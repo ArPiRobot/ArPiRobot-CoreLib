@@ -10,8 +10,7 @@ using namespace arpirobot;
 bool BaseRobot::stop = false;
 
 
-BaseRobot::BaseRobot(RobotCallbacks callbacks, RobotProfile profile) : callbacks(callbacks),
-        profile(profile),
+BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
         scheduler(profile.mainSchedulerThreads){
     signal(SIGINT, &BaseRobot::sigintHandler);
 }
@@ -24,10 +23,10 @@ void BaseRobot::start(){
     Logger::logInfo("Robot Started.");
 
     // Ensure this runs before periodic functions start running
-    callbacks.robotStarted();
+    robotStarted();
 
     // Start periodic callbacks
-    scheduler.every(std::chrono::milliseconds(50), callbacks.periodic);
+    scheduler.every(std::chrono::milliseconds(50), std::bind(&BaseRobot::periodic, this));
     scheduler.every(std::chrono::milliseconds(50), std::bind(&BaseRobot::modeBasedPeriodic, this));
 
     // Run watchdog on main thread (don't do this on scheduler b/c it could have all threads in use)
@@ -52,9 +51,9 @@ void BaseRobot::sigintHandler(int signal){
 
 void BaseRobot::modeBasedPeriodic(){
     if(isEnabled){
-        callbacks.enabledPeriodic();
+        enabledPeriodic();
     }else{
-        callbacks.disabledPeriodic();
+        disabledPeriodic();
     }
 }
 

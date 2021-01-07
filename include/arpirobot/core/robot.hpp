@@ -12,22 +12,25 @@ namespace arpirobot{
         int periodicFunctionRate = 50;
     };
 
-    struct RobotCallbacks{
-        void (*robotStarted)(void);
-        void (*robotEnabled)(void);
-        void (*robotDisabled)(void);
-        void (*enabledPeriodic)(void);
-        void (*disabledPeriodic)(void);
-        void (*periodic)(void);
-    };
-
     class BaseRobot{
     public:
-        BaseRobot(RobotCallbacks callbacks, RobotProfile profile);
+        BaseRobot(RobotProfile profile);
 
         void start();
 
         void feedWatchdog();
+
+        virtual void robotStarted() = 0;
+
+        virtual void robotEnabled() = 0;
+
+        virtual void robotDisabled() = 0;
+
+        virtual void enabledPeriodic() = 0;
+
+        virtual void disabledPeriodic() = 0;
+
+        virtual void periodic() = 0;
 
     private:
         static void sigintHandler(int signal);
@@ -42,7 +45,6 @@ namespace arpirobot{
 
         // Configuration
         RobotProfile profile;
-        RobotCallbacks callbacks;
 
         // Scheduler
         Bosma::Scheduler scheduler;

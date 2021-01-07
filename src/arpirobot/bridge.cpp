@@ -1,5 +1,49 @@
-#include <arpirobot/bridge.h>
+#include <arpirobot/bridge.hpp>
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// BaseRobot Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BridgeBaseRobot::BridgeBaseRobot(void (*robotStartedPtr)(void), 
+                        void (*robotEnabledPtr)(void), 
+                        void (*robotDisabledPtr)(void), 
+                        void (*enabledPeriodicPtr)(void), 
+                        void (*disabledPeriodicPtr)(void), 
+                        void (*periodicPtr)(void),
+                        RobotProfile profile) : BaseRobot(profile),
+                        robotStartedPtr(robotStartedPtr),
+                        robotEnabledPtr(robotEnabledPtr),
+                        robotDisabledPtr(robotDisabledPtr),
+                        enabledPeriodicPtr(enabledPeriodicPtr),
+                        disabledPeriodicPtr(disabledPeriodicPtr),
+                        periodicPtr(periodicPtr){
+    
+}
+
+void BridgeBaseRobot::robotStarted(){
+    robotStartedPtr();
+}
+
+void BridgeBaseRobot::robotEnabled(){
+    robotEnabledPtr();
+}
+
+void BridgeBaseRobot::robotDisabled(){
+    robotDisabledPtr();
+}
+
+void BridgeBaseRobot::enabledPeriodic(){
+    enabledPeriodicPtr();
+}
+
+void BridgeBaseRobot::disabledPeriodic(){
+    disabledPeriodicPtr();
+}
+
+void BridgeBaseRobot::periodic(){
+    periodicPtr();
+}
 
 BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void), 
                         void (*robotEnabled)(void), 
@@ -10,19 +54,12 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         int mainSchedulerThreads,
                         int periodicFunctionRate){
     RobotProfile profile;
-    RobotCallbacks callbacks;
-
-    callbacks.robotStarted = robotStarted;
-    callbacks.robotEnabled = robotEnabled;
-    callbacks.robotDisabled = robotDisabled;
-    callbacks.enabledPeriodic = enabledPeriodic;
-    callbacks.disabledPeriodic = disabledPeriodic;
-    callbacks.periodic = periodic;
 
     profile.mainSchedulerThreads = mainSchedulerThreads;
     profile.periodicFunctionRate = periodicFunctionRate;
 
-    BaseRobot *robot = new BaseRobot(callbacks, profile);
+    BaseRobot *robot = new BridgeBaseRobot(robotStarted, robotEnabled, robotDisabled, 
+        enabledPeriodic, disabledPeriodic, periodic, profile);
     return robot;
 }
 
