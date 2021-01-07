@@ -4,10 +4,10 @@ Experimental C++ library for ArPiRobot robots. Idea is to use language specific 
 
 Ideally, this means only one library to maintain, same features regardless of language, and issues like Python's GIL are avoided (mostly).
 
-## Building
+## Building (Linux Only)
 
 - Install CMake and conan
-- Download a [cross compiler](https://github.com/abhiTronix/raspberry-pi-cross-compilers) form the link. Make sure downloaded compiler supports pi zero. Extract to your home directory.
+- Download a [cross compiler](https://github.com/abhiTronix/raspberry-pi-cross-compilers) from the link below. Make sure downloaded compiler supports pi zero. Extract to your home directory.
 - Run prep_pi_zero
 - cd to build directory
 - Run `cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake_toolchains/pi_zero.cmake`

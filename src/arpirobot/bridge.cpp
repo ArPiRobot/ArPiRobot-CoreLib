@@ -1,7 +1,7 @@
-#include <bridge.h>
+#include <arpirobot/bridge.h>
 
 
-BRIDGE_FUNC BaseRobot* start_robot(void (*robotStarted)(void), 
+BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void), 
                         void (*robotEnabled)(void), 
                         void (*robotDisabled)(void), 
                         void (*enabledPeriodic)(void), 
@@ -26,6 +26,10 @@ BRIDGE_FUNC BaseRobot* start_robot(void (*robotStarted)(void),
     return robot;
 }
 
-BRIDGE_FUNC void stop_robot(BaseRobot *robot){
+BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot){
     delete robot;
+}
+
+BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot){
+    robot->feedWatchdog();
 }
