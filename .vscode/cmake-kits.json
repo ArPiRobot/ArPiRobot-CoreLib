@@ -1,0 +1,6 @@
+[
+    {
+        "name": "Pi Zero Toolchain",
+        "toolchainFile": "${workspaceFolder}/cmake_toolchains/pi_zero.cmake"
+    }
+]
