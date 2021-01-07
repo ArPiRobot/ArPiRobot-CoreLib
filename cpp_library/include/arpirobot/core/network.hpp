@@ -75,6 +75,8 @@ namespace arpirobot{
     public:
         static void startNetworking();
 
+        static void stopNetworking();
+
     private:
 
         static void runNetworking();

@@ -51,6 +51,10 @@ void NetworkManager::startNetworking(){
     }
 }
 
+void NetworkManager::stopNetworking(){
+    io.stop();
+}
+
 void NetworkManager::runNetworking(){
     io.run();
 }

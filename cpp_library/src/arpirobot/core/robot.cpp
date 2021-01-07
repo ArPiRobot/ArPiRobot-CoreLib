@@ -40,6 +40,7 @@ void BaseRobot::start(){
     runWatchdog();
 
     Logger::logInfo("Robot stopping.");
+    NetworkManager::stopNetworking();
 }
 
 void BaseRobot::feedWatchdog(){
