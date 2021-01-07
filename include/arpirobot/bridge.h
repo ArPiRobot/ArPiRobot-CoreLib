@@ -23,4 +23,6 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
 
 BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot);
 
+BRIDGE_FUNC void BaseRobot_start(BaseRobot *robot);
+
 BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot);

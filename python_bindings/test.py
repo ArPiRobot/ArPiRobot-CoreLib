@@ -24,6 +24,4 @@ class MyRobot(BaseRobot):
 
 
 robot = MyRobot()
-
-while True:
-    time.sleep(1)
+robot.start()

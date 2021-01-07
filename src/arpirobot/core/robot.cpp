@@ -2,19 +2,22 @@
 #include <arpirobot/core/log.hpp>
 
 #include <chrono>
+#include <csignal>
 
 using namespace arpirobot;
+
+
+bool BaseRobot::stop = false;
+
 
 BaseRobot::BaseRobot(RobotCallbacks callbacks, RobotProfile profile) : callbacks(callbacks),
         profile(profile),
         scheduler(profile.mainSchedulerThreads){
-    
+    signal(SIGINT, &BaseRobot::sigintHandler);
+}
+
+void BaseRobot::start(){
     // TODO: Start networking
-
-    // Start watchdog. Runs on its own thread to ensure there can never be a situation where all scheduler threads
-    //    are busy and watchdog does not run.
-    watchdogThread = new std::thread(std::bind(&BaseRobot::runWatchdog, this));
-
 
     // TODO: Ensure devices start disabled
 
@@ -26,12 +29,11 @@ BaseRobot::BaseRobot(RobotCallbacks callbacks, RobotProfile profile) : callbacks
     // Start periodic callbacks
     scheduler.every(std::chrono::milliseconds(50), callbacks.periodic);
     scheduler.every(std::chrono::milliseconds(50), std::bind(&BaseRobot::modeBasedPeriodic, this));
-}
 
-BaseRobot::~BaseRobot(){
-    stopping = true;
-    watchdogThread->join();
-    delete watchdogThread;
+    // Run watchdog on main thread (don't do this on scheduler b/c it could have all threads in use)
+    runWatchdog();
+
+    Logger::logInfo("Robot stopping.");
 }
 
 void BaseRobot::feedWatchdog(){
@@ -44,6 +46,10 @@ void BaseRobot::feedWatchdog(){
     watchdogMutex.unlock();
 }
 
+void BaseRobot::sigintHandler(int signal){
+    stop = true;
+}
+
 void BaseRobot::modeBasedPeriodic(){
     if(isEnabled){
         callbacks.enabledPeriodic();
@@ -53,7 +59,7 @@ void BaseRobot::modeBasedPeriodic(){
 }
 
 void BaseRobot::runWatchdog(){
-    while(!stopping){
+    while(!stop){
         watchdogMutex.lock();
         try{
             int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() 

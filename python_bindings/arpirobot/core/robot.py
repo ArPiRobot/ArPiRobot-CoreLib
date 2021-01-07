@@ -41,6 +41,8 @@ class BaseRobot(ABC):
             self.rs_internal, self.re_internal, self.rd_internal, self.ep_internal, 
             self.dp_internal, self.p_internal, 10, 50)
         
+    def start(self):
+        bridge.arpirobot.BaseRobot_start(self.__ptr)
 
     def feed_watchdog(self):
         bridge.arpirobot.BaseRobot_feedWatchdog(self.__ptr)

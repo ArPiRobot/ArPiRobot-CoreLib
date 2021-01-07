@@ -30,6 +30,10 @@ BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot){
     delete robot;
 }
 
+BRIDGE_FUNC void BaseRobot_start(BaseRobot *robot){
+    robot->start();
+}
+
 BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot){
     robot->feedWatchdog();
 }

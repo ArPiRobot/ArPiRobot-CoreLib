@@ -24,11 +24,14 @@ namespace arpirobot{
     class BaseRobot{
     public:
         BaseRobot(RobotCallbacks callbacks, RobotProfile profile);
-        ~BaseRobot();
+
+        void start();
 
         void feedWatchdog();
 
     private:
+        static void sigintHandler(int signal);
+
         void modeBasedPeriodic();
 
         void runWatchdog();
@@ -48,11 +51,12 @@ namespace arpirobot{
         bool isEnabled = false;
 
         // Watchdog
-        bool stopping = false; // Signal to thread to stop
         std::mutex watchdogMutex;
         std::chrono::steady_clock::time_point lastWatchdogFeed;
         bool watchdogDidDisable = false;
-        std::thread *watchdogThread;
+
+        // Stop flag from Ctrl+C
+        static bool stop;
     };
 
 }
