@@ -27,8 +27,12 @@ void BaseRobot::start(){
     robotStarted();
 
     // Start periodic callbacks
-    scheduler.every(std::chrono::milliseconds(50), std::bind(&BaseRobot::periodic, this));
-    scheduler.every(std::chrono::milliseconds(50), std::bind(&BaseRobot::modeBasedPeriodic, this));
+    scheduler.addRepeatedTask(std::bind(&BaseRobot::periodic, this), 
+        std::chrono::milliseconds(0), 
+        std::chrono::milliseconds(profile.periodicFunctionRate));
+    scheduler.addRepeatedTask(std::bind(&BaseRobot::modeBasedPeriodic, this),
+        std::chrono::milliseconds(0),
+        std::chrono::milliseconds(profile.periodicFunctionRate));
 
     // Just so there is no instant disable of devices when robot starts
     feedWatchdog();

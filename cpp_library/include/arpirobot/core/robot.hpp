@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Scheduler.h>
+#include <arpirobot/core/scheduler.hpp>
 #include <chrono>
 #include <thread>
 #include <mutex>
@@ -47,7 +47,7 @@ namespace arpirobot{
         RobotProfile profile;
 
         // Scheduler
-        Bosma::Scheduler scheduler;
+        Scheduler scheduler;
 
         // Status
         bool isEnabled = false;

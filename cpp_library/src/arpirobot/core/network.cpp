@@ -5,12 +5,12 @@ using namespace arpirobot;
 
 
 // Commands from drive station
-const extern char *COMMAND_ENABLE = "ENABLE";
-const extern char *COMMAND_DISABLE = "DISABLE";
+const char *COMMAND_ENABLE = "ENABLE";
+const char *COMMAND_DISABLE = "DISABLE";
 
 // Pre-defined (special) data packets
-const extern uint8_t NET_TABLE_START_SYNC_DATA[] = {255, 255, '\n'};
-const extern uint8_t NET_TABLE_END_SYNC_DATA[] = {255, 255, 255, '\n'};
+const uint8_t NET_TABLE_START_SYNC_DATA[] = {255, 255, '\n'};
+const uint8_t NET_TABLE_END_SYNC_DATA[] = {255, 255, 255, '\n'};
 
 // Static variables for NetworkManager
 std::thread *NetworkManager::networkThread = nullptr;

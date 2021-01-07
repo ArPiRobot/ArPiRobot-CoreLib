@@ -22,3 +22,4 @@ file (GLOB_RECURSE SOURCES
 
 add_library(arpirobot-core SHARED ${SOURCES})
 target_link_libraries(arpirobot-core CONAN_PKG::boost)
+target_compile_options(arpirobot-core PRIVATE -Wno-psabi)
