@@ -1,5 +1,6 @@
 #include <arpirobot/core/robot.hpp>
 #include <arpirobot/core/log.hpp>
+#include <arpirobot/core/network.hpp>
 
 #include <chrono>
 #include <csignal>
@@ -16,7 +17,7 @@ BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
 }
 
 void BaseRobot::start(){
-    // TODO: Start networking
+    NetworkManager::startNetworking();
 
     // TODO: Ensure devices start disabled
 
@@ -29,6 +30,8 @@ void BaseRobot::start(){
     scheduler.every(std::chrono::milliseconds(50), std::bind(&BaseRobot::periodic, this));
     scheduler.every(std::chrono::milliseconds(50), std::bind(&BaseRobot::modeBasedPeriodic, this));
 
+    // Just so there is no instant disable of devices when robot starts
+    feedWatchdog();
     // Run watchdog on main thread (don't do this on scheduler b/c it could have all threads in use)
     runWatchdog();
 
