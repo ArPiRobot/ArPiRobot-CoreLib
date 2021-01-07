@@ -8,8 +8,6 @@ else()
      message(FATAL_ERROR "Run conan first")
 endif()
 
-
-
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${PROJECT_SOURCE_DIR}/deps)
 

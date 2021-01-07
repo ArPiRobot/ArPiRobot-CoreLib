@@ -9,7 +9,7 @@ using namespace arpirobot;
 
 
 bool BaseRobot::stop = false;
-
+std::shared_ptr<BaseRobot> BaseRobot::currentRobot = nullptr;
 
 BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
         scheduler(profile.mainSchedulerThreads){
@@ -17,6 +17,8 @@ BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
 }
 
 void BaseRobot::start(){
+    currentRobot = std::shared_ptr<BaseRobot>(this);
+
     NetworkManager::startNetworking();
 
     // TODO: Ensure devices start disabled
@@ -41,6 +43,8 @@ void BaseRobot::start(){
 
     Logger::logInfo("Robot stopping.");
     NetworkManager::stopNetworking();
+
+    currentRobot = nullptr;
 }
 
 void BaseRobot::feedWatchdog(){
@@ -51,6 +55,14 @@ void BaseRobot::feedWatchdog(){
 
     }
     watchdogMutex.unlock();
+}
+
+void BaseRobot::_onDisable(){
+
+}
+
+void BaseRobot::_onEnable(){
+
 }
 
 void BaseRobot::sigintHandler(int signal){

@@ -81,10 +81,15 @@ namespace arpirobot{
 
         static void runNetworking();
 
+        static void receiveFrom(const tcp::socket &client);
+
+        static void handleConnectionStatusChanged();
+
         // Boost async handler functions
 
         static void handleAccept(const tcp::socket &client, const boost::system::error_code &ec);
-        //void handleReceive();
+        static void handleDisconnect(const tcp::socket &client);
+        static void handleTcpReceive(const tcp::socket &client, const boost::system::error_code &ec, std::size_t count);
         //void handleWrite();
 
         // Thread for network io service
@@ -101,9 +106,14 @@ namespace arpirobot{
         // TODO: Main vmon
 
         // Read buffers (only receive data from command, controller, net table ports)
-        static std::array<uint8_t, 32> commandRxBuffer;
-        static std::array<uint8_t, 128> netTableRxBuffer;
-        static std::array<uint8_t, 128> controllerRxBuffer;
+        static std::array<uint8_t, 32> tmpCommandRxBuf;
+        static std::array<uint8_t, 32> tmpNetTableRxBuf;
+        static std::array<uint8_t, 32> tmpControllerRxBuf;
+
+        // These hold data received from multiple packets (above buffers are one packet use)
+        static std::vector<uint8_t> commandRxData;
+        static std::vector<uint8_t> netTableRxData;
+        static std::vector<uint8_t> controllerRxData;
 
         // Boost ASIO stuff
         static io_service io;
