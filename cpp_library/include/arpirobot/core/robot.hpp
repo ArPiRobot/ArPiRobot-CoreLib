@@ -1,9 +1,11 @@
 #pragma once
 
+#include <arpirobot/core/device.hpp>
 #include <arpirobot/core/scheduler.hpp>
 #include <chrono>
 #include <thread>
 #include <mutex>
+#include <vector>
 
 namespace arpirobot{
 
@@ -19,6 +21,8 @@ namespace arpirobot{
         void start();
 
         void feedWatchdog();
+
+        static void beginWhenReady(BaseDevice *device);
 
         virtual void robotStarted() = 0;
 
@@ -61,8 +65,18 @@ namespace arpirobot{
         std::chrono::steady_clock::time_point lastWatchdogFeed;
         bool watchdogDidDisable = false;
 
+        std::vector<BaseDevice*> devices;
+
+        // Static variables
+
         // Stop flag from Ctrl+C
         static bool stop;
+
+        // Device that need to be started
+        // Static b/c this can be populated before there is an instance of BaseRobot
+        static std::vector<BaseDevice*> devicesToBegin;
+
+        static BaseRobot *currentRobot;
     };
 
 }

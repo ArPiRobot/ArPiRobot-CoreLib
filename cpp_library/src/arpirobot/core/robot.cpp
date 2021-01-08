@@ -1,14 +1,19 @@
 #include <arpirobot/core/robot.hpp>
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/network.hpp>
+#include <arpirobot/core/global.hpp>
 
 #include <chrono>
 #include <csignal>
+
+#include <pigpiod_if2.h>
 
 using namespace arpirobot;
 
 
 bool BaseRobot::stop = false;
+std::vector<BaseDevice*> BaseRobot::devicesToBegin;
+BaseRobot *BaseRobot::currentRobot = nullptr;
 
 BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
         scheduler(profile.mainSchedulerThreads){
@@ -16,16 +21,42 @@ BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
 }
 
 void BaseRobot::start(){
+
+    if(currentRobot != nullptr){
+        Logger::logError("Attempted to start a second robot. This is not allowed.");
+        return;
+    }
+
+    currentRobot = this;
+
+    // Start pigpio (connect to pigpiod, must be running on system)
+    pigpio_pi = pigpio_start(NULL, NULL);
+    if(pigpio_pi < 0){
+        Logger::logError("Failed to connect to pigpiod. Make sure the service is running.");
+        return;
+    }
+
     NetworkManager::startNetworking(std::bind(&BaseRobot::onEnable, this), std::bind(&BaseRobot::onDisable, this));
 
     NetworkTable::set("robotstate", "DISABLED");
 
-    // TODO: Ensure devices start disabled
+    // Begin any devices that were instantiated before the robot was started
+    for(BaseDevice *device : devicesToBegin){
+        devices.push_back(device);
+        device->doBegin();
+    }
+    devicesToBegin.clear();
+
+    // Make sure all devices start disabled
+    for(BaseDevice *device : devices){
+        device->_disable();
+    }
 
     Logger::logInfo("Robot Started.");
 
     // Ensure this runs before periodic functions start running
     robotStarted();
+    robotDisabled();
 
     // Start periodic callbacks
     scheduler.addRepeatedTask(std::bind(&BaseRobot::periodic, this), 
@@ -41,17 +72,45 @@ void BaseRobot::start(){
     runWatchdog();
 
     Logger::logInfo("Robot stopping.");
+    
+    // Disable all devices when robot stops
+    for(BaseDevice *device : devices){
+        device->_disable();
+    }
+
     NetworkManager::stopNetworking();
+    pigpio_stop(pigpio_pi);
+    currentRobot = nullptr;
 }
 
 void BaseRobot::feedWatchdog(){
     watchdogMutex.lock();
     try{
         lastWatchdogFeed = std::chrono::steady_clock::now();
+        if(watchdogDidDisable){
+            for(BaseDevice *device : devices){
+                if(!device->isEnabled() && device->shouldDisableWithWatchdog()){
+                    // Don't enable device with watchdog if it should be disabled with robot
+                    if(!device->shouldMatchRobotState() or isEnabled){
+                        device->_enable();
+                    }
+                }
+            }
+        }
     }catch(...){
 
     }
     watchdogMutex.unlock();
+}
+
+void BaseRobot::beginWhenReady(BaseDevice *device){
+    // Don't run begin on devices until the robot is started
+    if(currentRobot == nullptr){
+        devicesToBegin.push_back(device);
+    }else{
+        currentRobot->devices.push_back(device);
+        device->doBegin();
+    }
 }
 
 void BaseRobot::sigintHandler(int signal){
@@ -73,10 +132,13 @@ void BaseRobot::runWatchdog(){
             int elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() 
                 - lastWatchdogFeed).count();
             if(elapsed >= 500){
+                for(BaseDevice *device : devices){
+                    if(device->shouldDisableWithWatchdog() && device->isEnabled()){
+                        Logger::logWarningFrom(device->getDeviceName(), "Device disabled by watchdog.");
+                        device->_disable();
+                    }
+                }
                 watchdogDidDisable = true;
-                Logger::logWarning("Watchdog disabling devices!");
-                // TODO: Log device disabled by watchdog instead of above message
-                // TODO: Disable devices as needed
             }
         }catch(...){
 
@@ -90,7 +152,10 @@ void BaseRobot::onDisable(){
     if(isEnabled){
         NetworkTable::set("robotstate", "DISABLED");
 
-        // TODO: Disable devices if needed
+        for(BaseDevice *device : devices){
+            if(device->shouldMatchRobotState())
+                device->_disable();
+        }
 
         Logger::logInfo("Robot disabled.");
         robotDisabled();
@@ -102,7 +167,10 @@ void BaseRobot::onEnable(){
     if(!isEnabled){
         NetworkTable::set("robotstate", "ENABLED");
 
-        // TODO: Enable devices if needed
+        for(BaseDevice *device : devices){
+            if(device->shouldMatchRobotState())
+                device->_enable();
+        }
 
         Logger::logInfo("Robot enabled.");
         robotEnabled();
