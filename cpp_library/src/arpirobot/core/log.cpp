@@ -38,6 +38,10 @@ void Logger::logErrorFrom(std::string source, std::string message){
     log("[ERROR]: " + source + " - " + message);
 }
 
+void Logger::logNewline(){
+    log("");
+}
+
 void Logger::log(std::string message){
     logMutex.lock();
     try{

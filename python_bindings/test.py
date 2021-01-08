@@ -1,12 +1,13 @@
 from arpirobot.core.robot import BaseRobot
 from arpirobot.core.network import NetworkTable
+from arpirobot.core.log import Logger
 import time
 
 
 class MyRobot(BaseRobot):
     def robot_started(self):
         pass
-    
+
     def robot_enabled(self):
         pass
     

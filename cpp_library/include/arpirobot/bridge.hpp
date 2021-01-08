@@ -1,8 +1,7 @@
 #pragma once
 
 #include <arpirobot/core/robot.hpp>
-#include <arpirobot/core/network.hpp>
-#include <arpirobot/core/log.hpp>
+
 
 using namespace arpirobot;
 
@@ -65,3 +64,25 @@ BRIDGE_FUNC void NetworkTable_set(const char *key, const char *value);
 BRIDGE_FUNC const char *NetworkTable_get(const char *key);
 
 BRIDGE_FUNC bool NetworkTable_has(const char *key);
+
+////////////////////////////////////////////////////////////////////////////////
+/// Logger Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC void Logger_logDebug(const char *message);
+
+BRIDGE_FUNC void Logger_logInfo(const char *message);
+
+BRIDGE_FUNC void Logger_logWarning(const char *message);
+
+BRIDGE_FUNC void Logger_logError(const char *message);
+
+BRIDGE_FUNC void Logger_logDebugFrom(const char *source, const char *message);
+
+BRIDGE_FUNC void Logger_logInfoFrom(const char *source, const char *message);
+
+BRIDGE_FUNC void Logger_logWarningFrom(const char *source, const char *message);
+
+BRIDGE_FUNC void Logger_logErrorFrom(const char *source, const char *message);
+
+BRIDGE_FUNC void Logger_logNewline();

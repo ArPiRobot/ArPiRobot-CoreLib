@@ -22,6 +22,8 @@ namespace arpirobot {
 
         static void logErrorFrom(std::string source, std::string message);
 
+        static void logNewline();
+
     private:
         static void log(std::string message);
 
