@@ -16,6 +16,19 @@ const uint8_t arpirobot::NET_TABLE_START_SYNC_DATA[] = {255, 255, '\n'};
 const std::string arpirobot::NET_TABLE_END_SYNC_DATA = "\377\377\377\n";
 
 ////////////////////////////////////////////////////////////////////////////////
+/// ControllerData
+////////////////////////////////////////////////////////////////////////////////
+
+ControllerData::ControllerData(std::vector<uint8_t> &data){
+    updateData(data);
+}
+
+void ControllerData::updateData(std::vector<uint8_t> &data){
+    
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
 /// NetworkManager
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -28,19 +41,20 @@ std::array<uint8_t, 32> NetworkManager::tmpNetTableRxBuf;
 std::array<uint8_t, 32> NetworkManager::tmpControllerRxBuf;
 std::vector<uint8_t> NetworkManager::commandRxData;
 std::vector<uint8_t> NetworkManager::netTableRxData;
-std::vector<uint8_t> NetworkManager::controllerRxData;
 io_service NetworkManager::io;
 io_service::work NetworkManager::wk(NetworkManager::io);
 udp::socket NetworkManager::controllerSocket(NetworkManager::io, udp::endpoint(udp::v4(), 8090));
 tcp::acceptor NetworkManager::commandSocketAcceptor(NetworkManager::io, tcp::endpoint(tcp::v4(), 8091));
 tcp::acceptor NetworkManager::netTableSocketAcceptor(NetworkManager::io, tcp::endpoint(tcp::v4(), 8092));
 tcp::acceptor NetworkManager::logSocketAcceptor(NetworkManager::io, tcp::endpoint(tcp::v4(), 8093));
+udp::endpoint NetworkManager::controllerDataEndpoint;
 tcp::socket NetworkManager::commandClient(NetworkManager::io);
 tcp::socket NetworkManager::netTableClient(NetworkManager::io);
 tcp::socket NetworkManager::logClient(NetworkManager::io);
 std::function<void()> NetworkManager::enableFunc;
 std::function<void()> NetworkManager::disableFunc;
 std::unordered_map<std::string, std::string> NetworkManager::ntSyncData;
+std::unordered_map<int, std::shared_ptr<ControllerData>> NetworkManager::controllerData;
 
 void NetworkManager::startNetworking(std::function<void()> enableFunc, std::function<void()> disableFunc){
     if(!networkingStarted){
@@ -136,7 +150,11 @@ void NetworkManager::handleConnectionStatusChanged(){
             // Same address, valid DS
             isDsConnected = true;
             Logger::logInfo("Drive station connected.");
-            // TODO: Start receive UDP
+            
+            // Start waiting for controller data
+            controllerSocket.async_receive_from(boost::asio::buffer(tmpControllerRxBuf), 
+                controllerDataEndpoint, boost::bind(&NetworkManager::handleUdpReceive, _1, _2));
+
         }else{
             // Multiple DS connections. Reject all
             Logger::logError("Partial drive station connection from multiple addresses. All have been disconnected.");
@@ -155,7 +173,6 @@ void NetworkManager::handleConnectionStatusChanged(){
         }
 
         // Clear read buffers
-        controllerRxData.clear();
         netTableRxData.clear();
         commandRxData.clear();
 
@@ -176,7 +193,6 @@ void NetworkManager::handleDisconnect(const tcp::socket &client){
     commandClient.close();
     netTableClient.close();
     logClient.close();
-    // TODO: Stop receiving from controller UDP port
     handleConnectionStatusChanged();
 
     commandSocketAcceptor.async_accept(commandClient, boost::bind(&NetworkManager::handleAccept, 
@@ -206,9 +222,30 @@ void NetworkManager::handleTcpReceive(const tcp::socket &client,
         }
 
         // Wait for more data
-        receiveFrom(client);
+        if(isDsConnected)
+            receiveFrom(client);
     }else if(ec == boost::asio::error::eof || ec == boost::asio::error::connection_reset){
         handleDisconnect(client);
+    }
+}
+
+void NetworkManager::handleUdpReceive(const boost::system::error_code &ec, std::size_t count){
+    bool shouldProcess = netTableClient.is_open() && commandClient.is_open() && logClient.is_open();
+    if(!ec && shouldProcess){
+        std::string controllerAddress = controllerDataEndpoint.address().to_string();
+        std::string commandAddress = commandClient.remote_endpoint().address().to_string();
+        if(controllerAddress == commandAddress){
+            std::vector<uint8_t> data;
+            data.reserve(count);
+            for(size_t i = 0; i < count; ++i){
+                data.push_back(tmpControllerRxBuf[i]);
+            }
+            handleControllerData(data);
+        }
+    }
+    if(shouldProcess){
+        controllerSocket.async_receive_from(boost::asio::buffer(tmpControllerRxBuf), 
+            controllerDataEndpoint, boost::bind(&NetworkManager::handleUdpReceive, _1, _2));
     }
 }
 
@@ -275,6 +312,26 @@ void NetworkManager::handleNetTableData(){
                 ntSyncData[key] = value;
             }else{
                 NetworkTableInternal::setFromDs(key, value);
+            }
+        }
+    }
+}
+
+void NetworkManager::handleControllerData(std::vector<uint8_t> &data){
+    // Only handle data that is long enough
+    int l = data.size();
+    if(l >= 4){
+        int calcLen = 5 + 
+            2 * data[1] + 
+            (int)(std::ceil(data[2] / 8.0)) + 
+            (int)(std::ceil(data[3] / 2.0));
+        if(l == calcLen){
+            // Correct amount of data in this packet. handle the data
+            int controllerNum = data[0];
+            if(controllerData.find(controllerNum) != controllerData.end()){
+                controllerData[controllerNum]->updateData(data);
+            }else{
+                controllerData[controllerNum] = std::make_shared<ControllerData>(data);
             }
         }
     }

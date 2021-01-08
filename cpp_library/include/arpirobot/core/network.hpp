@@ -5,6 +5,7 @@
 #include <array>
 #include <thread>
 #include <unordered_map>
+#include <memory>
 
 using namespace boost::asio::ip;
 using namespace boost::asio;
@@ -67,10 +68,31 @@ namespace arpirobot{
     const extern uint8_t NET_TABLE_START_SYNC_DATA[];
     const extern std::string NET_TABLE_END_SYNC_DATA;
 
+    ////////////////////////////////////////////////////////////////////////////
+    /// ControllerData
+    ////////////////////////////////////////////////////////////////////////////
 
-    ////////////////////////////////////////////////////////////////////////////////
+    class ControllerData{
+    public:
+        ControllerData(std::vector<uint8_t> &data);
+
+        void updateData(std::vector<uint8_t> &data);
+
+        int controllerNumber = -1;
+        int axisCount = -1;
+        int buttonCount = -1;
+        int dpadCount = -1;
+        std::vector<float> axes;
+        std::vector<bool> buttons;
+        std::vector<int> dpads;
+        std::vector<uint8_t> lastData;
+        std::chrono::steady_clock::time_point lastUpdateTime;
+        bool dataZeroed = false;
+    };
+
+    ////////////////////////////////////////////////////////////////////////////
     /// NetworkManager
-    ////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////
 
     class NetworkManager{
     public:
@@ -97,10 +119,13 @@ namespace arpirobot{
         static void handleAccept(const tcp::socket &client, const boost::system::error_code &ec);
         static void handleDisconnect(const tcp::socket &client);
         static void handleTcpReceive(const tcp::socket &client, const boost::system::error_code &ec, std::size_t count);
+        static void handleUdpReceive(const boost::system::error_code &ec, std::size_t count);
 
         static void handleCommand();
 
         static void handleNetTableData();
+
+        static void handleControllerData(std::vector<uint8_t> &data);
 
         // Thread for network io service
         static std::thread *networkThread;
@@ -121,7 +146,6 @@ namespace arpirobot{
         // These hold data received from multiple packets (above buffers are one packet use)
         static std::vector<uint8_t> commandRxData;
         static std::vector<uint8_t> netTableRxData;
-        static std::vector<uint8_t> controllerRxData;
 
         // Boost ASIO stuff
         static io_service io;
@@ -144,6 +168,8 @@ namespace arpirobot{
         static std::function<void()> disableFunc;
 
         static std::unordered_map<std::string, std::string> ntSyncData;
+
+        static std::unordered_map<int, std::shared_ptr<ControllerData>> controllerData;
     };
 
 
