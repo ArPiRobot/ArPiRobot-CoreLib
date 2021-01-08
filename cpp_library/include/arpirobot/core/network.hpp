@@ -4,7 +4,7 @@
 #include <boost/bind.hpp>
 #include <array>
 #include <thread>
-
+#include <unordered_map>
 
 using namespace boost::asio::ip;
 using namespace boost::asio;
@@ -65,7 +65,7 @@ namespace arpirobot{
 
     // Pre-defined (special) data packets
     const extern uint8_t NET_TABLE_START_SYNC_DATA[];
-    const extern uint8_t NET_TABLE_END_SYNC_DATA[];
+    const extern std::string NET_TABLE_END_SYNC_DATA;
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -77,6 +77,10 @@ namespace arpirobot{
         static void startNetworking(std::function<void()> enableFunc, std::function<void()> disableFunc);
 
         static void stopNetworking();
+
+        static bool sendNtRaw(const_buffer buffer);
+
+        static bool sendNt(std::string key, std::string value);
 
     private:
 
@@ -91,9 +95,10 @@ namespace arpirobot{
         static void handleAccept(const tcp::socket &client, const boost::system::error_code &ec);
         static void handleDisconnect(const tcp::socket &client);
         static void handleTcpReceive(const tcp::socket &client, const boost::system::error_code &ec, std::size_t count);
-        //void handleWrite();
 
         static void handleCommand();
+
+        static void handleNetTableData();
 
         // Thread for network io service
         static std::thread *networkThread;
@@ -102,9 +107,7 @@ namespace arpirobot{
         static bool isDsConnected;
         static bool networkingStarted;
 
-        // TODO: Network managed data
-        // Controller data
-        // Net table stuffs
+        // TODO: Controller data
 
         // TODO: Main vmon
 
@@ -137,6 +140,35 @@ namespace arpirobot{
         // Doing this way makes it hard for other code to call enable / disable for the robot
         static std::function<void()> enableFunc;
         static std::function<void()> disableFunc;
+
+        static std::unordered_map<std::string, std::string> ntSyncData;
+    };
+
+
+    class NetworkTable{
+    public:
+        static void set(std::string key, std::string value);
+        static std::string get(std::string key);
+        static bool has(std::string key);
+    };
+
+    class NetworkTableInternal{
+    public:
+        static bool isInSync();
+        static void startSync();
+        static void sendAllValues();
+        static void finishSync(std::unordered_map<std::string, std::string> dataFromDs);
+        static void abortSync();
+
+        static void setFromRobot(std::string key, std::string value);
+        static void setFromDs(std::string key, std::string value);
+        static std::string get(std::string key);
+        static bool has(std::string key);
+    
+    private:
+        static std::unordered_map<std::string, std::string> data;
+        static std::mutex lock;
+        static bool inSync;
     };
 
 }
