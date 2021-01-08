@@ -18,6 +18,8 @@ BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
 void BaseRobot::start(){
     NetworkManager::startNetworking(std::bind(&BaseRobot::onEnable, this), std::bind(&BaseRobot::onDisable, this));
 
+    NetworkTable::set("robotstate", "DISABLED");
+
     // TODO: Ensure devices start disabled
 
     Logger::logInfo("Robot Started.");
@@ -86,7 +88,7 @@ void BaseRobot::runWatchdog(){
 
 void BaseRobot::onDisable(){
     if(isEnabled){
-        // TODO: Set net table key
+        NetworkTable::set("robotstate", "DISABLED");
 
         // TODO: Disable devices if needed
 
@@ -98,7 +100,7 @@ void BaseRobot::onDisable(){
 
 void BaseRobot::onEnable(){
     if(!isEnabled){
-        // TODO: set net table key
+        NetworkTable::set("robotstate", "ENABLED");
 
         // TODO: Enable devices if needed
 
