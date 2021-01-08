@@ -72,8 +72,6 @@ void NetworkManager::stopNetworking(){
 }
 
 bool NetworkManager::sendNtRaw(const_buffer buffer){
-    // WARNING: MAKE SURE data REMAINS VALID UNTIL ASYNC WRITE FINISHES!!!
-    //          BEST TO ONLY USE THIS WITH CONSTANTS!!!
     if(isDsConnected){
         try{
             boost::asio::write(netTableClient, buffer);
@@ -101,6 +99,18 @@ bool NetworkManager::sendNt(std::string key, std::string value){
     return sendNtRaw(boost::asio::buffer(data));
 }
 
+void NetworkManager::sendLogMessage(std::string message){
+    if(isDsConnected){
+        try{
+            boost::asio::write(logClient, boost::asio::buffer(message));
+        }catch(const boost::system::system_error &err){
+            if(err.code() == boost::asio::error::eof || err.code() == boost::asio::error::connection_reset){
+                handleDisconnect(logClient);
+            }
+        }
+    }
+}
+
 void NetworkManager::runNetworking(){
     io.run();
 }
@@ -124,8 +134,8 @@ void NetworkManager::handleConnectionStatusChanged(){
         std::string logAddress = logClient.remote_endpoint().address().to_string();
         if(cmdAddress == netTableAddress && cmdAddress == logAddress){
             // Same address, valid DS
-            Logger::logInfo("Drive station connected.");
             isDsConnected = true;
+            Logger::logInfo("Drive station connected.");
             // TODO: Start receive UDP
         }else{
             // Multiple DS connections. Reject all

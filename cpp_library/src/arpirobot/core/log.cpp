@@ -1,4 +1,5 @@
 #include <arpirobot/core/log.hpp>
+#include <arpirobot/core/network.hpp>
 #include <iostream>
 
 using namespace arpirobot;
@@ -41,6 +42,7 @@ void Logger::log(std::string message){
     logMutex.lock();
     try{
         std::cout << message << std::endl;
+        NetworkManager::sendLogMessage(message + "\n");
     }catch(...){
 
     }

@@ -82,6 +82,8 @@ namespace arpirobot{
 
         static bool sendNt(std::string key, std::string value);
 
+        static void sendLogMessage(std::string message);
+
     private:
 
         static void runNetworking();
