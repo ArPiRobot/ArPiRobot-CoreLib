@@ -252,7 +252,7 @@ void NetworkManager::handleNetTableData(){
         }
 
         // Subset until and including \n
-        std::string subset = std::string(startPos, endPos);
+        std::string subset = std::string(startPos, endPos + 1);
 
         // Handle data in the subset
         auto delim = subset.find((char)255);
