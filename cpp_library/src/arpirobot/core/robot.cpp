@@ -9,7 +9,6 @@ using namespace arpirobot;
 
 
 bool BaseRobot::stop = false;
-std::shared_ptr<BaseRobot> BaseRobot::currentRobot = nullptr;
 
 BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
         scheduler(profile.mainSchedulerThreads){
@@ -17,9 +16,7 @@ BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
 }
 
 void BaseRobot::start(){
-    currentRobot = std::shared_ptr<BaseRobot>(this);
-
-    NetworkManager::startNetworking();
+    NetworkManager::startNetworking(std::bind(&BaseRobot::onEnable, this), std::bind(&BaseRobot::onDisable, this));
 
     // TODO: Ensure devices start disabled
 
@@ -43,8 +40,6 @@ void BaseRobot::start(){
 
     Logger::logInfo("Robot stopping.");
     NetworkManager::stopNetworking();
-
-    currentRobot = nullptr;
 }
 
 void BaseRobot::feedWatchdog(){
@@ -55,14 +50,6 @@ void BaseRobot::feedWatchdog(){
 
     }
     watchdogMutex.unlock();
-}
-
-void BaseRobot::_onDisable(){
-
-}
-
-void BaseRobot::_onEnable(){
-
 }
 
 void BaseRobot::sigintHandler(int signal){
@@ -94,5 +81,29 @@ void BaseRobot::runWatchdog(){
         }
         watchdogMutex.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    }
+}
+
+void BaseRobot::onDisable(){
+    if(isEnabled){
+        // TODO: Set net table key
+
+        // TODO: Disable devices if needed
+
+        Logger::logInfo("Robot disabled.");
+        robotDisabled();
+        isEnabled = false;
+    }
+}
+
+void BaseRobot::onEnable(){
+    if(!isEnabled){
+        // TODO: set net table key
+
+        // TODO: Enable devices if needed
+
+        Logger::logInfo("Robot enabled.");
+        robotEnabled();
+        isEnabled = true;
     }
 }

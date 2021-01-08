@@ -59,12 +59,13 @@ namespace arpirobot{
 
 
     // Commands from drive station
-    const extern char *COMMAND_ENABLE;
-    const extern char *COMMAND_DISABLE;
+    const extern std::string COMMAND_ENABLE;
+    const extern std::string COMMAND_DISABLE;
+    const extern std::string COMMAND_NET_TABLE_SYNC;
 
     // Pre-defined (special) data packets
-    const extern uint8_t *NET_TABLE_START_SYNC_DATA;
-    const extern uint8_t *NET_TABLE_END_SYNC_DATA;
+    const extern uint8_t NET_TABLE_START_SYNC_DATA[];
+    const extern uint8_t NET_TABLE_END_SYNC_DATA[];
 
 
     ////////////////////////////////////////////////////////////////////////////////
@@ -73,7 +74,7 @@ namespace arpirobot{
 
     class NetworkManager{
     public:
-        static void startNetworking();
+        static void startNetworking(std::function<void()> enableFunc, std::function<void()> disableFunc);
 
         static void stopNetworking();
 
@@ -91,6 +92,8 @@ namespace arpirobot{
         static void handleDisconnect(const tcp::socket &client);
         static void handleTcpReceive(const tcp::socket &client, const boost::system::error_code &ec, std::size_t count);
         //void handleWrite();
+
+        static void handleCommand();
 
         // Thread for network io service
         static std::thread *networkThread;
@@ -129,6 +132,11 @@ namespace arpirobot{
         static tcp::socket commandClient;
         static tcp::socket netTableClient;
         static tcp::socket logClient;
+
+        // Callback for enable and disable events (this are private functions in BaseRobot)
+        // Doing this way makes it hard for other code to call enable / disable for the robot
+        static std::function<void()> enableFunc;
+        static std::function<void()> disableFunc;
     };
 
 }

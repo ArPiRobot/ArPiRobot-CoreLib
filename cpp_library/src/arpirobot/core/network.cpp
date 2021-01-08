@@ -2,16 +2,22 @@
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/robot.hpp>
 
+
+// TODO: remove
+#include <iostream>
+
+
 using namespace arpirobot;
 
 
 // Commands from drive station
-const char *COMMAND_ENABLE = "ENABLE";
-const char *COMMAND_DISABLE = "DISABLE";
+const std::string arpirobot::COMMAND_ENABLE = "ENABLE";
+const std::string arpirobot::COMMAND_DISABLE = "DISABLE";
+const std::string arpirobot::COMMAND_NET_TABLE_SYNC = "NT_SYNC";
 
 // Pre-defined (special) data packets
-const uint8_t NET_TABLE_START_SYNC_DATA[] = {255, 255, '\n'};
-const uint8_t NET_TABLE_END_SYNC_DATA[] = {255, 255, 255, '\n'};
+const uint8_t arpirobot::NET_TABLE_START_SYNC_DATA[] = {255, 255, '\n'};
+const uint8_t arpirobot::NET_TABLE_END_SYNC_DATA[] = {255, 255, 255, '\n'};
 
 // Static variables for NetworkManager
 std::thread *NetworkManager::networkThread = nullptr;
@@ -32,14 +38,20 @@ tcp::acceptor NetworkManager::logSocketAcceptor(NetworkManager::io, tcp::endpoin
 tcp::socket NetworkManager::commandClient(NetworkManager::io);
 tcp::socket NetworkManager::netTableClient(NetworkManager::io);
 tcp::socket NetworkManager::logClient(NetworkManager::io);
+std::function<void()> NetworkManager::enableFunc;
+std::function<void()> NetworkManager::disableFunc;
 
 
-void NetworkManager::startNetworking(){
+void NetworkManager::startNetworking(std::function<void()> enableFunc, std::function<void()> disableFunc){
     if(!networkingStarted){
         if(networkThread != nullptr){
             networkThread->join();
             delete networkThread;
         }
+
+        // Store enable and disable function "pointers"
+        NetworkManager::enableFunc = enableFunc;
+        NetworkManager::disableFunc = disableFunc;
 
         // Wait for connection from drive station
         commandSocketAcceptor.async_accept(commandClient, boost::bind(&NetworkManager::handleAccept, 
@@ -106,10 +118,7 @@ void NetworkManager::handleConnectionStatusChanged(){
 
         isDsConnected = false;
 
-        // Disable robot on DS disconnect
-        if(BaseRobot::currentRobot != nullptr){
-            BaseRobot::currentRobot->_onDisable();
-        }
+        disableFunc();
     }
 }
 
@@ -139,13 +148,54 @@ void NetworkManager::handleDisconnect(const tcp::socket &client){
 void NetworkManager::handleTcpReceive(const tcp::socket &client, 
         const boost::system::error_code &ec, std::size_t count){
     if(!ec){
-        if(count > 0){
-            // TODO: If connected to DS move data to RxData buffer (not tmp buffer)
-            // If not connected to DS, clear buffer after each read
+        if(count > 0 && isDsConnected){
+            if(&client == &commandClient){
+                for(int i = 0; i < count; ++i){
+                    commandRxData.push_back(tmpCommandRxBuf[i]);
+                }
+                handleCommand();
+            }else if(&client == &netTableClient){
+                for(int i = 0; i < count; ++i){
+                    netTableRxData.push_back(tmpNetTableRxBuf[i]);
+                }
+            }
         }
+
         // Wait for more data
         receiveFrom(client);
     }else if(ec == boost::asio::error::eof || ec == boost::asio::error::connection_reset){
         handleDisconnect(client);
+    }
+}
+
+void NetworkManager::handleCommand(){
+
+    auto startPos = commandRxData.begin();
+    auto endPos = startPos - 1;
+
+    // Could be multiple commands in the buffer, so handle all of them
+    while(true){
+        // End of last command is start of next
+        startPos = endPos + 1;
+        endPos = std::find(startPos, commandRxData.end(), '\n');
+        if(endPos == commandRxData.end()){
+            // Leave any incomplete data in the buffer
+            commandRxData = std::vector<uint8_t>(startPos, commandRxData.end());
+            break;
+        }
+
+        // Command excluding \n
+        std::string subset = std::string(startPos, endPos);
+        
+        // Handle the command
+        if(subset == COMMAND_ENABLE){
+            Logger::logDebug("Got enable command");
+            enableFunc();
+        }else if(subset == COMMAND_DISABLE){
+            Logger::logDebug("Got disable command");
+            disableFunc();
+        }else if(subset == COMMAND_NET_TABLE_SYNC){
+            // TODO
+        }
     }
 }

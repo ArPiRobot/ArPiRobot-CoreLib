@@ -74,6 +74,7 @@ namespace arpirobot{
     class Scheduler{
     public:
         Scheduler(unsigned int maxThreads = 4);
+        ~Scheduler();
 
         // Add a task to be run once
         std::shared_ptr<Task> addTask(const std::function<void()> &&targetFunc, sched_clk::time_point::duration delay);

@@ -32,23 +32,16 @@ namespace arpirobot{
 
         virtual void periodic() = 0;
 
-
-        // SHOULD NEVER BE RUN FROM USER CODE
-        void _onDisable();
-
-        // SHOULD NEVER BE RUN FROM USER CODE
-        void _onEnable();
-
-
-        // Currently in use instance of BaseRobot subclass
-        static std::shared_ptr<BaseRobot> currentRobot;
-
     private:
         static void sigintHandler(int signal);
 
         void modeBasedPeriodic();
 
         void runWatchdog();
+
+        void onDisable();
+
+        void onEnable();
 
         ////////////////////////////////////////////////////////////////////////////
         /// Member variables

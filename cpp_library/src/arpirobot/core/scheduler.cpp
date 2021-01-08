@@ -85,6 +85,11 @@ Scheduler::Scheduler(unsigned int maxThreads) : done(false), threads(maxThreads 
     });
 }
 
+Scheduler::~Scheduler(){
+    done = true;
+    sleeper.interrupt();
+}
+
 std::shared_ptr<Task> Scheduler::addTask(const std::function<void()> &&targetFunc, 
         sched_clk::time_point::duration delay){
     std::shared_ptr<Task> task = std::make_shared<Task>(std::move(targetFunc));
