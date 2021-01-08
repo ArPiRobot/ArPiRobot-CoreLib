@@ -1,25 +1,25 @@
 from arpirobot.core.robot import BaseRobot
+from arpirobot.core.network import NetworkTable
 import time
 
 
 class MyRobot(BaseRobot):
     def robot_started(self):
-        print("robot_started")
+        pass
     
     def robot_enabled(self):
-        print("robot_enabled")
+        pass
     
     def robot_disabled(self):
-        print("robot_disabled")
+        pass
 
     def enabled_periodic(self):
-        print("enabled_periodic")
+        pass
     
     def disabled_periodic(self):
-        print("disabled_periodic")
+        pass
     
     def periodic(self):
-        print("periodic")
         self.feed_watchdog()
 
 

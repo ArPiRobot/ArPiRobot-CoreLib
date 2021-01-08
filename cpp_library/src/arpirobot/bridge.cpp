@@ -1,5 +1,8 @@
 #include <arpirobot/bridge.hpp>
 
+// TODO: Remove this
+#include <iostream>
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// BaseRobot Bridge
@@ -73,4 +76,20 @@ BRIDGE_FUNC void BaseRobot_start(BaseRobot *robot){
 
 BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot){
     robot->feedWatchdog();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// NetworkTable Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC void NetworkTable_set(const char *key, const char *value){
+    NetworkTable::set(std::string(key), std::string(value));
+}
+
+BRIDGE_FUNC const char *NetworkTable_get(const char *key){
+    return NetworkTable::get(key).c_str();
+}
+
+BRIDGE_FUNC bool NetworkTable_has(const char *key){
+    return NetworkTable::has(key);
 }
