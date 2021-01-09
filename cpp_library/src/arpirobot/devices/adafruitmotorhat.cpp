@@ -75,7 +75,7 @@ void AdafruitMotorHat::LowLevelDCMotor::setSpeed(double speed){
         speed = 1;
     
     // Don't worry about thread safety here. It doesn't really matter if speed pin is set after kill()
-    int i = (int)(speed*4096);
+    int i = (int)(speed*4095);
     if(canRun)
         hat->setPWM(pwm, 0, i);
 }
