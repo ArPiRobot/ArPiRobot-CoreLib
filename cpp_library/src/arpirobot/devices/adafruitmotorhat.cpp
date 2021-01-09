@@ -98,6 +98,11 @@ AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus){
         throw std::runtime_error("Unable to open I2C device for adafruit motor hat.");
     }
 
+    // Make sure there is a device at that address
+    if(i2c_read_byte(pigpio_pi, handle) < 0){
+        throw std::runtime_error("Unable to open I2C device for adafruit motor hat.");
+    }
+
     motors[0] = std::make_shared<LowLevelDCMotor>(this, 0);
     motors[1] = std::make_shared<LowLevelDCMotor>(this, 1);
     motors[2] = std::make_shared<LowLevelDCMotor>(this, 2);
