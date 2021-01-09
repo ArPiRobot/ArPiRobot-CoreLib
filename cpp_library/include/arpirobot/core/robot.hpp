@@ -78,5 +78,4 @@ namespace arpirobot{
         // Static b/c this can be populated before there is an instance of BaseRobot
         static std::vector<BaseDevice*> devicesToBegin;
     };
-
 }

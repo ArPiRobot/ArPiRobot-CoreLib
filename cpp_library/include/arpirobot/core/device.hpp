@@ -22,7 +22,7 @@ namespace arpirobot{
         virtual void _disable() = 0;
 
         virtual std::string getDeviceName() = 0;
-    
+
     protected:
         virtual void begin() = 0;
 

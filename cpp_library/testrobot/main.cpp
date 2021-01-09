@@ -54,5 +54,4 @@ public:
 int main(){
     Robot r;
     r.start();
-    return 0;
 }

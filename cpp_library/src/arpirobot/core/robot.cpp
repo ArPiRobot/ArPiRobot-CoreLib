@@ -1,12 +1,11 @@
 #include <arpirobot/core/robot.hpp>
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/network.hpp>
-#include <arpirobot/core/global.hpp>
 
 #include <chrono>
 #include <csignal>
 
-#include <pigpiod_if2.h>
+#include <pigpio.h>
 
 using namespace arpirobot;
 
@@ -17,7 +16,7 @@ BaseRobot *BaseRobot::currentRobot = nullptr;
 
 BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
         scheduler(profile.mainSchedulerThreads){
-    signal(SIGINT, &BaseRobot::sigintHandler);
+    
 }
 
 void BaseRobot::start(){
@@ -29,12 +28,16 @@ void BaseRobot::start(){
 
     currentRobot = this;
 
-    // Start pigpio (connect to pigpiod, must be running on system)
-    pigpio_pi = pigpio_start(NULL, NULL);
-    if(pigpio_pi < 0){
-        Logger::logError("Failed to connect to pigpiod. Make sure the service is running.");
-        return;
+    int err = gpioInitialise();
+    if(err < 0){
+        Logger::logError("Failed to initialize pigpio.");
+        Logger::logDebug("Pigpio error code " + std::to_string(err));
+        throw std::runtime_error("Initialization of hardware interfaces failed.");
     }
+
+    // On interrupt set stop = true
+    // This will cause runWatchdog to return and cleanup can be run
+    signal(SIGINT, &BaseRobot::sigintHandler);
 
     NetworkManager::startNetworking(std::bind(&BaseRobot::onEnable, this), std::bind(&BaseRobot::onDisable, this));
 
@@ -78,8 +81,11 @@ void BaseRobot::start(){
         device->_disable();
     }
 
+    // Do not call this here. Registered as atexit func by pigpio
+    // Calling this here may just cause issues when BaseDevice object destructors run
+    // gpioTerminate();
+
     NetworkManager::stopNetworking();
-    pigpio_stop(pigpio_pi);
     currentRobot = nullptr;
 }
 

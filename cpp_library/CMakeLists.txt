@@ -10,8 +10,9 @@ endif()
 
 
 # Dependencies not available using conan
+# Build pigpio as static library
+set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pigpio-71 EXCLUDE_FROM_ALL)
-
 
 # ArPiRobot core library
 
@@ -23,9 +24,9 @@ file (GLOB_RECURSE SOURCES
 )
 
 add_library(arpirobot-core SHARED ${SOURCES})
-add_dependencies(arpirobot-core pigpiod_if2)
+add_dependencies(arpirobot-core pigpio)
 target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/deps ${PROJECT_SOURCE_DIR}/deps/pigpio-71)
-target_link_libraries(arpirobot-core CONAN_PKG::boost pigpiod_if2)
+target_link_libraries(arpirobot-core CONAN_PKG::boost pigpio)
 target_compile_options(arpirobot-core PRIVATE -Wno-psabi)
 
 

@@ -1,9 +1,8 @@
 #include <arpirobot/devices/adafruitmotorhat.hpp>
-#include <arpirobot/core/global.hpp>
 #include <arpirobot/core/robot.hpp>
 #include <arpirobot/core/log.hpp>
 
-#include <pigpiod_if2.h>
+#include <pigpio.h>
 
 #include <thread>
 #include <chrono>
@@ -93,13 +92,13 @@ void AdafruitMotorHat::LowLevelDCMotor::kill(){
 ////////////////////////////////////////////////////////////////////////////////
 
 AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus){
-    handle = i2c_open(pigpio_pi, bus, address, 0);
+    handle = i2cOpen(bus, address, 0);
     if(handle < 0){
         throw std::runtime_error("Unable to open I2C device for adafruit motor hat.");
     }
 
     // Make sure there is a device at that address
-    if(i2c_read_byte(pigpio_pi, handle) < 0){
+    if(i2cReadByte(handle) < 0){
         throw std::runtime_error("Unable to open I2C device for adafruit motor hat.");
     }
 
@@ -114,7 +113,7 @@ AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus){
 
 AdafruitMotorHat::~AdafruitMotorHat(){
     if(handle >=0){
-        i2c_close(pigpio_pi, handle);
+        i2cClose(handle);
     }
 }
 
@@ -124,12 +123,12 @@ std::shared_ptr<AdafruitMotorHat::LowLevelDCMotor> AdafruitMotorHat::getMotor(in
 
 void AdafruitMotorHat::startup(){
     setAllPWM(0, 0);
-    i2c_write_byte_data(pigpio_pi, handle, __MODE2, __OUTDRV);
-    i2c_write_byte_data(pigpio_pi, handle, __MODE1, __ALLCALL);
+    i2cWriteByteData(handle, __MODE2, __OUTDRV);
+    i2cWriteByteData(handle, __MODE1, __ALLCALL);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    uint8_t mode1 = i2c_read_byte_data(pigpio_pi, handle, __MODE1);
+    uint8_t mode1 = i2cReadByteData(handle, __MODE1);
     mode1 = mode1 & ~__SLEEP;
-    i2c_write_byte_data(pigpio_pi, handle, __MODE1, mode1);
+    i2cWriteByteData(handle, __MODE1, mode1);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
 }
 
@@ -147,27 +146,27 @@ void AdafruitMotorHat::setPWMFreq(int freq){
     prescaleval /= (float)freq;
     prescaleval -= 1.0;
     double prescale = std::floor(prescaleval + 0.5);
-    int oldmode = i2c_read_byte_data(pigpio_pi, handle, __MODE1);
+    int oldmode = i2cReadByteData(handle, __MODE1);
     int newMode = (oldmode & 0x7F) | 0x10;
-    i2c_write_byte_data(pigpio_pi, handle, __MODE1, newMode);
-    i2c_write_byte_data(pigpio_pi, handle, __PRESCALE, (int)std::floor(prescale));
-    i2c_write_byte_data(pigpio_pi, handle, __MODE1, oldmode);
+    i2cWriteByteData(handle, __MODE1, newMode);
+    i2cWriteByteData(handle, __PRESCALE, (int)std::floor(prescale));
+    i2cWriteByteData(handle, __MODE1, oldmode);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    i2c_write_byte_data(pigpio_pi, handle, __MODE1, oldmode | 0x80);
+    i2cWriteByteData(handle, __MODE1, oldmode | 0x80);
 }
 
 void AdafruitMotorHat::setPWM(uint8_t channel, int on, int off){
-    i2c_write_byte_data(pigpio_pi, handle, __LED0_ON_L+4*channel, on & 0xFF);
-    i2c_write_byte_data(pigpio_pi, handle, __LED0_ON_H+4*channel, on >> 8);
-    i2c_write_byte_data(pigpio_pi, handle, __LED0_OFF_L+4*channel, off & 0xFF);
-    i2c_write_byte_data(pigpio_pi, handle, __LED0_OFF_H+4*channel, off >> 8);
+    i2cWriteByteData(handle, __LED0_ON_L+4*channel, on & 0xFF);
+    i2cWriteByteData(handle, __LED0_ON_H+4*channel, on >> 8);
+    i2cWriteByteData(handle, __LED0_OFF_L+4*channel, off & 0xFF);
+    i2cWriteByteData(handle, __LED0_OFF_H+4*channel, off >> 8);
 }
 
 void AdafruitMotorHat::setAllPWM(int on, int off){
-    i2c_write_byte_data(pigpio_pi, handle, __ALL_LED_ON_L, on & 0xFF);
-    i2c_write_byte_data(pigpio_pi, handle, __ALL_LED_ON_H, on >> 8);
-    i2c_write_byte_data(pigpio_pi, handle, __ALL_LED_OFF_L, off & 0xFF);
-    i2c_write_byte_data(pigpio_pi, handle, __ALL_LED_OFF_H, off >> 8);
+    i2cWriteByteData(handle, __ALL_LED_ON_L, on & 0xFF);
+    i2cWriteByteData(handle, __ALL_LED_ON_H, on >> 8);
+    i2cWriteByteData(handle, __ALL_LED_OFF_L, off & 0xFF);
+    i2cWriteByteData(handle, __ALL_LED_OFF_H, off >> 8);
 }
 
 
@@ -228,7 +227,6 @@ void AdafruitMotorHatMotor::begin(){
 
     motor = hat->getMotor(internalMotorNumber - 1);
 }
-
 
 int AdafruitMotorHatMotor::remapMotorNumber(int hatAddress, int motorNum){
     if(hatAddress == GEEKWORM_ADDR){
