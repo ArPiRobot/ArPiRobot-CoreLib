@@ -35,3 +35,11 @@ cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=../arpirobot-cross.cmake -G "Unix Makefiles" ..
 cmake --build .
 ```
+
+## Launching Program w/ C++ Library
+
+- Make sure `libarpirobot-core.so` is in the same directory as `main`, where main is the robot executable
+
+```
+sudo LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH PYTHONPATH=. ./main
+```

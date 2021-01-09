@@ -27,5 +27,21 @@ namespace arpirobot{
         double rotation = 0;
     };
 
-    // TODO: Tank drive helper
+    class TankDriveHelper{
+    public:
+        TankDriveHelper(MotorController *leftMotor, MotorController *rightMotor);
+        TankDriveHelper(std::vector<MotorController*> leftMotors, std::vector<MotorController*> rightMotors);
+
+        void updateLeftSpeed(double newLeftSpeed);
+        void updateRightSpeed(double newRightSpeed);
+        void update(double newLeftSpeed, double newRightSpeed);
+    
+    private:
+        void doUpdate();
+
+        std::vector<MotorController*> leftMotors;
+        std::vector<MotorController*> rightMotors;
+        double leftSpeed = 0;
+        double rightSpeed = 0;
+    };
 }

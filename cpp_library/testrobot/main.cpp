@@ -19,7 +19,7 @@ public:
     AdafruitMotorHatMotor frmotor {2};
     AdafruitMotorHatMotor rrmotor {1};
 
-    ArcadeDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
+    TankDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
 
     Gamepad gp0 {0};
 
@@ -38,9 +38,9 @@ public:
         
     }
     void enabledPeriodic(){
-        double speed = gp0.getAxis(1, 0.1) * -1;
-        double rotation = gp0.getAxis(2, 0.1);
-        driveHelper.update(speed, rotation);
+        double left = gp0.getAxis(1, 0.1) * -1;
+        double right = gp0.getAxis(3, 0.1) * -1;
+        driveHelper.update(left, right);
     }
     void disabledPeriodic(){
 
