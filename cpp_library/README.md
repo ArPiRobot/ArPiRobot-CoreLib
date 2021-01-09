@@ -5,23 +5,39 @@ Experimental C++ library for ArPiRobot robots. Idea is to use language specific 
 Ideally, this means only one library to maintain, same features regardless of language, and issues like Python's GIL are avoided (mostly).
 
 ## Libraries
-- Boost:
-    - Installed via conan
-    - Statically linked into libarpirobot-core.so
+- Boost.ASIO:
+    - In deps folder. Header only.
+    - Depends on Boost.System (also header only in deps folder)
+    - Only includes specific (required) files form boost source
 - CTPL
     - Header only, in deps folder
 - PiGPIO
-    - Installed using CMake build system from pigpio project (in deps folder)
-    - Link to shared library b/c want to use whatever version is installed on the pi (as using pigpiod)
-        - Using shared library b/c need same version of library and pigpiod (use what is installed on pi itself)
-        - This library is installed on the pi from RPiOS repos when building the custom image
-    - Version in deps folder should match version on newest Pi image
-    - On pi run pigpiod -v to get version
+    - Built using CMake build system from pigpio project (in deps folder)
+    - Statically linked into libarpirobot-core
 
-## Building (Linux Only)
 
-- Install CMake and conan
-- Download a [cross compiler](https://github.com/abhiTronix/raspberry-pi-cross-compilers) from the link below. Make sure downloaded compiler supports pi zero. Extract to your home directory.
-- Run prep_pi_zero
-- cd to build directory
-- Run `cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake_toolchains/pi_zero.cmake`
+## Building (Core C++ Library)
+
+#### Requirements
+- [CMake](https://cmake.org/)
+- [conan](https://conan.io/)
+- Raspberry Pi Cross Compiler (GCC 8.3). Make sure to download one supporting the Pi Zero.
+    - [Pre-built Toolchains for Linux Host](https://github.com/abhiTronix/raspberry-pi-cross-compilers)
+        - Extract to `~/.arpirobot/toolchain`
+    - [Pre-built toolchains for Windows Host](https://gnutoolchains.com/raspberry/)
+        - Install to `C:\Users\USERNAME\.arpirobot\toolchain` changing USERNAME to your username
+
+
+#### Building
+Run the following commands in the cpp_lib directory
+```
+./pre_build.sh
+cd build
+cmake -DCMAKE_TOOLCHAIN_FILE=../cmake_toolchains/pi_cross_compile.cmake ..
+cmake --build .
+```
+
+
+## Python Bindings
+
+TODO

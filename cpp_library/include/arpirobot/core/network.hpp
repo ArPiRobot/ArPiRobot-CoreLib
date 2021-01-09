@@ -1,14 +1,14 @@
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
+#include <asio.hpp>
+#include <functional>
 #include <array>
 #include <thread>
 #include <unordered_map>
 #include <memory>
 
-using namespace boost::asio::ip;
-using namespace boost::asio;
+using namespace asio::ip;
+using namespace asio;
 
 namespace arpirobot{
 
@@ -119,10 +119,10 @@ namespace arpirobot{
 
         // Boost async handler functions
 
-        static void handleAccept(const tcp::socket &client, const boost::system::error_code &ec);
+        static void handleAccept(const tcp::socket &client, const std::error_code &ec);
         static void handleDisconnect(const tcp::socket &client);
-        static void handleTcpReceive(const tcp::socket &client, const boost::system::error_code &ec, std::size_t count);
-        static void handleUdpReceive(const boost::system::error_code &ec, std::size_t count);
+        static void handleTcpReceive(const tcp::socket &client, const std::error_code &ec, std::size_t count);
+        static void handleUdpReceive(const std::error_code &ec, std::size_t count);
 
         static void handleCommand();
 

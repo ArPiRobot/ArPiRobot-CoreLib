@@ -1,15 +1,6 @@
 cmake_minimum_required (VERSION 3.0)
 project (ArPiRobot-CoreLib C CXX)
 
-if(EXISTS ${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
-	conan_basic_setup(TARGETS)
-else()
-     message(FATAL_ERROR "Run conan first")
-endif()
-
-
-# Dependencies not available using conan
 # Build pigpio as static library
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pigpio-71 EXCLUDE_FROM_ALL)
@@ -25,8 +16,12 @@ file (GLOB_RECURSE SOURCES
 
 add_library(arpirobot-core SHARED ${SOURCES})
 add_dependencies(arpirobot-core pigpio)
-target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/deps ${PROJECT_SOURCE_DIR}/deps/pigpio-71)
-target_link_libraries(arpirobot-core CONAN_PKG::boost pigpio)
+target_include_directories(arpirobot-core PUBLIC 
+     ${PROJECT_SOURCE_DIR}/include 
+     ${PROJECT_SOURCE_DIR}/deps 
+     ${PROJECT_SOURCE_DIR}/deps/pigpio-71
+     ${PROJECT_SOURCE_DIR}/deps/asio-1.18.1/include)
+target_link_libraries(arpirobot-core pigpio pthread)
 target_compile_options(arpirobot-core PRIVATE -Wno-psabi)
 
 

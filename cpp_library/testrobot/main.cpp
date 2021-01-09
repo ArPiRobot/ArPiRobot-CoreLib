@@ -15,8 +15,8 @@ class Robot : public BaseRobot{
 public:
 
     AdafruitMotorHatMotor flmotor {3};
-    AdafruitMotorHatMotor frmotor {4};
-    AdafruitMotorHatMotor rlmotor {2};
+    AdafruitMotorHatMotor rlmotor {4};
+    AdafruitMotorHatMotor frmotor {2};
     AdafruitMotorHatMotor rrmotor {1};
 
     ArcadeDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
@@ -38,7 +38,7 @@ public:
         
     }
     void enabledPeriodic(){
-        double speed = gp0.getAxis(1, 0.1);
+        double speed = gp0.getAxis(1, 0.1) * -1;
         double rotation = gp0.getAxis(2, 0.1);
         driveHelper.update(speed, rotation);
     }

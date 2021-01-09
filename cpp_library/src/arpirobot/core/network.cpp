@@ -1,9 +1,11 @@
 #include <arpirobot/core/network.hpp>
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/robot.hpp>
+#include <cmath>
 
 
 using namespace arpirobot;
+using namespace std::placeholders;
 
 
 // Commands from drive station
@@ -126,12 +128,12 @@ void NetworkManager::startNetworking(std::function<void()> enableFunc, std::func
         NetworkManager::disableFunc = disableFunc;
 
         // Wait for connection from drive station
-        commandSocketAcceptor.async_accept(commandClient, boost::bind(&NetworkManager::handleAccept, 
-            boost::ref(commandClient), _1));
-        netTableSocketAcceptor.async_accept(netTableClient, boost::bind(&NetworkManager::handleAccept, 
-            boost::ref(netTableClient), _1));
-        logSocketAcceptor.async_accept(logClient, boost::bind(&NetworkManager::handleAccept, 
-            boost::ref(logClient), _1));
+        commandSocketAcceptor.async_accept(commandClient, std::bind(&NetworkManager::handleAccept, 
+            std::ref(commandClient), _1));
+        netTableSocketAcceptor.async_accept(netTableClient, std::bind(&NetworkManager::handleAccept, 
+            std::ref(netTableClient), _1));
+        logSocketAcceptor.async_accept(logClient, std::bind(&NetworkManager::handleAccept, 
+            std::ref(logClient), _1));
 
         networkThread = new std::thread(&NetworkManager::runNetworking);
 
@@ -146,10 +148,10 @@ void NetworkManager::stopNetworking(){
 bool NetworkManager::sendNtRaw(const_buffer buffer){
     if(isDsConnected){
         try{
-            boost::asio::write(netTableClient, buffer);
+            asio::write(netTableClient, buffer);
             return true;
-        }catch(const boost::system::system_error &err){
-            if(err.code() == boost::asio::error::eof || err.code() == boost::asio::error::connection_reset){
+        }catch(const std::system_error &err){
+            if(err.code() == asio::error::eof || err.code() == asio::error::connection_reset){
                 handleDisconnect(netTableClient);
             }
             return false;
@@ -168,15 +170,15 @@ bool NetworkManager::sendNt(std::string key, std::string value){
         data.push_back(value[i]);
     }
     data.push_back('\n');
-    return sendNtRaw(boost::asio::buffer(data));
+    return sendNtRaw(asio::buffer(data));
 }
 
 void NetworkManager::sendLogMessage(std::string message){
     if(isDsConnected){
         try{
-            boost::asio::write(logClient, boost::asio::buffer(message));
-        }catch(const boost::system::system_error &err){
-            if(err.code() == boost::asio::error::eof || err.code() == boost::asio::error::connection_reset){
+            asio::write(logClient, asio::buffer(message));
+        }catch(const std::system_error &err){
+            if(err.code() == asio::error::eof || err.code() == asio::error::connection_reset){
                 handleDisconnect(logClient);
             }
         }
@@ -189,11 +191,11 @@ void NetworkManager::runNetworking(){
 
 void NetworkManager::receiveFrom(const tcp::socket &client){
     if(&client == &commandClient){
-        commandClient.async_receive(boost::asio::buffer(tmpCommandRxBuf), 
-            boost::bind(&NetworkManager::handleTcpReceive, boost::ref(commandClient), _1, _2));
+        commandClient.async_receive(asio::buffer(tmpCommandRxBuf), 
+            std::bind(&NetworkManager::handleTcpReceive, std::ref(commandClient), _1, _2));
     }else if(&client == &netTableClient){
-        netTableClient.async_receive(boost::asio::buffer(tmpNetTableRxBuf), 
-            boost::bind(&NetworkManager::handleTcpReceive, boost::ref(netTableClient), _1, _2));
+        netTableClient.async_receive(asio::buffer(tmpNetTableRxBuf), 
+            std::bind(&NetworkManager::handleTcpReceive, std::ref(netTableClient), _1, _2));
     }
     // Data will never be received from log client
 }
@@ -210,8 +212,8 @@ void NetworkManager::handleConnectionStatusChanged(){
             Logger::logInfo("Drive station connected.");
             
             // Start waiting for controller data
-            controllerSocket.async_receive_from(boost::asio::buffer(tmpControllerRxBuf), 
-                controllerDataEndpoint, boost::bind(&NetworkManager::handleUdpReceive, _1, _2));
+            controllerSocket.async_receive_from(asio::buffer(tmpControllerRxBuf), 
+                controllerDataEndpoint, std::bind(&NetworkManager::handleUdpReceive, _1, _2));
 
         }else{
             // Multiple DS connections. Reject all
@@ -240,7 +242,7 @@ void NetworkManager::handleConnectionStatusChanged(){
     }
 }
 
-void NetworkManager::handleAccept(const tcp::socket &client, const boost::system::error_code &ec){
+void NetworkManager::handleAccept(const tcp::socket &client, const std::error_code &ec){
     if(!ec){
         handleConnectionStatusChanged();
         receiveFrom(client); // Start receive now so disconnect will be detected
@@ -253,17 +255,17 @@ void NetworkManager::handleDisconnect(const tcp::socket &client){
     logClient.close();
     handleConnectionStatusChanged();
 
-    commandSocketAcceptor.async_accept(commandClient, boost::bind(&NetworkManager::handleAccept, 
-        boost::ref(commandClient), _1));
-    netTableSocketAcceptor.async_accept(netTableClient, boost::bind(&NetworkManager::handleAccept, 
-        boost::ref(netTableClient), _1));
-    logSocketAcceptor.async_accept(logClient, boost::bind(&NetworkManager::handleAccept, 
-        boost::ref(logClient), _1));
+    commandSocketAcceptor.async_accept(commandClient, std::bind(&NetworkManager::handleAccept, 
+        std::ref(commandClient), _1));
+    netTableSocketAcceptor.async_accept(netTableClient, std::bind(&NetworkManager::handleAccept, 
+        std::ref(netTableClient), _1));
+    logSocketAcceptor.async_accept(logClient, std::bind(&NetworkManager::handleAccept, 
+        std::ref(logClient), _1));
 
 }
 
 void NetworkManager::handleTcpReceive(const tcp::socket &client, 
-        const boost::system::error_code &ec, std::size_t count){
+        const std::error_code &ec, std::size_t count){
     if(!ec){
         if(count > 0 && isDsConnected){
             if(&client == &commandClient){
@@ -282,12 +284,12 @@ void NetworkManager::handleTcpReceive(const tcp::socket &client,
         // Wait for more data
         if(isDsConnected)
             receiveFrom(client);
-    }else if(ec == boost::asio::error::eof || ec == boost::asio::error::connection_reset){
+    }else if(ec == asio::error::eof || ec == asio::error::connection_reset){
         handleDisconnect(client);
     }
 }
 
-void NetworkManager::handleUdpReceive(const boost::system::error_code &ec, std::size_t count){
+void NetworkManager::handleUdpReceive(const std::error_code &ec, std::size_t count){
     bool shouldProcess = netTableClient.is_open() && commandClient.is_open() && logClient.is_open();
     if(!ec && shouldProcess){
         std::string controllerAddress = controllerDataEndpoint.address().to_string();
@@ -302,8 +304,8 @@ void NetworkManager::handleUdpReceive(const boost::system::error_code &ec, std::
         }
     }
     if(shouldProcess){
-        controllerSocket.async_receive_from(boost::asio::buffer(tmpControllerRxBuf), 
-            controllerDataEndpoint, boost::bind(&NetworkManager::handleUdpReceive, _1, _2));
+        controllerSocket.async_receive_from(asio::buffer(tmpControllerRxBuf), 
+            controllerDataEndpoint, std::bind(&NetworkManager::handleUdpReceive, _1, _2));
     }
 }
 
@@ -428,7 +430,7 @@ void NetworkTableInternal::startSync(){
     inSync = true;
     Logger::logDebug("Starting sync from robot to DS.");
 
-    if(!NetworkManager::sendNtRaw(boost::asio::buffer(NET_TABLE_START_SYNC_DATA, 3))){
+    if(!NetworkManager::sendNtRaw(asio::buffer(NET_TABLE_START_SYNC_DATA, 3))){
         // abortSync will be called by handleDisconnect and lock will be released
         return;
     }
@@ -439,7 +441,7 @@ void NetworkTableInternal::startSync(){
     }
 
     Logger::logDebug("Ending sync from robot to DS. Waiting for DS to sync data to robot.");
-    NetworkManager::sendNtRaw(boost::asio::buffer(NET_TABLE_END_SYNC_DATA, 4));
+    NetworkManager::sendNtRaw(asio::buffer(NET_TABLE_END_SYNC_DATA, 4));
 }
 
 void NetworkTableInternal::sendAllValues(){
