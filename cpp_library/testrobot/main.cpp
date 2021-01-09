@@ -1,6 +1,5 @@
-#include <arpirobot/devices/adafruitmotorhat.hpp>
+#include <arpirobot/devices/gamepad.hpp>
 #include <arpirobot/core/robot.hpp>
-#include <arpirobot/devices/adafruitmotorhat.hpp>
 #include <arpirobot/core/log.hpp>
 
 #include <thread>
@@ -8,12 +7,12 @@
 #include <string>
 
 using namespace arpirobot;
-using MotorCommand = arpirobot::AdafruitMotorHat::MotorCommand;
+
 
 class Robot : public BaseRobot{
 public:
 
-    AdafruitMotorHatMotor motor{1, 0x6F, false};
+    Gamepad gp0{0};
 
     Robot() : BaseRobot(RobotProfile()){
 
@@ -23,7 +22,7 @@ public:
         
     }
     void robotEnabled(){
-        motor.setSpeed(0.5);
+        
     }
     void robotDisabled(){
         
@@ -36,6 +35,7 @@ public:
     }
     void periodic(){
         feedWatchdog();
+        Logger::logDebug(std::to_string(gp0.getAxis(0)));
     }
 };
 

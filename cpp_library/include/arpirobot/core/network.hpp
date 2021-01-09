@@ -107,6 +107,8 @@ namespace arpirobot{
 
         static void sendLogMessage(std::string message);
 
+        static std::unordered_map<int, std::shared_ptr<ControllerData>> controllerData;
+
     private:
 
         static void runNetworking();
@@ -134,8 +136,6 @@ namespace arpirobot{
         // Status
         static bool isDsConnected;
         static bool networkingStarted;
-
-        // TODO: Controller data
 
         // TODO: Main vmon
 
@@ -169,8 +169,6 @@ namespace arpirobot{
         static std::function<void()> disableFunc;
 
         static std::unordered_map<std::string, std::string> ntSyncData;
-
-        static std::unordered_map<int, std::shared_ptr<ControllerData>> controllerData;
     };
 
 

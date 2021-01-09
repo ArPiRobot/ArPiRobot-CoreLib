@@ -12,6 +12,7 @@ namespace arpirobot{
     struct RobotProfile{
         int mainSchedulerThreads = 10;
         int periodicFunctionRate = 50;
+        int maxGamepadDataAge = 100;
     };
 
     class BaseRobot{
@@ -36,6 +37,10 @@ namespace arpirobot{
 
         virtual void periodic() = 0;
 
+        static BaseRobot *currentRobot;
+        
+        RobotProfile profile;
+
     private:
         static void sigintHandler(int signal);
 
@@ -50,9 +55,6 @@ namespace arpirobot{
         ////////////////////////////////////////////////////////////////////////////
         /// Member variables
         ////////////////////////////////////////////////////////////////////////////
-
-        // Configuration
-        RobotProfile profile;
 
         // Scheduler
         Scheduler scheduler;
@@ -75,8 +77,6 @@ namespace arpirobot{
         // Device that need to be started
         // Static b/c this can be populated before there is an instance of BaseRobot
         static std::vector<BaseDevice*> devicesToBegin;
-
-        static BaseRobot *currentRobot;
     };
 
 }
