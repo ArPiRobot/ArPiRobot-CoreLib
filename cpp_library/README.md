@@ -5,10 +5,8 @@ Experimental C++ library for ArPiRobot robots. Idea is to use language specific 
 Ideally, this means only one library to maintain, same features regardless of language, and issues like Python's GIL are avoided (mostly).
 
 ## Libraries
-- Boost.ASIO:
+- ASIO:
     - In deps folder. Header only.
-    - Depends on Boost.System (also header only in deps folder)
-    - Only includes specific (required) files form boost source
 - CTPL
     - Header only, in deps folder
 - PiGPIO
@@ -31,9 +29,9 @@ Ideally, this means only one library to maintain, same features regardless of la
 #### Building
 Run the following commands in the cpp_lib directory
 ```
-./pre_build.sh
+mkdir build
 cd build
-cmake -DCMAKE_TOOLCHAIN_FILE=../cmake_toolchains/pi_cross_compile.cmake ..
+cmake -DCMAKE_TOOLCHAIN_FILE=..//arpirobot-cross.cmake ..
 cmake --build .
 ```
 
