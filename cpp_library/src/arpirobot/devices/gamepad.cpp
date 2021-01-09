@@ -54,7 +54,7 @@ double Gamepad::getAxis(int axisNum, double deadband){
     double value = data->axes[axisNum];
     if(std::abs(value) < deadband){
         value = 0;
-    }else{
+    }else if(deadband != 0){
         // Linearly scale from (deadban, 0) to (1, 1)
         value = (value - (std::abs(value) / value * deadband)) / (1 - deadband);
     }
@@ -111,5 +111,5 @@ std::string Gamepad::getDeviceName(){
 }
 
 void Gamepad::begin(){
-    
+
 }

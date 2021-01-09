@@ -46,11 +46,11 @@ void ControllerData::updateData(std::vector<uint8_t> &data){
     // Get axis array (each axis is a signed 16-bit integer, full range)
     int offset = 4;
     for(int i = 0; i < axisCount; ++i){
-        short tmp =data[offset] << 8 | data[offset + 1]; // signed 16-bit int: high byte, low byte
+        short tmp = data[offset] << 8 | data[offset + 1]; // signed 16-bit int: high byte, low byte.
         if(tmp < 0)
-            axes[i] = tmp / 32768;
-        else
-            axes[i] = tmp / 32767;
+            axes[i] = tmp / 32768.0f;
+        else if(tmp > 0)
+            axes[i] = tmp / 32767.0f;
         offset += 2;
     }
 
