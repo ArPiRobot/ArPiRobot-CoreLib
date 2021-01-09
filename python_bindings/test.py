@@ -24,13 +24,15 @@ class MyRobot(BaseRobot):
         self.frmotor.set_inverted(True)
 
     def robot_enabled(self):
-        self.drive_helper.update(0.5, 0)
-    
+        pass
+
     def robot_disabled(self):
         pass
 
     def enabled_periodic(self):
-        pass
+        speed = self.gp0.get_axis(1, 0.1) * -1
+        rotation = self.gp0.get_axis(2, 0.1)
+        self.drive_helper.update(speed, rotation)
     
     def disabled_periodic(self):
         pass

@@ -25,6 +25,7 @@ arpirobot.BaseRobot_create.argtypes = [ctypes.c_void_p,
     ctypes.c_void_p, 
     ctypes.c_void_p, 
     ctypes.c_int, 
+    ctypes.c_int,
     ctypes.c_int]
 arpirobot.BaseRobot_create.restype = ctypes.c_void_p
 

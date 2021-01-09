@@ -63,7 +63,8 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         void (*disabledPeriodic)(void), 
                         void (*periodic)(void),
                         int mainSchedulerThreads,
-                        int periodicFunctionRate);
+                        int periodicFunctionRate,
+                        int maxGamepadDataAge);
 
 BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot);
 

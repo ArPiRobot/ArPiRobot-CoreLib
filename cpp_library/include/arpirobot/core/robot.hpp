@@ -17,7 +17,7 @@ namespace arpirobot{
 
     class BaseRobot{
     public:
-        BaseRobot(RobotProfile profile);
+        BaseRobot(RobotProfile profile = RobotProfile());
 
         void start();
 

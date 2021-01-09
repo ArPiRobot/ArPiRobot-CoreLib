@@ -67,11 +67,13 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         void (*disabledPeriodic)(void), 
                         void (*periodic)(void),
                         int mainSchedulerThreads,
-                        int periodicFunctionRate){
+                        int periodicFunctionRate,
+                        int maxGamepadDataAge){
     RobotProfile profile;
 
     profile.mainSchedulerThreads = mainSchedulerThreads;
     profile.periodicFunctionRate = periodicFunctionRate;
+    profile.maxGamepadDataAge = maxGamepadDataAge;
 
     BaseRobot *robot = new BridgeBaseRobot(robotStarted, robotEnabled, robotDisabled, 
         enabledPeriodic, disabledPeriodic, periodic, profile);

@@ -23,7 +23,7 @@ public:
 
     Gamepad gp0 {0};
 
-    Robot() : BaseRobot(RobotProfile()){
+    Robot() : BaseRobot(){
 
     }
 

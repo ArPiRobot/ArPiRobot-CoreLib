@@ -2,8 +2,16 @@ import arpirobot.bridge as bridge
 from abc import ABC, abstractmethod
 import ctypes
 
-class BaseRobot(ABC):
+
+class RobotProfile:
     def __init__(self):
+        self.main_scheduler_threads = 10
+        self.periodic_function_rate = 50
+        self.max_gamepad_data_age = 100
+
+
+class BaseRobot(ABC):
+    def __init__(self, profile: RobotProfile = RobotProfile()):
 
         @ctypes.CFUNCTYPE(None)
         def robot_started():
@@ -39,7 +47,8 @@ class BaseRobot(ABC):
 
         self._ptr = bridge.arpirobot.BaseRobot_create(
             self.rs_internal, self.re_internal, self.rd_internal, self.ep_internal, 
-            self.dp_internal, self.p_internal, 10, 50)
+            self.dp_internal, self.p_internal, profile.main_scheduler_threads, 
+            profile.periodic_function_rate, profile.max_gamepad_data_age)
     
     def __del__(self):
         bridge.arpirobot.BaseRobot_destroy(self._ptr)
