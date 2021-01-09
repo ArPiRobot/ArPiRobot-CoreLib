@@ -167,3 +167,19 @@ BRIDGE_FUNC void ArcadeDriveHelper_updateSpeed(ArcadeDriveHelper *helper, double
 BRIDGE_FUNC void ArcadeDriveHelper_updateRotation(ArcadeDriveHelper *helper, double rotation);
 
 BRIDGE_FUNC void ArcadeDriveHelper_update(ArcadeDriveHelper *helper, double speed, double rotation);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// TankDriveHelper bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC TankDriveHelper *TankDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
+    MotorController **rightMotors, size_t rightMotorCount);
+
+BRIDGE_FUNC void TankDriveHelper_destroy(TankDriveHelper *helper);
+
+BRIDGE_FUNC void TankDriveHelper_updateLeftSpeed(TankDriveHelper *helper, double newLeftSpeed);
+
+BRIDGE_FUNC void TankDriveHelper_updateRightSpeed(TankDriveHelper *helper, double newRightSpeed);
+
+BRIDGE_FUNC void TankDriveHelper_update(TankDriveHelper *helper, double newLeftSpeed, double newRightSpeed);

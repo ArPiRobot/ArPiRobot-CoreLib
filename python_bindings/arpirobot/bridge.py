@@ -168,3 +168,23 @@ arpirobot.ArcadeDriveHelper_updateRotation.restype = None
 
 arpirobot.ArcadeDriveHelper_update.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double]
 arpirobot.ArcadeDriveHelper_update.restype = None
+
+
+################################################################################
+# TankDriveHelper Bridge
+################################################################################
+
+arpirobot.TankDriveHelper_create.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t]
+arpirobot.TankDriveHelper_create.restype = ctypes.c_void_p
+
+arpirobot.TankDriveHelper_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.TankDriveHelper_destroy.restype = None
+
+arpirobot.TankDriveHelper_updateLeftSpeed.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.TankDriveHelper_updateLeftSpeed.restype = None
+
+arpirobot.TankDriveHelper_updateRightSpeed.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.TankDriveHelper_updateRightSpeed.restype = None
+
+arpirobot.TankDriveHelper_update.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double]
+arpirobot.TankDriveHelper_update.restype = None

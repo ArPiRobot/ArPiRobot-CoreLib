@@ -264,3 +264,39 @@ BRIDGE_FUNC void ArcadeDriveHelper_updateRotation(ArcadeDriveHelper *helper, dou
 BRIDGE_FUNC void ArcadeDriveHelper_update(ArcadeDriveHelper *helper, double speed, double rotation){
     helper->update(speed, rotation);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// TankDriveHelper bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC TankDriveHelper *TankDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
+        MotorController **rightMotors, size_t rightMotorCount){
+    std::vector<MotorController*> lm;
+    std::vector<MotorController*> rm;
+    lm.reserve(leftMotorCount);
+    rm.reserve(rightMotorCount);
+    for(int i = 0; i < leftMotorCount; ++i){
+        lm.push_back(leftMotors[i]);
+    }
+    for(int i = 0; i < rightMotorCount; ++i){
+        rm.push_back(rightMotors[i]);
+    }
+    return new TankDriveHelper(lm, rm);
+}
+
+BRIDGE_FUNC void TankDriveHelper_destroy(TankDriveHelper *helper){
+    delete helper;
+}
+
+BRIDGE_FUNC void TankDriveHelper_updateLeftSpeed(TankDriveHelper *helper, double newLeftSpeed){
+    helper->updateLeftSpeed(newLeftSpeed);
+}
+
+BRIDGE_FUNC void TankDriveHelper_updateRightSpeed(TankDriveHelper *helper, double newRightSpeed){
+    helper->updateRightSpeed(newRightSpeed);
+}
+
+BRIDGE_FUNC void TankDriveHelper_update(TankDriveHelper *helper, double newLeftSpeed, double newRightSpeed){
+    helper->update(newLeftSpeed, newRightSpeed);
+}
