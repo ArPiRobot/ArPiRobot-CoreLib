@@ -184,3 +184,45 @@ BRIDGE_FUNC bool Gamepad_getButton(Gamepad *gamepad, int buttonNum){
 BRIDGE_FUNC int Gamepad_getDpad(Gamepad *gamepad, int dpadNum){
     return gamepad->getDpad(dpadNum);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// MotorController bridge (arpirobot/core/device.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC bool MotorController_isInverted(MotorController *motor){
+    return motor->isInverted();
+}
+
+BRIDGE_FUNC void MotorController_setInverted(MotorController *motor, bool inverted){
+    motor->setInverted(inverted);
+}
+
+BRIDGE_FUNC bool MotorController_isBrakeMode(MotorController *motor){
+    return motor->isBrakeMode();
+}
+
+BRIDGE_FUNC void MotorController_setBrakeMode(MotorController *motor, bool brakeMode){
+    motor->setBrakeMode(brakeMode);
+}
+
+BRIDGE_FUNC void MotorController_setSpeed(MotorController *motor, double speed){
+    motor->setSpeed(speed);
+}
+
+BRIDGE_FUNC double MotorController_getSpeed(MotorController *motor){
+    return motor->getSpeed();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// AdafruitMotorHatMotor bridge (arpirobot/devices/adafruitmotorhat.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, int address, bool remapNumbers){
+    return new AdafruitMotorHatMotor(motorNum, address, remapNumbers);
+}
+
+BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor){
+    delete motor;
+}

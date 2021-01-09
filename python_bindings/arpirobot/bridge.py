@@ -113,3 +113,38 @@ arpirobot.Gamepad_getButton.restype = ctypes.c_bool
 
 arpirobot.Gamepad_getDpad.argtypes = [ctypes.c_void_p, ctypes.c_int]
 arpirobot.Gamepad_getDpad.restype = ctypes.c_int
+
+
+################################################################################
+# MotorController Bridge
+################################################################################
+
+arpirobot.MotorController_isInverted.argtypes = [ctypes.c_void_p]
+arpirobot.MotorController_isInverted.restype = ctypes.c_bool
+
+arpirobot.MotorController_setInverted.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+arpirobot.MotorController_setInverted.restype = None
+
+arpirobot.MotorController_isBrakeMode.argtypes = [ctypes.c_void_p]
+arpirobot.MotorController_isBrakeMode.restype = ctypes.c_bool
+
+arpirobot.MotorController_setBrakeMode.argtypes = [ctypes.c_void_p, ctypes.c_bool]
+arpirobot.MotorController_setBrakeMode.restype = None
+
+arpirobot.MotorController_setSpeed.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.MotorController_setSpeed.restype = None
+
+arpirobot.MotorController_getSpeed.argtypes = [ctypes.c_void_p]
+arpirobot.MotorController_getSpeed.restype = ctypes.c_double
+
+
+################################################################################
+# AdafruitMotorHatMotor Bridge
+################################################################################
+
+arpirobot.AdafruitMotorHatMotor_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_bool]
+arpirobot.AdafruitMotorHatMotor_create.restype = ctypes.c_void_p
+
+arpirobot.AdafruitMotorHatMotor_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.AdafruitMotorHatMotor_destroy.restype = None
+

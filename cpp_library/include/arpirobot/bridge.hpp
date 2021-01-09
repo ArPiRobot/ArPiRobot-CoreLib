@@ -3,6 +3,7 @@
 #include <arpirobot/core/robot.hpp>
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/devices/gamepad.hpp>
+#include <arpirobot/devices/adafruitmotorhat.hpp>
 #include <string>
 
 using namespace arpirobot;
@@ -125,3 +126,30 @@ BRIDGE_FUNC double Gamepad_getAxis(Gamepad *gamepad, int axisNum, double deadban
 BRIDGE_FUNC bool Gamepad_getButton(Gamepad *gamepad, int buttonNum);
 
 BRIDGE_FUNC int Gamepad_getDpad(Gamepad *gamepad, int dpadNum);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// MotorController bridge (arpirobot/core/device.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC bool MotorController_isInverted(MotorController *motor);
+
+BRIDGE_FUNC void MotorController_setInverted(MotorController *motor, bool inverted);
+
+BRIDGE_FUNC bool MotorController_isBrakeMode(MotorController *motor);
+
+BRIDGE_FUNC void MotorController_setBrakeMode(MotorController *motor, bool brakeMode);
+
+BRIDGE_FUNC void MotorController_setSpeed(MotorController *motor, double speed);
+
+BRIDGE_FUNC double MotorController_getSpeed(MotorController *motor);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// AdafruitMotorHatMotor bridge (arpirobot/devices/adafruitmotorhat.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, int address, bool remapNumbers);
+
+BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor);
+
