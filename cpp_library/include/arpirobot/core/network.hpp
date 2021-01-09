@@ -78,6 +78,8 @@ namespace arpirobot{
 
         void updateData(std::vector<uint8_t> &data);
 
+        void zeroData();
+
         int controllerNumber = -1;
         int axisCount = -1;
         int buttonCount = -1;
@@ -87,7 +89,6 @@ namespace arpirobot{
         std::vector<int> dpads;
         std::vector<uint8_t> lastData;
         std::chrono::steady_clock::time_point lastUpdateTime;
-        bool dataZeroed = false;
     };
 
     ////////////////////////////////////////////////////////////////////////////
