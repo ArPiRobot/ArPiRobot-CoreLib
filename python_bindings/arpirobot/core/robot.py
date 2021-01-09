@@ -37,15 +37,18 @@ class BaseRobot(ABC):
         self.dp_internal = disabled_periodic
         self.p_internal = periodic
 
-        self.__ptr = bridge.arpirobot.BaseRobot_create(
+        self._ptr = bridge.arpirobot.BaseRobot_create(
             self.rs_internal, self.re_internal, self.rd_internal, self.ep_internal, 
             self.dp_internal, self.p_internal, 10, 50)
-        
+    
+    def __del__(self):
+        bridge.arpirobot.BaseRobot_destroy(self._ptr)
+
     def start(self):
-        bridge.arpirobot.BaseRobot_start(self.__ptr)
+        bridge.arpirobot.BaseRobot_start(self._ptr)
 
     def feed_watchdog(self):
-        bridge.arpirobot.BaseRobot_feedWatchdog(self.__ptr)
+        bridge.arpirobot.BaseRobot_feedWatchdog(self._ptr)
 
     @abstractmethod
     def robot_started(self):

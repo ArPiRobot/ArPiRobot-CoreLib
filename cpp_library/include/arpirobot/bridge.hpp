@@ -1,11 +1,25 @@
 #pragma once
 
 #include <arpirobot/core/robot.hpp>
-
+#include <arpirobot/core/log.hpp>
+#include <arpirobot/devices/gamepad.hpp>
+#include <string>
 
 using namespace arpirobot;
 
 #define BRIDGE_FUNC extern "C"
+
+////////////////////////////////////////////////////////////////////////////////
+/// General/Helper
+////////////////////////////////////////////////////////////////////////////////
+
+// Use to create a string that can be returned from one of these functions.
+BRIDGE_FUNC char *returnableString(std::string str);
+
+// Once the other language copies data out of the returned string free the memory
+// THIS MUST BE MANUALLY CALLED BY THE OTHER LANGUAGE's BRIDGE
+BRIDGE_FUNC void freeString(char *str);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// BaseRobot Bridge
@@ -61,9 +75,10 @@ BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot);
 
 BRIDGE_FUNC void NetworkTable_set(const char *key, const char *value);
 
-BRIDGE_FUNC const char *NetworkTable_get(const char *key);
+BRIDGE_FUNC char *NetworkTable_get(const char *key);
 
 BRIDGE_FUNC bool NetworkTable_has(const char *key);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Logger Bridge
@@ -86,3 +101,27 @@ BRIDGE_FUNC void Logger_logWarningFrom(const char *source, const char *message);
 BRIDGE_FUNC void Logger_logErrorFrom(const char *source, const char *message);
 
 BRIDGE_FUNC void Logger_logNewline();
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// BaseDevice bridge (arpirobot/core/device.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC char *BaseDevice_getDeviceName(BaseDevice *device);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// Gamepad bridge (arpirobot/devices/gamepad.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC Gamepad *Gamepad_create(int controllerNum);
+
+BRIDGE_FUNC void Gamepad_destroy(Gamepad *gamepad);
+
+BRIDGE_FUNC int Gamepad_getControllerNum(Gamepad *gamepad);
+
+BRIDGE_FUNC double Gamepad_getAxis(Gamepad *gamepad, int axisNum, double deadband);
+
+BRIDGE_FUNC bool Gamepad_getButton(Gamepad *gamepad, int buttonNum);
+
+BRIDGE_FUNC int Gamepad_getDpad(Gamepad *gamepad, int dpadNum);
