@@ -1,6 +1,6 @@
 import ctypes
 
-arpirobot = ctypes.CDLL("./libarpirobot-core.so")
+arpirobot = ctypes.CDLL("libarpirobot-core.so")
 
 
 # NOTE: If returning dynamically allocated string restype should be ptr (ctypes.c_void_p)
@@ -148,3 +148,22 @@ arpirobot.AdafruitMotorHatMotor_create.restype = ctypes.c_void_p
 arpirobot.AdafruitMotorHatMotor_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.AdafruitMotorHatMotor_destroy.restype = None
 
+
+################################################################################
+# ArcadeDriveHelper Bridge
+################################################################################
+
+arpirobot.ArcadeDriveHelper_create.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p, ctypes.c_size_t]
+arpirobot.ArcadeDriveHelper_create.restype = ctypes.c_void_p
+
+arpirobot.ArcadeDriveHelper_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.ArcadeDriveHelper_destroy.restype = None
+
+arpirobot.ArcadeDriveHelper_updateSpeed.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.ArcadeDriveHelper_updateSpeed.restype = None
+
+arpirobot.ArcadeDriveHelper_updateRotation.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.ArcadeDriveHelper_updateRotation.restype = None
+
+arpirobot.ArcadeDriveHelper_update.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double]
+arpirobot.ArcadeDriveHelper_update.restype = None

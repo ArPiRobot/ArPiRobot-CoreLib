@@ -4,6 +4,8 @@
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/devices/gamepad.hpp>
 #include <arpirobot/devices/adafruitmotorhat.hpp>
+#include <arpirobot/core/drive.hpp>
+#include <arpirobot/core/device.hpp>
 #include <string>
 
 using namespace arpirobot;
@@ -121,11 +123,7 @@ BRIDGE_FUNC void Gamepad_destroy(Gamepad *gamepad);
 
 BRIDGE_FUNC int Gamepad_getControllerNum(Gamepad *gamepad);
 
-BRIDGE_FUNC double Gamepad_getAxis(Gamepad *gamepad, int axisNum, double deadband);
 
-BRIDGE_FUNC bool Gamepad_getButton(Gamepad *gamepad, int buttonNum);
-
-BRIDGE_FUNC int Gamepad_getDpad(Gamepad *gamepad, int dpadNum);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -153,3 +151,18 @@ BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, in
 
 BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor);
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// ArcadeDriveHelper bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC ArcadeDriveHelper *ArcadeDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
+    MotorController **rightMotors, size_t rightMotorCount);
+
+BRIDGE_FUNC void ArcadeDriveHelper_destroy(ArcadeDriveHelper *helper);
+
+BRIDGE_FUNC void ArcadeDriveHelper_updateSpeed(ArcadeDriveHelper *helper, double speed);
+
+BRIDGE_FUNC void ArcadeDriveHelper_updateRotation(ArcadeDriveHelper *helper, double rotation);
+
+BRIDGE_FUNC void ArcadeDriveHelper_update(ArcadeDriveHelper *helper, double speed, double rotation);

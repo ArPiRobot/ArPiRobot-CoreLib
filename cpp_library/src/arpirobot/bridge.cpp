@@ -226,3 +226,39 @@ BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, in
 BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor){
     delete motor;
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ArcadeDriveHelper bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC ArcadeDriveHelper *ArcadeDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
+        MotorController **rightMotors, size_t rightMotorCount){
+    std::vector<MotorController*> lm;
+    std::vector<MotorController*> rm;
+    lm.reserve(leftMotorCount);
+    rm.reserve(rightMotorCount);
+    for(int i = 0; i < leftMotorCount; ++i){
+        lm.push_back(leftMotors[i]);
+    }
+    for(int i = 0; i < rightMotorCount; ++i){
+        rm.push_back(rightMotors[i]);
+    }
+    return new ArcadeDriveHelper(lm, rm);
+}
+
+BRIDGE_FUNC void ArcadeDriveHelper_destroy(ArcadeDriveHelper *helper){
+    delete helper;
+}
+
+BRIDGE_FUNC void ArcadeDriveHelper_updateSpeed(ArcadeDriveHelper *helper, double speed){
+    helper->updateSpeed(speed);
+}
+
+BRIDGE_FUNC void ArcadeDriveHelper_updateRotation(ArcadeDriveHelper *helper, double rotation){
+    helper->updateRotation(rotation);
+}
+
+BRIDGE_FUNC void ArcadeDriveHelper_update(ArcadeDriveHelper *helper, double speed, double rotation){
+    helper->update(speed, rotation);
+}
