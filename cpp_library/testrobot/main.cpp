@@ -35,7 +35,7 @@ public:
     }
     void periodic(){
         feedWatchdog();
-        Logger::logDebug(std::to_string(gp0.getAxis(0)));
+        //Logger::logDebug(std::to_string(gp0.getAxis(0)));
     }
 };
 
