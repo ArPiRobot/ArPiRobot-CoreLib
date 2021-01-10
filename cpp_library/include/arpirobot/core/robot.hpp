@@ -13,6 +13,7 @@ namespace arpirobot{
         int mainSchedulerThreads = 10;
         int periodicFunctionRate = 50;
         int maxGamepadDataAge = 100;
+        int actionFunctionPeriod = 50;
     };
 
     class BaseRobot{
@@ -22,6 +23,10 @@ namespace arpirobot{
         void start();
 
         void feedWatchdog();
+
+        static std::shared_ptr<Task> scheduleRepeatedFunction(const std::function<void()> &&func, sched_clk::duration rate);
+
+        static void removeTaskFromScheduler(std::shared_ptr<Task> task);
 
         static void beginWhenReady(BaseDevice *device);
 

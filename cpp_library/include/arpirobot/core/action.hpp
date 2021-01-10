@@ -11,12 +11,13 @@ namespace arpirobot{
 
     class Action{
     public:
-        Action();
-
+        // NOT TO BE CALLED BY USER CODE
         void _actionStart();
 
-        void _actionStop();
+        // NOT TO BE CALLED BY USER CODE
+        void _actionStop(bool interrupted);
 
+        // NOT TO BE CALLED BY USER CODE
         void _actionProcess();
 
         void lockDevices(std::vector<BaseDevice*> devices);
@@ -24,6 +25,12 @@ namespace arpirobot{
         void lockDevice(BaseDevice *device);
 
         bool isRunning();
+
+        bool isStarted();
+    
+        bool isFinished();
+
+        std::shared_ptr<Task> _schedulerTask = nullptr;
 
     protected:
 
@@ -36,7 +43,6 @@ namespace arpirobot{
         virtual bool shouldContinue() = 0;
 
     private:
-        std::shared_ptr<Task> schedulerTask;
         bool started = false;
         bool finished = false;
     };
@@ -44,57 +50,56 @@ namespace arpirobot{
 
     class BaseActionTrigger{
     public:
-
-        // This exists so it is safe to call BaseActionTrigger(std::make_shared<MyAction>()) 
-        // (no need to keep reference to action)
-        // But if using bridge layer need to use raw pointer
-        BaseActionTrigger(std::shared_ptr<Action> *targetAction, bool doRestart = true);
         BaseActionTrigger(Action *targetAction, bool doRestart = true);
 
         virtual bool shouldRun() = 0;
 
+        void startTargetAction();
+
     private:
 
-        // TODO: Do this with gamepad action transforms
-        // Only one of these will be set. If targetAction is nullptr will use shared ptr
-        std::shared_ptr<Action> targetActionSharedPtr;
         Action *targetAction = nullptr;
+        bool doRestart = true;
     };
 
     
     class ActionManager{
     public:
-        static void startAction(Action *action, bool doRestart = true);
 
-        static void addTrigger(Action *action);
-        static void addTrigger(std::shared_ptr<Action> action);
+        /**
+         * Start an action
+         * @param action    A pointer to the action to start.
+         * @param doRestart If true starting an action that is already running will restart the action.
+         *                  If false the action will continue running uninterrupted.
+         */
+        static bool startAction(Action *action, bool doRestart = true);
 
-        static void removeTrigger(Action *action);
-        static void removeTrigger(std::shared_ptr<Action> action);
+        /**
+         * Add a trigger to start an action when some event occurs.
+         * @param trigger A pointer to the trigger to add.
+         */
+        static void addTrigger(BaseActionTrigger *trigger);
 
-        static void stopAction(Action *action);
+        static void removeTrigger(BaseActionTrigger *trigger);
+
+        static bool stopAction(Action *action);
+
+        // NOT TO BE CALLED FROM USER CODE
+        static bool _stopActionInternal(Action *action, bool interrupted);
 
     private:
 
         static void checkTriggers();
 
-        static void stopActionInternal(Action *action, bool interrupted);
-
         static std::mutex triggerLock;
 
-        // Both of these can be populated. Both will be processed the same way.
-        static std::vector<std::shared_ptr<BaseActionTrigger>> triggerSharedPtrs;
         static std::vector<BaseActionTrigger*> triggers;
     };
 
 
     class ActionSeries : public Action{
     public:
-        // Here for use with bridge (primarily)
         ActionSeries(std::vector<Action*> actions, Action *finishedAction);
-
-        // Generally this should be used from C++ (memory safe, no need to keep instances)
-        ActionSeries(std::vector<std::shared_ptr<Action>> actions, std::shared_ptr<Action> finishedAction);
 
     protected:
         void begin();
@@ -107,10 +112,7 @@ namespace arpirobot{
     
     private:
         std::vector<Action*> actions;
-        std::vector<std::shared_ptr<Action>> actionsSharedPtr;
-
         Action *finishedAction;
-        std::shared_ptr<Action> finishedActionSharedPtr;
 
         int index = 0;
     };
