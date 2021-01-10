@@ -40,6 +40,14 @@ arpirobot.BaseRobot_feedWatchdog.restype = None
 
 
 ################################################################################
+# NetworkManager Bridge
+################################################################################
+
+arpirobot.NetworkManager_setMainVmon.argtypes = [ctypes.c_void_p]
+arpirobot.NetworkManager_setMainVmon.restype = None
+
+
+################################################################################
 # NetworkTable Bridge
 ################################################################################
 

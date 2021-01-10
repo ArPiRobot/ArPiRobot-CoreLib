@@ -3,6 +3,7 @@
 #include <arpirobot/core/robot.hpp>
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/devices/gamepad.hpp>
+#include <arpirobot/core/network.hpp>
 #include <arpirobot/devices/adafruitmotorhat.hpp>
 #include <arpirobot/core/drive.hpp>
 #include <arpirobot/core/device.hpp>
@@ -71,6 +72,13 @@ BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot);
 BRIDGE_FUNC void BaseRobot_start(BaseRobot *robot);
 
 BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// NetworkManager bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC void NetworkManager_setMainVmon(MainVMon *vmon);
 
 
 ////////////////////////////////////////////////////////////////////////////////

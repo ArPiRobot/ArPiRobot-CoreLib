@@ -1,6 +1,17 @@
 import arpirobot.bridge as bridge
 import ctypes
 
+class MainVmon:
+    # Just a common base class for valid main vmon devices
+    # Just here for error detection purposes
+    def __init__(self):
+        self._ptr = None
+
+
+class NetworkManager:
+    def set_main_vmon(self, vmon: MainVmon):
+        bridge.arpirobot.NetworkManager_setMainVmon(vmon._ptr)
+
 
 class NetworkTable:
     @staticmethod
