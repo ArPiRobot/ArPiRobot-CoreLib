@@ -1,6 +1,10 @@
 #pragma once
 
 #include <arpirobot/core/device.hpp>
+#include <arpirobot/devices/gamepad.hpp>
+#include <arpirobot/core/drive.hpp>
+
+#include <unordered_map>
 
 namespace arpirobot{
     class Gamepad : public BaseDevice{
@@ -25,7 +29,9 @@ namespace arpirobot{
 
         int getDpad(int dpadNum);
 
-        // TODO: Axis transforms
+        void setAxisTransform(int axisNum, std::shared_ptr<BaseAxisTransform> transform);
+
+        void clearAxisTransform(int axisNum);
 
         std::string getDeviceName();
     
@@ -34,5 +40,6 @@ namespace arpirobot{
 
     private:
         int controllerNum;
+        std::unordered_map<int, std::shared_ptr<BaseAxisTransform>> axisTransforms;
     };
 }

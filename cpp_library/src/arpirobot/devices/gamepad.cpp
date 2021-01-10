@@ -59,7 +59,10 @@ double Gamepad::getAxis(int axisNum, double deadband){
         value = (value - (std::abs(value) / value * deadband)) / (1 - deadband);
     }
 
-    // TODO: Apply axis transform
+    // Apply axis transform (if one exists)
+    if(axisTransforms.find(axisNum) != axisTransforms.end()){
+        value = axisTransforms[axisNum]->applyTransform(value);
+    }
 
     return value;
 }
@@ -104,6 +107,15 @@ int Gamepad::getDpad(int dpadNum){
     }
 
     return data->dpads[dpadNum];
+}
+
+void Gamepad::setAxisTransform(int axisNum, std::shared_ptr<BaseAxisTransform> transform){
+    axisTransforms[axisNum] = transform;
+}
+
+void Gamepad::clearAxisTransform(int axisNum){
+    if(axisTransforms.find(axisNum) != axisTransforms.end())
+        axisTransforms.erase(axisNum);
 }
 
 std::string Gamepad::getDeviceName(){

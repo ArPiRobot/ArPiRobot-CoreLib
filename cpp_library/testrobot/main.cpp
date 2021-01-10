@@ -19,7 +19,7 @@ public:
     AdafruitMotorHatMotor frmotor {2};
     AdafruitMotorHatMotor rrmotor {1};
 
-    TankDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
+    ArcadeDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
 
     Gamepad gp0 {0};
 
@@ -30,6 +30,9 @@ public:
     void robotStarted(){
         flmotor.setInverted(true);
         frmotor.setInverted(true);
+
+        gp0.setAxisTransform(1, std::make_shared<CubicAxisTransform>(0, 0.5));
+        gp0.setAxisTransform(2, std::make_shared<SquareRootAxisTransform>());
     }
     void robotEnabled(){
         
@@ -38,9 +41,9 @@ public:
         
     }
     void enabledPeriodic(){
-        double left = gp0.getAxis(1, 0.1) * -1;
-        double right = gp0.getAxis(3, 0.1) * -1;
-        driveHelper.update(left, right);
+        double speed = gp0.getAxis(1, 0.1) * -1;
+        double rotation = gp0.getAxis(2, 0.1);
+        driveHelper.update(speed, rotation);
     }
     void disabledPeriodic(){
 
