@@ -232,3 +232,45 @@ arpirobot.CubicAxisTransform_create.restype = ctypes.c_void_p
 
 arpirobot.CubicAxisTransform_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.CubicAxisTransform_destroy.restype = None
+
+
+################################################################################
+# Action Bridge
+################################################################################
+
+arpirobot.Action_create.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
+arpirobot.Action_create.restype = ctypes.c_void_p
+
+arpirobot.Action_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.Action_destroy.restype = None
+
+arpirobot.Action_lockDevices.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
+arpirobot.Action_lockDevices.restype = None
+
+arpirobot.Action_lockDevice.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+arpirobot.Action_lockDevice.restype = None
+
+arpirobot.Action_isRunning.argtypes = [ctypes.c_void_p]
+arpirobot.Action_isRunning.restype = ctypes.c_bool
+
+
+################################################################################
+# ActionManager Bridge
+################################################################################
+
+arpirobot.ActionManager_startAction.argtypes = [ctypes.c_void_p]
+arpirobot.ActionManager_startAction.restype = ctypes.c_bool
+
+arpirobot.ActionManager_stopAction.argtypes = [ctypes.c_void_p]
+arpirobot.ActionManager_stopAction.restype = ctypes.c_bool
+
+
+################################################################################
+# ActionSeries Bridge
+################################################################################
+
+arpirobot.ActionSeries_create.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p]
+arpirobot.ActionSeries_create.restype = ctypes.c_void_p
+
+arpirobot.ActionSeries_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.ActionSeries_destroy.restype = None

@@ -26,6 +26,7 @@ namespace arpirobot{
 
         bool isRunning();
 
+        // TODO: Move these private and make ActionManager friend class
         bool isStarted();
     
         bool isFinished();

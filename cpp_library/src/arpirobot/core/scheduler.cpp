@@ -1,9 +1,6 @@
 #include <arpirobot/core/scheduler.hpp>
 #include <algorithm>
 
-// TODO: Remove
-#include <iostream>
-
 using namespace arpirobot;
 
 

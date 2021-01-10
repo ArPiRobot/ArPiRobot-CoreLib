@@ -69,12 +69,14 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         void (*periodic)(void),
                         int mainSchedulerThreads,
                         int periodicFunctionRate,
-                        int maxGamepadDataAge){
+                        int maxGamepadDataAge,
+                        int actionFunctionPeriod){
     RobotProfile profile;
 
     profile.mainSchedulerThreads = mainSchedulerThreads;
     profile.periodicFunctionRate = periodicFunctionRate;
     profile.maxGamepadDataAge = maxGamepadDataAge;
+    profile.actionFunctionPeriod = actionFunctionPeriod;
 
     BaseRobot *robot = new BridgeBaseRobot(robotStarted, robotEnabled, robotDisabled, 
         enabledPeriodic, disabledPeriodic, periodic, profile);
@@ -353,4 +355,92 @@ BRIDGE_FUNC CubicAxisTransform *CubicAxisTransform_create(double minPower, doubl
 
 BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform){
     delete transform;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// Action Bridge (arpirobot/core/action.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BridgeAction::BridgeAction(void (*beginPtr)(void),
+        void (*processPtr)(void),
+        void (*finishPtr)(bool),
+        bool (*shouldContinuePtr)(void)) : beginPtr(beginPtr), processPtr(processPtr), 
+        finishPtr(finishPtr), shouldContinuePtr(shouldContinuePtr){
+    
+}
+
+void BridgeAction::begin(){
+    beginPtr();
+}
+
+void BridgeAction::process(){
+    processPtr();
+}
+
+void BridgeAction::finish(bool interrupted){
+    finishPtr(interrupted);
+}
+
+bool BridgeAction::shouldContinue(){
+    return shouldContinuePtr();
+}
+
+BRIDGE_FUNC Action *Action_create(void (*beginPtr)(void),
+        void (*processPtr)(void),
+        void (*finishPtr)(bool),
+        bool (*shouldContinuePtr)(void)){
+    return new BridgeAction(beginPtr, processPtr, finishPtr, shouldContinuePtr);
+}
+
+BRIDGE_FUNC void Action_destroy(Action *action){
+    delete action;
+}
+
+BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice *devices, size_t deviceCount){
+    std::vector<BaseDevice*> devs;
+    devs.reserve(deviceCount);
+    for(int i = 0; i < deviceCount; ++i){
+        devs.push_back(&devices[i]);
+    }
+    action->lockDevices(devs);
+}
+
+BRIDGE_FUNC void Action_lockDevice(Action *action, BaseDevice *device){
+    action->lockDevice(device);
+}
+
+BRIDGE_FUNC bool Action_isRunning(Action *action){
+    return action->isRunning();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ActionManager Bridge (arpirobot/core/action.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC bool ActionManager_startAction(Action *action){
+    return ActionManager::startAction(action);
+}
+
+BRIDGE_FUNC bool ActionManager_stopAction(Action *action){
+    return ActionManager::stopAction(action);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ActionSeries Bridge (arpirobot/core/action.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC ActionSeries *ActionSeries_create(Action *actions, size_t actionCount, Action* finishAction){
+    std::vector<Action*> actionsVector;
+    actionsVector.reserve(actionCount);
+    for(int i = 0; i < actionCount; ++i){
+        actionsVector.push_back(&actions[i]);
+    }
+    return new ActionSeries(actionsVector, finishAction);
+}
+
+BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries){
+    delete actionSeries;
 }

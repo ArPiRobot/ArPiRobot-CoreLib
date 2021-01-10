@@ -7,6 +7,7 @@
 #include <arpirobot/devices/adafruitmotorhat.hpp>
 #include <arpirobot/core/drive.hpp>
 #include <arpirobot/core/device.hpp>
+#include <arpirobot/core/action.hpp>
 #include <string>
 
 using namespace arpirobot;
@@ -65,7 +66,8 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         void (*periodic)(void),
                         int mainSchedulerThreads,
                         int periodicFunctionRate,
-                        int maxGamepadDataAge);
+                        int maxGamepadDataAge,
+                        int actionFunctionPeriod);
 
 BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot);
 
@@ -224,3 +226,60 @@ BRIDGE_FUNC CubicAxisTransform *CubicAxisTransform_create(double minPower, doubl
 
 BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform);
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// Action Bridge (arpirobot/core/action.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+
+class BridgeAction : public Action{
+public:
+    BridgeAction(void (*beginPtr)(void),
+        void (*processPtr)(void),
+        void (*finishPtr)(bool),
+        bool (*shouldContinuePtr)(void));
+
+    void begin();
+    void process();
+    void finish(bool interrupted);
+    bool shouldContinue();
+
+private:
+    void (*beginPtr)(void);
+    void (*processPtr)(void);
+    void (*finishPtr)(bool);
+    bool (*shouldContinuePtr)(void);
+};
+
+BRIDGE_FUNC Action *Action_create(void (*beginPtr)(void),
+    void (*processPtr)(void),
+    void (*finishPtr)(bool),
+    bool (*shouldContinuePtr)(void));
+
+BRIDGE_FUNC void Action_destroy(Action *action);
+
+BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice *devices, size_t deviceCount);
+
+BRIDGE_FUNC void Action_lockDevice(Action *action, BaseDevice *device);
+
+BRIDGE_FUNC bool Action_isRunning(Action *action);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ActionManager Bridge (arpirobot/core/action.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC bool ActionManager_startAction(Action *action);
+
+BRIDGE_FUNC bool ActionManager_stopAction(Action *action);
+
+// TOOD: Trigger functions
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ActionSeries Bridge (arpirobot/core/action.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC ActionSeries *ActionSeries_create(Action *actions, size_t actionCount, Action* finishAction);
+
+BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries);
