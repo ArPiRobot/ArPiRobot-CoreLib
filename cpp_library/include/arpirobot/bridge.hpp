@@ -124,8 +124,15 @@ BRIDGE_FUNC void Gamepad_destroy(Gamepad *gamepad);
 
 BRIDGE_FUNC int Gamepad_getControllerNum(Gamepad *gamepad);
 
+BRIDGE_FUNC double Gamepad_getAxis(Gamepad *gamepad, int axisNum, double deadband);
 
+BRIDGE_FUNC bool Gamepad_getButton(Gamepad *gamepad, int buttonNum);
 
+BRIDGE_FUNC int Gamepad_getDpad(Gamepad *gamepad, int dpadNum);
+
+BRIDGE_FUNC void Gamepad_setAxisTransform(Gamepad *gamepad, int axisNum, BaseAxisTransform *transform);
+
+BRIDGE_FUNC void Gamepad_clearAxisTransform(Gamepad *gamepad, int axisNum);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// MotorController bridge (arpirobot/core/device.hpp)
@@ -183,3 +190,29 @@ BRIDGE_FUNC void TankDriveHelper_updateLeftSpeed(TankDriveHelper *helper, double
 BRIDGE_FUNC void TankDriveHelper_updateRightSpeed(TankDriveHelper *helper, double newRightSpeed);
 
 BRIDGE_FUNC void TankDriveHelper_update(TankDriveHelper *helper, double newLeftSpeed, double newRightSpeed);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// BaseAxisTransform bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC double BaseAxisTransform_applyTransform(BaseAxisTransform *transform, double rawAxisValue);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// SquareRootAxisTransform bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC SquareRootAxisTransform *SquareRootAxisTransform_create();
+
+BRIDGE_FUNC void SquareRootAxisTransform_destroy(SquareRootAxisTransform *transform);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// CubicAxisTransform bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC CubicAxisTransform *CubicAxisTransform_create(double minPower, double midPower);
+
+BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform);
+

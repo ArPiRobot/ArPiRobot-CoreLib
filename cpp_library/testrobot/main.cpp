@@ -31,8 +31,8 @@ public:
         flmotor.setInverted(true);
         frmotor.setInverted(true);
 
-        gp0.setAxisTransform(1, std::make_shared<CubicAxisTransform>(0, 0.5));
-        gp0.setAxisTransform(2, std::make_shared<SquareRootAxisTransform>());
+        gp0.setAxisTransform(1, new CubicAxisTransform(0, 0.5));
+        gp0.setAxisTransform(2, new SquareRootAxisTransform());
     }
     void robotEnabled(){
         

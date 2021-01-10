@@ -1,12 +1,14 @@
 import arpirobot.bridge as bridge
 import ctypes
 from arpirobot.core.device import BaseDevice
+from arpirobot.core.drive import BaseAxisTransform
 
 
 class Gamepad(BaseDevice):
     def __init__(self, controller_num: int):
         super().__init__()
         self._ptr = bridge.arpirobot.Gamepad_create(ctypes.c_int(controller_num))
+        self.__axis_transforms = {}
     
     def __del__(self):
         bridge.arpirobot.Gamepad_destroy(self._ptr)
@@ -22,3 +24,13 @@ class Gamepad(BaseDevice):
     
     def get_dpad(self, dpad_num: int) -> int:
         return bridge.arpirobot.Gamepad_getDpad(self._ptr, dpad_num)
+
+    def set_axis_transform(self, axis_num: int, transform: BaseAxisTransform):
+        # Keep a reference to the BaseAxisTransform object or it will be deallocated
+        self.__axis_transforms[axis_num] = transform
+        bridge.arpirobot.Gamepad_setAxisTransform(self._ptr, axis_num, transform._ptr)
+    
+    def clear_axis_transform(self, axis_num: int):
+        if axis_num in self.__axis_transforms:
+            del self.__axis_transforms[axis_num]
+        bridge.arpirobot.Gamepad_clearAxisTransform(self._ptr, axis_num)

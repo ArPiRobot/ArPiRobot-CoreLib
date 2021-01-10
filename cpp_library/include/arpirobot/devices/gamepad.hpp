@@ -29,7 +29,7 @@ namespace arpirobot{
 
         int getDpad(int dpadNum);
 
-        void setAxisTransform(int axisNum, std::shared_ptr<BaseAxisTransform> transform);
+        void setAxisTransform(int axisNum, BaseAxisTransform *transform);
 
         void clearAxisTransform(int axisNum);
 
@@ -40,6 +40,6 @@ namespace arpirobot{
 
     private:
         int controllerNum;
-        std::unordered_map<int, std::shared_ptr<BaseAxisTransform>> axisTransforms;
+        std::unordered_map<int, BaseAxisTransform*> axisTransforms;
     };
 }

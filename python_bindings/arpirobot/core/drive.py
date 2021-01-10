@@ -80,3 +80,29 @@ class TankDriveHelper:
 
     def update(self, new_left_speed: float, new_right_speed: float):
         bridge.arpirobot.TankDriveHelper_update(self._ptr, new_left_speed, new_right_speed)
+
+
+class BaseAxisTransform:
+    def __init__(self):
+        self._ptr = None
+    
+    def apply_transform(self, raw_axis_value: float):
+        return bridge.arpirobot.BaseAxisTransform_applyTransform(raw_axis_value)
+
+
+class SquareRootAxisTransform(BaseAxisTransform):
+    def __init__(self):
+        super().__init__()
+        self._ptr = bridge.arpirobot.SquareRootAxisTransform_create()
+    
+    def __del__(self):
+        bridge.arpirobot.SquareRootAxisTransform_destroy(self._ptr)
+
+
+class CubicAxisTransform(BaseAxisTransform):
+    def __init__(self, min_power: float, mid_power: float):
+        super().__init__()
+        self._ptr = bridge.arpirobot.CubicAxisTransform_create(min_power, mid_power)
+    
+    def __del__(self):
+        bridge.arpirobot.CubicAxisTransform_destroy(self._ptr)

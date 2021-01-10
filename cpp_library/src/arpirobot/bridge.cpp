@@ -1,6 +1,7 @@
 #include <arpirobot/bridge.hpp>
 #include <arpirobot/core/network.hpp>
 #include <arpirobot/core/log.hpp>
+#include <arpirobot/core/drive.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// General/Helper
@@ -187,6 +188,14 @@ BRIDGE_FUNC int Gamepad_getDpad(Gamepad *gamepad, int dpadNum){
     return gamepad->getDpad(dpadNum);
 }
 
+BRIDGE_FUNC void Gamepad_setAxisTransform(Gamepad *gamepad, int axisNum, BaseAxisTransform *transform){
+    gamepad->setAxisTransform(axisNum, transform);
+}
+
+BRIDGE_FUNC void Gamepad_clearAxisTransform(Gamepad *gamepad, int axisNum){
+    gamepad->clearAxisTransform(axisNum);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// MotorController bridge (arpirobot/core/device.hpp)
@@ -299,4 +308,39 @@ BRIDGE_FUNC void TankDriveHelper_updateRightSpeed(TankDriveHelper *helper, doubl
 
 BRIDGE_FUNC void TankDriveHelper_update(TankDriveHelper *helper, double newLeftSpeed, double newRightSpeed){
     helper->update(newLeftSpeed, newRightSpeed);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// BaseAxisTransform bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC double BaseAxisTransform_applyTransform(BaseAxisTransform *transform, double rawAxisValue){
+    return transform->applyTransform(rawAxisValue);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// SquareRootAxisTransform bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC SquareRootAxisTransform *SquareRootAxisTransform_create(){
+    return new SquareRootAxisTransform();
+}
+
+BRIDGE_FUNC void SquareRootAxisTransform_destroy(SquareRootAxisTransform *transform){
+    delete transform;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// CubicAxisTransform bridge (arpirobot/core/drive.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC CubicAxisTransform *CubicAxisTransform_create(double minPower, double midPower){
+    return new CubicAxisTransform(minPower, midPower);
+}
+
+BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform){
+    delete transform;
 }

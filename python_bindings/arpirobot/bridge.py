@@ -115,6 +115,12 @@ arpirobot.Gamepad_getButton.restype = ctypes.c_bool
 arpirobot.Gamepad_getDpad.argtypes = [ctypes.c_void_p, ctypes.c_int]
 arpirobot.Gamepad_getDpad.restype = ctypes.c_int
 
+arpirobot.Gamepad_setAxisTransform.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p]
+arpirobot.Gamepad_setAxisTransform.restype = None
+
+arpirobot.Gamepad_clearAxisTransform.argtypes = [ctypes.c_void_p, ctypes.c_int]
+arpirobot.Gamepad_clearAxisTransform.restype = None
+
 
 ################################################################################
 # MotorController Bridge
@@ -188,3 +194,33 @@ arpirobot.TankDriveHelper_updateRightSpeed.restype = None
 
 arpirobot.TankDriveHelper_update.argtypes = [ctypes.c_void_p, ctypes.c_double, ctypes.c_double]
 arpirobot.TankDriveHelper_update.restype = None
+
+
+################################################################################
+# BaseAxisTransform Bridge
+################################################################################
+
+arpirobot.BaseAxisTransform_applyTransform.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.BaseAxisTransform_applyTransform.restype = ctypes.c_double
+
+
+################################################################################
+# SquareRootAxisTransform Bridge
+################################################################################
+
+arpirobot.SquareRootAxisTransform_create.argtypes = []
+arpirobot.SquareRootAxisTransform_create.restype = ctypes.c_void_p
+
+arpirobot.SquareRootAxisTransform_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.SquareRootAxisTransform_destroy.restype = None
+
+
+################################################################################
+# CubicAxisTransform Bridge
+################################################################################
+
+arpirobot.CubicAxisTransform_create.argtypes = [ctypes.c_double, ctypes.c_double]
+arpirobot.CubicAxisTransform_create.restype = ctypes.c_void_p
+
+arpirobot.CubicAxisTransform_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.CubicAxisTransform_destroy.restype = None

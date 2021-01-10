@@ -3,7 +3,8 @@ from arpirobot.core.network import NetworkTable
 from arpirobot.core.log import Logger
 from arpirobot.devices.gamepad import Gamepad
 from arpirobot.devices.adafruitmotorhat import AdafruitMotorHatMotor
-from arpirobot.core.drive import TankDriveHelper
+from arpirobot.core.drive import ArcadeDriveHelper
+from arpirobot.core.drive import CubicAxisTransform, SquareRootAxisTransform
 import time
 
 
@@ -17,11 +18,14 @@ class MyRobot(BaseRobot):
         self.frmotor = AdafruitMotorHatMotor(2)
         self.rrmotor = AdafruitMotorHatMotor(1)
 
-        self.drive_helper = TankDriveHelper([self.flmotor, self.rlmotor], [self.frmotor, self.rrmotor])
+        self.drive_helper = ArcadeDriveHelper([self.flmotor, self.rlmotor], [self.frmotor, self.rrmotor])
     
     def robot_started(self):
         self.flmotor.set_inverted(True)
         self.frmotor.set_inverted(True)
+
+        self.gp0.set_axis_transform(1, CubicAxisTransform(0, 0.5))
+        self.gp0.set_axis_transform(2, SquareRootAxisTransform())
 
     def robot_enabled(self):
         pass
@@ -30,9 +34,9 @@ class MyRobot(BaseRobot):
         pass
 
     def enabled_periodic(self):
-        left = self.gp0.get_axis(1, 0.1) * -1
-        right = self.gp0.get_axis(3, 0.1) * -1
-        self.drive_helper.update(left, right)
+        speed = self.gp0.get_axis(1, 0.1) * -1
+        rotation = self.gp0.get_axis(2, 0.1)
+        self.drive_helper.update(speed, rotation)
     
     def disabled_periodic(self):
         pass

@@ -1,6 +1,7 @@
 #include <arpirobot/devices/gamepad.hpp>
 #include <arpirobot/core/network.hpp>
 #include <arpirobot/core/robot.hpp>
+#include <arpirobot/core/log.hpp>
 
 using namespace arpirobot;
 
@@ -109,7 +110,7 @@ int Gamepad::getDpad(int dpadNum){
     return data->dpads[dpadNum];
 }
 
-void Gamepad::setAxisTransform(int axisNum, std::shared_ptr<BaseAxisTransform> transform){
+void Gamepad::setAxisTransform(int axisNum, BaseAxisTransform *transform){
     axisTransforms[axisNum] = transform;
 }
 
