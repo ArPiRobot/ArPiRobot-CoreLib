@@ -3,6 +3,7 @@
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/devices/adafruitmotorhat.hpp>
 #include <arpirobot/core/drive.hpp>
+#include <arpirobot/core/action.hpp>
 
 #include <thread>
 #include <chrono>
@@ -11,8 +12,30 @@
 using namespace arpirobot;
 
 
+class MyAction : public Action{
+public:
+    void begin(){
+        Logger::logDebug("MyAction starting");
+    }
+
+    void process(){
+        Logger::logDebug("MyAction running.");
+    }
+
+    void finish(bool interrupted){
+        Logger::logDebug("MyAction stopping");
+    }
+
+    bool shouldContinue(){
+        return false;
+    }
+};
+
+
 class Robot : public BaseRobot{
 public:
+
+    MyAction testAction;
 
     AdafruitMotorHatMotor flmotor {3};
     AdafruitMotorHatMotor rlmotor {4};
@@ -28,6 +51,11 @@ public:
     }
 
     void robotStarted(){
+
+        ActionManager::startAction(&testAction);
+        std::this_thread::sleep_for(std::chrono::seconds(2));
+        ActionManager::stopAction(&testAction);
+
         flmotor.setInverted(true);
         frmotor.setInverted(true);
 

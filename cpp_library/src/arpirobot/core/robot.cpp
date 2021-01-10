@@ -112,7 +112,7 @@ void BaseRobot::feedWatchdog(){
 std::shared_ptr<Task> BaseRobot::scheduleRepeatedFunction(const std::function<void()> &&func, sched_clk::duration rate){
     if(currentRobot == nullptr)
         return nullptr;
-    currentRobot->scheduler.addRepeatedTask(std::move(func), std::chrono::milliseconds(0), rate);
+    return currentRobot->scheduler.addRepeatedTask(std::move(func), std::chrono::milliseconds(0), rate);
 }
 
 void BaseRobot::removeTaskFromScheduler(std::shared_ptr<Task> task){

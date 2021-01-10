@@ -34,6 +34,9 @@ void Action::_actionStop(bool interrupted){
 }
 
 void Action::_actionProcess(){
+    if(!started || finished)
+        return;
+    
     bool cont  = false;
     try{
         process();
