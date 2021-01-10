@@ -62,7 +62,7 @@ namespace arpirobot{
         ////////////////////////////////////////////////////////////////////////////
 
         // Scheduler
-        Scheduler scheduler;
+        Scheduler *scheduler;
 
         // Status
         bool isEnabled = false;

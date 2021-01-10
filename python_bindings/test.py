@@ -5,8 +5,22 @@ from arpirobot.devices.gamepad import Gamepad
 from arpirobot.devices.adafruitmotorhat import AdafruitMotorHatMotor
 from arpirobot.core.drive import ArcadeDriveHelper
 from arpirobot.core.drive import CubicAxisTransform, SquareRootAxisTransform
+from arpirobot.core.action import Action, ActionManager
 import time
 
+
+class MyAction(Action):
+    def begin(self):
+        Logger.log_debug("MyAction begin()")
+    
+    def process(self):
+        Logger.log_debug("MyAction process()")
+    
+    def finish(self, was_interrupted: bool):
+        Logger.log_debug("MyAction finish()")
+    
+    def should_continue(self) -> bool:
+        return True
 
 class MyRobot(BaseRobot):
     def __init__(self):
@@ -21,6 +35,9 @@ class MyRobot(BaseRobot):
         self.drive_helper = ArcadeDriveHelper([self.flmotor, self.rlmotor], [self.frmotor, self.rrmotor])
     
     def robot_started(self):
+
+        ActionManager.start_action(MyAction())
+
         self.flmotor.set_inverted(True)
         self.frmotor.set_inverted(True)
 

@@ -14,8 +14,7 @@ bool BaseRobot::stop = false;
 std::vector<BaseDevice*> BaseRobot::devicesToBegin;
 BaseRobot *BaseRobot::currentRobot = nullptr;
 
-BaseRobot::BaseRobot(RobotProfile profile) : profile(profile),
-        scheduler(profile.mainSchedulerThreads){
+BaseRobot::BaseRobot(RobotProfile profile) : profile(profile) {
     
 }
 
@@ -26,6 +25,7 @@ void BaseRobot::start(){
         return;
     }
 
+    scheduler = new Scheduler(profile.mainSchedulerThreads);
     currentRobot = this;
 
     int err = gpioInitialise();
@@ -62,10 +62,10 @@ void BaseRobot::start(){
     robotDisabled();
 
     // Start periodic callbacks
-    scheduler.addRepeatedTask(std::bind(&BaseRobot::periodic, this), 
+    scheduler->addRepeatedTask(std::bind(&BaseRobot::periodic, this), 
         std::chrono::milliseconds(0), 
         std::chrono::milliseconds(profile.periodicFunctionRate));
-    scheduler.addRepeatedTask(std::bind(&BaseRobot::modeBasedPeriodic, this),
+    scheduler->addRepeatedTask(std::bind(&BaseRobot::modeBasedPeriodic, this),
         std::chrono::milliseconds(0),
         std::chrono::milliseconds(profile.periodicFunctionRate));
 
@@ -76,6 +76,13 @@ void BaseRobot::start(){
 
     Logger::logInfo("Robot stopping.");
     
+    // Make sure this is nullptr before stopping scheduler
+    currentRobot = nullptr;
+
+    // Make sure scheduler stops before devices are disabled
+    delete scheduler;
+    scheduler = nullptr;
+
     // Disable all devices when robot stops
     for(BaseDevice *device : devices){
         device->_disable();
@@ -86,7 +93,6 @@ void BaseRobot::start(){
     // gpioTerminate();
 
     NetworkManager::stopNetworking();
-    currentRobot = nullptr;
 }
 
 void BaseRobot::feedWatchdog(){
@@ -112,13 +118,13 @@ void BaseRobot::feedWatchdog(){
 std::shared_ptr<Task> BaseRobot::scheduleRepeatedFunction(const std::function<void()> &&func, sched_clk::duration rate){
     if(currentRobot == nullptr)
         return nullptr;
-    return currentRobot->scheduler.addRepeatedTask(std::move(func), std::chrono::milliseconds(0), rate);
+    return currentRobot->scheduler->addRepeatedTask(std::move(func), std::chrono::milliseconds(0), rate);
 }
 
 void BaseRobot::removeTaskFromScheduler(std::shared_ptr<Task> task){
     if(currentRobot == nullptr)
         return;
-    currentRobot->scheduler.removeTask(task);
+    currentRobot->scheduler->removeTask(task);
 }
 
 void BaseRobot::beginWhenReady(BaseDevice *device){

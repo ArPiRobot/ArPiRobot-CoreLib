@@ -68,12 +68,22 @@ class Action(ABC):
 
 
 class ActionManager:
+    __started_actions = []
+
     @staticmethod
-    def start_action(self, action: Action) -> bool:
+    def start_action( action: Action) -> bool:
+        # Keep a reference to the action or it will be deallocated
+        if action not in ActionManager.__started_actions:
+            ActionManager.__started_actions.append(action)
+        
         return bridge.arpirobot.ActionManager_startAction(action._ptr)
 
     @staticmethod
-    def stop_action(self, action: Action) -> bool:
+    def stop_action( action: Action) -> bool:
+        # No longer need reference
+        if action in ActionManager.__started_actions:
+            ActionManager.__started_actions.remove(action)
+
         return bridge.arpirobot.ActionManager_stopAction(action._ptr)
 
 
