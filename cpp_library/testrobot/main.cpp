@@ -31,6 +31,7 @@ public:
         flmotor.setInverted(true);
         frmotor.setInverted(true);
 
+        // Don't worry about mem leak here. Will need these until program exits.
         gp0.setAxisTransform(1, new CubicAxisTransform(0, 0.5));
         gp0.setAxisTransform(2, new SquareRootAxisTransform());
     }

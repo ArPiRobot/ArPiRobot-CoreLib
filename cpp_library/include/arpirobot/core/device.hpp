@@ -5,9 +5,14 @@
 
 namespace arpirobot{
 
+    class Action; // Forward declare b/c this header is included by action.hpp
+
     class BaseDevice{
     public:
-        // TODO: Lock device for action API
+
+        void _lockDevice(Action *lockingAction);
+
+        bool isLockedByAction();
 
         void doBegin();
 
@@ -27,6 +32,9 @@ namespace arpirobot{
         virtual void begin() = 0;
 
         bool initialized = false;
+    
+        std::mutex actionLock;
+        Action *lockingAction = nullptr;
     };
 
     class MotorController : public BaseDevice{

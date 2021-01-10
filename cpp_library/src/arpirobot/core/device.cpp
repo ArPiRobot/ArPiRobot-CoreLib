@@ -1,5 +1,7 @@
 #include <arpirobot/core/device.hpp>
 #include <arpirobot/core/log.hpp>
+#include <arpirobot/core/action.hpp>
+
 
 using namespace arpirobot;
 
@@ -7,6 +9,20 @@ using namespace arpirobot;
 ////////////////////////////////////////////////////////////////////////////////
 /// BaseDevice
 ////////////////////////////////////////////////////////////////////////////////
+void BaseDevice::_lockDevice(Action *lockingAction){
+    std::lock_guard<std::mutex> l(actionLock);
+    if(this->lockingAction != nullptr && this->lockingAction != lockingAction){
+        // Stop old locking action first
+        ActionManager::stopAction(this->lockingAction);
+    }
+    this->lockingAction = lockingAction;
+}
+
+bool BaseDevice::isLockedByAction(){
+    std::lock_guard<std::mutex> l(actionLock);
+    return lockingAction != nullptr;
+}
+
 void BaseDevice::doBegin(){
     if(!initialized){
         begin();
