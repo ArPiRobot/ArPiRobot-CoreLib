@@ -84,9 +84,9 @@ bool Action::isFinished(){
 /// BaseActionTrigger
 ////////////////////////////////////////////////////////////////////////////////
 
-BaseActionTrigger::BaseActionTrigger(Action *targetAction, bool doRestart){
-    targetAction = targetAction;
-    this->doRestart = doRestart;
+BaseActionTrigger::BaseActionTrigger(Action *targetAction, bool doRestart) : 
+        targetAction(targetAction), doRestart(doRestart){
+    
 }
 
 void BaseActionTrigger::startTargetAction(){

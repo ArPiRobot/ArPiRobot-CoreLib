@@ -144,6 +144,27 @@ BRIDGE_FUNC void Gamepad_setAxisTransform(Gamepad *gamepad, int axisNum, BaseAxi
 
 BRIDGE_FUNC void Gamepad_clearAxisTransform(Gamepad *gamepad, int axisNum);
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// ButtonPressedTrigger bridge (arpirobot/devices/gamepad.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC ButtonPressedTrigger *ButtonPressedTrigger_create(Gamepad *gamepad, int buttonNum, 
+    Action *targetAction, bool doRestart);
+
+BRIDGE_FUNC void ButtonPressedTrigger_destroy(ButtonPressedTrigger *trigger);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ButtonReleasedTrigger bridge (arpirobot/devices/gamepad.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC ButtonReleasedTrigger *ButtonReleasedTrigger_create(Gamepad *gamepad, int buttonNum, 
+    Action *targetAction, bool doRestart);
+
+BRIDGE_FUNC void ButtonReleasedTrigger_destroy(ButtonReleasedTrigger *trigger);
+
+
 ////////////////////////////////////////////////////////////////////////////////
 /// MotorController bridge (arpirobot/core/device.hpp)
 ////////////////////////////////////////////////////////////////////////////////
@@ -273,7 +294,9 @@ BRIDGE_FUNC bool ActionManager_startAction(Action *action);
 
 BRIDGE_FUNC bool ActionManager_stopAction(Action *action);
 
-// TOOD: Trigger functions
+BRIDGE_FUNC void ActionManager_addTrigger(BaseActionTrigger *trigger);
+
+BRIDGE_FUNC void ActionManager_removeTrigger(BaseActionTrigger *trigger);
 
 
 ////////////////////////////////////////////////////////////////////////////////

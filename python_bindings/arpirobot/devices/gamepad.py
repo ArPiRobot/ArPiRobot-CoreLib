@@ -2,6 +2,7 @@ import arpirobot.bridge as bridge
 import ctypes
 from arpirobot.core.device import BaseDevice
 from arpirobot.core.drive import BaseAxisTransform
+from arpirobot.core.action import BaseActionTrigger, Action
 
 
 class Gamepad(BaseDevice):
@@ -34,3 +35,23 @@ class Gamepad(BaseDevice):
         if axis_num in self.__axis_transforms:
             del self.__axis_transforms[axis_num]
         bridge.arpirobot.Gamepad_clearAxisTransform(self._ptr, axis_num)
+
+
+class ButtonPressedTrigger(BaseActionTrigger):
+    def __init__(self, gamepad: Gamepad, button_num: int, target_action: Action, do_restart: bool = True):
+        super().__init__()
+        self._ptr = bridge.arpirobot.ButtonPressedTrigger_create(gamepad._ptr, button_num, 
+            target_action._ptr, do_restart)
+    
+    def __del__(self):
+        bridge.arpirobot.ButtonPressedTrigger_destroy(self._ptr)
+
+
+class ButtonReleasedTrigger(BaseActionTrigger):
+    def __init__(self, gamepad: Gamepad, button_num: int, target_action: Action, do_restart: bool = True):
+        super().__init__()
+        self._ptr = bridge.arpirobot.ButtonReleasedTrigger_create(gamepad._ptr, button_num, 
+            target_action._ptr, do_restart)
+    
+    def __del__(self):
+        bridge.arpirobot.ButtonReleasedTrigger_destroy(self._ptr)

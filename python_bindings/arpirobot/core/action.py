@@ -67,11 +67,18 @@ class Action(ABC):
         pass
 
 
+# Just a common base class
+class BaseActionTrigger:
+    def __init__(self):
+        self._ptr = None
+
+
 class ActionManager:
     __started_actions = []
+    __added_triggers = []
 
     @staticmethod
-    def start_action( action: Action) -> bool:
+    def start_action(action: Action) -> bool:
         # Keep a reference to the action or it will be deallocated
         if action not in ActionManager.__started_actions:
             ActionManager.__started_actions.append(action)
@@ -79,12 +86,26 @@ class ActionManager:
         return bridge.arpirobot.ActionManager_startAction(action._ptr)
 
     @staticmethod
-    def stop_action( action: Action) -> bool:
+    def stop_action(action: Action) -> bool:
         # No longer need reference
         if action in ActionManager.__started_actions:
             ActionManager.__started_actions.remove(action)
 
         return bridge.arpirobot.ActionManager_stopAction(action._ptr)
+
+    @staticmethod
+    def add_trigger(trigger: BaseActionTrigger):
+        # Keep a reference to the trigger or it will be deallocated
+        if trigger not in ActionManager.__added_triggers:
+            ActionManager.__added_triggers.append(trigger)
+        bridge.arpirobot.ActionManager_addTrigger(trigger._ptr)
+
+    @staticmethod
+    def remove_trigger(trigger: BaseActionTrigger):
+        # No longer need reference
+        if trigger in ActionManager.__added_triggers:
+            ActionManager.__added_triggers.remove(trigger)
+        bridge.arpirobot.ActionManager_removeTrigger(trigger._ptr)
 
 
 class ActionSeries:
@@ -98,3 +119,4 @@ class ActionSeries:
     
     def __del__(self):
         bridge.arpirobot.ActionSeries_destroy(self._ptr)
+

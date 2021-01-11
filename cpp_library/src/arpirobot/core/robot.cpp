@@ -1,6 +1,7 @@
 #include <arpirobot/core/robot.hpp>
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/network.hpp>
+#include <arpirobot/core/action.hpp>
 
 #include <chrono>
 #include <csignal>
@@ -68,6 +69,9 @@ void BaseRobot::start(){
     scheduler->addRepeatedTask(std::bind(&BaseRobot::modeBasedPeriodic, this),
         std::chrono::milliseconds(0),
         std::chrono::milliseconds(profile.periodicFunctionRate));
+    scheduler->addRepeatedTask(&ActionManager::checkTriggers,
+        std::chrono::milliseconds(0),
+        std::chrono::milliseconds(profile.periodicFunctionRate)); 
 
     // Just so there is no instant disable of devices when robot starts
     feedWatchdog();

@@ -1,25 +1,20 @@
 #include <actions.hpp>
 #include <main.hpp>
 
-void JSDriveAction::begin(){
-    lockDevices({
-        &Main::robot->flmotor,
-        &Main::robot->frmotor,
-        &Main::robot->rlmotor,
-        &Main::robot->rrmotor
-    });
+#include <arpirobot/core/log.hpp>
+
+void DemoAction::begin(){
+    Logger::logDebug("Action Started Here");
 }
 
-void JSDriveAction::process(){
-    double speed = Main::robot->gp0.getAxis(1, 0.1) * -1;
-    double rotation = Main::robot->gp0.getAxis(2, 0.1);
-    Main::robot->driveHelper.update(speed, rotation);
+void DemoAction::process(){
+    
 }
 
-void JSDriveAction::finish(bool wasInterrupted){
-    Main::robot->driveHelper.update(0, 0);
+void DemoAction::finish(bool wasInterrupted){
+    
 }
 
-bool JSDriveAction::shouldContinue(){
-    return true;
+bool DemoAction::shouldContinue(){
+    return false;
 }

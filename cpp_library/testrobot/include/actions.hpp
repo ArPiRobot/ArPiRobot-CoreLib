@@ -4,7 +4,7 @@
 
 using namespace arpirobot;
 
-class JSDriveAction : public Action {
+class DemoAction : public Action {
 protected:
     void begin();
     void process();

@@ -130,6 +130,27 @@ arpirobot.Gamepad_setAxisTransform.restype = None
 arpirobot.Gamepad_clearAxisTransform.argtypes = [ctypes.c_void_p, ctypes.c_int]
 arpirobot.Gamepad_clearAxisTransform.restype = None
 
+################################################################################
+# ButtonPressedTrigger Bridge
+################################################################################
+
+arpirobot.ButtonPressedTrigger_create.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_bool]
+arpirobot.ButtonPressedTrigger_create.restype = ctypes.c_void_p
+
+arpirobot.ButtonPressedTrigger_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.ButtonPressedTrigger_destroy.restype = None
+
+
+################################################################################
+# ButtonReleasedTrigger Bridge
+################################################################################
+
+arpirobot.ButtonReleasedTrigger_create.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_void_p, ctypes.c_bool]
+arpirobot.ButtonReleasedTrigger_create.restype = ctypes.c_void_p
+
+arpirobot.ButtonReleasedTrigger_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.ButtonReleasedTrigger_destroy.restype = None
+
 
 ################################################################################
 # MotorController Bridge

@@ -2,6 +2,7 @@
 
 #include <arpirobot/core/scheduler.hpp>
 #include <arpirobot/core/device.hpp>
+#include <arpirobot/core/robot.hpp>
 
 #include <vector>
 #include <mutex>
@@ -95,6 +96,9 @@ namespace arpirobot{
         static std::mutex triggerLock;
 
         static std::vector<BaseActionTrigger*> triggers;
+
+        // BaseRobot needs to call checkTriggers on its scheduler
+        friend class BaseRobot;
     };
 
 
