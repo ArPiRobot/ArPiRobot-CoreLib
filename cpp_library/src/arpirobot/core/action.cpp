@@ -146,7 +146,6 @@ void ActionManager::removeTrigger(BaseActionTrigger *trigger){
 bool ActionManager::stopAction(Action *action){
     // This is the user-facing stop action function. 
     // Always consider the action interrupted if the user manually stops it
-
     return _stopActionInternal(action, true);
 }
 

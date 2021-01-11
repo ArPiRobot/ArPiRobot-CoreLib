@@ -26,11 +26,12 @@ target_compile_options(arpirobot-core PRIVATE -Wno-psabi)
 
 
 file (GLOB_RECURSE SOURCES_TESTROBOT
-     ${PROJECT_SOURCE_DIR}/testrobot/*.cpp
+     ${PROJECT_SOURCE_DIR}/testrobot/src/*.cpp
+     ${PROJECT_SOURCE_DIR}/testrobot/include/*.hpp
 )
 
 add_executable(testrobot ${SOURCES_TESTROBOT})
 add_dependencies(testrobot arpirobot-core)
-target_include_directories(testrobot PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(testrobot PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/testrobot/include)
 target_link_libraries(testrobot arpirobot-core)
 target_compile_options(testrobot PRIVATE -Wno-psabi)

@@ -258,7 +258,7 @@ BRIDGE_FUNC Action *Action_create(void (*beginPtr)(void),
 
 BRIDGE_FUNC void Action_destroy(Action *action);
 
-BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice *devices, size_t deviceCount);
+BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice **devices, size_t deviceCount);
 
 BRIDGE_FUNC void Action_lockDevice(Action *action, BaseDevice *device);
 

@@ -10,7 +10,7 @@ namespace arpirobot{
     class BaseDevice{
     public:
 
-        void _lockDevice(Action *lockingAction);
+        void _lockDevice(Action *action);
 
         bool isLockedByAction();
 

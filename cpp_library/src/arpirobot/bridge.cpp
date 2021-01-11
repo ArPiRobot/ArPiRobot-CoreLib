@@ -3,6 +3,7 @@
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/drive.hpp>
 
+
 ////////////////////////////////////////////////////////////////////////////////
 /// General/Helper
 ////////////////////////////////////////////////////////////////////////////////
@@ -397,11 +398,11 @@ BRIDGE_FUNC void Action_destroy(Action *action){
     delete action;
 }
 
-BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice *devices, size_t deviceCount){
+BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice **devices, size_t deviceCount){
     std::vector<BaseDevice*> devs;
     devs.reserve(deviceCount);
     for(int i = 0; i < deviceCount; ++i){
-        devs.push_back(&devices[i]);
+        devs.push_back(devices[i]);
     }
     action->lockDevices(devs);
 }

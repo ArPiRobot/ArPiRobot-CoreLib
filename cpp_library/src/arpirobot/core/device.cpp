@@ -9,13 +9,8 @@ using namespace arpirobot;
 ////////////////////////////////////////////////////////////////////////////////
 /// BaseDevice
 ////////////////////////////////////////////////////////////////////////////////
-void BaseDevice::_lockDevice(Action *lockingAction){
-    std::lock_guard<std::mutex> l(actionLock);
-    if(this->lockingAction != nullptr && this->lockingAction != lockingAction){
-        // Stop old locking action first
-        ActionManager::stopAction(this->lockingAction);
-    }
-    this->lockingAction = lockingAction;
+void BaseDevice::_lockDevice(Action *action){
+    Logger::logDebug(std::to_string(lockingAction == nullptr));
 }
 
 bool BaseDevice::isLockedByAction(){
