@@ -89,4 +89,24 @@ namespace arpirobot{
 
         friend class ArduinoDevice;
     };
+
+    class ArduinoUartInterface : public BaseArduinoInterface{
+    public:
+        ArduinoUartInterface(std::string port, int baud);
+
+    protected:
+        void open();
+        void close();
+        bool isOpen();
+        int available();
+        uint8_t readOne();
+        std::vector<uint8_t> readAll();
+        void write(const uint8_t &b);
+        std::string getDeviceName();
+    
+    private:
+        std::string port;
+        int baud;
+        int handle = -1;
+    };
 }

@@ -4,6 +4,7 @@
 #include <arpirobot/devices/adafruitmotorhat.hpp>
 #include <arpirobot/core/drive.hpp>
 #include <arpirobot/devices/gamepad.hpp>
+#include <arpirobot/arduino/iface.hpp>
 
 using namespace arpirobot;
 
@@ -30,4 +31,6 @@ public:
     ArcadeDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
 
     Gamepad gp0 {0};
+
+    ArduinoUartInterface arduino {"/dev/ttyUSB0", 57600};
 };
