@@ -45,6 +45,7 @@ namespace arpirobot{
         virtual bool shouldContinue() = 0;
 
     private:
+        std::mutex stateLock;
         bool started = false;
         bool finished = false;
     };

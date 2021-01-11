@@ -12,8 +12,11 @@ using namespace arpirobot;
 ////////////////////////////////////////////////////////////////////////////////
 
 void Action::_actionStart(){
-    started = true;
-    finished = false;
+    {
+        std::lock_guard<std::mutex> l(stateLock);
+        started = true;
+        finished = false;
+    }
     try{
         begin();
     }catch(const std::runtime_error &e){
@@ -24,7 +27,10 @@ void Action::_actionStart(){
 
 void Action::_actionStop(bool interrupted){
     // This function is used by ActionManager to stop an action
-    finished = true;
+    {
+        std::lock_guard<std::mutex> l(stateLock);
+        finished = true;
+    }
     try{
         finish(interrupted);
     }catch(const std::runtime_error &e){
@@ -34,8 +40,12 @@ void Action::_actionStop(bool interrupted){
 }
 
 void Action::_actionProcess(){
-    if(!started || finished)
-        return;
+    {
+        // Ensure process cannot run after action finishes
+        std::lock_guard<std::mutex> l(stateLock);
+        if(!started || finished)
+            return;
+    }
     
     bool cont  = false;
     try{
@@ -72,10 +82,12 @@ bool Action::isRunning(){
 }
 
 bool Action::isStarted(){
+    std::lock_guard<std::mutex> l(stateLock);
     return started;
 }
 
 bool Action::isFinished(){
+    std::lock_guard<std::mutex> l(stateLock);
     return finished;
 }
 
