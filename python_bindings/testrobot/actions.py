@@ -1,18 +1,25 @@
 from arpirobot.core.action import Action
 import time
-from main import Main
+import main
 from arpirobot.core.log import Logger
 
 
-class DemoAction(Action):
+class JSDriveAction(Action):
     def begin(self):
-        Logger.log_debug("DemoAction Started")
+        self.lock_devices([
+            main.robot.flmotor,
+            main.robot.frmotor,
+            main.robot.rlmotor,
+            main.robot.rrmotor
+        ])
 
     def process(self):
-        pass
+        speed = main.robot.gp0.get_axis(1, 0.1) * -1
+        rotation = main.robot.gp0.get_axis(2, 0.1)
+        main.robot.drive_helper.update(speed, rotation)
 
     def finish(self, interrupted: bool):
-        pass
+        main.robot.drive_helper.update(0, 0)
 
     def should_continue(self) -> bool:
         return True

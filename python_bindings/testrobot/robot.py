@@ -4,7 +4,7 @@ from arpirobot.devices.adafruitmotorhat import AdafruitMotorHatMotor
 from arpirobot.core.action import ActionManager
 from arpirobot.devices.gamepad import Gamepad, ButtonReleasedTrigger
 
-from actions import DemoAction
+from actions import JSDriveAction
 
 
 class Robot(BaseRobot):
@@ -19,8 +19,6 @@ class Robot(BaseRobot):
         self.drive_helper = ArcadeDriveHelper([self.flmotor, self.rlmotor], [self.frmotor, self.rrmotor])
 
         self.gp0 = Gamepad(0)
-
-        self.trigger = ButtonReleasedTrigger(self.gp0, 0, DemoAction())
     
     def robot_started(self):
         self.flmotor.set_inverted(True)
@@ -29,8 +27,7 @@ class Robot(BaseRobot):
         self.gp0.set_axis_transform(1, CubicAxisTransform(0, 0.5))
         self.gp0.set_axis_transform(2, SquareRootAxisTransform())
 
-        ActionManager.add_trigger(self.trigger)
-        ActionManager.remove_trigger(self.trigger)
+        ActionManager.start_action(JSDriveAction())
 
     def robot_enabled(self):
         pass
