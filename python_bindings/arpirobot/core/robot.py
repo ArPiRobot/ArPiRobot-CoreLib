@@ -8,6 +8,7 @@ class RobotProfile:
         self.main_scheduler_threads = 10
         self.periodic_function_rate = 50
         self.max_gamepad_data_age = 100
+        self.action_function_period = 50
 
 
 class BaseRobot(ABC):
@@ -48,7 +49,8 @@ class BaseRobot(ABC):
         self._ptr = bridge.arpirobot.BaseRobot_create(
             self.rs_internal, self.re_internal, self.rd_internal, self.ep_internal, 
             self.dp_internal, self.p_internal, profile.main_scheduler_threads, 
-            profile.periodic_function_rate, profile.max_gamepad_data_age)
+            profile.periodic_function_rate, profile.max_gamepad_data_age,
+            profile.action_function_period)
     
     def __del__(self):
         bridge.arpirobot.BaseRobot_destroy(self._ptr)

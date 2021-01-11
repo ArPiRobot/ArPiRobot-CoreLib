@@ -10,7 +10,13 @@ using namespace arpirobot;
 /// BaseDevice
 ////////////////////////////////////////////////////////////////////////////////
 void BaseDevice::_lockDevice(Action *action){
-    Logger::logDebug(std::to_string(lockingAction == nullptr));
+    std::lock_guard<std::mutex> l(actionLock);
+    
+    // If the same actio nis locking the device, don't stop it as this will cause issues with scheduler jobs
+    if(lockingAction != nullptr && lockingAction != action){
+        ActionManager::stopAction(lockingAction);
+    }
+    lockingAction = action;
 }
 
 bool BaseDevice::isLockedByAction(){
