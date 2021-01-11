@@ -26,6 +26,8 @@ namespace arpirobot{
 
         static std::shared_ptr<Task> scheduleRepeatedFunction(const std::function<void()> &&func, sched_clk::duration rate);
 
+        static void runOnceSoon(const std::function<void()> &&func);
+
         static void removeTaskFromScheduler(std::shared_ptr<Task> task);
 
         static void beginWhenReady(BaseDevice *device);
