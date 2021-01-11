@@ -1,4 +1,5 @@
 #include <arpirobot/core/scheduler.hpp>
+#include <arpirobot/core/log.hpp>
 #include <algorithm>
 
 using namespace arpirobot;
@@ -97,7 +98,7 @@ std::shared_ptr<Task> Scheduler::addTask(const std::function<void()> &&targetFun
 
     {
         std::lock_guard<std::mutex> l(lock);
-        tasks.emplace(time, std::move(task));
+        tasks.emplace(time, task);
         sleeper.interrupt();
     }
     
@@ -111,7 +112,7 @@ std::shared_ptr<Task> Scheduler::addRepeatedTask(const std::function<void()> &&t
 
     {
         std::lock_guard<std::mutex> l(lock);
-        tasks.emplace(time, std::move(task));
+        tasks.emplace(time, task);
         sleeper.interrupt();
     }
     
@@ -120,12 +121,16 @@ std::shared_ptr<Task> Scheduler::addRepeatedTask(const std::function<void()> &&t
 
 void Scheduler::removeTask(std::shared_ptr<Task> task){
     std::lock_guard<std::mutex> l(lock);
+    Logger::logDebug("Task to remove: " + std::to_string((uint32_t)task.get()));
     for(auto i = tasks.begin(); i != tasks.end(); ++i){
-        if(i->second == task){
+        Logger::logDebug("Found task: " + std::to_string((uint32_t)i->second.get()));
+        if(i->second.get() == task.get()){
+            Logger::logDebug("Found task to remove");
             tasks.erase(i);
             break;
         }
     }
+    Logger::logNewline();
 }
 
 void Scheduler::serviceTasks(){

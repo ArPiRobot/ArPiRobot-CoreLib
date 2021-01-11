@@ -208,6 +208,8 @@ void ActionSeries::process(){
 void ActionSeries::finish(bool interrupted){
     if(interrupted){
         ActionManager::stopAction(actions[index]);
+    }else if(finishedAction != nullptr){
+        ActionManager::startAction(finishedAction);
     }
 }
 

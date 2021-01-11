@@ -7,7 +7,14 @@ void Robot::robotStarted(){
     flmotor.setInverted(true);
     frmotor.setInverted(true);
 
-    ActionManager::addTrigger(new ButtonPressedTrigger(&gp0, 0, new DemoAction()));
+    // Runs when X pressed on gamepad
+    ActionManager::addTrigger(new ButtonPressedTrigger(&gp0, 0, new ActionSeries(
+        {new DriveTimeAction(1000, 0.5), new DriveTimeAction(1000, -0.5)},
+        new JSDriveAction()
+    )));
+
+    // Runs until interrupted
+    ActionManager::startAction(new JSDriveAction());
 }
 
 void Robot::robotEnabled(){
