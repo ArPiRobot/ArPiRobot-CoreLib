@@ -4,6 +4,7 @@
 #include <functional>
 #include <array>
 #include <thread>
+#include <mutex>
 #include <unordered_map>
 #include <memory>
 
@@ -99,6 +100,7 @@ namespace arpirobot{
         std::vector<int> dpads;
         std::vector<uint8_t> lastData;
         std::chrono::steady_clock::time_point lastUpdateTime;
+        std::mutex lock;
     };
 
     ////////////////////////////////////////////////////////////////////////////

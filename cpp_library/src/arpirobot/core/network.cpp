@@ -26,6 +26,10 @@ ControllerData::ControllerData(std::vector<uint8_t> &data){
 }
 
 void ControllerData::updateData(std::vector<uint8_t> &data){
+    // Lock used in case of axis, button, dpad count change
+    // It is possible to access data between count vars being updated and 
+    //
+    std::lock_guard<std::mutex> l(lock);
     controllerNumber = data[0];
     axisCount = data[1];
     buttonCount = data[2];
