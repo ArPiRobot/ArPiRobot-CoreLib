@@ -303,6 +303,6 @@ BRIDGE_FUNC void ActionManager_removeTrigger(BaseActionTrigger *trigger);
 /// ActionSeries Bridge (arpirobot/core/action.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
-BRIDGE_FUNC ActionSeries *ActionSeries_create(Action *actions, size_t actionCount, Action* finishAction);
+BRIDGE_FUNC ActionSeries *ActionSeries_create(Action **actions, size_t actionCount, Action* finishAction);
 
 BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries);

@@ -39,7 +39,7 @@ class Gamepad(BaseDevice):
 
 class ButtonPressedTrigger(BaseActionTrigger):
     def __init__(self, gamepad: Gamepad, button_num: int, target_action: Action, do_restart: bool = True):
-        super().__init__()
+        super().__init__(target_action)
         self._ptr = bridge.arpirobot.ButtonPressedTrigger_create(gamepad._ptr, button_num, 
             target_action._ptr, do_restart)
     
@@ -49,7 +49,7 @@ class ButtonPressedTrigger(BaseActionTrigger):
 
 class ButtonReleasedTrigger(BaseActionTrigger):
     def __init__(self, gamepad: Gamepad, button_num: int, target_action: Action, do_restart: bool = True):
-        super().__init__()
+        super().__init__(target_action)
         self._ptr = bridge.arpirobot.ButtonReleasedTrigger_create(gamepad._ptr, button_num, 
             target_action._ptr, do_restart)
     

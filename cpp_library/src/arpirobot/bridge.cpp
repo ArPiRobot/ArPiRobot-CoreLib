@@ -469,11 +469,11 @@ BRIDGE_FUNC void ActionManager_removeTrigger(BaseActionTrigger *trigger){
 /// ActionSeries Bridge (arpirobot/core/action.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
-BRIDGE_FUNC ActionSeries *ActionSeries_create(Action *actions, size_t actionCount, Action* finishAction){
+BRIDGE_FUNC ActionSeries *ActionSeries_create(Action **actions, size_t actionCount, Action* finishAction){
     std::vector<Action*> actionsVector;
     actionsVector.reserve(actionCount);
     for(int i = 0; i < actionCount; ++i){
-        actionsVector.push_back(&actions[i]);
+        actionsVector.push_back(actions[i]);
     }
     return new ActionSeries(actionsVector, finishAction);
 }

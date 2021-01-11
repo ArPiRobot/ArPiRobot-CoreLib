@@ -69,8 +69,10 @@ class Action(ABC):
 
 # Just a common base class
 class BaseActionTrigger:
-    def __init__(self):
+    def __init__(self, target_action: Action):
         self._ptr = None
+        # Used to hold reference so not deallocated
+        self._target_action = target_action
 
 
 class ActionManager:
@@ -110,12 +112,17 @@ class ActionManager:
 
 class ActionSeries:
     def __init__(self, actions: List[Action], finished_action: Action):
+
+        # Keep references so these are not deallocated
+        self.__actions = actions
+        self.__finished_action = finished_action
+
         # List of internal action pointer
         a = []
         for action in actions:
             a.append(action._ptr)
         a_type = ctypes.c_void_p * len(a)
-        self._ptr = bridge.arpirobot.ActionSeries_create(a_type(a), len(a), finished_action._ptr)
+        self._ptr = bridge.arpirobot.ActionSeries_create(a_type(*a), len(a), finished_action._ptr)
     
     def __del__(self):
         bridge.arpirobot.ActionSeries_destroy(self._ptr)

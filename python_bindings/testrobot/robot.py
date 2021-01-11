@@ -1,10 +1,10 @@
 from arpirobot.core.robot import BaseRobot
 from arpirobot.core.drive import ArcadeDriveHelper, CubicAxisTransform, SquareRootAxisTransform
 from arpirobot.devices.adafruitmotorhat import AdafruitMotorHatMotor
-from arpirobot.core.action import ActionManager
-from arpirobot.devices.gamepad import Gamepad, ButtonReleasedTrigger
+from arpirobot.core.action import ActionManager, ActionSeries
+from arpirobot.devices.gamepad import Gamepad, ButtonPressedTrigger
 
-from actions import JSDriveAction
+from actions import JSDriveAction, DriveTimeAction
 
 
 class Robot(BaseRobot):
@@ -26,6 +26,11 @@ class Robot(BaseRobot):
 
         self.gp0.set_axis_transform(1, CubicAxisTransform(0, 0.5))
         self.gp0.set_axis_transform(2, SquareRootAxisTransform())
+
+        ActionManager.add_trigger(ButtonPressedTrigger(self.gp0, 0, ActionSeries(
+            [DriveTimeAction(1000, 0.5), DriveTimeAction(1000, -0.5)],
+            JSDriveAction()
+        )))
 
         ActionManager.start_action(JSDriveAction())
 
