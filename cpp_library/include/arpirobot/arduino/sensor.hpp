@@ -72,4 +72,28 @@ namespace arpirobot{
         int countOffset = 0;
     };
 
+    class IRReflectorModule : public ArduinoDevice{
+    public:
+        IRReflectorModule(int digitalPin, bool createDevice = true, int deviceId = -1);
+        IRReflectorModule(std::string digitalPin, bool createDevice = true, int deviceId = -1);
+        IRReflectorModule(int digitalPin, std::string analogPin, bool createDevice = true, int deviceId = -1);
+        IRReflectorModule(std::string digitalPin, std::string analogPin, bool createDevice = true, int deviceId = -1);
+
+        bool getDigitalValue();
+        int getAnalogValue();
+
+        std::string getDeviceName();
+
+    protected:
+        void applyDefaultState();
+        std::vector<uint8_t> getCreateData();
+        void handleData(const std::vector<uint8_t> &data);
+    
+    private:
+        std::string digitalPin;
+        std::string analogPin;
+        bool digitalValue = false;
+        int analogValue = 0;
+    };
+
 }

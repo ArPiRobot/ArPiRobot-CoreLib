@@ -573,3 +573,25 @@ BRIDGE_FUNC int SingleEncoder_getPosition(SingleEncoder *enc){
 BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int currentPos){
     enc->setPosition(currentPos);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// IRReflectorModule bridge (arpirobot/arduino/sensor.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC IRReflectorModule *IRReflectorModule_create(const char *digitalPin, const char *analogPin, 
+        bool createDevice, int deviceId){
+    return new IRReflectorModule(std::string(digitalPin), std::string(analogPin));
+}
+
+BRIDGE_FUNC void IRReflectorModule_destroy(IRReflectorModule *ir){
+    delete ir;
+}
+
+BRIDGE_FUNC bool IRReflectorModule_getDigitalValue(IRReflectorModule *ir){
+    return ir->getDigitalValue();
+}
+
+BRIDGE_FUNC int IRReflectorModule_getAnalogValue(IRReflectorModule *ir){
+    return ir->getAnalogValue();
+}

@@ -6,7 +6,7 @@ from arpirobot.devices.gamepad import Gamepad, ButtonPressedTrigger
 from arpirobot.core.log import Logger
 
 from arpirobot.arduino.iface import ArduinoUartInterface
-from arpirobot.arduino.sensor import VoltageMonitor, SingleEncoder
+from arpirobot.arduino.sensor import VoltageMonitor, IRReflectorModule
 
 from actions import JSDriveAction, DriveTimeAction
 
@@ -26,7 +26,7 @@ class Robot(BaseRobot):
 
         self.arduino = ArduinoUartInterface("/dev/ttyUSB0", 57600)
         self.vmon = VoltageMonitor("A0", 4.85, 30000, 7500)
-        self.enc = SingleEncoder(2, False)
+        self.enc = IRReflectorModule(2)
     
     def robot_started(self):
         self.flmotor.set_inverted(True)
@@ -56,5 +56,5 @@ class Robot(BaseRobot):
         pass
 
     def periodic(self):
-        Logger.log_info("Position = " + str(self.enc.get_position()))
+        Logger.log_info("Detected = " + str(self.enc.get_digital_value()))
         self.feed_watchdog()

@@ -370,3 +370,20 @@ arpirobot.SingleEncoder_getPosition.restype = ctypes.c_int
 
 arpirobot.SingleEncoder_setPosition.argtypes = [ctypes.c_void_p, ctypes.c_int]
 arpirobot.SingleEncoder_setPosition.restype = None
+
+
+################################################################################
+# IRReflectorModule Bridge
+################################################################################
+
+arpirobot.IRReflectorModule_create.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool, ctypes.c_int]
+arpirobot.IRReflectorModule_create.restype = ctypes.c_void_p
+
+arpirobot.IRReflectorModule_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.IRReflectorModule_destroy.restype = None
+
+arpirobot.IRReflectorModule_getDigitalValue.argtypes = [ctypes.c_void_p]
+arpirobot.IRReflectorModule_getDigitalValue.restype = ctypes.c_bool
+
+arpirobot.IRReflectorModule_getAnalogValue.argtypes = [ctypes.c_void_p]
+arpirobot.IRReflectorModule_getAnalogValue.restype = ctypes.c_int

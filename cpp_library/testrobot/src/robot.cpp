@@ -9,7 +9,7 @@ void Robot::robotStarted(){
     frmotor.setInverted(true);
 
     arduino.addDevice(&vmon);
-    arduino.addDevice(&enc);
+    arduino.addDevice(&ir);
     arduino.begin();
 
     vmon.makeMainVmon();
@@ -41,6 +41,6 @@ void Robot::disabledPeriodic(){
 }
 
 void Robot::periodic(){
-    Logger::logInfo("Position = " + std::to_string(enc.getPosition()));
+    Logger::logInfo("Detected = " + std::to_string(ir.getDigitalValue()));
     feedWatchdog();
 }

@@ -48,3 +48,18 @@ class SingleEncoder(ArduinoDevice):
     
     def set_position(self, current_position: int):
         bridge.arpirobot.SingleEncoder_setPosition(self._ptr, current_position)
+
+class IRReflectorModule(ArduinoDevice):
+    def __init__(self, digital_pin: Union[int, str], analog_pin: str = "", create_device = True, device_id = -1):
+        super().__init__()
+        self._ptr = bridge.arpirobot.IRReflectorModule_create(str(digital_pin).encode(), analog_pin.encode(), 
+            create_device, device_id)
+    
+    def __del__(self):
+        bridge.arpirobot.IRReflectorModule_destroy(self._ptr)
+    
+    def get_digital_value(self) -> bool:
+        return bridge.arpirobot.IRReflectorModule_getDigitalValue(self._ptr)
+    
+    def get_analog_value(self) -> int:
+        return bridge.arpirobot.IRReflectorModule_getAnalogValue(self._ptr)
