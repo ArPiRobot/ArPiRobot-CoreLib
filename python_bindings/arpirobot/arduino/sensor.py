@@ -10,7 +10,6 @@ class VoltageMonitor(ArduinoDevice):
             create_device: bool = True, device_id: int = -1):
         super().__init__()
         self._ptr = bridge.arpirobot.VoltageMonitor_create(str(pin).encode(), vboard, r1, r2, create_device, device_id)
-        print(self._ptr)
     
     def __del__(self):
         bridge.arpirobot.VoltageMonitor_destroy(self._ptr)
@@ -20,3 +19,17 @@ class VoltageMonitor(ArduinoDevice):
     
     def make_main_vmon(self):
         bridge.arpirobot.VoltageMonitor_makeMainVmon(self._ptr)
+
+
+class Ultrasonic4Pin(ArduinoDevice):
+    def __init__(self, trigger_pin: Union[str, int], echo_pin: Union[str, int], 
+            create_device: bool = True, device_id : int = -1):
+        super().__init__()
+        self._ptr = bridge.arpirobot.Ultrasonic4Pin_create(str(trigger_pin).encode(), str(echo_pin).encode(), 
+            create_device, device_id)
+    
+    def __del__(self):
+        bridge.arpirobot.Ultrasonic4Pin_destroy(self._ptr)
+    
+    def get_distance(self) -> float:
+        return bridge.arpirobot.Ultrasonic4Pin_getDistance(self._ptr)

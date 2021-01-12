@@ -518,7 +518,7 @@ BRIDGE_FUNC char *ArduinoDevice_getDeviceName(ArduinoDevice *device){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC VoltageMonitor *VoltageMonitor_create(const char *pin, double vboard, int r1, 
-        int r2, int deviceId, bool createDevice){
+        int r2, bool createDevice, int deviceId){
     return new VoltageMonitor(pin, vboard, r1, r2, createDevice, deviceId);
 }
 
@@ -532,4 +532,22 @@ BRIDGE_FUNC double VoltageMonitor_getVoltage(VoltageMonitor *vmon){
 
 BRIDGE_FUNC void VoltageMonitor_makeMainVmon(VoltageMonitor *vmon){
     vmon->makeMainVmon();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// Ultrasonic4Pin (arpirobot/arduino/sensor.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC Ultrasonic4Pin *Ultrasonic4Pin_create(const char *triggerPin, const char *echoPin, 
+        bool createDevice, int deviceId){
+    return new Ultrasonic4Pin(std::string(triggerPin), std::string(echoPin), createDevice, deviceId);
+}
+
+BRIDGE_FUNC void Ultrasonic4Pin_destroy(Ultrasonic4Pin *usonic){
+    delete usonic;
+}
+
+BRIDGE_FUNC int Ultrasonic4Pin_getDistance(Ultrasonic4Pin *usonic){
+    return usonic->getDistance();
 }

@@ -305,7 +305,7 @@ BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// BaseArduinoInterface
+/// BaseArduinoInterface (arpirobot/arduino/iface.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC void BaseArduinoInterface_begin(BaseArduinoInterface *arduino);
@@ -316,7 +316,7 @@ BRIDGE_FUNC bool BaseArduinoInterface_isReady(BaseArduinoInterface *arduino);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ArduinoUartInterface
+/// ArduinoUartInterface (arpirobot/arduino/iface.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ArduinoUartInterface *ArduinoUartInterface_create(const char *tty, int baud);
@@ -325,21 +325,34 @@ BRIDGE_FUNC void ArduinoUartInterface_destroy(ArduinoUartInterface *interface);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ArduinoDevice
+/// ArduinoDevice (arpirobot/arduino/device.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC char *ArduinoDevice_getDeviceName(ArduinoDevice *device);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// VoltageMonitor
+/// VoltageMonitor (arpirobot/arduino/sensor.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC VoltageMonitor *VoltageMonitor_create(const char *pin, double vboard, int r1, 
-    int r2, int deviceId, bool createDevice);
+    int r2, bool createDevice, int deviceId);
 
 BRIDGE_FUNC void VoltageMonitor_destroy(VoltageMonitor *vmon);
 
 BRIDGE_FUNC double VoltageMonitor_getVoltage(VoltageMonitor *vmon);
 
 BRIDGE_FUNC void VoltageMonitor_makeMainVmon(VoltageMonitor *vmon);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// Ultrasonic4Pin (arpirobot/arduino/sensor.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC Ultrasonic4Pin *Ultrasonic4Pin_create(const char *triggerPin, const char *echoPin, 
+    bool createDevice, int deviceId);
+
+BRIDGE_FUNC void Ultrasonic4Pin_destroy(Ultrasonic4Pin *usonic);
+
+BRIDGE_FUNC int Ultrasonic4Pin_getDistance(Ultrasonic4Pin *usonic);
+

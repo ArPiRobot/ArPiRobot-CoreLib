@@ -327,7 +327,8 @@ arpirobot.ArduinoDevice_getDeviceName.restype = ctypes.c_void_p
 # VoltageMonitor Bridge
 ################################################################################
 
-arpirobot.VoltageMonitor_create.argtypes = [ctypes.c_char_p, ctypes.c_double, ctypes.c_int, ctypes.c_int]
+arpirobot.VoltageMonitor_create.argtypes = [ctypes.c_char_p, ctypes.c_double, ctypes.c_int, ctypes.c_int, 
+    ctypes.c_bool, ctypes.c_int]
 arpirobot.VoltageMonitor_create.restype = ctypes.c_void_p
 
 arpirobot.VoltageMonitor_destroy.argtypes = [ctypes.c_void_p]
@@ -338,3 +339,17 @@ arpirobot.VoltageMonitor_getVoltage.restype = ctypes.c_double
 
 arpirobot.VoltageMonitor_makeMainVmon.argtypes = [ctypes.c_void_p]
 arpirobot.VoltageMonitor_makeMainVmon.restype = None
+
+
+################################################################################
+# Ultrasonic4Pin Bridge
+################################################################################
+
+arpirobot.Ultrasonic4Pin_create.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool, ctypes.c_int]
+arpirobot.Ultrasonic4Pin_create.restype = ctypes.c_void_p
+
+arpirobot.Ultrasonic4Pin_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.Ultrasonic4Pin_destroy.restype = None
+
+arpirobot.Ultrasonic4Pin_getDistance.argtypes = [ctypes.c_void_p]
+arpirobot.Ultrasonic4Pin_getDistance.restype = ctypes.c_int
