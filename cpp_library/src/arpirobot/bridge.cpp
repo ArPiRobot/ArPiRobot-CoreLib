@@ -551,3 +551,25 @@ BRIDGE_FUNC void Ultrasonic4Pin_destroy(Ultrasonic4Pin *usonic){
 BRIDGE_FUNC int Ultrasonic4Pin_getDistance(Ultrasonic4Pin *usonic){
     return usonic->getDistance();
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// SingleEncode bridge (arpirobot/arduino/sensor.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC SingleEncoder *SingleEncoder_create(const char *pin, bool useInternalPullup, 
+        bool createDevice, int deviceId){
+    return new SingleEncoder(std::string(pin), useInternalPullup, createDevice, deviceId);
+}
+
+BRIDGE_FUNC void SingleEncoder_destroy(SingleEncoder *enc){
+    delete enc;
+}
+
+BRIDGE_FUNC int SingleEncoder_getPosition(SingleEncoder *enc){
+    return enc->getPosition();
+}
+
+BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int currentPos){
+    enc->setPosition(currentPos);
+}

@@ -50,4 +50,26 @@ namespace arpirobot{
         int distance = 0;
     };
 
+    class SingleEncoder : public ArduinoDevice{
+    public:
+        SingleEncoder(int pin, bool useInternalPullup, bool createDevice = true, int deviceId = -1);
+        SingleEncoder(std::string pin, bool useInternalPullup, bool createDevice = true, int deviceId = -1);
+
+        int getPosition();
+        void setPosition(int currentPosition);
+
+        std::string getDeviceName();
+    
+    protected:
+        void applyDefaultState();
+        std::vector<uint8_t> getCreateData();
+        void handleData(const std::vector<uint8_t> &data);
+    
+    private:
+        std::string pin;
+        uint8_t useInternalPullup;
+        int count = 0;
+        int countOffset = 0;
+    };
+
 }

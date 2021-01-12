@@ -31,5 +31,20 @@ class Ultrasonic4Pin(ArduinoDevice):
     def __del__(self):
         bridge.arpirobot.Ultrasonic4Pin_destroy(self._ptr)
     
-    def get_distance(self) -> float:
+    def get_distance(self) -> int:
         return bridge.arpirobot.Ultrasonic4Pin_getDistance(self._ptr)
+
+class SingleEncoder(ArduinoDevice):
+    def __init__(self, pin: Union[int, str], use_internal_pullup: bool, create_device = True, device_id = -1):
+        super().__init__()
+        self._ptr = bridge.arpirobot.SingleEncoder_create(str(pin).encode(), use_internal_pullup, 
+            create_device, device_id)
+    
+    def __del__(self):
+        bridge.arpirobot.SingleEncoder_destroy(self._ptr)
+    
+    def get_position(self) -> int:
+        return bridge.arpirobot.SingleEncoder_getPosition(self._ptr)
+    
+    def set_position(self, current_position: int):
+        bridge.arpirobot.SingleEncoder_setPosition(self._ptr, current_position)

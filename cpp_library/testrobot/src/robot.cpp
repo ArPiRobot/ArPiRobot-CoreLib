@@ -9,7 +9,7 @@ void Robot::robotStarted(){
     frmotor.setInverted(true);
 
     arduino.addDevice(&vmon);
-    arduino.addDevice(&usonic);
+    arduino.addDevice(&enc);
     arduino.begin();
 
     vmon.makeMainVmon();
@@ -41,6 +41,6 @@ void Robot::disabledPeriodic(){
 }
 
 void Robot::periodic(){
-    Logger::logInfo("Distance = " + std::to_string(usonic.getDistance()));
+    Logger::logInfo("Position = " + std::to_string(enc.getPosition()));
     feedWatchdog();
 }

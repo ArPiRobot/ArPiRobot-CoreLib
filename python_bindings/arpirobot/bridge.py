@@ -353,3 +353,20 @@ arpirobot.Ultrasonic4Pin_destroy.restype = None
 
 arpirobot.Ultrasonic4Pin_getDistance.argtypes = [ctypes.c_void_p]
 arpirobot.Ultrasonic4Pin_getDistance.restype = ctypes.c_int
+
+
+################################################################################
+# SingleEncoder Bridge
+################################################################################
+
+arpirobot.SingleEncoder_create.argtypes = [ctypes.c_char_p, ctypes.c_bool, ctypes.c_bool, ctypes.c_int]
+arpirobot.SingleEncoder_create.restype = ctypes.c_void_p
+
+arpirobot.SingleEncoder_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.SingleEncoder_destroy.restype = None
+
+arpirobot.SingleEncoder_getPosition.argtypes = [ctypes.c_void_p]
+arpirobot.SingleEncoder_getPosition.restype = ctypes.c_int
+
+arpirobot.SingleEncoder_setPosition.argtypes = [ctypes.c_void_p, ctypes.c_int]
+arpirobot.SingleEncoder_setPosition.restype = None

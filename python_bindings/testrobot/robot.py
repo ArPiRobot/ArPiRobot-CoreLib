@@ -6,7 +6,7 @@ from arpirobot.devices.gamepad import Gamepad, ButtonPressedTrigger
 from arpirobot.core.log import Logger
 
 from arpirobot.arduino.iface import ArduinoUartInterface
-from arpirobot.arduino.sensor import VoltageMonitor, Ultrasonic4Pin
+from arpirobot.arduino.sensor import VoltageMonitor, SingleEncoder
 
 from actions import JSDriveAction, DriveTimeAction
 
@@ -26,7 +26,7 @@ class Robot(BaseRobot):
 
         self.arduino = ArduinoUartInterface("/dev/ttyUSB0", 57600)
         self.vmon = VoltageMonitor("A0", 4.85, 30000, 7500)
-        self.usonic = Ultrasonic4Pin(7, 8)
+        self.enc = SingleEncoder(2, False)
     
     def robot_started(self):
         self.flmotor.set_inverted(True)
@@ -36,7 +36,7 @@ class Robot(BaseRobot):
         self.gp0.set_axis_transform(2, SquareRootAxisTransform())
 
         self.arduino.add_device(self.vmon)
-        self.arduino.add_device(self.usonic)
+        self.arduino.add_device(self.enc)
         self.arduino.begin()
 
         self.vmon.make_main_vmon()
@@ -56,5 +56,5 @@ class Robot(BaseRobot):
         pass
 
     def periodic(self):
-        Logger.log_info("Distance = " + str(self.usonic.get_distance()))
+        Logger.log_info("Position = " + str(self.enc.get_position()))
         self.feed_watchdog()

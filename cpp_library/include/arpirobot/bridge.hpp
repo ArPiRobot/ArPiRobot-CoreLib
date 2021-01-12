@@ -305,7 +305,7 @@ BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// BaseArduinoInterface (arpirobot/arduino/iface.hpp)
+/// BaseArduinoInterface bridge (arpirobot/arduino/iface.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC void BaseArduinoInterface_begin(BaseArduinoInterface *arduino);
@@ -316,7 +316,7 @@ BRIDGE_FUNC bool BaseArduinoInterface_isReady(BaseArduinoInterface *arduino);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ArduinoUartInterface (arpirobot/arduino/iface.hpp)
+/// ArduinoUartInterface bridge (arpirobot/arduino/iface.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ArduinoUartInterface *ArduinoUartInterface_create(const char *tty, int baud);
@@ -325,14 +325,14 @@ BRIDGE_FUNC void ArduinoUartInterface_destroy(ArduinoUartInterface *interface);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ArduinoDevice (arpirobot/arduino/device.hpp)
+/// ArduinoDevice bridge (arpirobot/arduino/device.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC char *ArduinoDevice_getDeviceName(ArduinoDevice *device);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// VoltageMonitor (arpirobot/arduino/sensor.hpp)
+/// VoltageMonitor bridge (arpirobot/arduino/sensor.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC VoltageMonitor *VoltageMonitor_create(const char *pin, double vboard, int r1, 
@@ -346,7 +346,7 @@ BRIDGE_FUNC void VoltageMonitor_makeMainVmon(VoltageMonitor *vmon);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Ultrasonic4Pin (arpirobot/arduino/sensor.hpp)
+/// Ultrasonic4Pin bridge (arpirobot/arduino/sensor.hpp)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC Ultrasonic4Pin *Ultrasonic4Pin_create(const char *triggerPin, const char *echoPin, 
@@ -356,3 +356,16 @@ BRIDGE_FUNC void Ultrasonic4Pin_destroy(Ultrasonic4Pin *usonic);
 
 BRIDGE_FUNC int Ultrasonic4Pin_getDistance(Ultrasonic4Pin *usonic);
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// SingleEncode bridge (arpirobot/arduino/sensor.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC SingleEncoder *SingleEncoder_create(const char *pin, bool useInternalPullup, 
+    bool createDevice, int deviceId);
+
+BRIDGE_FUNC void SingleEncoder_destroy(SingleEncoder *enc);
+
+BRIDGE_FUNC int SingleEncoder_getPosition(SingleEncoder *enc);
+
+BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int currentPos);
