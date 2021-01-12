@@ -16,6 +16,7 @@ cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=../arpirobot-cross.cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" ..
 cmake --build .
 cp libarpirobot-core.so ../../package/
+cp -r ../include ../../package/
 
 cd ../..
 
