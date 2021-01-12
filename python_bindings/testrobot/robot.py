@@ -6,7 +6,7 @@ from arpirobot.devices.gamepad import Gamepad, ButtonPressedTrigger
 from arpirobot.core.log import Logger
 
 from arpirobot.arduino.iface import ArduinoUartInterface
-from arpirobot.arduino.sensor import VoltageMonitor, OldAdafruit9Dof
+from arpirobot.arduino.sensor import VoltageMonitor, NxpAdafruit9Dof
 
 from actions import JSDriveAction, DriveTimeAction
 
@@ -26,7 +26,7 @@ class Robot(BaseRobot):
 
         self.arduino = ArduinoUartInterface("/dev/ttyUSB0", 57600)
         self.vmon = VoltageMonitor("A0", 4.85, 30000, 7500)
-        self.enc = OldAdafruit9Dof()
+        self.enc = NxpAdafruit9Dof()
     
     def robot_started(self):
         self.flmotor.set_inverted(True)

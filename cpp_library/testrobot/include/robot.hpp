@@ -35,5 +35,5 @@ public:
 
     ArduinoUartInterface arduino {"/dev/ttyUSB0", 57600};
     VoltageMonitor vmon {"A0", 4.85, 30000, 7500};
-    OldAdafruit9Dof imu;
+    NxpAdafruit9Dof imu;
 };

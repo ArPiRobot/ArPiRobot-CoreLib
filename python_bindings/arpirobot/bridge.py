@@ -425,3 +425,41 @@ arpirobot.OldAdafruit9Dof_setGyroY.restype = None
 
 arpirobot.OldAdafruit9Dof_setGyroZ.argtypes = [ctypes.c_void_p, ctypes.c_double]
 arpirobot.OldAdafruit9Dof_setGyroZ.restype = None
+
+
+################################################################################
+# NxpAdafruit9Dof Bridge
+################################################################################
+
+arpirobot.NxpAdafruit9Dof_create.argtypes = [ctypes.c_bool, ctypes.c_int]
+arpirobot.NxpAdafruit9Dof_create.restype = ctypes.c_void_p
+
+arpirobot.NxpAdafruit9Dof_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.NxpAdafruit9Dof_destroy.restype = None
+
+arpirobot.NxpAdafruit9Dof_getGyroX.argtypes = [ctypes.c_void_p]
+arpirobot.NxpAdafruit9Dof_getGyroX.restype = ctypes.c_double
+
+arpirobot.NxpAdafruit9Dof_getGyroY.argtypes = [ctypes.c_void_p]
+arpirobot.NxpAdafruit9Dof_getGyroY.restype = ctypes.c_double
+
+arpirobot.NxpAdafruit9Dof_getGyroZ.argtypes = [ctypes.c_void_p]
+arpirobot.NxpAdafruit9Dof_getGyroZ.restype = ctypes.c_double
+
+arpirobot.NxpAdafruit9Dof_getAccelX.argtypes = [ctypes.c_void_p]
+arpirobot.NxpAdafruit9Dof_getAccelX.restype = ctypes.c_double
+
+arpirobot.NxpAdafruit9Dof_getAccelY.argtypes = [ctypes.c_void_p]
+arpirobot.NxpAdafruit9Dof_getAccelY.restype = ctypes.c_double
+
+arpirobot.NxpAdafruit9Dof_getAccelZ.argtypes = [ctypes.c_void_p]
+arpirobot.NxpAdafruit9Dof_getAccelZ.restype = ctypes.c_double
+
+arpirobot.NxpAdafruit9Dof_setGyroX.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.NxpAdafruit9Dof_setGyroX.restype = None
+
+arpirobot.NxpAdafruit9Dof_setGyroY.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.NxpAdafruit9Dof_setGyroY.restype = None
+
+arpirobot.NxpAdafruit9Dof_setGyroZ.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.NxpAdafruit9Dof_setGyroZ.restype = None

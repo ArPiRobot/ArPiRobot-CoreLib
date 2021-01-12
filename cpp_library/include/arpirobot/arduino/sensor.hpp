@@ -124,4 +124,33 @@ namespace arpirobot{
         double gyroXOffset = 0, gyroYOffset = 0, gyroZOffset = 0;
     };
 
+
+    class NxpAdafruit9Dof : public ArduinoDevice{
+    public:
+        NxpAdafruit9Dof(bool createDevice = true, int deviceId = -1);
+
+        double getGyroX();
+        double getGyroY();
+        double getGyroZ();
+
+        double getAccelX();
+        double getAccelY();
+        double getAccelZ();
+
+        void setGyroX(double newGyroX);
+        void setGyroY(double newGyroY);
+        void setGyroZ(double newGyroZ);
+
+        std::string getDeviceName();
+
+    protected:
+        void applyDefaultState();
+        std::vector<uint8_t> getCreateData();
+        void handleData(const std::vector<uint8_t> &data);
+    
+    private:
+        double gyroX = 0, gyroY = 0, gyroZ = 0, accelX = 0, accelY = 0, accelZ = 0;
+        double gyroXOffset = 0, gyroYOffset = 0, gyroZOffset = 0;
+    };
+
 }

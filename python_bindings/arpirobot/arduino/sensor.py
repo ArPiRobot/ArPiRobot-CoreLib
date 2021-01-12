@@ -101,3 +101,39 @@ class OldAdafruit9Dof(ArduinoDevice):
 
     def set_gyro_z(self, new_gyro_z: float):
         bridge.arpirobot.OldAdafruit9Dof_setGyroZ(self._ptr, new_gyro_z)
+
+
+class NxpAdafruit9Dof(ArduinoDevice):
+    def __init__(self, create_device = True, device_id = -1):
+        super().__init__()
+        self._ptr = bridge.arpirobot.NxpAdafruit9Dof_create(create_device, device_id)
+    
+    def __del__(self):
+        bridge.arpirobot.NxpAdafruit9Dof_destroy(self._ptr)
+    
+    def get_gyro_x(self) -> float:
+        return bridge.arpirobot.NxpAdafruit9Dof_getGyroX(self._ptr)
+    
+    def get_gyro_y(self) -> float:
+        return bridge.arpirobot.NxpAdafruit9Dof_getGyroY(self._ptr)
+
+    def get_gyro_z(self) -> float:
+        return bridge.arpirobot.NxpAdafruit9Dof_getGyroZ(self._ptr)
+
+    def get_accel_x(self) -> float:
+        return bridge.arpirobot.NxpAdafruit9Dof_getAccelX(self._ptr)
+
+    def get_accel_y(self) -> float:
+        return bridge.arpirobot.NxpAdafruit9Dof_getAccelY(self._ptr)
+
+    def get_accel_z(self) -> float:
+        return bridge.arpirobot.NxpAdafruit9Dof_getAccelZ(self._ptr)
+
+    def set_gyro_x(self, new_gyro_x: float):
+        bridge.arpirobot.NxpAdafruit9Dof_setGyroX(self._ptr, new_gyro_x)
+
+    def set_gyro_y(self, new_gyro_y: float):
+        bridge.arpirobot.NxpAdafruit9Dof_setGyroY(self._ptr, new_gyro_y)
+
+    def set_gyro_z(self, new_gyro_z: float):
+        bridge.arpirobot.NxpAdafruit9Dof_setGyroZ(self._ptr, new_gyro_z)
