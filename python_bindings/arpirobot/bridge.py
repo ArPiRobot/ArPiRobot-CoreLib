@@ -41,14 +41,6 @@ arpirobot.BaseRobot_feedWatchdog.restype = None
 
 
 ################################################################################
-# NetworkManager Bridge
-################################################################################
-
-arpirobot.NetworkManager_setMainVmon.argtypes = [ctypes.c_void_p]
-arpirobot.NetworkManager_setMainVmon.restype = None
-
-
-################################################################################
 # NetworkTable Bridge
 ################################################################################
 
@@ -296,3 +288,53 @@ arpirobot.ActionSeries_create.restype = ctypes.c_void_p
 
 arpirobot.ActionSeries_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.ActionSeries_destroy.restype = None
+
+
+################################################################################
+# BaseArduinoInterface Bridge
+################################################################################
+
+arpirobot.BaseArduinoInterface_begin.argtypes = [ctypes.c_void_p]
+arpirobot.BaseArduinoInterface_begin.restype = None
+
+arpirobot.BaseArduinoInterface_addDevice.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+arpirobot.BaseArduinoInterface_addDevice.restype = None
+
+arpirobot.BaseArduinoInterface_isReady.argtypes = [ctypes.c_void_p]
+arpirobot.BaseArduinoInterface_isReady.restype = ctypes.c_bool
+
+
+################################################################################
+# ArduinoUartInterface Bridge
+################################################################################
+
+arpirobot.ArduinoUartInterface_create.argtypes = [ctypes.c_char_p, ctypes.c_int]
+arpirobot.ArduinoUartInterface_create.restype = ctypes.c_void_p
+
+arpirobot.ArduinoUartInterface_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.ArduinoUartInterface_destroy.restype = None
+
+
+################################################################################
+# ArduinoDevice Bridge
+################################################################################
+
+arpirobot.ArduinoDevice_getDeviceName.argtypes = [ctypes.c_void_p]
+arpirobot.ArduinoDevice_getDeviceName.restype = ctypes.c_void_p
+
+
+################################################################################
+# VoltageMonitor Bridge
+################################################################################
+
+arpirobot.VoltageMonitor_create.argtypes = [ctypes.c_char_p, ctypes.c_double, ctypes.c_int, ctypes.c_int]
+arpirobot.VoltageMonitor_create.restype = ctypes.c_void_p
+
+arpirobot.VoltageMonitor_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.VoltageMonitor_destroy.restype = None
+
+arpirobot.VoltageMonitor_getVoltage.argtypes = [ctypes.c_void_p]
+arpirobot.VoltageMonitor_getVoltage.restype = ctypes.c_double
+
+arpirobot.VoltageMonitor_makeMainVmon.argtypes = [ctypes.c_void_p]
+arpirobot.VoltageMonitor_makeMainVmon.restype = None

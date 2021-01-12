@@ -3,6 +3,10 @@ from arpirobot.core.drive import ArcadeDriveHelper, CubicAxisTransform, SquareRo
 from arpirobot.devices.adafruitmotorhat import AdafruitMotorHatMotor
 from arpirobot.core.action import ActionManager, ActionSeries
 from arpirobot.devices.gamepad import Gamepad, ButtonPressedTrigger
+from arpirobot.core.log import Logger
+
+from arpirobot.arduino.iface import ArduinoUartInterface
+from arpirobot.arduino.sensor import VoltageMonitor
 
 from actions import JSDriveAction, DriveTimeAction
 
@@ -19,6 +23,9 @@ class Robot(BaseRobot):
         self.drive_helper = ArcadeDriveHelper([self.flmotor, self.rlmotor], [self.frmotor, self.rrmotor])
 
         self.gp0 = Gamepad(0)
+
+        self.arduino = ArduinoUartInterface("/dev/ttyUSB0", 57600)
+        self.vmon = VoltageMonitor("A0", 4.85, 30000, 7500)
     
     def robot_started(self):
         self.flmotor.set_inverted(True)
@@ -27,10 +34,10 @@ class Robot(BaseRobot):
         self.gp0.set_axis_transform(1, CubicAxisTransform(0, 0.5))
         self.gp0.set_axis_transform(2, SquareRootAxisTransform())
 
-        ActionManager.add_trigger(ButtonPressedTrigger(self.gp0, 0, ActionSeries(
-            [DriveTimeAction(1000, 0.5), DriveTimeAction(1000, -0.5)],
-            JSDriveAction()
-        )))
+        self.arduino.add_device(self.vmon)
+        self.arduino.begin()
+
+        self.vmon.make_main_vmon()
 
         ActionManager.start_action(JSDriveAction())
 
@@ -47,4 +54,5 @@ class Robot(BaseRobot):
         pass
 
     def periodic(self):
+        Logger.log_info("Voltage: " + str(self.vmon.get_voltage()))
         self.feed_watchdog()

@@ -20,6 +20,10 @@ VoltageMonitor::VoltageMonitor(int pin, double vboard, int r1, int r2, bool crea
 
 }
 
+double VoltageMonitor::getVoltage(){
+    return voltage;
+}
+
 void VoltageMonitor::makeMainVmon(){
     NetworkManager::setMainVmon((void*)this);
 }

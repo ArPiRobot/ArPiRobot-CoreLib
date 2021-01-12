@@ -8,6 +8,9 @@
 #include <arpirobot/core/drive.hpp>
 #include <arpirobot/core/device.hpp>
 #include <arpirobot/core/action.hpp>
+#include <arpirobot/arduino/iface.hpp>
+#include <arpirobot/arduino/device.hpp>
+#include <arpirobot/arduino/sensor.hpp>
 #include <string>
 
 using namespace arpirobot;
@@ -299,3 +302,44 @@ BRIDGE_FUNC void ActionManager_removeTrigger(BaseActionTrigger *trigger);
 BRIDGE_FUNC ActionSeries *ActionSeries_create(Action **actions, size_t actionCount, Action* finishAction);
 
 BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// BaseArduinoInterface
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC void BaseArduinoInterface_begin(BaseArduinoInterface *arduino);
+
+BRIDGE_FUNC void BaseArduinoInterface_addDevice(BaseArduinoInterface *arduino, ArduinoDevice *device);
+
+BRIDGE_FUNC bool BaseArduinoInterface_isReady(BaseArduinoInterface *arduino);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ArduinoUartInterface
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC ArduinoUartInterface *ArduinoUartInterface_create(const char *tty, int baud);
+
+BRIDGE_FUNC void ArduinoUartInterface_destroy(ArduinoUartInterface *interface);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ArduinoDevice
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC char *ArduinoDevice_getDeviceName(ArduinoDevice *device);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// VoltageMonitor
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC VoltageMonitor *VoltageMonitor_create(const char *pin, double vboard, int r1, 
+    int r2, int deviceId, bool createDevice);
+
+BRIDGE_FUNC void VoltageMonitor_destroy(VoltageMonitor *vmon);
+
+BRIDGE_FUNC double VoltageMonitor_getVoltage(VoltageMonitor *vmon);
+
+BRIDGE_FUNC void VoltageMonitor_makeMainVmon(VoltageMonitor *vmon);

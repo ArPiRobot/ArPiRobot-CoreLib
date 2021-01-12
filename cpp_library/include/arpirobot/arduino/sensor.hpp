@@ -9,6 +9,8 @@ namespace arpirobot{
         VoltageMonitor(std::string pin, double vboard, int r1, int r2, bool createDevice = true, int deviceId = -1);
         VoltageMonitor(int pin, double vboard, int r1, int r2, bool createDevice = true, int deviceId = -1);
 
+        double getVoltage();
+
         void makeMainVmon();
 
         std::string getDeviceName();

@@ -472,3 +472,64 @@ BRIDGE_FUNC ActionSeries *ActionSeries_create(Action **actions, size_t actionCou
 BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries){
     delete actionSeries;
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// BaseArduinoInterface
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC void BaseArduinoInterface_begin(BaseArduinoInterface *arduino){
+    arduino->begin();
+}
+
+BRIDGE_FUNC void BaseArduinoInterface_addDevice(BaseArduinoInterface *arduino, ArduinoDevice *device){
+    arduino->addDevice(device);
+}
+
+BRIDGE_FUNC bool BaseArduinoInterface_isReady(BaseArduinoInterface *arduino){
+    return arduino->isReady();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ArduinoUartInterface
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC ArduinoUartInterface *ArduinoUartInterface_create(const char *tty, int baud){
+    return new ArduinoUartInterface(std::string(tty), baud);
+}
+
+BRIDGE_FUNC void ArduinoUartInterface_destroy(ArduinoUartInterface *interface){
+    delete interface;
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// ArduinoDevice
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC char *ArduinoDevice_getDeviceName(ArduinoDevice *device){
+    return returnableString(device->getDeviceName());
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// VoltageMonitor
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC VoltageMonitor *VoltageMonitor_create(const char *pin, double vboard, int r1, 
+        int r2, int deviceId, bool createDevice){
+    return new VoltageMonitor(pin, vboard, r1, r2, createDevice, deviceId);
+}
+
+BRIDGE_FUNC void VoltageMonitor_destroy(VoltageMonitor *vmon){
+    delete vmon;
+}
+
+BRIDGE_FUNC double VoltageMonitor_getVoltage(VoltageMonitor *vmon){
+    return vmon->getVoltage();
+}
+
+BRIDGE_FUNC void VoltageMonitor_makeMainVmon(VoltageMonitor *vmon){
+    vmon->makeMainVmon();
+}
