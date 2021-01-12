@@ -13,9 +13,9 @@ class TB6612Motor(MotorController):
 
 
 class TB6612Module:
-    def __init__(self, in1_pin: int, in2_pin: int, pwma_pin: int, in3_pin: int, in4_pin: int, pwmb_pin: int):
-        self.__motorA = TB6612Motor(in1_pin, in2_pin, pwma_pin)
-        self.__motorB = TB6612Motor(in3_pin, in4_pin, pwmb_pin)
+    def __init__(self, a_in1_pin: int, a_in2_pin: int, pwma_pin: int, b_in1_pin: int, b_in2_pin: int, pwmb_pin: int):
+        self.__motorA = TB6612Motor(a_in1_pin, a_in2_pin, pwma_pin)
+        self.__motorB = TB6612Motor(b_in1_pin, b_in2_pin, pwmb_pin)
     
     def get_motor_a(self) -> TB6612Motor:
         return self.__motorA

@@ -21,7 +21,7 @@ namespace arpirobot{
 
     class TB6612Module{
     public:
-        TB6612Module(int in1Pin, int in2Pin, int pwmaPin, int in3Pin, int in4Pin, int pwmbPin);
+        TB6612Module(int aIn1Pin, int aIn2Pin, int pwmaPin, int bIn1Pin, int bIn2Pin, int pwmbPin);
 
         TB6612Motor &getMotorA();
         TB6612Motor &getMotorB();

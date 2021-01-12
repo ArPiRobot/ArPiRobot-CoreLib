@@ -201,6 +201,17 @@ arpirobot.TB6612Motor_destroy.restype = None
 
 
 ################################################################################
+# DRV8833Motor Bridge
+################################################################################
+
+arpirobot.DRV8833Motor_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
+arpirobot.DRV8833Motor_create.restype = ctypes.c_void_p
+
+arpirobot.DRV8833Motor_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.DRV8833Motor_destroy.restype = None
+
+
+################################################################################
 # ArcadeDriveHelper Bridge
 ################################################################################
 

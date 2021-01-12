@@ -48,8 +48,8 @@ void TB6612Motor::run(){
     }
 }
 
-TB6612Module::TB6612Module(int in1Pin, int in2Pin, int pwmaPin, int in3Pin, int in4Pin, int pwmbPin) : 
-        motorA(in1Pin, in2Pin, pwmaPin), motorB(in3Pin, in4Pin, pwmbPin){
+TB6612Module::TB6612Module(int aIn1Pin, int aIn2Pin, int pwmaPin, int bIn1Pin, int bIn2Pin, int pwmbPin) : 
+        motorA(aIn1Pin, aIn2Pin, pwmaPin), motorB(bIn1Pin, bIn2Pin, pwmbPin){
     
 }
 
