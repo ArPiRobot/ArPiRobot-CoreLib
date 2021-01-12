@@ -87,7 +87,7 @@ bool BaseArduinoInterface::begin(){
                     }else if(msgStartsWith(msg, MSG_ADDSUCCESS)){
                         dev->setDeviceId(msg[10]);
                         dev->applyDefaultState();
-                        Logger::logDebugFrom(getDeviceName(), "Created device with ID " + std::to_string(dev->deviceId));
+                        Logger::logDebugFrom(dev->getDeviceName(), "Created device with ID " + std::to_string(dev->deviceId));
                     }else{
                         Logger::logWarningFrom(getDeviceName(), "Arduino failed to add device " + dev->getDeviceName());
                         dev->setDeviceId(-1);
@@ -234,7 +234,10 @@ bool BaseArduinoInterface::readData(){
             }
             parseStarted = true;
         }else if(b == END_BYTE && parseStarted){
-            readDataset = workingBuffer;
+            readDataset.clear();
+            for(size_t i = 0; i < workingBuffer.size(); ++i){
+                readDataset.push_back(workingBuffer[i]);
+            }
             workingBuffer.clear();
             parseStarted = false;
             return true;
@@ -248,6 +251,7 @@ bool BaseArduinoInterface::readData(){
 }
 
 bool BaseArduinoInterface::checkData(){
+
     if(readDataset.size() == 0)
         return false;
     // CRC is sent big endian (high_byte, low_byte)
@@ -331,8 +335,12 @@ int ArduinoUartInterface::available() {
 }
 
 uint8_t ArduinoUartInterface::readOne() {
+    // Note: Would be MUCH better to do this with blocking io...
+    while(!available()){
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    }
     int b = serReadByte(handle);
-    if(b < 0 && b != PI_SER_READ_NO_DATA){
+    if(b < 0){
         throw std::runtime_error("Failed to read from serial port.");
     }
     return (uint8_t) b;

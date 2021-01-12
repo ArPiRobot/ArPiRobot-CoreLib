@@ -2,6 +2,7 @@
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/network.hpp>
 #include <arpirobot/core/action.hpp>
+#include <arpirobot/core/conversions.hpp>
 
 #include <chrono>
 #include <csignal>
@@ -20,6 +21,9 @@ BaseRobot::BaseRobot(RobotProfile profile) : profile(profile) {
 }
 
 void BaseRobot::start(){
+
+    // Make sure conversions helper is configured properly before starting robot
+    Conversions::checkBigEndian();
 
     if(currentRobot != nullptr){
         Logger::logError("Attempted to start a second robot. This is not allowed.");

@@ -5,6 +5,7 @@
 #include <arpirobot/core/drive.hpp>
 #include <arpirobot/devices/gamepad.hpp>
 #include <arpirobot/arduino/iface.hpp>
+#include <arpirobot/arduino/sensor.hpp>
 
 using namespace arpirobot;
 
@@ -33,4 +34,5 @@ public:
     Gamepad gp0 {0};
 
     ArduinoUartInterface arduino {"/dev/ttyUSB0", 57600};
+    VoltageMonitor vmon {"A0", 4.85, 30000, 7500};
 };

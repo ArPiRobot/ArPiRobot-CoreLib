@@ -70,16 +70,6 @@ namespace arpirobot{
     const extern std::string NET_TABLE_END_SYNC_DATA;
 
     ////////////////////////////////////////////////////////////////////////////
-    /// MainVMon Interface (all voltage monitors that can monitor the main 
-    ///                     battery should implement this)
-    ////////////////////////////////////////////////////////////////////////////
-
-    class MainVMon{
-    public:
-        virtual double getVoltageDs() = 0;
-    };
-
-    ////////////////////////////////////////////////////////////////////////////
     /// ControllerData
     ////////////////////////////////////////////////////////////////////////////
 
@@ -119,9 +109,11 @@ namespace arpirobot{
 
         static void sendLogMessage(std::string message);
 
-        static void setMainVmon(MainVMon *vmon);
+        static void setMainVmon(void *vmon);
 
-        static bool isMainVmon(MainVMon *vmon);
+        static bool isMainVmon(void *vmon);
+
+        static void sendMainBatteryVoltage(double voltage);
 
         static std::unordered_map<int, std::shared_ptr<ControllerData>> controllerData;
 
@@ -186,7 +178,7 @@ namespace arpirobot{
 
         static std::unordered_map<std::string, std::string> ntSyncData;
 
-        static MainVMon *mainVmon;
+        static void *mainVmon;
     };
 
 

@@ -11,6 +11,15 @@ ArduinoDevice::~ArduinoDevice(){
 
 }
 
+std::vector<uint8_t> ArduinoDevice::stringToData(const std::string &str){
+    std::vector<uint8_t> data;
+    data.reserve(str.length());
+    for(size_t i = 0; i < str.length(); ++i){
+        data.push_back((uint8_t)str[i]);
+    }
+    return data;
+}
+
 void ArduinoDevice::setArduino(BaseArduinoInterface *arduino){
     this->arduino = arduino;
 }

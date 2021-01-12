@@ -15,6 +15,8 @@ namespace arpirobot{
         virtual std::string getDeviceName() = 0;
 
     protected:
+        static std::vector<uint8_t> stringToData(const std::string &str);
+
         void setArduino(BaseArduinoInterface *arduino);
         void setDeviceId(int deviceId);
 

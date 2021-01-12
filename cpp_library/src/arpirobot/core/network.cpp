@@ -2,7 +2,8 @@
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/robot.hpp>
 #include <cmath>
-
+#include <sstream>
+#include <iomanip>
 
 using namespace arpirobot;
 using namespace std::placeholders;
@@ -119,7 +120,7 @@ std::function<void()> NetworkManager::enableFunc;
 std::function<void()> NetworkManager::disableFunc;
 std::unordered_map<std::string, std::string> NetworkManager::ntSyncData;
 std::unordered_map<int, std::shared_ptr<ControllerData>> NetworkManager::controllerData;
-MainVMon *NetworkManager::mainVmon = nullptr;
+void *NetworkManager::mainVmon = nullptr;
 
 void NetworkManager::startNetworking(std::function<void()> enableFunc, std::function<void()> disableFunc){
     if(!networkingStarted){
@@ -190,12 +191,18 @@ void NetworkManager::sendLogMessage(std::string message){
     }
 }
 
-void NetworkManager::setMainVmon(MainVMon *vmon){
+void NetworkManager::setMainVmon(void *vmon){
     mainVmon = vmon;
 }
 
-bool NetworkManager::isMainVmon(MainVMon *vmon){
+bool NetworkManager::isMainVmon(void *vmon){
     return vmon == mainVmon;
+}
+
+void NetworkManager::sendMainBatteryVoltage(double voltage){
+    std::stringstream vstr;
+    vstr << std::fixed << std::setprecision(2) << voltage;
+    NetworkTableInternal::setFromRobot("vbat0", vstr.str());
 }
 
 void NetworkManager::runNetworking(){
