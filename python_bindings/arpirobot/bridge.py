@@ -496,3 +496,26 @@ arpirobot.NxpAdafruit9Dof_setGyroY.restype = None
 
 arpirobot.NxpAdafruit9Dof_setGyroZ.argtypes = [ctypes.c_void_p, ctypes.c_double]
 arpirobot.NxpAdafruit9Dof_setGyroZ.restype = None
+
+
+################################################################################
+# INA260PowerSensor Bridge
+################################################################################
+
+arpirobot.INA260PowerSensor_create.argtypes = []
+arpirobot.INA260PowerSensor_create.restype = ctypes.c_void_p
+
+arpirobot.INA260PowerSensor_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.INA260PowerSensor_destroy.restype = None
+
+arpirobot.INA260PowerSensor_getCurrent.argtypes = [ctypes.c_void_p]
+arpirobot.INA260PowerSensor_getCurrent.restype = ctypes.c_double
+
+arpirobot.INA260PowerSensor_getVoltage.argtypes = [ctypes.c_void_p]
+arpirobot.INA260PowerSensor_getVoltage.restype = ctypes.c_double
+
+arpirobot.INA260PowerSensor_getPower.argtypes = [ctypes.c_void_p]
+arpirobot.INA260PowerSensor_getPower.restype = ctypes.c_double
+
+arpirobot.INA260PowerSensor_makeMainVmon.argtypes = [ctypes.c_void_p]
+arpirobot.INA260PowerSensor_makeMainVmon.restype = None

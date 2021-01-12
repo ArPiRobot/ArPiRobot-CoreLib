@@ -1,7 +1,7 @@
 from arpirobot.core.robot import BaseRobot
 from arpirobot.core.drive import ArcadeDriveHelper, CubicAxisTransform, SquareRootAxisTransform
-from arpirobot.devices.drv8833 import DRV8833Module
 from arpirobot.core.action import ActionManager, ActionSeries
+from arpirobot.devices.ina260 import INA260PowerSensor
 from arpirobot.devices.gamepad import Gamepad, ButtonPressedTrigger
 from arpirobot.core.log import Logger
 
@@ -15,12 +15,10 @@ class Robot(BaseRobot):
     def __init__(self):
         super().__init__()
         self.gp0 = Gamepad(0)
-        self.drv8833 = DRV8833Module(24, 25, 17, 27, 23)
-        self.motor1 = self.drv8833.get_motor_a()
-        self.motor2 = self.drv8833.get_motor_b()
+        self.vmon = INA260PowerSensor()
     
     def robot_started(self):
-        pass
+        self.vmon.make_main_vmon()
 
     def robot_enabled(self):
         pass

@@ -732,3 +732,32 @@ BRIDGE_FUNC void NxpAdafruit9Dof_setGyroY(NxpAdafruit9Dof *imu, double newGyroY)
 BRIDGE_FUNC void NxpAdafruit9Dof_setGyroZ(NxpAdafruit9Dof *imu, double newGyroZ){
     imu->setGyroZ(newGyroZ);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// INA260PowerSensor bridge (arpirobot/devices/ina260.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC INA260PowerSensor *INA260PowerSensor_create(){
+    return new INA260PowerSensor();
+}
+
+BRIDGE_FUNC void INA260PowerSensor_destroy(INA260PowerSensor *vmon){
+    delete vmon;
+}
+
+BRIDGE_FUNC double INA260PowerSensor_getCurrent(INA260PowerSensor *vmon){
+    return vmon->getCurrent();
+}
+
+BRIDGE_FUNC double INA260PowerSensor_getVoltage(INA260PowerSensor *vmon){
+    return vmon->getVolgate();
+}
+
+BRIDGE_FUNC double INA260PowerSensor_getPower(INA260PowerSensor *vmon){
+    return vmon->getPower();
+}
+
+BRIDGE_FUNC void INA260PowerSensor_makeMainVmon(INA260PowerSensor *vmon){
+    vmon->makeMainVmon();
+}
