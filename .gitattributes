@@ -1,0 +1,8 @@
+* text=auto
+
+# For scripts, use LF even on windows
+*.sh text eol=lf
+*.py text eol=lf
+
+# This is binary not text
+*.zip binary
