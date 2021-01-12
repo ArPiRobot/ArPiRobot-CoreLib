@@ -179,6 +179,17 @@ arpirobot.AdafruitMotorHatMotor_destroy.restype = None
 
 
 ################################################################################
+# L298NMotor Bridge
+################################################################################
+
+arpirobot.L298NMotor_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
+arpirobot.L298NMotor_create.restype = ctypes.c_void_p
+
+arpirobot.L298NMotor_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.L298NMotor_destroy.restype = None
+
+
+################################################################################
 # ArcadeDriveHelper Bridge
 ################################################################################
 

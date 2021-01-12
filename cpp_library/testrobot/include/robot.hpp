@@ -1,7 +1,7 @@
 #pragma once
 
 #include <arpirobot/core/robot.hpp>
-#include <arpirobot/devices/adafruitmotorhat.hpp>
+#include <arpirobot/devices/l298n.hpp>
 #include <arpirobot/core/drive.hpp>
 #include <arpirobot/devices/gamepad.hpp>
 #include <arpirobot/arduino/iface.hpp>
@@ -24,16 +24,9 @@ public:
 
     void periodic();
 
-    AdafruitMotorHatMotor flmotor {3};
-    AdafruitMotorHatMotor rlmotor {4};
-    AdafruitMotorHatMotor frmotor {2};
-    AdafruitMotorHatMotor rrmotor {1};
-
-    ArcadeDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
-
     Gamepad gp0 {0};
 
-    ArduinoUartInterface arduino {"/dev/ttyUSB0", 57600};
-    VoltageMonitor vmon {"A0", 4.85, 30000, 7500};
-    NxpAdafruit9Dof imu;
+    L298NModule l298n {24, 25, 23, 17, 27, 22};
+    L298NMotor &motor1 {l298n.getMotorA()};
+    L298NMotor &motor2 {l298n.getMotorB()};
 };

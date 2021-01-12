@@ -1,6 +1,6 @@
 from arpirobot.core.robot import BaseRobot
 from arpirobot.core.drive import ArcadeDriveHelper, CubicAxisTransform, SquareRootAxisTransform
-from arpirobot.devices.adafruitmotorhat import AdafruitMotorHatMotor
+from arpirobot.devices.l298n import L298NModule
 from arpirobot.core.action import ActionManager, ActionSeries
 from arpirobot.devices.gamepad import Gamepad, ButtonPressedTrigger
 from arpirobot.core.log import Logger
@@ -14,34 +14,13 @@ from actions import JSDriveAction, DriveTimeAction
 class Robot(BaseRobot):
     def __init__(self):
         super().__init__()
-
-        self.flmotor = AdafruitMotorHatMotor(3)
-        self.rlmotor = AdafruitMotorHatMotor(4)
-        self.frmotor = AdafruitMotorHatMotor(2)
-        self.rrmotor = AdafruitMotorHatMotor(1)
-
-        self.drive_helper = ArcadeDriveHelper([self.flmotor, self.rlmotor], [self.frmotor, self.rrmotor])
-
         self.gp0 = Gamepad(0)
-
-        self.arduino = ArduinoUartInterface("/dev/ttyUSB0", 57600)
-        self.vmon = VoltageMonitor("A0", 4.85, 30000, 7500)
-        self.enc = NxpAdafruit9Dof()
+        self.l298n = L298NModule(24, 25, 23,17, 27, 22)
+        self.motor1 = self.l298n.get_motor_a()
+        self.motor2 = self.l298n.get_motor_b()
     
     def robot_started(self):
-        self.flmotor.set_inverted(True)
-        self.frmotor.set_inverted(True)
-
-        self.gp0.set_axis_transform(1, CubicAxisTransform(0, 0.5))
-        self.gp0.set_axis_transform(2, SquareRootAxisTransform())
-
-        self.arduino.add_device(self.vmon)
-        self.arduino.add_device(self.enc)
-        self.arduino.begin()
-
-        self.vmon.make_main_vmon()
-
-        ActionManager.start_action(JSDriveAction())
+        pass
 
     def robot_enabled(self):
         pass
@@ -50,11 +29,12 @@ class Robot(BaseRobot):
         pass
 
     def enabled_periodic(self):
-        pass
+        speed = self.gp0.get_axis(1, 0.1)
+        self.motor1.set_speed(speed)
+        self.motor2.set_speed(speed)
 
     def disabled_periodic(self):
         pass
 
     def periodic(self):
-        Logger.log_info("Rotation = " + str(self.enc.get_gyro_z()))
         self.feed_watchdog()

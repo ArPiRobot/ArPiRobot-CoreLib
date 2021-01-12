@@ -5,27 +5,12 @@
 #include <actions.hpp>
 
 void Robot::robotStarted(){
-    flmotor.setInverted(true);
-    frmotor.setInverted(true);
-
-    arduino.addDevice(&vmon);
-    arduino.addDevice(&imu);
-    arduino.begin();
-
-    vmon.makeMainVmon();
-
-    // Runs when X pressed on gamepad
-    ActionManager::addTrigger(new ButtonPressedTrigger(&gp0, 0, new ActionSeries(
-        {new DriveTimeAction(1000, 0.5), new DriveTimeAction(1000, -0.5)},
-        new JSDriveAction()
-    )));
-
-    // Runs until interrupted
-    ActionManager::startAction(new JSDriveAction());
+    
 }
 
 void Robot::robotEnabled(){
-
+    motor1.setSpeed(0.5);
+    motor2.setSpeed(0.5);
 }
 
 void Robot::robotDisabled(){
@@ -33,7 +18,9 @@ void Robot::robotDisabled(){
 }
 
 void Robot::enabledPeriodic(){
-
+    double speed = gp0.getAxis(1, 0.1);
+    motor1.setSpeed(speed);
+    motor2.setSpeed(speed);
 }
 
 void Robot::disabledPeriodic(){
@@ -41,9 +28,5 @@ void Robot::disabledPeriodic(){
 }
 
 void Robot::periodic(){
-    Logger::logInfo("Orientation = " + std::to_string(imu.getGyroZ()));
-    if(gp0.getButton(0)){
-        imu.setGyroZ(0);
-    }
     feedWatchdog();
 }

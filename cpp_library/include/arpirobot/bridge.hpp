@@ -5,6 +5,7 @@
 #include <arpirobot/devices/gamepad.hpp>
 #include <arpirobot/core/network.hpp>
 #include <arpirobot/devices/adafruitmotorhat.hpp>
+#include <arpirobot/devices/l298n.hpp>
 #include <arpirobot/core/drive.hpp>
 #include <arpirobot/core/device.hpp>
 #include <arpirobot/core/action.hpp>
@@ -185,6 +186,15 @@ BRIDGE_FUNC double MotorController_getSpeed(MotorController *motor);
 BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, int address, bool remapNumbers);
 
 BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// L298Motor bridge (arpirobot/devices/l298n.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC L298NMotor *L298NMotor_create(int in1Pin, int in2Pin, int pwmPin);
+
+BRIDGE_FUNC void L298NMotor_destroy(L298NMotor *motor);
 
 
 ////////////////////////////////////////////////////////////////////////////////
