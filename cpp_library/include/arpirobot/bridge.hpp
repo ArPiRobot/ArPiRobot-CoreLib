@@ -6,6 +6,7 @@
 #include <arpirobot/core/network.hpp>
 #include <arpirobot/devices/adafruitmotorhat.hpp>
 #include <arpirobot/devices/l298n.hpp>
+#include <arpirobot/devices/tb6612.hpp>
 #include <arpirobot/core/drive.hpp>
 #include <arpirobot/core/device.hpp>
 #include <arpirobot/core/action.hpp>
@@ -195,6 +196,15 @@ BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor);
 BRIDGE_FUNC L298NMotor *L298NMotor_create(int in1Pin, int in2Pin, int pwmPin);
 
 BRIDGE_FUNC void L298NMotor_destroy(L298NMotor *motor);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// TB6612Motor bridge (arpirobot/devices/tb6612.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC TB6612Motor *TB6612Motor_create(int in1Pin, int in2Pin, int pwmPin);
+
+BRIDGE_FUNC void TB6612Motor_destroy(TB6612Motor *motor);
 
 
 ////////////////////////////////////////////////////////////////////////////////

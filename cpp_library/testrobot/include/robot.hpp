@@ -1,7 +1,7 @@
 #pragma once
 
 #include <arpirobot/core/robot.hpp>
-#include <arpirobot/devices/l298n.hpp>
+#include <arpirobot/devices/tb6612.hpp>
 #include <arpirobot/core/drive.hpp>
 #include <arpirobot/devices/gamepad.hpp>
 #include <arpirobot/arduino/iface.hpp>
@@ -26,7 +26,7 @@ public:
 
     Gamepad gp0 {0};
 
-    L298NModule l298n {24, 25, 23, 17, 27, 22};
-    L298NMotor &motor1 {l298n.getMotorA()};
-    L298NMotor &motor2 {l298n.getMotorB()};
+    TB6612Module tb6612 {24, 25, 23, 17, 27, 22};
+    TB6612Motor &motor1 {tb6612.getMotorA()};
+    TB6612Motor &motor2 {tb6612.getMotorB()};
 };

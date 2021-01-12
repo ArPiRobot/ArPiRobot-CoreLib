@@ -190,6 +190,17 @@ arpirobot.L298NMotor_destroy.restype = None
 
 
 ################################################################################
+# TB6612Motor Bridge
+################################################################################
+
+arpirobot.TB6612Motor_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int]
+arpirobot.TB6612Motor_create.restype = ctypes.c_void_p
+
+arpirobot.TB6612Motor_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.TB6612Motor_destroy.restype = None
+
+
+################################################################################
 # ArcadeDriveHelper Bridge
 ################################################################################
 
