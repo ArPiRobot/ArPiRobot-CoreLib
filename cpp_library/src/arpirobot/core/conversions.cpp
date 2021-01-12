@@ -45,6 +45,27 @@ int32_t Conversions::convertDataToInt32(const std::vector<uint8_t> &data, size_t
     }
 }
 
+std::vector<uint8_t> Conversions::convertInt16ToData(int16_t input, bool littleEndian){
+    std::vector<uint8_t> data;
+    data.reserve(2);
+    if(littleEndian){
+        data.push_back(input);
+        data.push_back(input >> 8);
+    }else{
+        data.push_back(input >> 8);
+        data.push_back(input);
+    }
+    return data;
+}
+
+int16_t Conversions::convertDataToInt16(const std::vector<uint8_t> &data, size_t offset, bool littleEndian){
+    if(littleEndian){
+        return data[offset] | data[offset + 1] << 8;
+    }else{
+        return data[offset] << 8 | data[offset + 1];
+    }
+}
+
 std::vector<uint8_t> Conversions::convertFloatToData(float input, bool littleEndian){
     std::vector<uint8_t> data;
     data.reserve(4);

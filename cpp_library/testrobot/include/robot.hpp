@@ -35,4 +35,5 @@ public:
 
     ArduinoUartInterface arduino {"/dev/ttyUSB0", 57600};
     VoltageMonitor vmon {"A0", 4.85, 30000, 7500};
+    Ultrasonic4Pin usonic {7, 8};
 };

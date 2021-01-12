@@ -27,4 +27,27 @@ namespace arpirobot{
         int r2;
         double voltage = 0;
     };
+
+    class Ultrasonic4Pin : public ArduinoDevice{
+    public:
+        Ultrasonic4Pin(int triggerPin, int echoPin, bool createDevice = true, int deviceId = -1);
+        Ultrasonic4Pin(int triggerPin, std::string echoPin, bool createDevice = true, int deviceId = -1);
+        Ultrasonic4Pin(std::string triggerPin, int echoPin, bool createDevice = true, int deviceId = -1);
+        Ultrasonic4Pin(std::string triggerPin, std::string echoPin, bool createDevice = true, int deviceId = -1);
+
+        int getDistance();
+
+        std::string getDeviceName();
+    
+    protected:
+        void applyDefaultState();
+        std::vector<uint8_t> getCreateData();
+        void handleData(const std::vector<uint8_t> &data);
+    
+    private:
+        std::string triggerPin;
+        std::string echoPin;
+        int distance = 0;
+    };
+
 }

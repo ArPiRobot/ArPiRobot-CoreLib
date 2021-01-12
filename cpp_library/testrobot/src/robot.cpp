@@ -1,5 +1,6 @@
 #include <robot.hpp>
 #include <arpirobot/core/action.hpp>
+#include <arpirobot/core/log.hpp>
 #include <arpirobot/devices/gamepad.hpp>
 #include <actions.hpp>
 
@@ -8,6 +9,7 @@ void Robot::robotStarted(){
     frmotor.setInverted(true);
 
     arduino.addDevice(&vmon);
+    arduino.addDevice(&usonic);
     arduino.begin();
 
     vmon.makeMainVmon();
@@ -39,5 +41,6 @@ void Robot::disabledPeriodic(){
 }
 
 void Robot::periodic(){
+    Logger::logInfo("Distance = " + std::to_string(usonic.getDistance()));
     feedWatchdog();
 }

@@ -54,5 +54,4 @@ class Robot(BaseRobot):
         pass
 
     def periodic(self):
-        Logger.log_info("Voltage: " + str(self.vmon.get_voltage()))
         self.feed_watchdog()

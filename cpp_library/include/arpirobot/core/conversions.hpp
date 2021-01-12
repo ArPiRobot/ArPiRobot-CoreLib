@@ -13,6 +13,10 @@ namespace arpirobot{
 
         static int32_t convertDataToInt32(const std::vector<uint8_t> &data, size_t offset, bool littleEndian);
 
+        static std::vector<uint8_t> convertInt16ToData(int16_t input, bool littleEndian);
+
+        static int16_t convertDataToInt16(const std::vector<uint8_t> &data, size_t offset, bool littleEndian);
+
         static std::vector<uint8_t> convertFloatToData(float input, bool littleEndian);
 
         static float convertDataToFloat(const std::vector<uint8_t> &data, size_t offset, bool littleEndian);
