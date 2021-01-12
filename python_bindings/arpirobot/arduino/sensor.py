@@ -34,6 +34,7 @@ class Ultrasonic4Pin(ArduinoDevice):
     def get_distance(self) -> int:
         return bridge.arpirobot.Ultrasonic4Pin_getDistance(self._ptr)
 
+
 class SingleEncoder(ArduinoDevice):
     def __init__(self, pin: Union[int, str], use_internal_pullup: bool, create_device = True, device_id = -1):
         super().__init__()
@@ -46,8 +47,9 @@ class SingleEncoder(ArduinoDevice):
     def get_position(self) -> int:
         return bridge.arpirobot.SingleEncoder_getPosition(self._ptr)
     
-    def set_position(self, current_position: int):
-        bridge.arpirobot.SingleEncoder_setPosition(self._ptr, current_position)
+    def set_position(self, new_position: int):
+        bridge.arpirobot.SingleEncoder_setPosition(self._ptr, new_position)
+
 
 class IRReflectorModule(ArduinoDevice):
     def __init__(self, digital_pin: Union[int, str], analog_pin: str = "", create_device = True, device_id = -1):
@@ -63,3 +65,39 @@ class IRReflectorModule(ArduinoDevice):
     
     def get_analog_value(self) -> int:
         return bridge.arpirobot.IRReflectorModule_getAnalogValue(self._ptr)
+
+
+class OldAdafruit9Dof(ArduinoDevice):
+    def __init__(self, create_device = True, device_id = -1):
+        super().__init__()
+        self._ptr = bridge.arpirobot.OldAdafruit9Dof_create(create_device, device_id)
+    
+    def __del__(self):
+        bridge.arpirobot.OldAdafruit9Dof_destroy(self._ptr)
+    
+    def get_gyro_x(self) -> float:
+        return bridge.arpirobot.OldAdafruit9Dof_getGyroX(self._ptr)
+    
+    def get_gyro_y(self) -> float:
+        return bridge.arpirobot.OldAdafruit9Dof_getGyroY(self._ptr)
+
+    def get_gyro_z(self) -> float:
+        return bridge.arpirobot.OldAdafruit9Dof_getGyroZ(self._ptr)
+
+    def get_accel_x(self) -> float:
+        return bridge.arpirobot.OldAdafruit9Dof_getAccelX(self._ptr)
+
+    def get_accel_y(self) -> float:
+        return bridge.arpirobot.OldAdafruit9Dof_getAccelY(self._ptr)
+
+    def get_accel_z(self) -> float:
+        return bridge.arpirobot.OldAdafruit9Dof_getAccelZ(self._ptr)
+
+    def set_gyro_x(self, new_gyro_x: float):
+        bridge.arpirobot.OldAdafruit9Dof_setGyroX(self._ptr, new_gyro_x)
+
+    def set_gyro_y(self, new_gyro_y: float):
+        bridge.arpirobot.OldAdafruit9Dof_setGyroY(self._ptr, new_gyro_y)
+
+    def set_gyro_z(self, new_gyro_z: float):
+        bridge.arpirobot.OldAdafruit9Dof_setGyroZ(self._ptr, new_gyro_z)

@@ -570,8 +570,8 @@ BRIDGE_FUNC int SingleEncoder_getPosition(SingleEncoder *enc){
     return enc->getPosition();
 }
 
-BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int currentPos){
-    enc->setPosition(currentPos);
+BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int newPosition){
+    enc->setPosition(newPosition);
 }
 
 
@@ -594,4 +594,53 @@ BRIDGE_FUNC bool IRReflectorModule_getDigitalValue(IRReflectorModule *ir){
 
 BRIDGE_FUNC int IRReflectorModule_getAnalogValue(IRReflectorModule *ir){
     return ir->getAnalogValue();
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// OldAdafruit9Dof bridge (arpirobot/arduino/sensor.hpp)
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC OldAdafruit9Dof *OldAdafruit9Dof_create(bool createDevice, int deviceId){
+    return new OldAdafruit9Dof();
+}
+
+BRIDGE_FUNC void OldAdafruit9Dof_destroy(OldAdafruit9Dof *imu){
+    delete imu;
+}
+
+BRIDGE_FUNC double OldAdafruit9Dof_getGyroX(OldAdafruit9Dof *imu){
+    return imu->getGyroX();
+}
+
+BRIDGE_FUNC double OldAdafruit9Dof_getGyroY(OldAdafruit9Dof *imu){
+    return imu->getGyroY();
+}
+
+BRIDGE_FUNC double OldAdafruit9Dof_getGyroZ(OldAdafruit9Dof *imu){
+    return imu->getGyroZ();
+}
+
+BRIDGE_FUNC double OldAdafruit9Dof_getAccelX(OldAdafruit9Dof *imu){
+    return imu->getAccelX();
+}
+
+BRIDGE_FUNC double OldAdafruit9Dof_getAccelY(OldAdafruit9Dof *imu){
+    return imu->getAccelY();
+}
+
+BRIDGE_FUNC double OldAdafruit9Dof_getAccelZ(OldAdafruit9Dof *imu){
+    return imu->getAccelZ();
+}
+
+BRIDGE_FUNC void OldAdafruit9Dof_setGyroX(OldAdafruit9Dof *imu, double newGyroX){
+    imu->setGyroX(newGyroX);
+}
+
+BRIDGE_FUNC void OldAdafruit9Dof_setGyroY(OldAdafruit9Dof *imu, double newGyroY){
+    imu->setGyroY(newGyroY);
+}
+
+BRIDGE_FUNC void OldAdafruit9Dof_setGyroZ(OldAdafruit9Dof *imu, double newGyroZ){
+    imu->setGyroZ(newGyroZ);
 }

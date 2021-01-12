@@ -9,7 +9,7 @@ void Robot::robotStarted(){
     frmotor.setInverted(true);
 
     arduino.addDevice(&vmon);
-    arduino.addDevice(&ir);
+    arduino.addDevice(&imu);
     arduino.begin();
 
     vmon.makeMainVmon();
@@ -41,6 +41,9 @@ void Robot::disabledPeriodic(){
 }
 
 void Robot::periodic(){
-    Logger::logInfo("Detected = " + std::to_string(ir.getDigitalValue()));
+    Logger::logInfo("Orientation = " + std::to_string(imu.getGyroZ()));
+    if(gp0.getButton(0)){
+        imu.setGyroZ(0);
+    }
     feedWatchdog();
 }
