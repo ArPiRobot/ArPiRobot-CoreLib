@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iomanip>
 
+
 using namespace arpirobot;
 using namespace std::placeholders;
 
@@ -54,7 +55,7 @@ void ControllerData::updateData(std::vector<uint8_t> &data){
     int offset = 4;
     for(int i = 0; i < axisCount; ++i){
         short tmp = data[offset] << 8 | data[offset + 1]; // signed 16-bit int: high byte, low byte.
-        if(tmp < 0)
+        if(tmp <= 0)
             axes[i] = tmp / 32768.0f;
         else if(tmp > 0)
             axes[i] = tmp / 32767.0f;

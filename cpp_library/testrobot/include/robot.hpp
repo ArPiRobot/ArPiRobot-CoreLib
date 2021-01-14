@@ -1,7 +1,8 @@
 #pragma once
 
 #include <arpirobot/core/robot.hpp>
-#include <arpirobot/devices/ina260.hpp>
+#include <arpirobot/core/drive.hpp>
+#include <arpirobot/devices/adafruitmotorhat.hpp>
 #include <arpirobot/devices/gamepad.hpp>
 
 using namespace arpirobot;
@@ -23,5 +24,11 @@ public:
 
     Gamepad gp0 {0};
 
-    INA260PowerSensor vmon;
+    AdafruitMotorHatMotor flmotor {3};
+    AdafruitMotorHatMotor rlmotor {4};
+    AdafruitMotorHatMotor frmotor {2};
+    AdafruitMotorHatMotor rrmotor {1};
+
+    ArcadeDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
+
 };
