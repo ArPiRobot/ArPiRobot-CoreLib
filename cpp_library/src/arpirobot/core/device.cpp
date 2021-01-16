@@ -9,7 +9,7 @@ using namespace arpirobot;
 ////////////////////////////////////////////////////////////////////////////////
 /// BaseDevice
 ////////////////////////////////////////////////////////////////////////////////
-void BaseDevice::_lockDevice(Action *action){
+void BaseDevice::lockDevice(Action *action){
     std::lock_guard<std::mutex> l(actionLock);
     
     // If the same actio nis locking the device, don't stop it as this will cause issues with scheduler jobs
@@ -91,7 +91,7 @@ bool MotorController::shouldDisableWithWatchdog(){
     return true;
 }
 
-void MotorController::_enable(){
+void MotorController::enable(){
     if(!initialized)
         return;
     {
@@ -100,7 +100,7 @@ void MotorController::_enable(){
     }
 }
 
-void MotorController::_disable(){
+void MotorController::disable(){
     if(!initialized)
         return;
     {

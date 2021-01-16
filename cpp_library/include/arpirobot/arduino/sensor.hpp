@@ -2,16 +2,15 @@
 
 #include <arpirobot/arduino/device.hpp>
 #include <arpirobot/arduino/iface.hpp>
+#include <arpirobot/core/network.hpp>
 
 namespace arpirobot{
-    class VoltageMonitor : public ArduinoDevice{
+    class VoltageMonitor : public ArduinoDevice, public MainVmon{
     public:
         VoltageMonitor(std::string pin, double vboard, int r1, int r2, bool createDevice = true, int deviceId = -1);
         VoltageMonitor(int pin, double vboard, int r1, int r2, bool createDevice = true, int deviceId = -1);
 
         double getVoltage();
-
-        void makeMainVmon();
 
         std::string getDeviceName();
     

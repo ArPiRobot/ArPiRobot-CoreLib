@@ -3,14 +3,11 @@ import ctypes
 
 class MainVmon:
     # Just a common base class for valid main vmon devices
-    # Just here for error detection purposes
     def __init__(self):
         self._ptr = None
-
-
-class NetworkManager:
-    def set_main_vmon(self, vmon: MainVmon):
-        bridge.arpirobot.NetworkManager_setMainVmon(vmon._ptr)
+    
+    def make_main_vmon(self):
+        bridge.arpirobot.MainVMon_makeMainVmon(self._ptr)
 
 
 class NetworkTable:

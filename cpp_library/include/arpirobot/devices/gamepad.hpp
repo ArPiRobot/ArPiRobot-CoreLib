@@ -12,16 +12,6 @@ namespace arpirobot{
     public:
         Gamepad(int controllerNum);
 
-        bool isEnabled();
-
-        bool shouldMatchRobotState();
-
-        bool shouldDisableWithWatchdog();
-
-        void _enable();
-
-        void _disable();
-
         int getControllerNum();
 
         double getAxis(int axisNum, double deadband = 0);
@@ -38,6 +28,16 @@ namespace arpirobot{
     
     protected:
         void begin();
+
+        bool isEnabled();
+
+        bool shouldMatchRobotState();
+
+        bool shouldDisableWithWatchdog();
+
+        void enable();
+
+        void disable();
 
     private:
         int controllerNum;

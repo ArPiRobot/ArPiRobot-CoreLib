@@ -9,7 +9,8 @@
 #include <cmath>
 
 using namespace arpirobot;
-using MotorCommand = arpirobot::AdafruitMotorHat::MotorCommand;
+using namespace arpirobot::internal;
+using MotorCommand = arpirobot::internal::AdafruitMotorHat::MotorCommand;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// AdafruitMotorHat::LowLevelDCMotor

@@ -84,6 +84,12 @@ BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot);
 
 
 ////////////////////////////////////////////////////////////////////////////////
+/// MainVMon Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC void MainVMon_makeMainVmon(MainVmon *vmon);
+
+////////////////////////////////////////////////////////////////////////////////
 /// NetworkTable Bridge
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -373,8 +379,6 @@ BRIDGE_FUNC void VoltageMonitor_destroy(VoltageMonitor *vmon);
 
 BRIDGE_FUNC double VoltageMonitor_getVoltage(VoltageMonitor *vmon);
 
-BRIDGE_FUNC void VoltageMonitor_makeMainVmon(VoltageMonitor *vmon);
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Ultrasonic4Pin bridge (arpirobot/arduino/sensor.hpp)
@@ -483,5 +487,3 @@ BRIDGE_FUNC double INA260PowerSensor_getCurrent(INA260PowerSensor *vmon);
 BRIDGE_FUNC double INA260PowerSensor_getVoltage(INA260PowerSensor *vmon);
 
 BRIDGE_FUNC double INA260PowerSensor_getPower(INA260PowerSensor *vmon);
-
-BRIDGE_FUNC void INA260PowerSensor_makeMainVmon(INA260PowerSensor *vmon);

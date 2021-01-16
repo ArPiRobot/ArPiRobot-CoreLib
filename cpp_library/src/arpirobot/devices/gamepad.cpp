@@ -9,26 +9,6 @@ Gamepad::Gamepad(int controllerNum) : controllerNum(controllerNum){
     BaseRobot::beginWhenReady(this);
 }
 
-bool Gamepad::isEnabled(){
-    return true;
-}
-
-bool Gamepad::shouldMatchRobotState(){
-    return false;
-}
-
-bool Gamepad::shouldDisableWithWatchdog(){
-    return false;
-}
-
-void Gamepad::_enable(){
-
-}
-
-void Gamepad::_disable(){
-
-}
-
 int Gamepad::getControllerNum(){
     return controllerNum;
 }
@@ -142,7 +122,25 @@ void Gamepad::begin(){
 
 }
 
+bool Gamepad::isEnabled(){
+    return true;
+}
 
+bool Gamepad::shouldMatchRobotState(){
+    return false;
+}
+
+bool Gamepad::shouldDisableWithWatchdog(){
+    return false;
+}
+
+void Gamepad::enable(){
+
+}
+
+void Gamepad::disable(){
+
+}
 
 ButtonPressedTrigger::ButtonPressedTrigger(Gamepad *gamepad, int buttonNum, Action *targetAction, 
         bool doRestart) : BaseActionTrigger(targetAction, doRestart), gamepad(gamepad), buttonNum(buttonNum){

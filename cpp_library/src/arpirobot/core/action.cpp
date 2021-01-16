@@ -11,7 +11,21 @@ using namespace arpirobot;
 /// Action
 ////////////////////////////////////////////////////////////////////////////////
 
-void Action::_actionStart(){
+void Action::lockDevices(std::vector<BaseDevice*> devices){
+    for(auto dev : devices){
+        lockDevice(dev);
+    }
+}
+
+void Action::lockDevice(BaseDevice *device){
+    device->lockDevice(this);
+}
+
+bool Action::isRunning(){
+    return started && !finished;
+}
+
+void Action::actionStart(){
     {
         std::lock_guard<std::mutex> l(stateLock);
         started = true;
@@ -25,7 +39,7 @@ void Action::_actionStart(){
     }
 }
 
-void Action::_actionStop(bool interrupted){
+void Action::actionStop(bool interrupted){
     // This function is used by ActionManager to stop an action
     {
         std::lock_guard<std::mutex> l(stateLock);
@@ -39,7 +53,7 @@ void Action::_actionStop(bool interrupted){
     }
 }
 
-void Action::_actionProcess(){
+void Action::actionProcess(){
     {
         // Ensure process cannot run after action finishes
         std::lock_guard<std::mutex> l(stateLock);
@@ -63,22 +77,8 @@ void Action::_actionProcess(){
     }
 
     if(!cont){
-        ActionManager::_stopActionInternal(this, false);
+        ActionManager::stopActionInternal(this, false);
     }
-}
-
-void Action::lockDevices(std::vector<BaseDevice*> devices){
-    for(auto dev : devices){
-        lockDevice(dev);
-    }
-}
-
-void Action::lockDevice(BaseDevice *device){
-    device->_lockDevice(this);
-}
-
-bool Action::isRunning(){
-    return started && !finished;
 }
 
 bool Action::isStarted(){
@@ -118,9 +118,9 @@ bool ActionManager::startAction(Action *action, bool doRestart){
     if(BaseRobot::currentRobot == nullptr)
         return false;
     if(!action->isStarted() || action->isFinished()){
-        action->_actionStart();
+        action->actionStart();
         action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
-            std::bind(&Action::_actionProcess, action),
+            std::bind(&Action::actionProcess, action),
             std::chrono::milliseconds(BaseRobot::currentRobot->profile.actionFunctionPeriod)
         );
         return true;
@@ -128,9 +128,9 @@ bool ActionManager::startAction(Action *action, bool doRestart){
         // Action is already running, but should be restarted
         ActionManager::stopAction(action);
         // Restart action
-        action->_actionStart();
+        action->actionStart();
         action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
-            std::bind(&Action::_actionProcess, action),
+            std::bind(&Action::actionProcess, action),
             std::chrono::milliseconds(BaseRobot::currentRobot->profile.actionFunctionPeriod)
         );
         return true;
@@ -158,12 +158,12 @@ void ActionManager::removeTrigger(BaseActionTrigger *trigger){
 bool ActionManager::stopAction(Action *action){
     // This is the user-facing stop action function. 
     // Always consider the action interrupted if the user manually stops it
-    return _stopActionInternal(action, true);
+    return stopActionInternal(action, true);
 }
 
-bool ActionManager::_stopActionInternal(Action *action, bool interrupted){
+bool ActionManager::stopActionInternal(Action *action, bool interrupted){
     if(action->isStarted() && !action->isFinished()){
-        action->_actionStop(interrupted);
+        action->actionStop(interrupted);
         BaseRobot::removeTaskFromScheduler(action->_schedulerTask);
         action->_schedulerTask = nullptr;
         return true;

@@ -2,7 +2,6 @@
 
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/robot.hpp>
-#include <arpirobot/core/network.hpp>
 
 #include <pigpio.h>
 #include <stdexcept>
@@ -214,26 +213,6 @@ INA260PowerSensor::~INA260PowerSensor(){
     stop = true;
 }
 
-bool INA260PowerSensor::isEnabled(){
-    return true;
-}
-
-bool INA260PowerSensor::shouldMatchRobotState(){
-    return false;
-}
-
-bool INA260PowerSensor::shouldDisableWithWatchdog(){
-    return false;
-}
-
-void INA260PowerSensor::_enable(){
-
-}
-
-void INA260PowerSensor::_disable(){
-
-}
-
 std::string INA260PowerSensor::getDeviceName(){
     return "INA260PowerSensor";
 }
@@ -250,10 +229,6 @@ double INA260PowerSensor::getPower(){
     return power;
 }
 
-void INA260PowerSensor::makeMainVmon(){
-    NetworkManager::setMainVmon((void*)this);
-}
-
 void INA260PowerSensor::begin(){
     sensor = std::make_shared<AdafruitINA260>(0x40);
     if(!sensor->begin()){
@@ -261,6 +236,26 @@ void INA260PowerSensor::begin(){
         return;
     }
     BaseRobot::runOnceSoon(std::bind(&INA260PowerSensor::feed, this));
+}
+
+bool INA260PowerSensor::isEnabled(){
+    return true;
+}
+
+bool INA260PowerSensor::shouldMatchRobotState(){
+    return false;
+}
+
+bool INA260PowerSensor::shouldDisableWithWatchdog(){
+    return false;
+}
+
+void INA260PowerSensor::enable(){
+
+}
+
+void INA260PowerSensor::disable(){
+
 }
 
 void INA260PowerSensor::feed(){
@@ -271,8 +266,8 @@ void INA260PowerSensor::feed(){
             voltage = sensor->readBusVoltage() / 1000.0;
             power = sensor->readPower();
 
-            if(NetworkManager::isMainVmon(this))
-                NetworkManager::sendMainBatteryVoltage(voltage);
+            if(isMainVmon())
+                sendMainBatteryVoltage(voltage);
         }catch(const std::runtime_error &ignored){
 
         }

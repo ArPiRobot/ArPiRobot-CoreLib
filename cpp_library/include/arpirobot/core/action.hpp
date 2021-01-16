@@ -12,27 +12,11 @@ namespace arpirobot{
 
     class Action{
     public:
-        // NOT TO BE CALLED BY USER CODE
-        void _actionStart();
-
-        // NOT TO BE CALLED BY USER CODE
-        void _actionStop(bool interrupted);
-
-        // NOT TO BE CALLED BY USER CODE
-        void _actionProcess();
-
         void lockDevices(std::vector<BaseDevice*> devices);
 
         void lockDevice(BaseDevice *device);
 
         bool isRunning();
-
-        // TODO: Move these private and make ActionManager friend class
-        bool isStarted();
-    
-        bool isFinished();
-
-        std::shared_ptr<Task> _schedulerTask = nullptr;
 
     protected:
 
@@ -45,9 +29,25 @@ namespace arpirobot{
         virtual bool shouldContinue() = 0;
 
     private:
+
+        void actionStart();
+
+        void actionStop(bool interrupted);
+
+        void actionProcess();
+
+        bool isStarted();
+    
+        bool isFinished();
+
+        std::shared_ptr<Task> _schedulerTask = nullptr;
+
         std::mutex stateLock;
         bool started = false;
         bool finished = false;
+
+        friend class ActionManager;
+        friend class ActionSeries;
     };
 
 
@@ -55,14 +55,17 @@ namespace arpirobot{
     public:
         BaseActionTrigger(Action *targetAction, bool doRestart = true);
 
+    protected:
         virtual bool shouldRun() = 0;
-
-        void startTargetAction();
 
     private:
 
+        void startTargetAction();
+
         Action *targetAction = nullptr;
         bool doRestart = true;
+
+        friend class ActionManager;
     };
 
     
@@ -87,10 +90,9 @@ namespace arpirobot{
 
         static bool stopAction(Action *action);
 
-        // NOT TO BE CALLED FROM USER CODE
-        static bool _stopActionInternal(Action *action, bool interrupted);
-
     private:
+
+        static bool stopActionInternal(Action *action, bool interrupted);
 
         static void checkTriggers();
 
@@ -98,8 +100,8 @@ namespace arpirobot{
 
         static std::vector<BaseActionTrigger*> triggers;
 
-        // BaseRobot needs to call checkTriggers on its scheduler
-        friend class BaseRobot;
+        friend class BaseRobot; // BaseRobot needs to call checkTriggers on its scheduler
+        friend class Action;    // Action needs to be able to call stopActionInternal
     };
 
 

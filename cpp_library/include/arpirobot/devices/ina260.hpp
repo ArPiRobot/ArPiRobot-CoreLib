@@ -2,6 +2,7 @@
 
 #include <arpirobot/core/device.hpp>
 #include <arpirobot/core/scheduler.hpp>
+#include <arpirobot/core/network.hpp>
 
 namespace arpirobot{
 
@@ -88,21 +89,11 @@ namespace arpirobot{
     };
 
 
-    class INA260PowerSensor : public BaseDevice{
+    class INA260PowerSensor : public BaseDevice, public MainVmon{
     public:
         INA260PowerSensor();
 
         ~INA260PowerSensor();
-
-        bool isEnabled();
-
-        bool shouldMatchRobotState();
-
-        bool shouldDisableWithWatchdog();
-
-        void _enable();
-
-        void _disable();
 
         std::string getDeviceName();
 
@@ -115,10 +106,18 @@ namespace arpirobot{
         // Power in mW
         double getPower();
 
-        void makeMainVmon();
-
     protected:
         void begin();
+
+        bool isEnabled();
+
+        bool shouldMatchRobotState();
+
+        bool shouldDisableWithWatchdog();
+
+        void enable();
+
+        void disable();
 
     private:
 

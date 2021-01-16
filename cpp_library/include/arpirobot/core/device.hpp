@@ -9,32 +9,31 @@ namespace arpirobot{
 
     class BaseDevice{
     public:
+        virtual std::string getDeviceName() = 0;
 
-        void _lockDevice(Action *action);
+    protected:
+        virtual void begin() = 0;
+        virtual bool isEnabled() = 0;
+        virtual bool shouldMatchRobotState() = 0;
+        virtual bool shouldDisableWithWatchdog() = 0;
+        virtual void enable() = 0;
+        virtual void disable() = 0;
+    
+        bool initialized = false;
+
+    private:
+
+        void lockDevice(Action *action);
 
         bool isLockedByAction();
 
         void doBegin();
 
-        virtual bool isEnabled() = 0;
-
-        virtual bool shouldMatchRobotState() = 0;
-
-        virtual bool shouldDisableWithWatchdog() = 0;
-
-        virtual void _enable() = 0;
-
-        virtual void _disable() = 0;
-
-        virtual std::string getDeviceName() = 0;
-
-    protected:
-        virtual void begin() = 0;
-
-        bool initialized = false;
-    
         std::mutex actionLock;
         Action *lockingAction = nullptr;
+
+        friend class Action; // Needs to call lockDevice
+        friend class BaseRobot; // Needs doBegin, enable, disable
     };
 
     class MotorController : public BaseDevice{
@@ -48,17 +47,17 @@ namespace arpirobot{
         double getSpeed();
         void setSpeed(double speed);
 
-        virtual bool isEnabled();
-
-        virtual bool shouldMatchRobotState();
-
-        virtual bool shouldDisableWithWatchdog();
-
-        virtual void _enable();
-
-        virtual void _disable();
-
     protected:
+        bool isEnabled();
+
+        bool shouldMatchRobotState();
+
+        bool shouldDisableWithWatchdog();
+
+        void enable();
+
+        void disable();
+        
         virtual void run() = 0;
 
         double speed = 0;

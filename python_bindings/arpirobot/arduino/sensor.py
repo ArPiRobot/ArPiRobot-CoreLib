@@ -1,11 +1,13 @@
 
+from arpirobot.core.network import MainVmon
 import arpirobot.bridge as bridge
 import ctypes
 from typing import Union
 from arpirobot.arduino.device import ArduinoDevice
+from arpirobot.core.network import MainVmon
 
 
-class VoltageMonitor(ArduinoDevice):
+class VoltageMonitor(ArduinoDevice, MainVmon):
     def __init__(self, pin: Union[int, str], vboard: float, r1: int, r2: int, 
             create_device: bool = True, device_id: int = -1):
         super().__init__()
@@ -16,9 +18,6 @@ class VoltageMonitor(ArduinoDevice):
     
     def get_voltage(self) -> float:
         return bridge.arpirobot.VoltageMonitor_getVoltage(self._ptr)
-    
-    def make_main_vmon(self):
-        bridge.arpirobot.VoltageMonitor_makeMainVmon(self._ptr)
 
 
 class Ultrasonic4Pin(ArduinoDevice):

@@ -93,6 +93,23 @@ void ControllerData::updateData(std::vector<uint8_t> &data){
     lastUpdateTime = std::chrono::steady_clock::now();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+/// MainVmon
+////////////////////////////////////////////////////////////////////////////////
+
+void MainVmon::makeMainVmon(){
+    NetworkManager::setMainVmon(this);
+}
+
+bool MainVmon::isMainVmon(){
+    return NetworkManager::isMainVmon(this);
+}
+
+void MainVmon::sendMainBatteryVoltage(double voltage){
+    if(isMainVmon())
+        NetworkManager::sendMainBatteryVoltage(voltage);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// NetworkManager
@@ -203,7 +220,7 @@ bool NetworkManager::isMainVmon(void *vmon){
 void NetworkManager::sendMainBatteryVoltage(double voltage){
     std::stringstream vstr;
     vstr << std::fixed << std::setprecision(2) << voltage;
-    NetworkTableInternal::setFromRobot("vbat0", vstr.str());
+    NetworkTable::setFromRobot("vbat0", vstr.str());
 }
 
 void NetworkManager::runNetworking(){
@@ -248,8 +265,8 @@ void NetworkManager::handleConnectionStatusChanged(){
         // Handle disconnect
         Logger::logInfo("Drive station disconnected.");
 
-        if(NetworkTableInternal::isInSync()){
-            NetworkTableInternal::abortSync();
+        if(NetworkTable::isInSync()){
+            NetworkTable::abortSync();
             Logger::logDebug("Net table sync aborted due to drive station disconnect.");
         }
 
@@ -359,7 +376,7 @@ void NetworkManager::handleCommand(){
         }else if(subset == COMMAND_NET_TABLE_SYNC){
             Logger::logDebug("Starting net table sync.");
             ntSyncData.clear();
-            NetworkTableInternal::startSync();
+            NetworkTable::startSync();
         }
     }
 }
@@ -385,14 +402,14 @@ void NetworkManager::handleNetTableData(){
         // Handle data in the subset
         auto delim = subset.find((char)255);
         if(subset == NET_TABLE_END_SYNC_DATA){
-            NetworkTableInternal::finishSync(ntSyncData);
+            NetworkTable::finishSync(ntSyncData);
         }else if (delim != std::string::npos){
             std::string key = std::string(subset.begin(), subset.begin() + delim);
             std::string value = std::string(subset.begin() + delim + 1, subset.begin() + subset.length() - 1);
-            if(NetworkTableInternal::isInSync()){
+            if(NetworkTable::isInSync()){
                 ntSyncData[key] = value;
             }else{
-                NetworkTableInternal::setFromDs(key, value);
+                NetworkTable::setFromDs(key, value);
             }
         }
     }
@@ -422,31 +439,35 @@ void NetworkManager::handleControllerData(std::vector<uint8_t> &data){
 /// NetworkTable
 ////////////////////////////////////////////////////////////////////////////////
 
+std::unordered_map<std::string, std::string> NetworkTable::data;
+std::mutex NetworkTable::lock;
+bool NetworkTable::inSync = false;
+
 void NetworkTable::set(std::string key, std::string value){
-    NetworkTableInternal::setFromRobot(key, value);
+    setFromRobot(key, value);
 }
 
 std::string NetworkTable::get(std::string key){
-    return NetworkTableInternal::get(key);
+    std::lock_guard<std::mutex> l(lock);
+    auto it = data.find(key);
+    if(it != data.end()){
+        return data[key];
+    }
+    return "";
 }
 
 bool NetworkTable::has(std::string key){
-    return NetworkTableInternal::has(key);
+    std::lock_guard<std::mutex> l(lock);
+    auto it = data.find(key);
+    return it != data.end();
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// NetworkTableInternal
-////////////////////////////////////////////////////////////////////////////////
 
-std::unordered_map<std::string, std::string> NetworkTableInternal::data;
-std::mutex NetworkTableInternal::lock;
-bool NetworkTableInternal::inSync = false;
-
-bool NetworkTableInternal::isInSync(){
+bool NetworkTable::isInSync(){
     return inSync;
 }
 
-void NetworkTableInternal::startSync(){
+void NetworkTable::startSync(){
     lock.lock();
     inSync = true;
     Logger::logDebug("Starting sync from robot to DS.");
@@ -465,7 +486,7 @@ void NetworkTableInternal::startSync(){
     NetworkManager::sendNtRaw(asio::buffer(NET_TABLE_END_SYNC_DATA, 4));
 }
 
-void NetworkTableInternal::sendAllValues(){
+void NetworkTable::sendAllValues(){
     for(const auto &it : data){
         if(!inSync){
             return;
@@ -474,7 +495,7 @@ void NetworkTableInternal::sendAllValues(){
     }
 }
 
-void NetworkTableInternal::finishSync(std::unordered_map<std::string, std::string> dataFromDs){
+void NetworkTable::finishSync(std::unordered_map<std::string, std::string> dataFromDs){
     Logger::logDebug("Got all sync data from DS to robot.");
 
     for(const auto &it : dataFromDs){
@@ -486,13 +507,13 @@ void NetworkTableInternal::finishSync(std::unordered_map<std::string, std::strin
     Logger::logInfo("Network table sync complete.");
 }
 
-void NetworkTableInternal::abortSync(){
+void NetworkTable::abortSync(){
     inSync = false;
     lock.unlock();
     Logger::logWarning("Network table sync aborted.");
 }
 
-void NetworkTableInternal::setFromRobot(std::string key, std::string value){
+void NetworkTable::setFromRobot(std::string key, std::string value){
     // Do not allow \n or 255 in the key or value
     std::replace(key.begin(), key.end(), (char)255, '\0');
     std::replace(key.begin(), key.end(), '\n', '\0');
@@ -503,22 +524,7 @@ void NetworkTableInternal::setFromRobot(std::string key, std::string value){
     NetworkManager::sendNt(key, value);
 }
 
-void NetworkTableInternal::setFromDs(std::string key, std::string value){
+void NetworkTable::setFromDs(std::string key, std::string value){
     std::lock_guard<std::mutex> l(lock);
     data[key] = value;
-}
-
-std::string NetworkTableInternal::get(std::string key){
-    std::lock_guard<std::mutex> l(lock);
-    auto it = data.find(key);
-    if(it != data.end()){
-        return data[key];
-    }
-    return "";
-}
-
-bool NetworkTableInternal::has(std::string key){
-    std::lock_guard<std::mutex> l(lock);
-    auto it = data.find(key);
-    return it != data.end();
 }

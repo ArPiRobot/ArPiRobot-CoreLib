@@ -1,7 +1,6 @@
 #include <arpirobot/arduino/sensor.hpp>
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/conversions.hpp>
-#include <arpirobot/core/network.hpp>
 
 using namespace arpirobot;
 
@@ -22,10 +21,6 @@ VoltageMonitor::VoltageMonitor(int pin, double vboard, int r1, int r2, bool crea
 
 double VoltageMonitor::getVoltage(){
     return voltage;
-}
-
-void VoltageMonitor::makeMainVmon(){
-    NetworkManager::setMainVmon((void*)this);
 }
 
 std::string VoltageMonitor::getDeviceName(){
@@ -75,8 +70,8 @@ std::vector<uint8_t> VoltageMonitor::getCreateData(){
 void VoltageMonitor::handleData(const std::vector<uint8_t> &data){
     if(data.size() >= 5){
         voltage = Conversions::convertDataToFloat(data, 1, true);
-        if(NetworkManager::isMainVmon(this)){
-            NetworkManager::sendMainBatteryVoltage(voltage);
+        if(isMainVmon()){
+            sendMainBatteryVoltage(voltage);
         }
     }
 }

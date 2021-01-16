@@ -93,6 +93,16 @@ namespace arpirobot{
         std::mutex lock;
     };
 
+    class MainVmon{
+    public:
+        void makeMainVmon();
+
+    protected:
+        bool isMainVmon();
+
+        void sendMainBatteryVoltage(double voltage);
+    };
+
     ////////////////////////////////////////////////////////////////////////////
     /// NetworkManager
     ////////////////////////////////////////////////////////////////////////////
@@ -102,6 +112,8 @@ namespace arpirobot{
         static void startNetworking(std::function<void()> enableFunc, std::function<void()> disableFunc);
 
         static void stopNetworking();
+
+    private:
 
         static bool sendNtRaw(const_buffer buffer);
 
@@ -114,10 +126,6 @@ namespace arpirobot{
         static bool isMainVmon(void *vmon);
 
         static void sendMainBatteryVoltage(double voltage);
-
-        static std::unordered_map<int, std::shared_ptr<ControllerData>> controllerData;
-
-    private:
 
         static void runNetworking();
 
@@ -137,6 +145,8 @@ namespace arpirobot{
         static void handleNetTableData();
 
         static void handleControllerData(std::vector<uint8_t> &data);
+
+        static std::unordered_map<int, std::shared_ptr<ControllerData>> controllerData;
 
         // Thread for network io service
         static std::thread *networkThread;
@@ -179,6 +189,12 @@ namespace arpirobot{
         static std::unordered_map<std::string, std::string> ntSyncData;
 
         static void *mainVmon;
+
+
+        friend class MainVmon;
+        friend class Logger;
+        friend class NetworkTable;
+        friend class Gamepad;
     };
 
 
@@ -187,10 +203,8 @@ namespace arpirobot{
         static void set(std::string key, std::string value);
         static std::string get(std::string key);
         static bool has(std::string key);
-    };
 
-    class NetworkTableInternal{
-    public:
+    private:
         static bool isInSync();
         static void startSync();
         static void sendAllValues();
@@ -199,13 +213,12 @@ namespace arpirobot{
 
         static void setFromRobot(std::string key, std::string value);
         static void setFromDs(std::string key, std::string value);
-        static std::string get(std::string key);
-        static bool has(std::string key);
     
-    private:
         static std::unordered_map<std::string, std::string> data;
         static std::mutex lock;
         static bool inSync;
+
+        friend class NetworkManager;
     };
 
 }

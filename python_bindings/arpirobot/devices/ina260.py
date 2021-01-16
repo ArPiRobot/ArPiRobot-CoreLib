@@ -1,9 +1,10 @@
+from arpirobot.core.network import MainVmon
 import arpirobot.bridge as bridge
 import ctypes
 from arpirobot.core.device import BaseDevice
 
 
-class INA260PowerSensor(BaseDevice):
+class INA260PowerSensor(BaseDevice, MainVmon):
     def __init__(self):
         super().__init__()
         self._ptr = bridge.arpirobot.INA260PowerSensor_create()
@@ -19,6 +20,3 @@ class INA260PowerSensor(BaseDevice):
 
     def get_power(self) -> float:
         return bridge.arpirobot.INA260PowerSensor_getPower(self._ptr)
-
-    def make_main_vmon(self):
-        bridge.arpirobot.INA260PowerSensor_makeMainVmon(self._ptr)

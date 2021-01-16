@@ -57,7 +57,7 @@ void BaseRobot::start(){
 
     // Make sure all devices start disabled
     for(BaseDevice *device : devices){
-        device->_disable();
+        device->disable();
     }
 
     Logger::logInfo("Robot Started.");
@@ -93,7 +93,7 @@ void BaseRobot::start(){
 
     // Disable all devices when robot stops
     for(BaseDevice *device : devices){
-        device->_disable();
+        device->disable();
     }
 
     // Do not call this here. Registered as atexit func by pigpio
@@ -112,7 +112,7 @@ void BaseRobot::feedWatchdog(){
                 if(!device->isEnabled() && device->shouldDisableWithWatchdog()){
                     // Don't enable device with watchdog if it should be disabled with robot
                     if(!device->shouldMatchRobotState() or isEnabled){
-                        device->_enable();
+                        device->enable();
                     }
                 }
             }
@@ -173,7 +173,7 @@ void BaseRobot::runWatchdog(){
                 for(BaseDevice *device : devices){
                     if(device->shouldDisableWithWatchdog() && device->isEnabled()){
                         Logger::logWarningFrom(device->getDeviceName(), "Device disabled by watchdog.");
-                        device->_disable();
+                        device->disable();
                     }
                 }
                 watchdogDidDisable = true;
@@ -193,7 +193,7 @@ void BaseRobot::onDisable(){
 
         for(BaseDevice *device : devices){
             if(device->shouldMatchRobotState())
-                device->_disable();
+                device->disable();
         }
 
         Logger::logInfo("Robot disabled.");
@@ -208,7 +208,7 @@ void BaseRobot::onEnable(){
 
         for(BaseDevice *device : devices){
             if(device->shouldMatchRobotState())
-                device->_enable();
+                device->enable();
         }
 
         Logger::logInfo("Robot enabled.");
