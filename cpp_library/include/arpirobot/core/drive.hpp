@@ -128,7 +128,7 @@ namespace arpirobot{
     class BaseAxisTransform{
     public:
         /**
-         * Axis transforms should override this functino to implement specific calculations.
+         * Axis transforms should override this function to implement specific calculations.
          */
         virtual double applyTransform(double rawAxisValue) = 0;
     };

@@ -5,6 +5,7 @@ from arpirobot.core.device import BaseDevice
 from typing import List
 
 
+## Generic action class. User actions should inherit this class and implement the four pure virtual methods
 class Action(ABC):
     def __init__(self):
 
@@ -36,6 +37,9 @@ class Action(ABC):
         bridge.arpirobot.Action_destroy(self._ptr)
     
 
+    ## Use this action to lock a set of devices. 
+    #  This is the same as calling lock_evice once for each device individually.
+    #  @param devices A vector of devices to lock
     def lock_devices(self, devices: List[BaseDevice]):
         # Build list of internal pointers for each device
         d = []
@@ -44,9 +48,13 @@ class Action(ABC):
         d_type = ctypes.c_void_p * len(d)
         bridge.arpirobot.Action_lockDevices(self._ptr, d_type(*d), len(d))
 
+    ## Use this action to lock a device. When a device is locked by this action, 
+    #  any action previously locking it will be stopped.
+    #  @param device The device to lock
     def lock_device(self, device: BaseDevice):
         bridge.arpirobot.Action_lockDevice(self._ptr, device._ptr)
 
+    ## @returns true if the action has been started, but has not finished or been stopped.
     def is_running(self) -> bool:
         return bridge.arpirobot.Action_isRunning(self._ptr)
 
@@ -67,7 +75,8 @@ class Action(ABC):
         pass
 
 
-# Just a common base class
+## Generic action trigger. Triggers are registered with the action manager. When some event occurs
+#   a trigger will run the designated action.
 class BaseActionTrigger:
     def __init__(self, target_action: Action):
         self._ptr = None
@@ -75,10 +84,16 @@ class BaseActionTrigger:
         self._target_action = target_action
 
 
+## Static helper class to manage actions and triggers
 class ActionManager:
     __started_actions = []
     __added_triggers = []
 
+    ## Start an action
+    #  @param action    A pointer to the action to start.
+    #  @param doRestart If true starting an action that is already running will restart the action.
+    #                   If false the action will continue running uninterrupted.
+    #  @returns true if the action was started successfully
     @staticmethod
     def start_action(action: Action) -> bool:
         # Keep a reference to the action or it will be deallocated
@@ -87,6 +102,10 @@ class ActionManager:
         
         return bridge.arpirobot.ActionManager_startAction(action._ptr)
 
+    ## Stop an action (interrupts it)
+    #  If the action is not running nothing is done.
+    #  @param action A pointer to the action to stop
+    #  @returns true if the action was stopped. If false, the action was not running.
     @staticmethod
     def stop_action(action: Action) -> bool:
         # No longer need reference
@@ -94,7 +113,9 @@ class ActionManager:
             ActionManager.__started_actions.remove(action)
 
         return bridge.arpirobot.ActionManager_stopAction(action._ptr)
-
+    
+    ## Add a trigger to start an action when some event occurs.
+    #  @param trigger A pointer to the trigger to add.
     @staticmethod
     def add_trigger(trigger: BaseActionTrigger):
         # Keep a reference to the trigger or it will be deallocated
@@ -102,6 +123,8 @@ class ActionManager:
             ActionManager.__added_triggers.append(trigger)
         bridge.arpirobot.ActionManager_addTrigger(trigger._ptr)
 
+    ## Remove a trigger
+    #  @param trigger A pointer to the trigger to remove
     @staticmethod
     def remove_trigger(trigger: BaseActionTrigger):
         # No longer need reference
@@ -110,7 +133,10 @@ class ActionManager:
         bridge.arpirobot.ActionManager_removeTrigger(trigger._ptr)
 
 
+## A special action that will run a sequential set of actions (one at a time)
 class ActionSeries:
+    ## @param actions A vector of actions to run sequentially
+    #  @param finishedAction An action to transition to once other actions are complete
     def __init__(self, actions: List[Action], finished_action: Action):
 
         # Keep references so these are not deallocated

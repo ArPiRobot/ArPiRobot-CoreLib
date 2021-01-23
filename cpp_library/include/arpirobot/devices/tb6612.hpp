@@ -11,6 +11,11 @@ namespace arpirobot{
      */
     class TB6612Motor : public MotorController{
     public:
+        /**
+         * @param in1Pin pin for side 1 directional control
+         * @param in2Pin pin for side 2 directional control
+         * @param pwmPin pin for pwm of motor
+         */
         TB6612Motor(int in1Pin, int in2Pin, int pwmPin);
         ~TB6612Motor();
 

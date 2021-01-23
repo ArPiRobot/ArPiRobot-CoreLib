@@ -15,10 +15,11 @@ class Robot(BaseRobot):
     def __init__(self):
         super().__init__()
         self.gp0 = Gamepad(0)
-        self.vmon = INA260PowerSensor()
+        self.vmon = ArduinoUartInterface()
+        self.vmon.begin()
     
     def robot_started(self):
-        self.vmon.make_main_vmon()
+        pass
 
     def robot_enabled(self):
         pass

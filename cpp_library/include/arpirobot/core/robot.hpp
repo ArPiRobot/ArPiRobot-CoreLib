@@ -15,10 +15,17 @@ namespace arpirobot{
      * Settings to configure general robot behavior
      */
     struct RobotProfile{
-        int mainSchedulerThreads = 10; /// Number of threads to use on the main scheduler 
-        int periodicFunctionRate = 50; /// Rate to run robot periodic functions at (ms)
-        int maxGamepadDataAge = 100;   /// Maximum age gamepad data can be before it is considered invalid (ms)
-        int actionFunctionPeriod = 50; /// Rate to run action periodic functions at (ms)
+        /// Number of threads to use on the main scheduler
+        int mainSchedulerThreads = 10; 
+
+        /// Rate to run robot periodic functions at (ms)
+        int periodicFunctionRate = 50; 
+
+        /// Maximum age gamepad data can be before it is considered invalid (ms)
+        int maxGamepadDataAge = 100;  
+        
+        /// Rate to run action periodic functions at (ms) 
+        int actionFunctionPeriod = 50; 
     };
 
     /**

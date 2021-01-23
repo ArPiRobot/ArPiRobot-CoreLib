@@ -10,7 +10,7 @@
 namespace arpirobot{
 
     /**
-     * Gamepad receiving data from network table
+     * Gamepad receiving data from drive station
      */
     class Gamepad : public BaseDevice{
     public:
