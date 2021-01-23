@@ -6,6 +6,8 @@
 
 namespace arpirobot{
     /**
+     * \class VoltageMonitor sensor.hpp arpirobot/arduino/sensor.hpp
+     * 
      * Simple analog input voltage monitor (using voltage divider) connected to arduino analog input.
      */
     class VoltageMonitor : public ArduinoDevice, public MainVmon{
@@ -57,6 +59,8 @@ namespace arpirobot{
     };
 
     /**
+     * \class Ultrasonic4Pin sensor.hpp arpirobot/arduino/sensor.hpp
+     * 
      * Device for 4-pin ultrasonic sensor.
      */
     class Ultrasonic4Pin : public ArduinoDevice{
@@ -117,6 +121,8 @@ namespace arpirobot{
     };
     
     /**
+     * \class SingleEncoder sensor.hpp arpirobot/arduino/sensor.hpp
+     * 
      * Single-channel encoder
      */
     class SingleEncoder : public ArduinoDevice{
@@ -169,6 +175,8 @@ namespace arpirobot{
     };
 
     /**
+     * \class IRReflectorModule sensor.hpp arpirobot/arduino/sensor.hpp
+     * 
      * Infrared reflection detector module
      */
     class IRReflectorModule : public ArduinoDevice{
@@ -234,6 +242,8 @@ namespace arpirobot{
     };
 
     /**
+     * \class OldAdafruit9Dof sensor.hpp arpirobot/arduino/sensor.hpp
+     * 
      * Now discontinued Adafruit 9-DOF IMU
      * https://www.adafruit.com/product/1714
      */
@@ -317,6 +327,11 @@ namespace arpirobot{
     };
 
 
+    /**
+     * \class NxpAdafruit9Dof sensor.hpp arpirobot/arduino/sensor.hpp
+     * 
+     * Newer adafruit 9-DOF NXP IMU
+     */
     class NxpAdafruit9Dof : public ArduinoDevice{
     public:
         /**

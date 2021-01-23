@@ -8,6 +8,8 @@
 namespace arpirobot{
 
     /**
+     * \class ArduinoDevice device.hpp arpirobot/arduino/device.hpp
+     * 
      * Common base class for any device that is connected to an arduino (any device that communicates with the Pi via 
      * an arduino or other microprocessor)
      */

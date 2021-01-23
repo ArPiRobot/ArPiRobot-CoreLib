@@ -11,6 +11,8 @@
 namespace arpirobot{
 
     /**
+     * \class Action action.hpp arpirobot/core/action.hpp
+     * 
      * Generic action class. User actions should inherit this class and implement the four pure virtual methods
      */
     class Action{
@@ -82,6 +84,8 @@ namespace arpirobot{
     };
 
     /**
+     * \class BaseActionTrigger action.hpp arpirobot/core/action.hpp
+     * 
      * Generic action trigger. Triggers are registered with the action manager. When some event occurs
      * a trigger will run the designated action.
      */
@@ -151,6 +155,8 @@ namespace arpirobot{
 
 
     /**
+     * \class ActionSeries action.hpp arpirobot/core/action.hpp
+     * 
      * A special action that will run a sequential set of actions (one at a time)
      */
     class ActionSeries : public Action{
