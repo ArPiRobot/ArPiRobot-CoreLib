@@ -11,9 +11,13 @@
 namespace arpirobot{
 
     namespace internal{
-        // Low level driver to interface with motor hat via I2C
-        // arpirobot BaseDevice implementatio is built on top of this
-        // Based on https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library/blob/master/Adafruit_MotorHAT/
+        /**
+         * \class AdafruitMotorHat adafruitmotorhatmotor.hpp arpirobot/devices/adafruitmotorhatmotor.hpp
+         * 
+         * Low level driver to interface with motor hat via I2C
+         * arpirobot BaseDevice implementatio is built on top of this
+         * Based on https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library/blob/master/Adafruit_MotorHAT/
+         */
         class AdafruitMotorHat{
         public:
             // Motor commands
@@ -22,11 +26,23 @@ namespace arpirobot{
             AdafruitMotorHat(uint8_t address, uint8_t bus = 1);
             ~AdafruitMotorHat();
 
+            /**
+             * Motor object instantiated by the motor hat
+             */
             class LowLevelDCMotor{
             public:
                 LowLevelDCMotor(AdafruitMotorHat *hat, int num);
 
+                /**
+                 * Set the motor's mode (MotorCommand)
+                 * @param cmd The MotorCommand for the motor
+                 */
                 void run(MotorCommand cmd);
+
+                /**
+                 * Set the speed of the motor
+                 * @param speed The motor speed (-1.0 to 1.0)
+                 */
                 void setSpeed(double speed);
 
             private:
@@ -76,6 +92,11 @@ namespace arpirobot{
         };
     }
 
+    /**
+     * \class AdafruitMotorHatMotor adafruitmotorhatmotor.hpp arpirobot/devices/adafruitmotorhatmotor.hpp
+     * 
+     * Motor for Adafruit Motor Hat
+     */
     class AdafruitMotorHatMotor : public MotorController{
     public:
 
@@ -91,6 +112,10 @@ namespace arpirobot{
          */
         AdafruitMotorHatMotor(int motorNum, int address = DETECT_ADDR, bool remapNumbers = true);
 
+        /**
+         * Get the human-readable name of the device
+         * @returns the devices human readable name
+         */
         std::string getDeviceName();
 
     protected:

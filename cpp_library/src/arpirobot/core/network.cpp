@@ -138,7 +138,7 @@ std::function<void()> NetworkManager::enableFunc;
 std::function<void()> NetworkManager::disableFunc;
 std::unordered_map<std::string, std::string> NetworkManager::ntSyncData;
 std::unordered_map<int, std::shared_ptr<ControllerData>> NetworkManager::controllerData;
-void *NetworkManager::mainVmon = nullptr;
+MainVmon *NetworkManager::mainVmon = nullptr;
 
 void NetworkManager::startNetworking(std::function<void()> enableFunc, std::function<void()> disableFunc){
     if(!networkingStarted){
@@ -209,11 +209,11 @@ void NetworkManager::sendLogMessage(std::string message){
     }
 }
 
-void NetworkManager::setMainVmon(void *vmon){
+void NetworkManager::setMainVmon(MainVmon *vmon){
     mainVmon = vmon;
 }
 
-bool NetworkManager::isMainVmon(void *vmon){
+bool NetworkManager::isMainVmon(MainVmon *vmon){
     return vmon == mainVmon;
 }
 

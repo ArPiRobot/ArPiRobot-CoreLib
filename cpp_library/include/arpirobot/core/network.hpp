@@ -73,13 +73,24 @@ namespace arpirobot{
     /// ControllerData
     ////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * \class ControllerData network.hpp arpirobot/core/network.hpp
+     * 
+     * Class to hold and data for a single controller and parse data received from network
+     */
     class ControllerData{
     public:
+
+        /**
+         * @param data The raw controller data from network
+         */
         ControllerData(std::vector<uint8_t> &data);
 
+        /**
+         * Update the controller data from raw network data
+         * @param data Raw controller data from network
+         */
         void updateData(std::vector<uint8_t> &data);
-
-        void zeroData();
 
         int controllerNumber = -1;
         int axisCount = -1;
@@ -93,13 +104,29 @@ namespace arpirobot{
         std::mutex lock;
     };
 
+    /**
+     * \class MainVmon network.hpp arpirobot/core/network.hpp
+     * 
+     * Main voltage monitor interface
+     * Any sensor (arduino or pi device) can implement this interface to be able to be used as a main vmon
+     */
     class MainVmon{
     public:
+
+        /**
+         * Make this device the main voltage monitor
+         */
         void makeMainVmon();
 
     protected:
+        /**
+         * Returns true if this is currently the main vmon
+         */
         bool isMainVmon();
 
+        /**
+         * Send the main battery voltage to the connected DS (if this is the main vmon)
+         */
         void sendMainBatteryVoltage(double voltage);
     };
 
@@ -107,30 +134,81 @@ namespace arpirobot{
     /// NetworkManager
     ////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * \class NetworkManager network.hpp arpirobot/core/network.hpp
+     * 
+     * Used by BaseRobot to manage networking (with drive station)
+     * Should not be used directly from user code
+     */
     class NetworkManager{
     public:
+
+        /**
+         * Start networking protocol
+         * @param enableFunc The function to call when the enable command is received
+         * @param disableFunc The function to call when the disable function is received
+         */
         static void startNetworking(std::function<void()> enableFunc, std::function<void()> disableFunc);
 
+        /**
+         * Stop networking
+         */
         static void stopNetworking();
 
     private:
 
+        /**
+         * Send raw net table data
+         * @param buffer Raw data to send to network table client
+         */
         static bool sendNtRaw(const_buffer buffer);
 
+        /**
+         * Send a network table key/value pair to the network table client
+         * @param key The key for the pair
+         * @param value The value for the pair
+         */
         static bool sendNt(std::string key, std::string value);
 
+        /**
+         * Send a message to the log client
+         * @param message The message to send
+         */
         static void sendLogMessage(std::string message);
 
-        static void setMainVmon(void *vmon);
+        /**
+         * Set a device as the main vmon
+         * @param vmon A pointer to the device that is the main vmon.
+         */
+        static void setMainVmon(MainVmon *vmon);
 
-        static bool isMainVmon(void *vmon);
+        /**
+         * Check if the given device is the main voltage monitor
+         * @param vmon A pointer to the device that is the main vmon
+         * @returns true if the given device is the main vmon, else false
+         */
+        static bool isMainVmon(MainVmon *vmon);
 
+        /**
+         * Send the given voltage to the net table client using correct key
+         * @param voltage The voltage to send
+         */
         static void sendMainBatteryVoltage(double voltage);
 
+        /**
+         * Internal function to run the asio loop
+         */
         static void runNetworking();
 
+        /**
+         * Handle data sent from client (async receive)
+         * @param client The client to receive data from
+         */
         static void receiveFrom(const tcp::socket &client);
 
+        /**
+         * Called when DS connects or disconnects
+         */
         static void handleConnectionStatusChanged();
 
         // Boost async handler functions
@@ -188,7 +266,7 @@ namespace arpirobot{
 
         static std::unordered_map<std::string, std::string> ntSyncData;
 
-        static void *mainVmon;
+        static MainVmon *mainVmon;
 
 
         friend class MainVmon;
@@ -198,10 +276,33 @@ namespace arpirobot{
     };
 
 
+    /**
+     * \class NetworkTable network.hpp arpirobot/core/network.hpp
+     * 
+     * Helper class used to manage network table key/value pairs
+     */
     class NetworkTable{
     public:
+
+        /**
+         * Sets a given key/value pair. If the key does not exist it will be created. Else the value will be updated.
+         * @param key The key for the pair
+         * @param value The value for the pair
+         */
         static void set(std::string key, std::string value);
+
+        /**
+         * Get the value for a key/value pair
+         * @param key The key to get the associated value with
+         * @returns The value associated with the given key. If the key does not exist an empty string is returned.
+         */
         static std::string get(std::string key);
+
+        /**
+         * Check if a key has a value
+         * @param key The key to check for a value associated with
+         * @returns true if a value exists for the given key, else false
+         */
         static bool has(std::string key);
 
     private:
