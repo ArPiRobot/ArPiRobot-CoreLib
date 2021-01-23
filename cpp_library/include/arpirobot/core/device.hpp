@@ -7,8 +7,18 @@ namespace arpirobot{
 
     class Action; // Forward declare b/c this header is included by action.hpp
 
+    /**
+     * \class BaseDevice device.hpp arpirobot/core/device.hpp
+     * 
+     * Base class for any device connected to the raspberry pi.
+     */
     class BaseDevice{
     public:
+
+        /**
+         * Get the human-readable name of the device
+         * @returns the devices human readable name
+         */
         virtual std::string getDeviceName() = 0;
 
     protected:
@@ -36,15 +46,48 @@ namespace arpirobot{
         friend class BaseRobot; // Needs doBegin, enable, disable
     };
 
+    /**
+     * \class MotorController device.hpp arpirobot/core/device.hpp
+     * 
+     * Base class for motor controllers.
+     */
     class MotorController : public BaseDevice{
     public:
+
+        /**
+         * Check if the motor direction is inverted (positive and negative speed switched)
+         * @returns true if inverted, else false
+         */
         bool isInverted();
+
+        /**
+         * Set the motor direction to inverted or non-inverted (positive and negative speed switched)
+         * @param inverted True for inverted, false for non-inverted
+         */
         void setInverted(bool inverted);
 
+        /**
+         * Check if brake mode is enabled. When enabled motors with a speed of zero will resist motion.
+         * @returns true if enabled, else false
+         */
         bool isBrakeMode();
+
+        /**
+         * Set if brake mode is enabled
+         * @param brakeMode true for enabled, false for disabled
+         */
         void setBrakeMode(bool brakeMode);
 
+        /**
+         * Get the current speed of the motor
+         * @returns the motor's speed
+         */
         double getSpeed();
+
+        /**
+         * Set the current speed of the motor (no effect if motor is disabled)
+         * @param speed The motor's speed (between -1.0 and 1.0)
+         */
         void setSpeed(double speed);
 
     protected:

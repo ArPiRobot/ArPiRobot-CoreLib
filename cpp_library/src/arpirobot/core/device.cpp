@@ -58,7 +58,7 @@ double MotorController::getSpeed(){
         return 0;
     {
         std::lock_guard<std::mutex> l(lock);
-        return speed;
+        return speed / speedFactor; // divide by speed factor so this matches what user sets
     }
 }
 
