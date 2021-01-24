@@ -15,6 +15,8 @@ namespace arpirobot{
     class BaseDevice{
     public:
 
+        virtual ~BaseDevice();
+
         /**
          * Get the human-readable name of the device
          * @returns the devices human readable name
@@ -53,6 +55,8 @@ namespace arpirobot{
      */
     class MotorController : public BaseDevice{
     public:
+
+        virtual ~MotorController();
 
         /**
          * Check if the motor direction is inverted (positive and negative speed switched)

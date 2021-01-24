@@ -11,6 +11,10 @@ using namespace arpirobot;
 /// Action
 ////////////////////////////////////////////////////////////////////////////////
 
+Action::~Action(){
+    
+}
+
 void Action::lockDevices(std::vector<BaseDevice*> devices){
     for(auto dev : devices){
         lockDevice(dev);

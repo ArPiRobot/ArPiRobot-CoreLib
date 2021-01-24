@@ -39,6 +39,8 @@ namespace arpirobot{
     public:
         BaseRobot(RobotProfile profile = RobotProfile());
 
+        virtual ~BaseRobot();
+
         /**
          * Start the robot. Only one robot instance my run at a time
          */

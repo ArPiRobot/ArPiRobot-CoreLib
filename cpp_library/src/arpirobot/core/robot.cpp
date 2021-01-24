@@ -20,6 +20,10 @@ BaseRobot::BaseRobot(RobotProfile profile) : profile(profile) {
     
 }
 
+BaseRobot::~BaseRobot(){
+    
+}
+
 void BaseRobot::start(){
 
     // Make sure conversions helper is configured properly before starting robot

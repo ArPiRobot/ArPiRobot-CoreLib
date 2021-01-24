@@ -18,6 +18,8 @@ namespace arpirobot{
     class Action{
     public:
 
+        virtual ~Action();
+
         /**
          * Use this action to lock a set of devices. 
          * This is the same as calling Action::lockDevice once for each device individually.
