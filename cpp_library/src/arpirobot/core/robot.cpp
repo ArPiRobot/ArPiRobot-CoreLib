@@ -71,7 +71,7 @@ void BaseRobot::start(){
     robotDisabled();
 
     // Start periodic callbacks
-    scheduler->addRepeatedTask(std::bind(&BaseRobot::periodic, this), 
+    scheduler->addRepeatedTask(std::bind(&BaseRobot::doPeriodic, this), 
         std::chrono::milliseconds(0), 
         std::chrono::milliseconds(profile.periodicFunctionRate));
     scheduler->addRepeatedTask(std::bind(&BaseRobot::modeBasedPeriodic, this),
@@ -160,10 +160,24 @@ void BaseRobot::sigintHandler(int signal){
 }
 
 void BaseRobot::modeBasedPeriodic(){
-    if(isEnabled){
-        enabledPeriodic();
-    }else{
-        disabledPeriodic();
+    try{
+        if(isEnabled){
+            enabledPeriodic();
+        }else{
+            disabledPeriodic();
+        }
+    }catch(const std::runtime_error &e){
+        Logger::logError("Error running mode based periodic function!");
+        Logger::logDebug(e.what());
+    }
+}
+
+void BaseRobot::doPeriodic(){
+    try{
+        periodic();
+    }catch(const std::runtime_error &e){
+        Logger::logError("Error running periodic!");
+        Logger::logDebug(e.what());
     }
 }
 
@@ -201,7 +215,12 @@ void BaseRobot::onDisable(){
         }
 
         Logger::logInfo("Robot disabled.");
-        robotDisabled();
+        try{
+            robotDisabled();
+        }catch(const std::runtime_error &e){
+            Logger::logError("Error running robotDisabled!");
+            Logger::logDebug(e.what());
+        }
         isEnabled = false;
     }
 }
@@ -216,7 +235,12 @@ void BaseRobot::onEnable(){
         }
 
         Logger::logInfo("Robot enabled.");
-        robotEnabled();
+        try{
+            robotEnabled();
+        }catch(const std::runtime_error &e){
+            Logger::logError("Error running robotEnabled!");
+            Logger::logDebug(e.what());
+        }
         isEnabled = true;
     }
 }

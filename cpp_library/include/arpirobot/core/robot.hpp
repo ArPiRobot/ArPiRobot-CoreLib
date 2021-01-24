@@ -121,6 +121,8 @@ namespace arpirobot{
 
         void modeBasedPeriodic();
 
+        void doPeriodic();
+
         void runWatchdog();
 
         void onDisable();
