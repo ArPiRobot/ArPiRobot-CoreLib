@@ -28,6 +28,19 @@ model {
                 cppCompiler.executable = "arm-linux-gnueabihf-g++"
                 linker.executable = "arm-linux-gnueabihf-gcc"
                 assembler.executable = "arm-linux-gnueabihf-as"
+                cCompiler.withArguments { args ->
+                    args << '-I'
+                    args << projectDir.toString() + '/../cpp_library/include'
+                }
+                cppCompiler.withArguments { args ->
+                    args << '-I'
+                    args << projectDir.toString() + '/../cpp_library/include'
+                }
+                linker.withArguments { args ->
+                    args << "-L" 
+                    args << projectDir.toString() + '/../cpp_library/build'
+                    args << "-larpirobot-core"
+                }
             }
         }
     }
