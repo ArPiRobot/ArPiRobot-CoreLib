@@ -1,5 +1,6 @@
 plugins {
     id 'java-library'
+    id 'c'
     id 'cpp'
 }
 
@@ -8,14 +9,9 @@ repositories {
 }
 
 dependencies {
-    compile files("build/libs.corelibjni/libarpirobotcorejni.so")
+    implementation files("build/libs.corelibjni/libarpirobotcorejni.so")
 }
 
-jar{
-    from("build/libs/arpirobotcorejni/shared"){
-        include "libarpirobotcorejni.so"
-    }
-}
 
 model {
     platforms {
@@ -26,7 +22,7 @@ model {
     }
     toolChains{
         gcc(Gcc){
-            target("pi"){
+            target("pi") {
                 path System.properties['user.home'] + "/.arpirobot/toolchain/bin/"
                 cCompiler.executable = "arm-linux-gnueabihf-gcc"
                 cppCompiler.executable = "arm-linux-gnueabihf-g++"
@@ -38,17 +34,16 @@ model {
     components {
         arpirobotcorejni(NativeLibrarySpec) {
             targetPlatform "pi"
-            binaries.withType(SharedLibraryBinarySpec) {
-                if (targetPlatform.operatingSystem.linux) {
-                    cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include"
-                    cCompiler.args '-I', "${org.gradle.internal.jvm.Jvm.current().javaHome}/include/linux"
-                }else{
-                    buildable = false
-                }
-            }
             binaries.withType(StaticLibraryBinarySpec) {
                 buildable = false
             }
         }
+    }
+}
+
+jar{
+    dependsOn ":arpirobotcorejniSharedLibrary"
+    from("build/libs/arpirobotcorejni/shared"){
+        include "libarpirobotcorejni.so"
     }
 }
