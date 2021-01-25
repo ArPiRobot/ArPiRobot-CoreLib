@@ -10,7 +10,7 @@
 namespace arpirobot{
 
     /**
-     * \class RobotProfile network.hpp arpirobot/core/network.hpp
+     * \class RobotProfile robot.hpp arpirobot/core/robot.hpp
      * 
      * Settings to configure general robot behavior
      */
@@ -29,7 +29,7 @@ namespace arpirobot{
     };
 
     /**
-     * \class BaseRobot network.hpp arpirobot/core/network.hpp
+     * \class BaseRobot robot.hpp arpirobot/core/robot.hpp
      * 
      * Base class to facilitate general robot code structure/flow
      * Each robot program should have a single class that inherits from this class and
