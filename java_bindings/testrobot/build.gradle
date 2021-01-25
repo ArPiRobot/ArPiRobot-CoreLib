@@ -2,6 +2,25 @@ plugins {
     id 'application'
 }
 
+application {
+    mainClass = 'robot.Main'
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'robot.Main'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    baseName 'robot'
+}
+
 repositories {
     jcenter()
 }

@@ -2,10 +2,22 @@ plugins {
     id 'java-library'
 }
 
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    baseName "ArPiRobot-CoreLib"
+}
+
+compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
+}
+
 repositories {
     jcenter()
 }
 
 dependencies {
-    implementation group: 'net.java.dev.jna', name: 'jna', version: '5.6.0'
+    api group: 'net.java.dev.jna', name: 'jna', version: '5.6.0'
 }
