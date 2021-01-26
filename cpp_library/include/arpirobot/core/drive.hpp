@@ -120,6 +120,8 @@ namespace arpirobot{
     };
 
     /**
+     * \class BaseAxisTransform drive.hpp arpirobot/core/drive.hpp
+     * 
      * Base class for axis transforms. Axis transforms take an analog axis value (-1.0 to 1.0)
      * and apply a fixed calculation to modify the curve of the axis.
      * 
@@ -136,6 +138,8 @@ namespace arpirobot{
     };
 
     /**
+     * \class SquareRootAxisTransform drive.hpp arpirobot/core/drive.hpp
+     * 
      * Transform that applies a square root function to the magnitude of the input.
      * Sign of the output will match the sign of the input
      */
@@ -145,6 +149,8 @@ namespace arpirobot{
     };
 
     /**
+     * \class CubicAxisTransform drive.hpp arpirobot/core/drive.hpp
+     * 
      * Transform that applies a cubic function to the magnitude of the input.
      * The cubic function is fit to the data set (0, minPower), (0.5, midPower), (1, 1)
      * This gives a wide range of inputs that will yield a value near midPower
