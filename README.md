@@ -12,6 +12,9 @@ C++ Library. This is where everything is implemented. This library is loaded by 
 
 Python bindings for the ArPiRobot core library (C++). The python library matches the object oriented API of the C++ library.
 
+## [java_bindings](java_bindings/)
+
+Java bindings for the ArPiRobot core library (C++). The java library matches the object oriented API of the C++ library.
 
 ## Development of Library (and Bindings)
 
@@ -26,10 +29,15 @@ Python bindings for the ArPiRobot core library (C++). The python library matches
             - Python extension (Microsoft)
             - Pylance extension (Microsoft)
         - Recommended to use Pylance as the language server
+    - java_bindings
+        - recommended extensions
+            - Java extension pack
+            - Gradle Tasks extension
     
 
 - Deploying to robot for testing
     - In this (project root) folder there are several scripts
-        - `dev-deploy.sh`: Used to copy built library and language bindings to the robot (192.168.10.1) via SCP. Files deployed to `/home/pi/CPPLibTest`. *Make sure you build the C++ library / testrobot program before deploying.*
+        - `dev-deploy.sh`: Used to copy built library and language bindings to the robot (192.168.10.1) via SCP. Files deployed to `/home/pi/CPPLibTest`. *Make sure you build the C++ library and Java library before deploying or some files will be missing.*
         - `start-cpp.sh`: Used to start the C++ testrobot program (run this on the robot using SSH)
         - `start-py.sh`: Used to start the Python testrobot program (run this on the robot using SSH)
+        - `start-java.sh`: Used to start the Java testrobot program (run this on the robot using SSH)
