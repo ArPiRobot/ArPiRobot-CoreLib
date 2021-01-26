@@ -11,20 +11,19 @@ compileJava {
     targetCompatibility = '1.8'
 }
 
-jar {
-    manifest {
-        attributes 'Main-Class': 'robot.Main'
-    }
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    archiveBaseName = 'robot'
-}
-
 repositories {
     jcenter()
 }
 
 dependencies {
     implementation project(':lib')
+}
+
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'robot.Main'
+        attributes "Class-Path": configurations.runtimeClasspath.files.collect { it.getName() }.join(' ')
+    }
+    archiveBaseName = 'robot'
 }
