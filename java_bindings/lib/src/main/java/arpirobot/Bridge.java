@@ -144,6 +144,42 @@ public class Bridge {
 
 
         ////////////////////////////////////////////////////////////////////////
+        /// AdafruitMotorHatMotor bridge (arpirobot/devices/adafruitmotorhat.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long AdafruitMotorHatMotor_create(int motorNum, int address, boolean remapNumbers);
+
+        public static native void AdafruitMotorHatMotor_destroy(long motor);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// L298Motor bridge (arpirobot/devices/l298n.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long L298NMotor_create(int in1Pin, int in2Pin, int pwmPin);
+
+        public static native void L298NMotor_destroy(long motor);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// TB6612Motor bridge (arpirobot/devices/tb6612.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long TB6612Motor_create(int in1Pin, int in2Pin, int pwmPin);
+
+        public static native void TB6612Motor_destroy(long motor);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// DRV8833Motor bridge (arpirobot/devices/drv8833.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long DRV8833Motor_create(int in1Pin, int in2Pin, int slpPin);
+
+        public static native void DRV8833Motor_destroy(long motor);
+
+
+        ////////////////////////////////////////////////////////////////////////
         /// ArcadeDriveHelper bridge
         ////////////////////////////////////////////////////////////////////////
         public static native long ArcadeDriveHelper_create(long[] leftMotors, int leftMotorCount, 
