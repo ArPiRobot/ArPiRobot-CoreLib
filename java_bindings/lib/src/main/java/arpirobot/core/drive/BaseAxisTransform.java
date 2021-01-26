@@ -14,6 +14,7 @@ public abstract class BaseAxisTransform extends DestroyableObject {
      * Axis transforms should override this function to implement specific calculations.
      */
     public double applyTransform(double rawAxisValue){
+        verifyNotDestroyed();
         return Bridge.arpirobot.BaseAxisTransform_applyTransform(ptr, rawAxisValue);
     }
 }

@@ -12,6 +12,7 @@ public abstract class MotorController extends BaseDevice {
      * @return true if inverted, else false
      */
     public boolean isInverted(){
+        verifyNotDestroyed();
         return Bridge.arpirobot.MotorController_isInverted(ptr);
     }
 
@@ -20,6 +21,7 @@ public abstract class MotorController extends BaseDevice {
      * @param inverted True for inverted, false for non-inverted
      */
     public void setInverted(boolean inverted){
+        verifyNotDestroyed();
         Bridge.arpirobot.MotorController_setInverted(ptr, inverted);
     }
 
@@ -28,6 +30,7 @@ public abstract class MotorController extends BaseDevice {
      * @return true if enabled, else false
      */
     public boolean isBrakeMode(){
+        verifyNotDestroyed();
         return Bridge.arpirobot.MotorController_isBrakeMode(ptr);
     }
 
@@ -36,6 +39,7 @@ public abstract class MotorController extends BaseDevice {
      * @param brakeMode true for enabled, false for disabled
      */
     public void setBrakeMode(boolean brakeMode){
+        verifyNotDestroyed();
         Bridge.arpirobot.MotorController_setBrakeMode(ptr, brakeMode);
     }
 
@@ -44,6 +48,7 @@ public abstract class MotorController extends BaseDevice {
      * @return the motor's speed
      */
     public double getSpeed(){
+        verifyNotDestroyed();
         return Bridge.arpirobot.MotorController_getSpeed(ptr);
     }
 
@@ -52,6 +57,7 @@ public abstract class MotorController extends BaseDevice {
      * @param speed The motor's speed (between -1.0 and 1.0)
      */
     public void setSpeed(double speed){
+        verifyNotDestroyed();
         Bridge.arpirobot.MotorController_setSpeed(ptr, speed);
     }
 }

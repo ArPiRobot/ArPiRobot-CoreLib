@@ -13,6 +13,7 @@ public abstract class BaseDevice extends DestroyableObject {
      * @return the devices human readable name
      */
     public String getDeviceName(){
+        verifyNotDestroyed();
         Pointer strPtr = Bridge.arpirobot.BaseDevice_getDeviceName(ptr);
         String str = strPtr.getString(0);
         Bridge.arpirobot.freeString(strPtr);

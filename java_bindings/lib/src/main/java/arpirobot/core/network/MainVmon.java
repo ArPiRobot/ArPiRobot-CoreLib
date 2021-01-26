@@ -12,6 +12,7 @@ public abstract class MainVmon extends DestroyableObject{
      * Make this device the main voltage monitor
      */
     public void makeMainVmon(){
+        verifyNotDestroyed();
         Bridge.arpirobot.MainVMon_makeMainVmon(ptr);
     }
 }

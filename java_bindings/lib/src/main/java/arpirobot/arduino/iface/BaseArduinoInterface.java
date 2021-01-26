@@ -16,6 +16,7 @@ public abstract class BaseArduinoInterface extends DestroyableObject {
      * no longer be added to this arduino using BaseArduinoInterface::addDevice.
      */
     public void begin(){
+        verifyNotDestroyed();
         Bridge.arpirobot.BaseArduinoInterface_begin(ptr);
     }
 
@@ -25,6 +26,7 @@ public abstract class BaseArduinoInterface extends DestroyableObject {
      * @param device The ArduinoDevice instance to add
      */
     public void addDevice(ArduinoDevice device){
+        verifyNotDestroyed();
         Bridge.arpirobot.BaseArduinoInterface_addDevice(ptr, device._ptr());
     }
 
@@ -34,6 +36,7 @@ public abstract class BaseArduinoInterface extends DestroyableObject {
      * @return true if ready, else false
      */
     public boolean isReady(){
+        verifyNotDestroyed();
         return Bridge.arpirobot.BaseArduinoInterface_isReady(ptr);
     }
 }

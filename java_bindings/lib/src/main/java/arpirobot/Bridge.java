@@ -293,6 +293,127 @@ public class Bridge {
 
         public static native Pointer ArduinoDevice_getDeviceName(long device);
 
+
+        ////////////////////////////////////////////////////////////////////////
+        /// VoltageMonitor bridge (arpirobot/arduino/sensor.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long VoltageMonitor_create(String pin, double vboard, int r1, 
+                int r2, boolean createDevice, int deviceId);
+
+        public static native void VoltageMonitor_destroy(long vmon);
+
+        public static native double VoltageMonitor_getVoltage(long vmon);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// Ultrasonic4Pin bridge (arpirobot/arduino/sensor.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long Ultrasonic4Pin_create(String triggerPin, String echoPin, 
+                boolean createDevice, int deviceId);
+
+        public static native void Ultrasonic4Pin_destroy(long usonic);
+
+        public static native int Ultrasonic4Pin_getDistance(long usonic);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// SingleEncode bridge (arpirobot/arduino/sensor.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long SingleEncoder_create(String pin, boolean useInternalPullup, 
+                boolean createDevice, int deviceId);
+
+        public static native void SingleEncoder_destroy(long enc);
+
+        public static native int SingleEncoder_getPosition(long enc);
+
+        public static native void SingleEncoder_setPosition(long enc, int newPosition);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// IRReflectorModule bridge (arpirobot/arduino/sensor.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long IRReflectorModule_create(String digitalPin, String analogPin, 
+                boolean createDevice, int deviceId);
+
+        public static native void IRReflectorModule_destroy(long ir);
+
+        public static native boolean IRReflectorModule_getDigitalValue(long ir);
+
+        public static native int IRReflectorModule_getAnalogValue(long ir);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// OldAdafruit9Dof bridge (arpirobot/arduino/sensor.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long OldAdafruit9Dof_create(boolean createDevice, int deviceId);
+
+        public static native void OldAdafruit9Dof_destroy(long imu);
+
+        public static native double OldAdafruit9Dof_getGyroX(long imu);
+
+        public static native double OldAdafruit9Dof_getGyroY(long imu);
+
+        public static native double OldAdafruit9Dof_getGyroZ(long imu);
+
+        public static native double OldAdafruit9Dof_getAccelX(long imu);
+
+        public static native double OldAdafruit9Dof_getAccelY(long imu);
+
+        public static native double OldAdafruit9Dof_getAccelZ(long imu);
+
+        public static native void OldAdafruit9Dof_setGyroX(long imu, double newGyroX);
+
+        public static native void OldAdafruit9Dof_setGyroY(long imu, double newGyroY);
+
+        public static native void OldAdafruit9Dof_setGyroZ(long imu, double newGyroZ);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// NxpAdafruit9Dof bridge (arpirobot/arduino/sensor.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long NxpAdafruit9Dof_create(boolean createDevice, int deviceId);
+
+        public static native void NxpAdafruit9Dof_destroy(long imu);
+
+        public static native double NxpAdafruit9Dof_getGyroX(long imu);
+
+        public static native double NxpAdafruit9Dof_getGyroY(long imu);
+
+        public static native double NxpAdafruit9Dof_getGyroZ(long imu);
+
+        public static native double NxpAdafruit9Dof_getAccelX(long imu);
+
+        public static native double NxpAdafruit9Dof_getAccelY(long imu);
+
+        public static native double NxpAdafruit9Dof_getAccelZ(long imu);
+
+        public static native void NxpAdafruit9Dof_setGyroX(long imu, double newGyroX);
+
+        public static native void NxpAdafruit9Dof_setGyroY(long imu, double newGyroY);
+
+        public static native void NxpAdafruit9Dof_setGyroZ(long imu, double newGyroZ);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// INA260PowerSensor bridge (arpirobot/devices/ina260.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native long INA260PowerSensor_create();
+
+        public static native void INA260PowerSensor_destroy(long vmon);
+
+        public static native double INA260PowerSensor_getCurrent(long vmon);
+
+        public static native double INA260PowerSensor_getVoltage(long vmon);
+
+        public static native double INA260PowerSensor_getPower(long vmon);
+
     }
 
 

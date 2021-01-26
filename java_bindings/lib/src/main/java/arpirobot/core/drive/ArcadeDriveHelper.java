@@ -50,6 +50,7 @@ public class ArcadeDriveHelper extends DestroyableObject {
      * @param newSpeed the new speed (-1.0 to 1.0)
      */
     public void updateSpeed(double newSpeed){
+        verifyNotDestroyed();
         Bridge.arpirobot.ArcadeDriveHelper_updateSpeed(ptr, newSpeed);
     }
 
@@ -58,6 +59,7 @@ public class ArcadeDriveHelper extends DestroyableObject {
      * @param newRotation the new rotation (-1.0 to 1.0)
      */
     public void updateRotation(double newRotation){
+        verifyNotDestroyed();
         Bridge.arpirobot.ArcadeDriveHelper_updateRotation(ptr, newRotation);
     }
 
@@ -70,6 +72,7 @@ public class ArcadeDriveHelper extends DestroyableObject {
      * @param newRotation the new rotation (-1.0 to 1.0)
      */
     public void update(double newSpeed, double newRotation){
+        verifyNotDestroyed();
         Bridge.arpirobot.ArcadeDriveHelper_update(ptr, newSpeed, newRotation);
     }
 

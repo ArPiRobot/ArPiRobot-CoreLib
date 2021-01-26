@@ -43,6 +43,7 @@ public class TankDriveHelper extends DestroyableObject {
      * @param newLeftSpeed the new rotation (-1.0 to 1.0)
      */
     void updateLeftSpeed(double newLeftSpeed){
+        verifyNotDestroyed();
         Bridge.arpirobot.TankDriveHelper_updateLeftSpeed(ptr, newLeftSpeed);
     }
 
@@ -51,6 +52,7 @@ public class TankDriveHelper extends DestroyableObject {
      * @param newRightSpeed the new rotation (-1.0 to 1.0)
      */
     void updateRightSpeed(double newRightSpeed){
+        verifyNotDestroyed();
         Bridge.arpirobot.TankDriveHelper_updateRightSpeed(ptr, newRightSpeed);
     }
 
@@ -63,6 +65,7 @@ public class TankDriveHelper extends DestroyableObject {
      * @param newRightSpeed the new rotation (-1.0 to 1.0)
      */
     void update(double newLeftSpeed, double newRightSpeed){
+        verifyNotDestroyed();
         Bridge.arpirobot.TankDriveHelper_update(ptr, newLeftSpeed, newRightSpeed);
     }
 

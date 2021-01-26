@@ -6,6 +6,7 @@ import arpirobot.DestroyableObject;
 public class ActionSeries extends DestroyableObject {
 
     public ActionSeries(Action[] actions, Action finishedAction){
+        verifyNotDestroyed();
         long[] actionsInternal = new long[actions.length];
         for(int i = 0; i < actions.length; ++i){
             actionsInternal[i] = actions[i]._ptr();
@@ -15,6 +16,7 @@ public class ActionSeries extends DestroyableObject {
 
     @Override
     protected void doDestroy() {
+        verifyNotDestroyed();
         Bridge.arpirobot.ActionSeries_destroy(ptr);
     }
     

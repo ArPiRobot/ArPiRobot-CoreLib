@@ -6,7 +6,7 @@ jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    baseName "ArPiRobot-CoreLib"
+    archiveBaseName = "ArPiRobot-CoreLib"
 }
 
 compileJava {

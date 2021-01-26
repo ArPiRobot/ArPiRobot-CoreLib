@@ -29,6 +29,7 @@ public abstract class Action extends DestroyableObject {
      * @param devices A vector of devices to lock
      */
     public void lockDevices(BaseDevice[] devices){
+        verifyNotDestroyed();
         long[] devicesInternal = new long[devices.length];
         for(int i = 0; i < devices.length; ++i){
             devicesInternal[i] = devices[i]._ptr();
@@ -42,6 +43,7 @@ public abstract class Action extends DestroyableObject {
      * @param device The device to lock
      */
     public void lockDevice(BaseDevice device){
+        verifyNotDestroyed();
         Bridge.arpirobot.Action_lockDevice(ptr, device._ptr());
     }
 
@@ -49,6 +51,7 @@ public abstract class Action extends DestroyableObject {
      * @return true if the action has been started, but has not finished or been stopped.
      */
     public boolean isRunning(){
+        verifyNotDestroyed();
         return Bridge.arpirobot.Action_isRunning(ptr);
     }
 

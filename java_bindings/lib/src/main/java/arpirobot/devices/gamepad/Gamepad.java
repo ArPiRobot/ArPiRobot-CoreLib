@@ -23,6 +23,7 @@ public class Gamepad extends DestroyableObject {
      * @return The controller number
      */
     public int getControllerNum(){
+        verifyNotDestroyed();
         return Bridge.arpirobot.Gamepad_getControllerNum(ptr);
     }
 
@@ -32,6 +33,7 @@ public class Gamepad extends DestroyableObject {
      * @return The axis value after applying the deadband and (if required) an axis transform
      */
     public double getAxis(int axisNum){
+        verifyNotDestroyed();
         return getAxis(axisNum, 0);
     }
 
@@ -42,6 +44,7 @@ public class Gamepad extends DestroyableObject {
      * @return The axis value after applying the deadband and (if required) an axis transform
      */
     public double getAxis(int axisNum, double deadband){
+        verifyNotDestroyed();
         return Bridge.arpirobot.Gamepad_getAxis(ptr, axisNum, deadband);
     }
 
@@ -51,6 +54,7 @@ public class Gamepad extends DestroyableObject {
      * @return true if pressed, else false
      */
     public boolean getButton(int buttonNum){
+        verifyNotDestroyed();
         return Bridge.arpirobot.Gamepad_getButton(ptr, buttonNum);
     }
 
@@ -60,14 +64,17 @@ public class Gamepad extends DestroyableObject {
      * @return 0 if center, 1 for up through 8 going clockwise
      */
     public int getDpad(int dpadNum){
+        verifyNotDestroyed();
         return Bridge.arpirobot.Gamepad_getDpad(ptr, dpadNum);
     }
 
     public void setAxisTransform(int axisNum, BaseAxisTransform transform){
+        verifyNotDestroyed();
         Bridge.arpirobot.Gamepad_setAxisTransform(ptr, axisNum, transform._ptr());
     }
 
     public void clearAxisTransform(int axisNum){
+        verifyNotDestroyed();
         Bridge.arpirobot.Gamepad_clearAxisTransform(ptr, axisNum);
     }
 }
