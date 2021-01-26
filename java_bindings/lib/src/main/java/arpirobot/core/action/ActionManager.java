@@ -12,7 +12,7 @@ public class ActionManager {
      * @param action    A pointer to the action to start.
      * @param doRestart If true starting an action that is already running will restart the action.
      *                  If false the action will continue running uninterrupted.
-     * @returns true if the action was started successfully
+     * @return true if the action was started successfully
      */
     public static boolean startAction(Action action){
         return Bridge.arpirobot.ActionManager_startAction(action._ptr());
@@ -22,7 +22,7 @@ public class ActionManager {
      * Stop an action (interrupts it)
      * If the action is not running nothing is done.
      * @param action A pointer to the action to stop
-     * @returns true if the action was stopped. If false, the action was not running.
+     * @return true if the action was stopped. If false, the action was not running.
      */
     public static boolean stopAction(Action action){
         return Bridge.arpirobot.ActionManager_stopAction(action._ptr());

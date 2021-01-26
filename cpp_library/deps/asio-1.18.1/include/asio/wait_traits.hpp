@@ -25,7 +25,7 @@ struct wait_traits
 {
   /// Convert a clock duration into a duration used for waiting.
   /**
-   * @returns @c d.
+   * @return @c d.
    */
   static typename Clock::duration to_wait_duration(
       const typename Clock::duration& d)
@@ -35,7 +35,7 @@ struct wait_traits
 
   /// Convert a clock duration into a duration used for waiting.
   /**
-   * @returns @c d.
+   * @return @c d.
    */
   static typename Clock::duration to_wait_duration(
       const typename Clock::time_point& t)

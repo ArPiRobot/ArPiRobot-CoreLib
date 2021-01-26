@@ -416,7 +416,7 @@ public:
 
   /// Gets the non-blocking mode of the descriptor.
   /**
-   * @returns @c true if the descriptor's synchronous operations will fail with
+   * @return @c true if the descriptor's synchronous operations will fail with
    * asio::error::would_block if they are unable to perform the requested
    * operation immediately. If @c false, synchronous operations will block
    * until complete.
@@ -476,7 +476,7 @@ public:
    * native descriptor. This mode has no effect on the behaviour of the
    * descriptor object's synchronous operations.
    *
-   * @returns @c true if the underlying descriptor is in non-blocking mode and
+   * @return @c true if the underlying descriptor is in non-blocking mode and
    * direct system calls may fail with asio::error::would_block (or the
    * equivalent system error).
    *

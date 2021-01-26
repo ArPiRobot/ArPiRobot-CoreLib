@@ -103,7 +103,7 @@ ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void()) post(
 
 /// Submits a completion token or function object for execution.
 /**
- * @returns <tt>post(ctx.get_executor(), forward<CompletionToken>(token))</tt>.
+ * @return <tt>post(ctx.get_executor(), forward<CompletionToken>(token))</tt>.
  */
 template <typename ExecutionContext,
     ASIO_COMPLETION_TOKEN_FOR(void()) CompletionToken

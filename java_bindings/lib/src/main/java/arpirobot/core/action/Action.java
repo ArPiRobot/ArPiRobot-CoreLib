@@ -46,7 +46,7 @@ public abstract class Action extends DestroyableObject {
     }
 
     /**
-     * @returns true if the action has been started, but has not finished or been stopped.
+     * @return true if the action has been started, but has not finished or been stopped.
      */
     public boolean isRunning(){
         return Bridge.arpirobot.Action_isRunning(ptr);
@@ -70,7 +70,7 @@ public abstract class Action extends DestroyableObject {
 
     /**
      * Called each time after Action::process. When this returns false the action will stop.
-     * @returns false if the action should stop. Else true.
+     * @return false if the action should stop. Else true.
      */
     protected abstract boolean shouldContinue();
 }

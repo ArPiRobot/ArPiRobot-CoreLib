@@ -148,7 +148,7 @@ public:
 
   /// Determine whether the wrapper has a target executor.
   /**
-   * @returns @c true if the polymorphic wrapper has a target executor,
+   * @return @c true if the polymorphic wrapper has a target executor,
    * otherwise false.
    */
   explicit operator bool() const noexcept;

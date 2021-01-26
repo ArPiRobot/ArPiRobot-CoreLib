@@ -268,6 +268,31 @@ public class Bridge {
 
         public static native void ActionSeries_destroy(long actionSeries);
 
+
+        ////////////////////////////////////////////////////////////////////////
+        /// BaseArduinoInterface bridge
+        ////////////////////////////////////////////////////////////////////////
+        public static native void BaseArduinoInterface_begin(long arduino);
+
+        public static native void BaseArduinoInterface_addDevice(long arduino, long device);
+
+        public static native boolean BaseArduinoInterface_isReady(long arduino);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// ArduinoUartInterface bridge
+        ////////////////////////////////////////////////////////////////////////
+        public static native long ArduinoUartInterface_create(String tty, int baud);
+
+        public static native void ArduinoUartInterface_destroy(long iface);
+
+
+        ////////////////////////////////////////////////////////////////////////
+        /// ArduinoDevice bridge
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native Pointer ArduinoDevice_getDeviceName(long device);
+
     }
 
 

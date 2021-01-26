@@ -61,7 +61,7 @@ namespace asio {
  * of the buffer sizes indicates the maximum number of bytes to read from the
  * device.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @throws asio::system_error Thrown on failure.
  *
@@ -107,7 +107,7 @@ std::size_t read_at(SyncRandomAccessReadDevice& d,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @par Example
  * To read into a single data buffer use the @ref buffer function as follows:
@@ -165,7 +165,7 @@ std::size_t read_at(SyncRandomAccessReadDevice& d,
  * return value indicates the maximum number of bytes to be read on the next
  * call to the device's read_some_at function.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @throws asio::system_error Thrown on failure.
  *
@@ -223,7 +223,7 @@ std::size_t read_at(SyncRandomAccessReadDevice& d,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes read. If an error occurs, returns the total
+ * @return The number of bytes read. If an error occurs, returns the total
  * number of bytes successfully transferred prior to the error.
  */
 template <typename SyncRandomAccessReadDevice, typename MutableBufferSequence,
@@ -254,7 +254,7 @@ std::size_t read_at(SyncRandomAccessReadDevice& d,
  *
  * @param b The basic_streambuf object into which the data will be read.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @throws asio::system_error Thrown on failure.
  *
@@ -288,7 +288,7 @@ std::size_t read_at(SyncRandomAccessReadDevice& d,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @note This overload is equivalent to calling:
  * @code asio::read_at(
@@ -333,7 +333,7 @@ std::size_t read_at(SyncRandomAccessReadDevice& d,
  * return value indicates the maximum number of bytes to be read on the next
  * call to the device's read_some_at function.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @throws asio::system_error Thrown on failure.
  */
@@ -378,7 +378,7 @@ std::size_t read_at(SyncRandomAccessReadDevice& d,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes read. If an error occurs, returns the total
+ * @return The number of bytes read. If an error occurs, returns the total
  * number of bytes successfully transferred prior to the error.
  */
 template <typename SyncRandomAccessReadDevice, typename Allocator,

@@ -101,7 +101,7 @@ struct is_match_condition
  *
  * @param delim The delimiter character.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the delimiter.
  *
  * @throws asio::system_error Thrown on failure.
@@ -164,7 +164,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the delimiter. Returns 0 if an error occurred.
  *
  * @note After a successful read_until operation, the dynamic buffer sequence
@@ -205,7 +205,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param delim The delimiter string.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the delimiter.
  *
  * @note After a successful read_until operation, the dynamic buffer sequence
@@ -267,7 +267,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the delimiter. Returns 0 if an error occurred.
  *
  * @note After a successful read_until operation, the dynamic buffer sequence
@@ -314,7 +314,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param expr The regular expression.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the substring that matches the regular expression.
  *
  * @throws asio::system_error Thrown on failure.
@@ -379,7 +379,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the substring that matches the regular expression. Returns 0
  * if an error occurred.
  *
@@ -438,7 +438,7 @@ std::size_t read_until(SyncReadStream& s,
  * @c second member of the return value is true if a match has been found, false
  * otherwise.
  *
- * @returns The number of bytes in the dynamic_buffer's get area that
+ * @return The number of bytes in the dynamic_buffer's get area that
  * have been fully consumed by the match function.
  *
  * @throws asio::system_error Thrown on failure.
@@ -552,7 +552,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area that
+ * @return The number of bytes in the dynamic buffer sequence's get area that
  * have been fully consumed by the match function. Returns 0 if an error
  * occurred.
  *
@@ -600,7 +600,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param delim The delimiter character.
  *
- * @returns The number of bytes in the streambuf's get area up to and including
+ * @return The number of bytes in the streambuf's get area up to and including
  * the delimiter.
  *
  * @throws asio::system_error Thrown on failure.
@@ -654,7 +654,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the streambuf's get area up to and including
+ * @return The number of bytes in the streambuf's get area up to and including
  * the delimiter. Returns 0 if an error occurred.
  *
  * @note After a successful read_until operation, the streambuf may contain
@@ -687,7 +687,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param delim The delimiter string.
  *
- * @returns The number of bytes in the streambuf's get area up to and including
+ * @return The number of bytes in the streambuf's get area up to and including
  * the delimiter.
  *
  * @throws asio::system_error Thrown on failure.
@@ -742,7 +742,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the streambuf's get area up to and including
+ * @return The number of bytes in the streambuf's get area up to and including
  * the delimiter. Returns 0 if an error occurred.
  *
  * @note After a successful read_until operation, the streambuf may contain
@@ -779,7 +779,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param expr The regular expression.
  *
- * @returns The number of bytes in the streambuf's get area up to and including
+ * @return The number of bytes in the streambuf's get area up to and including
  * the substring that matches the regular expression.
  *
  * @throws asio::system_error Thrown on failure.
@@ -835,7 +835,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the streambuf's get area up to and including
+ * @return The number of bytes in the streambuf's get area up to and including
  * the substring that matches the regular expression. Returns 0 if an error
  * occurred.
  *
@@ -888,7 +888,7 @@ std::size_t read_until(SyncReadStream& s,
  * @c second member of the return value is true if a match has been found, false
  * otherwise.
  *
- * @returns The number of bytes in the streambuf's get area that have been fully
+ * @return The number of bytes in the streambuf's get area that have been fully
  * consumed by the match function.
  *
  * @throws asio::system_error Thrown on failure.
@@ -995,7 +995,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the streambuf's get area that have been fully
+ * @return The number of bytes in the streambuf's get area that have been fully
  * consumed by the match function. Returns 0 if an error occurred.
  *
  * @note After a successful read_until operation, the streambuf may contain
@@ -1042,7 +1042,7 @@ std::size_t read_until(SyncReadStream& s,
  *
  * @param delim The delimiter character.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the delimiter.
  *
  * @throws asio::system_error Thrown on failure.
@@ -1103,7 +1103,7 @@ std::size_t read_until(SyncReadStream& s, DynamicBuffer_v2 buffers, char delim,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the delimiter. Returns 0 if an error occurred.
  *
  * @note After a successful read_until operation, the dynamic buffer sequence
@@ -1142,7 +1142,7 @@ std::size_t read_until(SyncReadStream& s, DynamicBuffer_v2 buffers,
  *
  * @param delim The delimiter string.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the delimiter.
  *
  * @note After a successful read_until operation, the dynamic buffer sequence
@@ -1202,7 +1202,7 @@ std::size_t read_until(SyncReadStream& s, DynamicBuffer_v2 buffers,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the delimiter. Returns 0 if an error occurred.
  *
  * @note After a successful read_until operation, the dynamic buffer sequence
@@ -1246,7 +1246,7 @@ std::size_t read_until(SyncReadStream& s, DynamicBuffer_v2 buffers,
  *
  * @param expr The regular expression.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the substring that matches the regular expression.
  *
  * @throws asio::system_error Thrown on failure.
@@ -1309,7 +1309,7 @@ std::size_t read_until(SyncReadStream& s, DynamicBuffer_v2 buffers,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area up to
+ * @return The number of bytes in the dynamic buffer sequence's get area up to
  * and including the substring that matches the regular expression. Returns 0
  * if an error occurred.
  *
@@ -1366,7 +1366,7 @@ std::size_t read_until(SyncReadStream& s, DynamicBuffer_v2 buffers,
  * @c second member of the return value is true if a match has been found, false
  * otherwise.
  *
- * @returns The number of bytes in the dynamic_buffer's get area that
+ * @return The number of bytes in the dynamic_buffer's get area that
  * have been fully consumed by the match function.
  *
  * @throws asio::system_error Thrown on failure.
@@ -1478,7 +1478,7 @@ std::size_t read_until(SyncReadStream& s, DynamicBuffer_v2 buffers,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes in the dynamic buffer sequence's get area that
+ * @return The number of bytes in the dynamic buffer sequence's get area that
  * have been fully consumed by the match function. Returns 0 if an error
  * occurred.
  *

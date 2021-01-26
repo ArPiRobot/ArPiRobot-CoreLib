@@ -79,7 +79,7 @@ struct bulk_guarantee_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns unsequenced_t();
+     * @return unsequenced_t();
      */
     static constexpr bulk_guarantee_t value();
   };
@@ -108,7 +108,7 @@ struct bulk_guarantee_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns sequenced_t();
+     * @return sequenced_t();
      */
     static constexpr bulk_guarantee_t value();
   };
@@ -137,7 +137,7 @@ struct bulk_guarantee_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns parallel_t();
+     * @return parallel_t();
      */
     static constexpr bulk_guarantee_t value();
   };

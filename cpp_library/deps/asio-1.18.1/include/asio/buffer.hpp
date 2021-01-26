@@ -904,7 +904,7 @@ private:
 
 /// Create a new modifiable buffer from an existing buffer.
 /**
- * @returns <tt>mutable_buffer(b)</tt>.
+ * @return <tt>mutable_buffer(b)</tt>.
  */
 inline ASIO_MUTABLE_BUFFER buffer(
     const mutable_buffer& b) ASIO_NOEXCEPT
@@ -914,7 +914,7 @@ inline ASIO_MUTABLE_BUFFER buffer(
 
 /// Create a new modifiable buffer from an existing buffer.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     b.data(),
  *     min(b.size(), max_size_in_bytes)); @endcode
@@ -934,7 +934,7 @@ inline ASIO_MUTABLE_BUFFER buffer(const mutable_buffer& b,
 
 /// Create a new non-modifiable buffer from an existing buffer.
 /**
- * @returns <tt>const_buffer(b)</tt>.
+ * @return <tt>const_buffer(b)</tt>.
  */
 inline ASIO_CONST_BUFFER buffer(
     const const_buffer& b) ASIO_NOEXCEPT
@@ -944,7 +944,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new non-modifiable buffer from an existing buffer.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     b.data(),
  *     min(b.size(), max_size_in_bytes)); @endcode
@@ -963,7 +963,7 @@ inline ASIO_CONST_BUFFER buffer(const const_buffer& b,
 
 /// Create a new modifiable buffer that represents the given memory range.
 /**
- * @returns <tt>mutable_buffer(data, size_in_bytes)</tt>.
+ * @return <tt>mutable_buffer(data, size_in_bytes)</tt>.
  */
 inline ASIO_MUTABLE_BUFFER buffer(void* data,
     std::size_t size_in_bytes) ASIO_NOEXCEPT
@@ -973,7 +973,7 @@ inline ASIO_MUTABLE_BUFFER buffer(void* data,
 
 /// Create a new non-modifiable buffer that represents the given memory range.
 /**
- * @returns <tt>const_buffer(data, size_in_bytes)</tt>.
+ * @return <tt>const_buffer(data, size_in_bytes)</tt>.
  */
 inline ASIO_CONST_BUFFER buffer(const void* data,
     std::size_t size_in_bytes) ASIO_NOEXCEPT
@@ -983,7 +983,7 @@ inline ASIO_CONST_BUFFER buffer(const void* data,
 
 /// Create a new modifiable buffer that represents the given POD array.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     static_cast<void*>(data),
  *     N * sizeof(PodType)); @endcode
@@ -996,7 +996,7 @@ inline ASIO_MUTABLE_BUFFER buffer(PodType (&data)[N]) ASIO_NOEXCEPT
  
 /// Create a new modifiable buffer that represents the given POD array.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     static_cast<void*>(data),
  *     min(N * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1012,7 +1012,7 @@ inline ASIO_MUTABLE_BUFFER buffer(PodType (&data)[N],
  
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     static_cast<const void*>(data),
  *     N * sizeof(PodType)); @endcode
@@ -1026,7 +1026,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     static_cast<const void*>(data),
  *     min(N * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1112,7 +1112,7 @@ buffer(boost::array<PodType, N>& data,
 
 /// Create a new modifiable buffer that represents the given POD array.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     data.data(),
  *     data.size() * sizeof(PodType)); @endcode
@@ -1127,7 +1127,7 @@ inline ASIO_MUTABLE_BUFFER buffer(
 
 /// Create a new modifiable buffer that represents the given POD array.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     data.data(),
  *     min(data.size() * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1143,7 +1143,7 @@ inline ASIO_MUTABLE_BUFFER buffer(boost::array<PodType, N>& data,
 
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.data(),
  *     data.size() * sizeof(PodType)); @endcode
@@ -1157,7 +1157,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.data(),
  *     min(data.size() * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1175,7 +1175,7 @@ inline ASIO_CONST_BUFFER buffer(boost::array<const PodType, N>& data,
 
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.data(),
  *     data.size() * sizeof(PodType)); @endcode
@@ -1189,7 +1189,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.data(),
  *     min(data.size() * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1207,7 +1207,7 @@ inline ASIO_CONST_BUFFER buffer(const boost::array<PodType, N>& data,
 
 /// Create a new modifiable buffer that represents the given POD array.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     data.data(),
  *     data.size() * sizeof(PodType)); @endcode
@@ -1221,7 +1221,7 @@ inline ASIO_MUTABLE_BUFFER buffer(
 
 /// Create a new modifiable buffer that represents the given POD array.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     data.data(),
  *     min(data.size() * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1237,7 +1237,7 @@ inline ASIO_MUTABLE_BUFFER buffer(std::array<PodType, N>& data,
 
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.data(),
  *     data.size() * sizeof(PodType)); @endcode
@@ -1251,7 +1251,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.data(),
  *     min(data.size() * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1267,7 +1267,7 @@ inline ASIO_CONST_BUFFER buffer(std::array<const PodType, N>& data,
 
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.data(),
  *     data.size() * sizeof(PodType)); @endcode
@@ -1281,7 +1281,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new non-modifiable buffer that represents the given POD array.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.data(),
  *     min(data.size() * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1299,7 +1299,7 @@ inline ASIO_CONST_BUFFER buffer(const std::array<PodType, N>& data,
 
 /// Create a new modifiable buffer that represents the given POD vector.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     data.size() ? &data[0] : 0,
  *     data.size() * sizeof(PodType)); @endcode
@@ -1323,7 +1323,7 @@ inline ASIO_MUTABLE_BUFFER buffer(
 
 /// Create a new modifiable buffer that represents the given POD vector.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     data.size() ? &data[0] : 0,
  *     min(data.size() * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1348,7 +1348,7 @@ inline ASIO_MUTABLE_BUFFER buffer(std::vector<PodType, Allocator>& data,
 
 /// Create a new non-modifiable buffer that represents the given POD vector.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.size() ? &data[0] : 0,
  *     data.size() * sizeof(PodType)); @endcode
@@ -1372,7 +1372,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new non-modifiable buffer that represents the given POD vector.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.size() ? &data[0] : 0,
  *     min(data.size() * sizeof(PodType), max_size_in_bytes)); @endcode
@@ -1398,7 +1398,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new modifiable buffer that represents the given string.
 /**
- * @returns <tt>mutable_buffer(data.size() ? &data[0] : 0,
+ * @return <tt>mutable_buffer(data.size() ? &data[0] : 0,
  * data.size() * sizeof(Elem))</tt>.
  *
  * @note The buffer is invalidated by any non-const operation called on the
@@ -1420,7 +1420,7 @@ inline ASIO_MUTABLE_BUFFER buffer(
 
 /// Create a new modifiable buffer that represents the given string.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     data.size() ? &data[0] : 0,
  *     min(data.size() * sizeof(Elem), max_size_in_bytes)); @endcode
@@ -1446,7 +1446,7 @@ inline ASIO_MUTABLE_BUFFER buffer(
 
 /// Create a new non-modifiable buffer that represents the given string.
 /**
- * @returns <tt>const_buffer(data.data(), data.size() * sizeof(Elem))</tt>.
+ * @return <tt>const_buffer(data.data(), data.size() * sizeof(Elem))</tt>.
  *
  * @note The buffer is invalidated by any non-const operation called on the
  * given string object.
@@ -1466,7 +1466,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new non-modifiable buffer that represents the given string.
 /**
- * @returns A const_buffer value equivalent to:
+ * @return A const_buffer value equivalent to:
  * @code const_buffer(
  *     data.data(),
  *     min(data.size() * sizeof(Elem), max_size_in_bytes)); @endcode
@@ -1495,7 +1495,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new modifiable buffer that represents the given string_view.
 /**
- * @returns <tt>mutable_buffer(data.size() ? &data[0] : 0,
+ * @return <tt>mutable_buffer(data.size() ? &data[0] : 0,
  * data.size() * sizeof(Elem))</tt>.
  */
 template <typename Elem, typename Traits>
@@ -1514,7 +1514,7 @@ inline ASIO_CONST_BUFFER buffer(
 
 /// Create a new non-modifiable buffer that represents the given string.
 /**
- * @returns A mutable_buffer value equivalent to:
+ * @return A mutable_buffer value equivalent to:
  * @code mutable_buffer(
  *     data.size() ? &data[0] : 0,
  *     min(data.size() * sizeof(Elem), max_size_in_bytes)); @endcode
@@ -1604,7 +1604,7 @@ public:
   /// @b DynamicBuffer_v1: Get the size of the input sequence.
   /// @b DynamicBuffer_v2: Get the current size of the underlying memory.
   /**
-   * @returns @b DynamicBuffer_v1 The current size of the input sequence.
+   * @return @b DynamicBuffer_v1 The current size of the input sequence.
    * @b DynamicBuffer_v2: The current size of the underlying string if less than
    * max_size(). Otherwise returns max_size().
    */
@@ -1619,7 +1619,7 @@ public:
 
   /// Get the maximum size of the dynamic buffer.
   /**
-   * @returns The allowed maximum size of the underlying memory.
+   * @return The allowed maximum size of the underlying memory.
    */
   std::size_t max_size() const ASIO_NOEXCEPT
   {
@@ -1629,7 +1629,7 @@ public:
   /// Get the maximum size that the buffer may grow to without triggering
   /// reallocation.
   /**
-   * @returns The current capacity of the underlying string if less than
+   * @return The current capacity of the underlying string if less than
    * max_size(). Otherwise returns max_size().
    */
   std::size_t capacity() const ASIO_NOEXCEPT
@@ -1641,7 +1641,7 @@ public:
   /// @b DynamicBuffer_v1: Get a list of buffers that represents the input
   /// sequence.
   /**
-   * @returns An object of type @c const_buffers_type that satisfies
+   * @return An object of type @c const_buffers_type that satisfies
    * ConstBufferSequence requirements, representing the basic_string memory in
    * the input sequence.
    *
@@ -1663,7 +1663,7 @@ public:
    * underlying memory is shorter, the buffer sequence represents as many bytes
    * as are available.
    *
-   * @returns An object of type @c mutable_buffers_type that satisfies
+   * @return An object of type @c mutable_buffers_type that satisfies
    * MutableBufferSequence requirements, representing the basic_string memory.
    *
    * @note The returned object is invalidated by any @c dynamic_string_buffer
@@ -1701,7 +1701,7 @@ public:
    * Ensures that the output sequence can accommodate @c n bytes, resizing the
    * basic_string object as necessary.
    *
-   * @returns An object of type @c mutable_buffers_type that satisfies
+   * @return An object of type @c mutable_buffers_type that satisfies
    * MutableBufferSequence requirements, representing basic_string memory
    * at the start of the output sequence of size @c n.
    *
@@ -1872,7 +1872,7 @@ public:
   /// @b DynamicBuffer_v1: Get the size of the input sequence.
   /// @b DynamicBuffer_v2: Get the current size of the underlying memory.
   /**
-   * @returns @b DynamicBuffer_v1 The current size of the input sequence.
+   * @return @b DynamicBuffer_v1 The current size of the input sequence.
    * @b DynamicBuffer_v2: The current size of the underlying vector if less than
    * max_size(). Otherwise returns max_size().
    */
@@ -1887,7 +1887,7 @@ public:
 
   /// Get the maximum size of the dynamic buffer.
   /**
-   * @returns @b DynamicBuffer_v1: The allowed maximum of the sum of the sizes
+   * @return @b DynamicBuffer_v1: The allowed maximum of the sum of the sizes
    * of the input sequence and output sequence. @b DynamicBuffer_v2: The allowed
    * maximum size of the underlying memory.
    */
@@ -1899,7 +1899,7 @@ public:
   /// Get the maximum size that the buffer may grow to without triggering
   /// reallocation.
   /**
-   * @returns @b DynamicBuffer_v1: The current total capacity of the buffer,
+   * @return @b DynamicBuffer_v1: The current total capacity of the buffer,
    * i.e. for both the input sequence and output sequence. @b DynamicBuffer_v2:
    * The current capacity of the underlying vector if less than max_size().
    * Otherwise returns max_size().
@@ -1913,7 +1913,7 @@ public:
   /// @b DynamicBuffer_v1: Get a list of buffers that represents the input
   /// sequence.
   /**
-   * @returns An object of type @c const_buffers_type that satisfies
+   * @return An object of type @c const_buffers_type that satisfies
    * ConstBufferSequence requirements, representing the vector memory in the
    * input sequence.
    *
@@ -1936,7 +1936,7 @@ public:
    * underlying memory is shorter, the buffer sequence represents as many bytes
    * as are available.
    *
-   * @returns An object of type @c mutable_buffers_type that satisfies
+   * @return An object of type @c mutable_buffers_type that satisfies
    * MutableBufferSequence requirements, representing the vector memory.
    *
    * @note The returned object is invalidated by any @c dynamic_vector_buffer
@@ -1974,7 +1974,7 @@ public:
    * Ensures that the output sequence can accommodate @c n bytes, resizing the
    * vector object as necessary.
    *
-   * @returns An object of type @c mutable_buffers_type that satisfies
+   * @return An object of type @c mutable_buffers_type that satisfies
    * MutableBufferSequence requirements, representing vector memory at the
    * start of the output sequence of size @c n.
    *
@@ -2093,7 +2093,7 @@ private:
 
 /// Create a new dynamic buffer that represents the given string.
 /**
- * @returns <tt>dynamic_string_buffer<Elem, Traits, Allocator>(data)</tt>.
+ * @return <tt>dynamic_string_buffer<Elem, Traits, Allocator>(data)</tt>.
  */
 template <typename Elem, typename Traits, typename Allocator>
 inline dynamic_string_buffer<Elem, Traits, Allocator> dynamic_buffer(
@@ -2104,7 +2104,7 @@ inline dynamic_string_buffer<Elem, Traits, Allocator> dynamic_buffer(
 
 /// Create a new dynamic buffer that represents the given string.
 /**
- * @returns <tt>dynamic_string_buffer<Elem, Traits, Allocator>(data,
+ * @return <tt>dynamic_string_buffer<Elem, Traits, Allocator>(data,
  * max_size)</tt>.
  */
 template <typename Elem, typename Traits, typename Allocator>
@@ -2117,7 +2117,7 @@ inline dynamic_string_buffer<Elem, Traits, Allocator> dynamic_buffer(
 
 /// Create a new dynamic buffer that represents the given vector.
 /**
- * @returns <tt>dynamic_vector_buffer<Elem, Allocator>(data)</tt>.
+ * @return <tt>dynamic_vector_buffer<Elem, Allocator>(data)</tt>.
  */
 template <typename Elem, typename Allocator>
 inline dynamic_vector_buffer<Elem, Allocator> dynamic_buffer(
@@ -2128,7 +2128,7 @@ inline dynamic_vector_buffer<Elem, Allocator> dynamic_buffer(
 
 /// Create a new dynamic buffer that represents the given vector.
 /**
- * @returns <tt>dynamic_vector_buffer<Elem, Allocator>(data, max_size)</tt>.
+ * @return <tt>dynamic_vector_buffer<Elem, Allocator>(data, max_size)</tt>.
  */
 template <typename Elem, typename Allocator>
 inline dynamic_vector_buffer<Elem, Allocator> dynamic_buffer(
@@ -2348,7 +2348,7 @@ std::size_t buffer_copy(multiple_buffers, multiple_buffers,
  * @param source A non-modifiable buffer sequence representing the memory
  * regions from which the bytes will be copied.
  *
- * @returns The number of bytes copied.
+ * @return The number of bytes copied.
  *
  * @note The number of bytes copied is the lesser of:
  *
@@ -2383,7 +2383,7 @@ inline std::size_t buffer_copy(const MutableBufferSequence& target,
  *
  * @param max_bytes_to_copy The maximum number of bytes to be copied.
  *
- * @returns The number of bytes copied.
+ * @return The number of bytes copied.
  *
  * @note The number of bytes copied is the lesser of:
  *

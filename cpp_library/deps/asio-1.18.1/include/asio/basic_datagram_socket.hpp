@@ -335,7 +335,7 @@ public:
    *
    * @param buffers One ore more data buffers to be sent on the socket.
    *
-   * @returns The number of bytes sent.
+   * @return The number of bytes sent.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -369,7 +369,7 @@ public:
    *
    * @param flags Flags specifying how the send call is to be made.
    *
-   * @returns The number of bytes sent.
+   * @return The number of bytes sent.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -399,7 +399,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes sent.
+   * @return The number of bytes sent.
    *
    * @note The send operation can only be used with a connected socket. Use
    * the send_to function to send data on an unconnected datagram socket.
@@ -517,7 +517,7 @@ public:
    *
    * @param destination The remote endpoint to which the data will be sent.
    *
-   * @returns The number of bytes sent.
+   * @return The number of bytes sent.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -555,7 +555,7 @@ public:
    *
    * @param flags Flags specifying how the send call is to be made.
    *
-   * @returns The number of bytes sent.
+   * @return The number of bytes sent.
    *
    * @throws asio::system_error Thrown on failure.
    */
@@ -584,7 +584,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes sent.
+   * @return The number of bytes sent.
    */
   template <typename ConstBufferSequence>
   std::size_t send_to(const ConstBufferSequence& buffers,
@@ -700,7 +700,7 @@ public:
    *
    * @param buffers One or more buffers into which the data will be received.
    *
-   * @returns The number of bytes received.
+   * @return The number of bytes received.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -736,7 +736,7 @@ public:
    *
    * @param flags Flags specifying how the receive call is to be made.
    *
-   * @returns The number of bytes received.
+   * @return The number of bytes received.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -767,7 +767,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes received.
+   * @return The number of bytes received.
    *
    * @note The receive operation can only be used with a connected socket. Use
    * the receive_from function to receive data on an unconnected datagram
@@ -887,7 +887,7 @@ public:
    * @param sender_endpoint An endpoint object that receives the endpoint of
    * the remote sender of the datagram.
    *
-   * @returns The number of bytes received.
+   * @return The number of bytes received.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -926,7 +926,7 @@ public:
    *
    * @param flags Flags specifying how the receive call is to be made.
    *
-   * @returns The number of bytes received.
+   * @return The number of bytes received.
    *
    * @throws asio::system_error Thrown on failure.
    */
@@ -955,7 +955,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes received.
+   * @return The number of bytes received.
    */
   template <typename MutableBufferSequence>
   std::size_t receive_from(const MutableBufferSequence& buffers,

@@ -242,7 +242,7 @@ public:
    *
    * @param q A query object that determines what endpoints will be returned.
    *
-   * @returns A range object representing the list of endpoint entries. A
+   * @return A range object representing the list of endpoint entries. A
    * successful call to this function is guaranteed to return a non-empty
    * range.
    *
@@ -266,7 +266,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns A range object representing the list of endpoint entries. An
+   * @return A range object representing the list of endpoint entries. An
    * empty range is returned if an error occurs. A successful call to this
    * function is guaranteed to return a non-empty range.
    */
@@ -292,7 +292,7 @@ public:
    * be an empty string, in which case all resolved endpoints will have a port
    * number of 0.
    *
-   * @returns A range object representing the list of endpoint entries. A
+   * @return A range object representing the list of endpoint entries. A
    * successful call to this function is guaranteed to return a non-empty
    * range.
    *
@@ -333,7 +333,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns A range object representing the list of endpoint entries. An
+   * @return A range object representing the list of endpoint entries. An
    * empty range is returned if an error occurs. A successful call to this
    * function is guaranteed to return a non-empty range.
    *
@@ -375,7 +375,7 @@ public:
    * remote hosts. See the @ref resolver_base documentation for the set of
    * available flags.
    *
-   * @returns A range object representing the list of endpoint entries. A
+   * @return A range object representing the list of endpoint entries. A
    * successful call to this function is guaranteed to return a non-empty
    * range.
    *
@@ -427,7 +427,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns A range object representing the list of endpoint entries. An
+   * @return A range object representing the list of endpoint entries. An
    * empty range is returned if an error occurs. A successful call to this
    * function is guaranteed to return a non-empty range.
    *
@@ -470,7 +470,7 @@ public:
    * be an empty string, in which case all resolved endpoints will have a port
    * number of 0.
    *
-   * @returns A range object representing the list of endpoint entries. A
+   * @return A range object representing the list of endpoint entries. A
    * successful call to this function is guaranteed to return a non-empty
    * range.
    *
@@ -514,7 +514,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns A range object representing the list of endpoint entries. An
+   * @return A range object representing the list of endpoint entries. An
    * empty range is returned if an error occurs. A successful call to this
    * function is guaranteed to return a non-empty range.
    *
@@ -560,7 +560,7 @@ public:
    * remote hosts. See the @ref resolver_base documentation for the set of
    * available flags.
    *
-   * @returns A range object representing the list of endpoint entries. A
+   * @return A range object representing the list of endpoint entries. A
    * successful call to this function is guaranteed to return a non-empty
    * range.
    *
@@ -617,7 +617,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns A range object representing the list of endpoint entries. An
+   * @return A range object representing the list of endpoint entries. An
    * empty range is returned if an error occurs. A successful call to this
    * function is guaranteed to return a non-empty range.
    *
@@ -945,7 +945,7 @@ public:
    * @param e An endpoint object that determines what endpoints will be
    * returned.
    *
-   * @returns A range object representing the list of endpoint entries. A
+   * @return A range object representing the list of endpoint entries. A
    * successful call to this function is guaranteed to return a non-empty
    * range.
    *
@@ -970,7 +970,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns A range object representing the list of endpoint entries. An
+   * @return A range object representing the list of endpoint entries. An
    * empty range is returned if an error occurs. A successful call to this
    * function is guaranteed to return a non-empty range.
    */

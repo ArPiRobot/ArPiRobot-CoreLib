@@ -180,7 +180,7 @@ public:
    *
    * @param buffers One or more data buffers to be written to the handle.
    *
-   * @returns The number of bytes written.
+   * @return The number of bytes written.
    *
    * @throws asio::system_error Thrown on failure. An error code of
    * asio::error::eof indicates that the connection was closed by the
@@ -222,7 +222,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes written. Returns 0 if an error occurred.
+   * @return The number of bytes written. Returns 0 if an error occurred.
    *
    * @note The write_some operation may not transmit all of the data to the
    * peer. Consider using the @ref write_at function if you need to ensure that
@@ -299,7 +299,7 @@ public:
    *
    * @param buffers One or more buffers into which the data will be read.
    *
-   * @returns The number of bytes read.
+   * @return The number of bytes read.
    *
    * @throws asio::system_error Thrown on failure. An error code of
    * asio::error::eof indicates that the connection was closed by the
@@ -342,7 +342,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes read. Returns 0 if an error occurred.
+   * @return The number of bytes read. Returns 0 if an error occurred.
    *
    * @note The read_some operation may not read all of the requested number of
    * bytes. Consider using the @ref read_at function if you need to ensure that

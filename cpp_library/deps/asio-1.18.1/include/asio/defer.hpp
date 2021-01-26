@@ -107,7 +107,7 @@ ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void()) defer(
 
 /// Submits a completion token or function object for execution.
 /**
- * @returns <tt>defer(ctx.get_executor(), forward<CompletionToken>(token))</tt>.
+ * @return <tt>defer(ctx.get_executor(), forward<CompletionToken>(token))</tt>.
  */
 template <typename ExecutionContext,
     ASIO_COMPLETION_TOKEN_FOR(void()) CompletionToken

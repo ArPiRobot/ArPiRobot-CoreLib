@@ -206,7 +206,7 @@ public:
 
   /// Obtain type information for the target executor object.
   /**
-   * @returns If @c *this has a target type of type @c T, <tt>typeid(T)</tt>;
+   * @return If @c *this has a target type of type @c T, <tt>typeid(T)</tt>;
    * otherwise, <tt>typeid(void)</tt>.
    */
 #if !defined(ASIO_NO_TYPEID) || defined(GENERATING_DOCUMENTATION)
@@ -223,7 +223,7 @@ public:
 
   /// Obtain a pointer to the target executor object.
   /**
-   * @returns If <tt>target_type() == typeid(T)</tt>, a pointer to the stored
+   * @return If <tt>target_type() == typeid(T)</tt>, a pointer to the stored
    * executor target; otherwise, a null pointer.
    */
   template <typename Executor>
@@ -231,7 +231,7 @@ public:
 
   /// Obtain a pointer to the target executor object.
   /**
-   * @returns If <tt>target_type() == typeid(T)</tt>, a pointer to the stored
+   * @return If <tt>target_type() == typeid(T)</tt>, a pointer to the stored
    * executor target; otherwise, a null pointer.
    */
   template <typename Executor>

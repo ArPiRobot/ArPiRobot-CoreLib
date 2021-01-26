@@ -114,7 +114,7 @@ namespace arpirobot{
 
         /**
          * Get the human-readable name of the device
-         * @returns the devices human readable name
+         * @return the devices human readable name
          */
         std::string getDeviceName();
 

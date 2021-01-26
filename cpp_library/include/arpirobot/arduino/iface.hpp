@@ -35,6 +35,7 @@ namespace arpirobot{
         /**
          * Returns true when the arduino is ready to process sensor data (after BaseArduinoInterface::begin 
          * is successful)
+         * @return true if ready, else false
          */
         bool isReady();
 

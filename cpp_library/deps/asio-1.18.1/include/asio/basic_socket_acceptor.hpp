@@ -962,7 +962,7 @@ public:
 
   /// Gets the non-blocking mode of the acceptor.
   /**
-   * @returns @c true if the acceptor's synchronous operations will fail with
+   * @return @c true if the acceptor's synchronous operations will fail with
    * asio::error::would_block if they are unable to perform the requested
    * operation immediately. If @c false, synchronous operations will block
    * until complete.
@@ -1022,7 +1022,7 @@ public:
    * native acceptor. This mode has no effect on the behaviour of the acceptor
    * object's synchronous operations.
    *
-   * @returns @c true if the underlying acceptor is in non-blocking mode and
+   * @return @c true if the underlying acceptor is in non-blocking mode and
    * direct system calls may fail with asio::error::would_block (or the
    * equivalent system error).
    *
@@ -1085,7 +1085,7 @@ public:
   /**
    * This function is used to obtain the locally bound endpoint of the acceptor.
    *
-   * @returns An object that represents the local endpoint of the acceptor.
+   * @return An object that represents the local endpoint of the acceptor.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -1111,7 +1111,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns An object that represents the local endpoint of the acceptor.
+   * @return An object that represents the local endpoint of the acceptor.
    * Returns a default-constructed endpoint object if an error occurred and the
    * error handler did not throw an exception.
    *
@@ -1473,7 +1473,7 @@ public:
    * This overload requires that the Protocol template parameter satisfy the
    * AcceptableProtocol type requirements.
    *
-   * @returns A socket object representing the newly accepted connection.
+   * @return A socket object representing the newly accepted connection.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -1506,7 +1506,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns On success, a socket object representing the newly accepted
+   * @return On success, a socket object representing the newly accepted
    * connection. On error, a socket object where is_open() is false.
    *
    * @par Example
@@ -1604,7 +1604,7 @@ public:
    * @param ex The I/O executor object to be used for the newly
    * accepted socket.
    *
-   * @returns A socket object representing the newly accepted connection.
+   * @return A socket object representing the newly accepted connection.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -1643,7 +1643,7 @@ public:
    * @param context The I/O execution context object to be used for the newly
    * accepted socket.
    *
-   * @returns A socket object representing the newly accepted connection.
+   * @return A socket object representing the newly accepted connection.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -1684,7 +1684,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns On success, a socket object representing the newly accepted
+   * @return On success, a socket object representing the newly accepted
    * connection. On error, a socket object where is_open() is false.
    *
    * @par Example
@@ -1726,7 +1726,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns On success, a socket object representing the newly accepted
+   * @return On success, a socket object representing the newly accepted
    * connection. On error, a socket object where is_open() is false.
    *
    * @par Example
@@ -1904,7 +1904,7 @@ public:
    * @param peer_endpoint An endpoint object into which the endpoint of the
    * remote peer will be written.
    *
-   * @returns A socket object representing the newly accepted connection.
+   * @return A socket object representing the newly accepted connection.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -1942,7 +1942,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns On success, a socket object representing the newly accepted
+   * @return On success, a socket object representing the newly accepted
    * connection. On error, a socket object where is_open() is false.
    *
    * @par Example
@@ -2051,7 +2051,7 @@ public:
    * @param peer_endpoint An endpoint object into which the endpoint of the
    * remote peer will be written.
    *
-   * @returns A socket object representing the newly accepted connection.
+   * @return A socket object representing the newly accepted connection.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -2096,7 +2096,7 @@ public:
    * @param peer_endpoint An endpoint object into which the endpoint of the
    * remote peer will be written.
    *
-   * @returns A socket object representing the newly accepted connection.
+   * @return A socket object representing the newly accepted connection.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -2143,7 +2143,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns On success, a socket object representing the newly accepted
+   * @return On success, a socket object representing the newly accepted
    * connection. On error, a socket object where is_open() is false.
    *
    * @par Example
@@ -2192,7 +2192,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns On success, a socket object representing the newly accepted
+   * @return On success, a socket object representing the newly accepted
    * connection. On error, a socket object where is_open() is false.
    *
    * @par Example

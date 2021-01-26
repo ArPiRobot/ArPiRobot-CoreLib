@@ -20,7 +20,7 @@ public class NetworkTable {
     /**
      * Get the value for a key/value pair
      * @param key The key to get the associated value with
-     * @returns The value associated with the given key. If the key does not exist an empty string is returned.
+     * @return The value associated with the given key. If the key does not exist an empty string is returned.
      */
     public static String get(String key){
         Pointer ptr = Bridge.arpirobot.NetworkTable_get(key);
@@ -32,7 +32,7 @@ public class NetworkTable {
     /**
      * Check if a key has a value
      * @param key The key to check for a value associated with
-     * @returns true if a value exists for the given key, else false
+     * @return true if a value exists for the given key, else false
      */
     public static boolean has(String key){
         return Bridge.arpirobot.NetworkTable_has(key);

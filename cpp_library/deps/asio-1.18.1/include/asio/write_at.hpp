@@ -60,7 +60,7 @@ namespace asio {
  * of the buffer sizes indicates the maximum number of bytes to write to the
  * device.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @throws asio::system_error Thrown on failure.
  *
@@ -105,7 +105,7 @@ std::size_t write_at(SyncRandomAccessWriteDevice& d,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @par Example
  * To write a single data buffer use the @ref buffer function as follows:
@@ -162,7 +162,7 @@ std::size_t write_at(SyncRandomAccessWriteDevice& d,
  * non-zero return value indicates the maximum number of bytes to be written on
  * the next call to the device's write_some_at function.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @throws asio::system_error Thrown on failure.
  *
@@ -219,7 +219,7 @@ std::size_t write_at(SyncRandomAccessWriteDevice& d,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes written. If an error occurs, returns the total
+ * @return The number of bytes written. If an error occurs, returns the total
  * number of bytes successfully transferred prior to the error.
  */
 template <typename SyncRandomAccessWriteDevice, typename ConstBufferSequence,
@@ -251,7 +251,7 @@ std::size_t write_at(SyncRandomAccessWriteDevice& d,
  *
  * @param b The basic_streambuf object from which data will be written.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @throws asio::system_error Thrown on failure.
  *
@@ -286,7 +286,7 @@ std::size_t write_at(SyncRandomAccessWriteDevice& d,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @note This overload is equivalent to calling:
  * @code asio::write_at(
@@ -332,7 +332,7 @@ std::size_t write_at(SyncRandomAccessWriteDevice& d,
  * non-zero return value indicates the maximum number of bytes to be written on
  * the next call to the device's write_some_at function.
  *
- * @returns The number of bytes transferred.
+ * @return The number of bytes transferred.
  *
  * @throws asio::system_error Thrown on failure.
  */
@@ -377,7 +377,7 @@ std::size_t write_at(SyncRandomAccessWriteDevice& d, uint64_t offset,
  *
  * @param ec Set to indicate what error occurred, if any.
  *
- * @returns The number of bytes written. If an error occurs, returns the total
+ * @return The number of bytes written. If an error occurs, returns the total
  * number of bytes successfully transferred prior to the error.
  */
 template <typename SyncRandomAccessWriteDevice, typename Allocator,

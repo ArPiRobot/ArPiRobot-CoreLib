@@ -142,7 +142,7 @@ public:
 
   /// Get the size of the input sequence.
   /**
-   * @returns The size of the input sequence. The value is equal to that
+   * @return The size of the input sequence. The value is equal to that
    * calculated for @c s in the following code:
    * @code
    * size_t s = 0;
@@ -162,7 +162,7 @@ public:
 
   /// Get the maximum size of the basic_streambuf.
   /**
-   * @returns The allowed maximum of the sum of the sizes of the input sequence
+   * @return The allowed maximum of the sum of the sizes of the input sequence
    * and output sequence.
    */
   std::size_t max_size() const ASIO_NOEXCEPT
@@ -172,7 +172,7 @@ public:
 
   /// Get the current capacity of the basic_streambuf.
   /**
-   * @returns The current total capacity of the streambuf, i.e. for both the
+   * @return The current total capacity of the streambuf, i.e. for both the
    * input sequence and output sequence.
    */
   std::size_t capacity() const ASIO_NOEXCEPT
@@ -182,7 +182,7 @@ public:
 
   /// Get a list of buffers that represents the input sequence.
   /**
-   * @returns An object of type @c const_buffers_type that satisfies
+   * @return An object of type @c const_buffers_type that satisfies
    * ConstBufferSequence requirements, representing all character arrays in the
    * input sequence.
    *
@@ -201,7 +201,7 @@ public:
    * Ensures that the output sequence can accommodate @c n characters,
    * reallocating character array objects as necessary.
    *
-   * @returns An object of type @c mutable_buffers_type that satisfies
+   * @return An object of type @c mutable_buffers_type that satisfies
    * MutableBufferSequence requirements, representing character array objects
    * at the start of the output sequence such that the sum of the buffer sizes
    * is @c n.

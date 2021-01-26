@@ -185,7 +185,7 @@ namespace arpirobot{
         /**
          * Check if the given device is the main voltage monitor
          * @param vmon A pointer to the device that is the main vmon
-         * @returns true if the given device is the main vmon, else false
+         * @return true if the given device is the main vmon, else false
          */
         static bool isMainVmon(MainVmon *vmon);
 
@@ -294,14 +294,14 @@ namespace arpirobot{
         /**
          * Get the value for a key/value pair
          * @param key The key to get the associated value with
-         * @returns The value associated with the given key. If the key does not exist an empty string is returned.
+         * @return The value associated with the given key. If the key does not exist an empty string is returned.
          */
         static std::string get(std::string key);
 
         /**
          * Check if a key has a value
          * @param key The key to check for a value associated with
-         * @returns true if a value exists for the given key, else false
+         * @return true if a value exists for the given key, else false
          */
         static bool has(std::string key);
 

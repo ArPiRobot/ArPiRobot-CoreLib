@@ -1206,7 +1206,7 @@ public:
 
   /// Gets the non-blocking mode of the socket.
   /**
-   * @returns @c true if the socket's synchronous operations will fail with
+   * @return @c true if the socket's synchronous operations will fail with
    * asio::error::would_block if they are unable to perform the requested
    * operation immediately. If @c false, synchronous operations will block
    * until complete.
@@ -1266,7 +1266,7 @@ public:
    * native socket. This mode has no effect on the behaviour of the socket
    * object's synchronous operations.
    *
-   * @returns @c true if the underlying socket is in non-blocking mode and
+   * @return @c true if the underlying socket is in non-blocking mode and
    * direct system calls may fail with asio::error::would_block (or the
    * equivalent system error).
    *
@@ -1539,7 +1539,7 @@ public:
   /**
    * This function is used to obtain the locally bound endpoint of the socket.
    *
-   * @returns An object that represents the local endpoint of the socket.
+   * @return An object that represents the local endpoint of the socket.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -1565,7 +1565,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns An object that represents the local endpoint of the socket.
+   * @return An object that represents the local endpoint of the socket.
    * Returns a default-constructed endpoint object if an error occurred.
    *
    * @par Example
@@ -1589,7 +1589,7 @@ public:
   /**
    * This function is used to obtain the remote endpoint of the socket.
    *
-   * @returns An object that represents the remote endpoint of the socket.
+   * @return An object that represents the remote endpoint of the socket.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -1615,7 +1615,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns An object that represents the remote endpoint of the socket.
+   * @return An object that represents the remote endpoint of the socket.
    * Returns a default-constructed endpoint object if an error occurred.
    *
    * @par Example

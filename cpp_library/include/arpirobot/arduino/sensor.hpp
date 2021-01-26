@@ -35,13 +35,13 @@ namespace arpirobot{
 
         /**
          * Get the voltage read by this voltage monitor (in volts)
-         * @returns The voltage in volts
+         * @return The voltage in volts
          */
         double getVoltage();
 
         /**
          * Get the human-readable name for this device
-         * @returns The device name
+         * @return The device name
          */
         std::string getDeviceName();
     
@@ -99,13 +99,13 @@ namespace arpirobot{
 
         /**
          * Get the last distance read by the ultrasonic sensor
-         * @returns The distance in cm
+         * @return The distance in cm
          */
         int getDistance();
 
         /**
          * Get the human-readable name for this device
-         * @returns The device name
+         * @return The device name
          */
         std::string getDeviceName();
     
@@ -146,7 +146,7 @@ namespace arpirobot{
 
         /**
          * Get the position (tick count) for this encoder
-         * @returns The position in ticks
+         * @return The position in ticks
          */
         int getPosition();
 
@@ -158,7 +158,7 @@ namespace arpirobot{
 
         /**
          * Get the human-readable name for this device
-         * @returns The device name
+         * @return The device name
          */
         std::string getDeviceName();
     
@@ -213,19 +213,19 @@ namespace arpirobot{
 
         /**
          * Get the digital value read from the sensor
-         * @returns true or false. One cooresponds to reflection detected. The other is no reflection detected.
+         * @return true or false. One cooresponds to reflection detected. The other is no reflection detected.
          */
         bool getDigitalValue();
 
         /**
          * Get the analog reflection signal strength (if this device was setup to use an analog input)
-         * @returns The read analog value (will be zero if not configured for analog data)
+         * @return The read analog value (will be zero if not configured for analog data)
          */
         int getAnalogValue();
 
         /**
          * Get the human-readable name for this device
-         * @returns The device name
+         * @return The device name
          */
         std::string getDeviceName();
 
@@ -258,37 +258,37 @@ namespace arpirobot{
 
         /**
          * Get the X rotation
-         * @returns X rotation in degrees
+         * @return X rotation in degrees
          */
         double getGyroX();
 
         /**
          * Get the Y rotation
-         * @returns Y rotation in degrees
+         * @return Y rotation in degrees
          */
         double getGyroY();
 
         /**
          * Get the Z rotation
-         * @returns Z rotation in degrees
+         * @return Z rotation in degrees
          */
         double getGyroZ();
 
         /**
          * Get the X axis acceleration
-         * @returns X acceleration in m/s^2
+         * @return X acceleration in m/s^2
          */
         double getAccelX();
 
         /**
          * Get the Y axis acceleration
-         * @returns Y acceleration in m/s^2
+         * @return Y acceleration in m/s^2
          */
         double getAccelY();
 
         /**
          * Get the Z axis acceleration
-         * @returns Z acceleration in m/s^2
+         * @return Z acceleration in m/s^2
          */
         double getAccelZ();
 
@@ -312,7 +312,7 @@ namespace arpirobot{
 
         /**
          * Get the human-readable name for this device
-         * @returns The device name
+         * @return The device name
          */
         std::string getDeviceName();
 
@@ -342,37 +342,37 @@ namespace arpirobot{
 
         /**
          * Get the X rotation
-         * @returns X rotation in degrees
+         * @return X rotation in degrees
          */
         double getGyroX();
 
         /**
          * Get the Y rotation
-         * @returns Y rotation in degrees
+         * @return Y rotation in degrees
          */
         double getGyroY();
 
         /**
          * Get the Z rotation
-         * @returns Z rotation in degrees
+         * @return Z rotation in degrees
          */
         double getGyroZ();
 
         /**
          * Get the X axis acceleration
-         * @returns X acceleration in m/s^2
+         * @return X acceleration in m/s^2
          */
         double getAccelX();
 
         /**
          * Get the Y axis acceleration
-         * @returns Y acceleration in m/s^2
+         * @return Y acceleration in m/s^2
          */
         double getAccelY();
 
         /**
          * Get the Z axis acceleration
-         * @returns Z acceleration in m/s^2
+         * @return Z acceleration in m/s^2
          */
         double getAccelZ();
 
@@ -396,7 +396,7 @@ namespace arpirobot{
 
         /**
          * Get the human-readable name for this device
-         * @returns The device name
+         * @return The device name
          */
         std::string getDeviceName();
 

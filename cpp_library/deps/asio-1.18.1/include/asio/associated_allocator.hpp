@@ -90,7 +90,7 @@ struct associated_allocator
 
 /// Helper function to obtain an object's associated allocator.
 /**
- * @returns <tt>associated_allocator<T>::get(t)</tt>
+ * @return <tt>associated_allocator<T>::get(t)</tt>
  */
 template <typename T>
 inline typename associated_allocator<T>::type
@@ -101,7 +101,7 @@ get_associated_allocator(const T& t) ASIO_NOEXCEPT
 
 /// Helper function to obtain an object's associated allocator.
 /**
- * @returns <tt>associated_allocator<T, Allocator>::get(t, a)</tt>
+ * @return <tt>associated_allocator<T, Allocator>::get(t, a)</tt>
  */
 template <typename T, typename Allocator>
 inline typename associated_allocator<T, Allocator>::type

@@ -75,7 +75,7 @@ struct is_endpoint_sequence
  *
  * @param endpoints A sequence of endpoints.
  *
- * @returns The successfully connected endpoint.
+ * @return The successfully connected endpoint.
  *
  * @throws asio::system_error Thrown on failure. If the sequence is
  * empty, the associated @c error_code is asio::error::not_found.
@@ -109,7 +109,7 @@ typename Protocol::endpoint connect(basic_socket<Protocol, Executor>& s,
  * empty, set to asio::error::not_found. Otherwise, contains the error
  * from the last connection attempt.
  *
- * @returns On success, the successfully connected endpoint. Otherwise, a
+ * @return On success, the successfully connected endpoint. Otherwise, a
  * default-constructed endpoint.
  *
  * @par Example
@@ -143,7 +143,7 @@ typename Protocol::endpoint connect(basic_socket<Protocol, Executor>& s,
  *
  * @param begin An iterator pointing to the start of a sequence of endpoints.
  *
- * @returns On success, an iterator denoting the successfully connected
+ * @return On success, an iterator denoting the successfully connected
  * endpoint. Otherwise, the end iterator.
  *
  * @throws asio::system_error Thrown on failure. If the sequence is
@@ -175,7 +175,7 @@ Iterator connect(basic_socket<Protocol, Executor>& s, Iterator begin,
  * empty, set to asio::error::not_found. Otherwise, contains the error
  * from the last connection attempt.
  *
- * @returns On success, an iterator denoting the successfully connected
+ * @return On success, an iterator denoting the successfully connected
  * endpoint. Otherwise, the end iterator.
  *
  * @note This overload assumes that a default constructed object of type @c
@@ -202,7 +202,7 @@ Iterator connect(basic_socket<Protocol, Executor>& s,
  *
  * @param end An iterator pointing to the end of a sequence of endpoints.
  *
- * @returns An iterator denoting the successfully connected endpoint.
+ * @return An iterator denoting the successfully connected endpoint.
  *
  * @throws asio::system_error Thrown on failure. If the sequence is
  * empty, the associated @c error_code is asio::error::not_found.
@@ -237,7 +237,7 @@ Iterator connect(basic_socket<Protocol, Executor>& s,
  * empty, set to asio::error::not_found. Otherwise, contains the error
  * from the last connection attempt.
  *
- * @returns On success, an iterator denoting the successfully connected
+ * @return On success, an iterator denoting the successfully connected
  * endpoint. Otherwise, the end iterator.
  *
  * @par Example
@@ -279,7 +279,7 @@ Iterator connect(basic_socket<Protocol, Executor>& s,
  * The function object should return true if the next endpoint should be tried,
  * and false if it should be skipped.
  *
- * @returns The successfully connected endpoint.
+ * @return The successfully connected endpoint.
  *
  * @throws asio::system_error Thrown on failure. If the sequence is
  * empty, the associated @c error_code is asio::error::not_found.
@@ -341,7 +341,7 @@ typename Protocol::endpoint connect(basic_socket<Protocol, Executor>& s,
  * empty, set to asio::error::not_found. Otherwise, contains the error
  * from the last connection attempt.
  *
- * @returns On success, the successfully connected endpoint. Otherwise, a
+ * @return On success, the successfully connected endpoint. Otherwise, a
  * default-constructed endpoint.
  *
  * @par Example
@@ -407,7 +407,7 @@ typename Protocol::endpoint connect(basic_socket<Protocol, Executor>& s,
  * The function object should return true if the next endpoint should be tried,
  * and false if it should be skipped.
  *
- * @returns On success, an iterator denoting the successfully connected
+ * @return On success, an iterator denoting the successfully connected
  * endpoint. Otherwise, the end iterator.
  *
  * @throws asio::system_error Thrown on failure. If the sequence is
@@ -452,7 +452,7 @@ Iterator connect(basic_socket<Protocol, Executor>& s,
  * empty, set to asio::error::not_found. Otherwise, contains the error
  * from the last connection attempt.
  *
- * @returns On success, an iterator denoting the successfully connected
+ * @return On success, an iterator denoting the successfully connected
  * endpoint. Otherwise, the end iterator.
  *
  * @note This overload assumes that a default constructed object of type @c
@@ -491,7 +491,7 @@ Iterator connect(basic_socket<Protocol, Executor>& s, Iterator begin,
  * The function object should return true if the next endpoint should be tried,
  * and false if it should be skipped.
  *
- * @returns An iterator denoting the successfully connected endpoint.
+ * @return An iterator denoting the successfully connected endpoint.
  *
  * @throws asio::system_error Thrown on failure. If the sequence is
  * empty, the associated @c error_code is asio::error::not_found.
@@ -554,7 +554,7 @@ Iterator connect(basic_socket<Protocol, Executor>& s, Iterator begin,
  * empty, set to asio::error::not_found. Otherwise, contains the error
  * from the last connection attempt.
  *
- * @returns On success, an iterator denoting the successfully connected
+ * @return On success, an iterator denoting the successfully connected
  * endpoint. Otherwise, the end iterator.
  *
  * @par Example

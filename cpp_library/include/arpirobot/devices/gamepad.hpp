@@ -21,7 +21,7 @@ namespace arpirobot{
 
         /**
          * Get the controller number for this gamepad
-         * @returns The controller number
+         * @return The controller number
          */
         int getControllerNum();
 
@@ -29,21 +29,21 @@ namespace arpirobot{
          * Get an axis for this controller
          * @param axisNum The axis number
          * @param deadband A minimum threshold for axis values. Values below this will be returned as zero.
-         * @returns The axis value after applying the deadband and (if required) an axis transform
+         * @return The axis value after applying the deadband and (if required) an axis transform
          */
         double getAxis(int axisNum, double deadband = 0);
 
         /**
          * Get a button for the controller
          * @param buttonNum The button number
-         * @returns true if pressed, else false
+         * @return true if pressed, else false
          */
         bool getButton(int buttonNum);
 
         /**
          * Get the value of a dpad
          * @param dpadNum The dpad number
-         * @returns 0 if center, 1 for up through 8 going clockwise
+         * @return 0 if center, 1 for up through 8 going clockwise
          */
         int getDpad(int dpadNum);
 
@@ -62,7 +62,7 @@ namespace arpirobot{
 
         /**
          * Get the human-readable name of the device
-         * @returns the devices human readable name
+         * @return the devices human readable name
          */
         std::string getDeviceName();
     

@@ -78,7 +78,7 @@ struct outstanding_work_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns untracked_t();
+     * @return untracked_t();
      */
     static constexpr outstanding_work_t value();
   };
@@ -107,7 +107,7 @@ struct outstanding_work_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns tracked_t();
+     * @return tracked_t();
      */
     static constexpr outstanding_work_t value();
   };

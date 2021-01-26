@@ -110,19 +110,19 @@ namespace arpirobot{
 
         /**
          * Get current measurement
-         * @returns Current in mA
+         * @return Current in mA
          */
         double getCurrent();
 
         /**
          * Get voltage measurement
-         * @returns Voltage in V
+         * @return Voltage in V
          */
         double getVolgate();
 
         /**
          * Get power measurement
-         * @returns Power in mW
+         * @return Power in mW
          */
         double getPower();
 

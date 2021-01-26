@@ -82,7 +82,7 @@ struct blocking_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns possibly_t();
+     * @return possibly_t();
      */
     static constexpr blocking_t value();
   };
@@ -112,7 +112,7 @@ struct blocking_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns always_t();
+     * @return always_t();
      */
     static constexpr blocking_t value();
   };
@@ -142,7 +142,7 @@ struct blocking_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns never_t();
+     * @return never_t();
      */
     static constexpr blocking_t value();
   };

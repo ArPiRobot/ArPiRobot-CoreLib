@@ -35,7 +35,7 @@ namespace arpirobot{
         void lockDevice(BaseDevice *device);
 
         /**
-         * @returns true if the action has been started, but has not finished or been stopped.
+         * @return true if the action has been started, but has not finished or been stopped.
          */
         bool isRunning();
 
@@ -59,7 +59,7 @@ namespace arpirobot{
 
         /**
          * Called each time after Action::process. When this returns false the action will stop.
-         * @returns false if the action should stop. Else true.
+         * @return false if the action should stop. Else true.
          */
         virtual bool shouldContinue() = 0;
 
@@ -122,7 +122,7 @@ namespace arpirobot{
          * @param action    A pointer to the action to start.
          * @param doRestart If true starting an action that is already running will restart the action.
          *                  If false the action will continue running uninterrupted.
-         * @returns true if the action was started successfully
+         * @return true if the action was started successfully
          */
         static bool startAction(Action *action, bool doRestart = true);
 
@@ -142,7 +142,7 @@ namespace arpirobot{
          * Stop an action (interrupts it)
          * If the action is not running nothing is done.
          * @param action A pointer to the action to stop
-         * @returns true if the action was stopped. If false, the action was not running.
+         * @return true if the action was stopped. If false, the action was not running.
          */
         static bool stopAction(Action *action);
 

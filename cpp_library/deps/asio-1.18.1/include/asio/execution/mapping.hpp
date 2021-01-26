@@ -78,7 +78,7 @@ struct mapping_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns thread_t();
+     * @return thread_t();
      */
     static constexpr mapping_t value();
   };
@@ -107,7 +107,7 @@ struct mapping_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns new_thread_t();
+     * @return new_thread_t();
      */
     static constexpr mapping_t value();
   };
@@ -136,7 +136,7 @@ struct mapping_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns other_t();
+     * @return other_t();
      */
     static constexpr mapping_t value();
   };

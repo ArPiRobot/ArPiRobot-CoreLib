@@ -78,7 +78,7 @@ struct relationship_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns fork_t();
+     * @return fork_t();
      */
     static constexpr relationship_t value();
   };
@@ -107,7 +107,7 @@ struct relationship_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns continuation_t();
+     * @return continuation_t();
      */
     static constexpr relationship_t value();
   };

@@ -20,7 +20,7 @@ public class Gamepad extends DestroyableObject {
 
     /**
      * Get the controller number for this gamepad
-     * @returns The controller number
+     * @return The controller number
      */
     public int getControllerNum(){
         return Bridge.arpirobot.Gamepad_getControllerNum(ptr);
@@ -29,7 +29,7 @@ public class Gamepad extends DestroyableObject {
     /**
      * Get an axis for this controller
      * @param axisNum The axis number
-     * @returns The axis value after applying the deadband and (if required) an axis transform
+     * @return The axis value after applying the deadband and (if required) an axis transform
      */
     public double getAxis(int axisNum){
         return getAxis(axisNum, 0);
@@ -39,7 +39,7 @@ public class Gamepad extends DestroyableObject {
      * Get an axis for this controller
      * @param axisNum The axis number
      * @param deadband A minimum threshold for axis values. Values below this will be returned as zero.
-     * @returns The axis value after applying the deadband and (if required) an axis transform
+     * @return The axis value after applying the deadband and (if required) an axis transform
      */
     public double getAxis(int axisNum, double deadband){
         return Bridge.arpirobot.Gamepad_getAxis(ptr, axisNum, deadband);
@@ -48,7 +48,7 @@ public class Gamepad extends DestroyableObject {
     /**
      * Get a button for the controller
      * @param buttonNum The button number
-     * @returns true if pressed, else false
+     * @return true if pressed, else false
      */
     public boolean getButton(int buttonNum){
         return Bridge.arpirobot.Gamepad_getButton(ptr, buttonNum);
@@ -57,7 +57,7 @@ public class Gamepad extends DestroyableObject {
     /**
      * Get the value of a dpad
      * @param dpadNum The dpad number
-     * @returns 0 if center, 1 for up through 8 going clockwise
+     * @return 0 if center, 1 for up through 8 going clockwise
      */
     public int getDpad(int dpadNum){
         return Bridge.arpirobot.Gamepad_getDpad(ptr, dpadNum);

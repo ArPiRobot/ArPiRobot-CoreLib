@@ -97,7 +97,7 @@ ASIO_INITFN_AUTO_RESULT_TYPE(CompletionToken, void()) dispatch(
 
 /// Submits a completion token or function object for execution.
 /**
- * @returns <tt>dispatch(ctx.get_executor(),
+ * @return <tt>dispatch(ctx.get_executor(),
  * forward<CompletionToken>(token))</tt>.
  */
 template <typename ExecutionContext,

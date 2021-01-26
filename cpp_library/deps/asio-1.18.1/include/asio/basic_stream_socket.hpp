@@ -337,7 +337,7 @@ public:
    *
    * @param buffers One or more data buffers to be sent on the socket.
    *
-   * @returns The number of bytes sent.
+   * @return The number of bytes sent.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -374,7 +374,7 @@ public:
    *
    * @param flags Flags specifying how the send call is to be made.
    *
-   * @returns The number of bytes sent.
+   * @return The number of bytes sent.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -414,7 +414,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes sent. Returns 0 if an error occurred.
+   * @return The number of bytes sent. Returns 0 if an error occurred.
    *
    * @note The send operation may not transmit all of the data to the peer.
    * Consider using the @ref write function if you need to ensure that all data
@@ -540,7 +540,7 @@ public:
    *
    * @param buffers One or more buffers into which the data will be received.
    *
-   * @returns The number of bytes received.
+   * @return The number of bytes received.
    *
    * @throws asio::system_error Thrown on failure. An error code of
    * asio::error::eof indicates that the connection was closed by the
@@ -580,7 +580,7 @@ public:
    *
    * @param flags Flags specifying how the receive call is to be made.
    *
-   * @returns The number of bytes received.
+   * @return The number of bytes received.
    *
    * @throws asio::system_error Thrown on failure. An error code of
    * asio::error::eof indicates that the connection was closed by the
@@ -623,7 +623,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes received. Returns 0 if an error occurred.
+   * @return The number of bytes received. Returns 0 if an error occurred.
    *
    * @note The receive operation may not receive all of the requested number of
    * bytes. Consider using the @ref read function if you need to ensure that the
@@ -753,7 +753,7 @@ public:
    *
    * @param buffers One or more data buffers to be written to the socket.
    *
-   * @returns The number of bytes written.
+   * @return The number of bytes written.
    *
    * @throws asio::system_error Thrown on failure. An error code of
    * asio::error::eof indicates that the connection was closed by the
@@ -792,7 +792,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes written. Returns 0 if an error occurred.
+   * @return The number of bytes written. Returns 0 if an error occurred.
    *
    * @note The write_some operation may not transmit all of the data to the
    * peer. Consider using the @ref write function if you need to ensure that
@@ -865,7 +865,7 @@ public:
    *
    * @param buffers One or more buffers into which the data will be read.
    *
-   * @returns The number of bytes read.
+   * @return The number of bytes read.
    *
    * @throws asio::system_error Thrown on failure. An error code of
    * asio::error::eof indicates that the connection was closed by the
@@ -905,7 +905,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes read. Returns 0 if an error occurred.
+   * @return The number of bytes read. Returns 0 if an error occurred.
    *
    * @note The read_some operation may not read all of the requested number of
    * bytes. Consider using the @ref read function if you need to ensure that

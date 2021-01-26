@@ -92,7 +92,7 @@ struct associated_executor
 
 /// Helper function to obtain an object's associated executor.
 /**
- * @returns <tt>associated_executor<T>::get(t)</tt>
+ * @return <tt>associated_executor<T>::get(t)</tt>
  */
 template <typename T>
 inline typename associated_executor<T>::type
@@ -103,7 +103,7 @@ get_associated_executor(const T& t) ASIO_NOEXCEPT
 
 /// Helper function to obtain an object's associated executor.
 /**
- * @returns <tt>associated_executor<T, Executor>::get(t, ex)</tt>
+ * @return <tt>associated_executor<T, Executor>::get(t, ex)</tt>
  */
 template <typename T, typename Executor>
 inline typename associated_executor<T, Executor>::type
@@ -117,7 +117,7 @@ get_associated_executor(const T& t, const Executor& ex,
 
 /// Helper function to obtain an object's associated executor.
 /**
- * @returns <tt>associated_executor<T, typename
+ * @return <tt>associated_executor<T, typename
  * ExecutionContext::executor_type>::get(t, ctx.get_executor())</tt>
  */
 template <typename T, typename ExecutionContext>

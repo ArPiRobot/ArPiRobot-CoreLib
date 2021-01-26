@@ -55,7 +55,7 @@ namespace arpirobot{
          * Schedule a function to be run at a given rate.
          * @param func The function to run
          * @param rate The rate to run at
-         * @returns The task on the scheduler. Can be used to stop the task later
+         * @return The task on the scheduler. Can be used to stop the task later
          */
         static std::shared_ptr<Task> scheduleRepeatedFunction(const std::function<void()> &&func, sched_clk::duration rate);
 

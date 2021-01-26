@@ -85,7 +85,7 @@ struct blocking_adaptation_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns disallowed_t();
+     * @return disallowed_t();
      */
     static constexpr blocking_adaptation_t value();
   };
@@ -113,7 +113,7 @@ struct blocking_adaptation_t
 
     /// Get the value associated with a property object.
     /**
-     * @returns allowed_t();
+     * @return allowed_t();
      */
     static constexpr blocking_adaptation_t value();
   };

@@ -558,7 +558,7 @@ public:
    *
    * @param buffers The data to be written.
    *
-   * @returns The number of bytes written.
+   * @return The number of bytes written.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -585,7 +585,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes written. Returns 0 if an error occurred.
+   * @return The number of bytes written. Returns 0 if an error occurred.
    *
    * @note The write_some operation may not transmit all of the data to the
    * peer. Consider using the @ref write function if you need to ensure that all
@@ -645,7 +645,7 @@ public:
    *
    * @param buffers The buffers into which the data will be read.
    *
-   * @returns The number of bytes read.
+   * @return The number of bytes read.
    *
    * @throws asio::system_error Thrown on failure.
    *
@@ -672,7 +672,7 @@ public:
    *
    * @param ec Set to indicate what error occurred, if any.
    *
-   * @returns The number of bytes read. Returns 0 if an error occurred.
+   * @return The number of bytes read. Returns 0 if an error occurred.
    *
    * @note The read_some operation may not read all of the requested number of
    * bytes. Consider using the @ref read function if you need to ensure that the

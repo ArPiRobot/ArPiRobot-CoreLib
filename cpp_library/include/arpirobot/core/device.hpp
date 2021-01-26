@@ -19,7 +19,7 @@ namespace arpirobot{
 
         /**
          * Get the human-readable name of the device
-         * @returns the devices human readable name
+         * @return the devices human readable name
          */
         virtual std::string getDeviceName() = 0;
 
@@ -60,7 +60,7 @@ namespace arpirobot{
 
         /**
          * Check if the motor direction is inverted (positive and negative speed switched)
-         * @returns true if inverted, else false
+         * @return true if inverted, else false
          */
         bool isInverted();
 
@@ -72,7 +72,7 @@ namespace arpirobot{
 
         /**
          * Check if brake mode is enabled. When enabled motors with a speed of zero will resist motion.
-         * @returns true if enabled, else false
+         * @return true if enabled, else false
          */
         bool isBrakeMode();
 
@@ -84,7 +84,7 @@ namespace arpirobot{
 
         /**
          * Get the current speed of the motor
-         * @returns the motor's speed
+         * @return the motor's speed
          */
         double getSpeed();
 
