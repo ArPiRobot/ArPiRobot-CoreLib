@@ -3,6 +3,7 @@ package arpirobot.devices.gamepad;
 import arpirobot.Bridge;
 import arpirobot.DestroyableObject;
 import arpirobot.core.drive.BaseAxisTransform;
+import arpirobot.core.log.Logger;
 
 public class Gamepad extends DestroyableObject {
 
@@ -33,7 +34,6 @@ public class Gamepad extends DestroyableObject {
      * @return The axis value after applying the deadband and (if required) an axis transform
      */
     public double getAxis(int axisNum){
-        verifyNotDestroyed();
         return getAxis(axisNum, 0);
     }
 
@@ -45,6 +45,7 @@ public class Gamepad extends DestroyableObject {
      */
     public double getAxis(int axisNum, double deadband){
         verifyNotDestroyed();
+        Logger.logDebug("JAVA Reading axis " + axisNum + " from controller " + getControllerNum());
         return Bridge.arpirobot.Gamepad_getAxis(ptr, axisNum, deadband);
     }
 
