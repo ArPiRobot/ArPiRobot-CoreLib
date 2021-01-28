@@ -3,7 +3,6 @@
 #include <arpirobot/core/log.hpp>
 #include <arpirobot/core/drive.hpp>
 
-#include <iostream>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// General/Helper
@@ -190,7 +189,6 @@ BRIDGE_FUNC int Gamepad_getControllerNum(Gamepad *gamepad){
 }
 
 BRIDGE_FUNC double Gamepad_getAxis(Gamepad *gamepad, int axisNum, double deadband){
-    std::cout << "AxisNum: " << axisNum << std::endl;
     return gamepad->getAxis(axisNum, deadband);
 }
 

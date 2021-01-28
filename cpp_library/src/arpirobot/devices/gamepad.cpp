@@ -14,9 +14,6 @@ int Gamepad::getControllerNum(){
 }
 
 double Gamepad::getAxis(int axisNum, double deadband){
-
-    Logger::logDebug("Reading axis " + std::to_string(axisNum) + " from controller " + std::to_string(controllerNum));
-
     auto it = NetworkManager::controllerData.find(controllerNum);
     if(it == NetworkManager::controllerData.end()){
         // No data for this controller

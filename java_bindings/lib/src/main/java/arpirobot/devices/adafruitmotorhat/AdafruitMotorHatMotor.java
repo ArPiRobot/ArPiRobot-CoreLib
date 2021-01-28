@@ -14,21 +14,6 @@ public class AdafruitMotorHatMotor extends MotorController {
 
     /**
      * @param motorNum The number for the motor
-     */
-    public AdafruitMotorHatMotor(int motorNum){
-        this(motorNum, DETECT_ADDR, true);
-    }
-
-    /**
-     * @param motorNum The number for the motor
-     * @param address The address of the hat for the motor
-     */
-    public AdafruitMotorHatMotor(int motorNum, int address){
-        this(motorNum, address, true);
-    }
-
-    /**
-     * @param motorNum The number for the motor
      * @param address The address of the hat for the motor
      * @param remapNumbers If true the motor numbers will be remapped (if needed) to match the 
      *                     physical order of the Adafruit motor hat
