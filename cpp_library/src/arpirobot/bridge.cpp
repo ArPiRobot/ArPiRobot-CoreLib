@@ -190,8 +190,6 @@ BRIDGE_FUNC int Gamepad_getControllerNum(Gamepad *gamepad){
 }
 
 BRIDGE_FUNC double Gamepad_getAxis(Gamepad *gamepad, int axisNum, double deadband){
-    std::cout << "AxisNum: " << axisNum << std::endl;
-    std::cout << "Deadband: " << deadband << std::endl;
     return gamepad->getAxis(axisNum, deadband);
 }
 

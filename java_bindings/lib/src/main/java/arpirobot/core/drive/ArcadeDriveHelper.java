@@ -5,8 +5,6 @@ import arpirobot.DestroyableObject;
 import arpirobot.core.device.MotorController;
 
 import com.sun.jna.Pointer;
-import com.sun.jna.Memory;
-import com.sun.jna.Native;
 
 /**
  * Drive helper for arcade drive method.
@@ -41,14 +39,8 @@ public class ArcadeDriveHelper extends DestroyableObject {
             rmInternal[i] = rightMotors[i]._ptr();
         }
 
-        // JNA cannot map pointer array to void ** in C, but passing Pointer works
-        Memory lmSingle = new Memory(Native.POINTER_SIZE * lmInternal.length);
-        lmSingle.write(0, lmInternal, 0, lmInternal.length);
-
-        Memory rmSingle = new Memory(Native.POINTER_SIZE * rmInternal.length);
-        rmSingle.write(0, rmInternal, 0, rmInternal.length);
-
-        ptr = Bridge.arpirobot.ArcadeDriveHelper_create(lmSingle, lmInternal.length, rmSingle, rmInternal.length);
+        ptr = Bridge.arpirobot.ArcadeDriveHelper_create(Bridge.ptrArrayToPtr(lmInternal), lmInternal.length, 
+                Bridge.ptrArrayToPtr(rmInternal), rmInternal.length);
     }
 
     @Override

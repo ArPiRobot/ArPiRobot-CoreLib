@@ -38,7 +38,9 @@ public class Robot extends BaseRobot {
 
     @Override
     protected void enabledPeriodic() {
-        driveHelper.update(0.5, 0);
+        double speed = gp0.getAxis(1, 0.1) * -1;
+        double rotation = gp0.getAxis(2, 0.1);
+        driveHelper.update(speed, rotation);
     }
 
     @Override
@@ -49,7 +51,6 @@ public class Robot extends BaseRobot {
     @Override
     protected void periodic() {
         feedWatchdog();
-        //Logger.logDebug("" + gp0.getAxis(1, 0.1));
     }
     
 }

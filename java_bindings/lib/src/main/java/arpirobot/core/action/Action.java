@@ -36,7 +36,7 @@ public abstract class Action extends DestroyableObject {
         for(int i = 0; i < devices.length; ++i){
             devicesInternal[i] = devices[i]._ptr();
         }
-        //Bridge.arpirobot.Action_lockDevices(ptr, devicesInternal, devicesInternal.length);
+        Bridge.arpirobot.Action_lockDevices(ptr, Bridge.ptrArrayToPtr(devicesInternal), devicesInternal.length);
     }
 
     /**

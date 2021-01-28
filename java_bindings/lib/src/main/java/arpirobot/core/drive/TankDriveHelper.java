@@ -32,7 +32,8 @@ public class TankDriveHelper extends DestroyableObject {
             rmInternal[i] = rightMotors[i]._ptr();
         }
 
-        //ptr = Bridge.arpirobot.TankDriveHelper_create(lmInternal, lmInternal.length, rmInternal, rmInternal.length);
+        ptr = Bridge.arpirobot.TankDriveHelper_create(Bridge.ptrArrayToPtr(lmInternal), lmInternal.length, 
+                Bridge.ptrArrayToPtr(rmInternal), rmInternal.length);
     }
 
     @Override

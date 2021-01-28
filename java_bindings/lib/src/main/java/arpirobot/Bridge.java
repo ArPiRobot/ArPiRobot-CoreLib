@@ -2,6 +2,7 @@ package arpirobot;
 
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
+import com.sun.jna.Memory;
 
 import com.sun.jna.Callback;
 
@@ -20,6 +21,20 @@ public class Bridge {
     // Callback for functions taking args (bool) and returning void
     public interface void_bool_func_ptr extends Callback {
         public void invoke(boolean arg);
+    }
+
+    /**
+     * JNA cannot handle passing pointer array (and converting to void**)
+     * However passing pointer to function that takes void** works.
+     * This function allocates memory for and creates a Pointer object
+     * Containing the data for an array of pointers
+     * @param pointerArray The pointer array
+     * @return A pointer to the pointer array
+     */
+    public static Pointer ptrArrayToPtr(Pointer[] pointerArray){
+        Memory ptrSingle = new Memory(Native.POINTER_SIZE * pointerArray.length);
+        ptrSingle.write(0, pointerArray, 0, pointerArray.length);
+        return ptrSingle;
     }
 
     public static class arpirobot {
@@ -198,8 +213,8 @@ public class Bridge {
         /// TankDriveHelper bridge
         ////////////////////////////////////////////////////////////////////////
 
-        /*public static native Pointer TankDriveHelper_create(Pointer[] leftMotors, int leftMotorCount, 
-            Pointer[] rightMotors, int rightMotorCount);*/
+        public static native Pointer TankDriveHelper_create(Pointer leftMotors, int leftMotorCount, 
+            Pointer rightMotors, int rightMotorCount);
 
         public static native void TankDriveHelper_destroy(Pointer helper);
 
@@ -242,7 +257,7 @@ public class Bridge {
 
         public static native void Action_destroy(Pointer action);
 
-        //public static native void Action_lockDevices(Pointer action, Pointer []devices, int deviceCount);
+        public static native void Action_lockDevices(Pointer action, Pointer devices, int deviceCount);
 
         public static native void Action_lockDevice(Pointer action, Pointer device);
 
@@ -264,7 +279,7 @@ public class Bridge {
         ////////////////////////////////////////////////////////////////////////
         /// ActionSeries bridge
         ////////////////////////////////////////////////////////////////////////
-        //public static native Pointer ActionSeries_create(Pointer[] actions, int actionCount, Pointer finishAction);
+        public static native Pointer ActionSeries_create(Pointer actions, int actionCount, Pointer finishAction);
 
         public static native void ActionSeries_destroy(Pointer actionSeries);
 
