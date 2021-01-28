@@ -3,15 +3,17 @@ package arpirobot.core.action;
 import arpirobot.Bridge;
 import arpirobot.DestroyableObject;
 
+import com.sun.jna.Pointer;
+
 public class ActionSeries extends DestroyableObject {
 
     public ActionSeries(Action[] actions, Action finishedAction){
         verifyNotDestroyed();
-        long[] actionsInternal = new long[actions.length];
+        Pointer[] actionsInternal = new Pointer[actions.length];
         for(int i = 0; i < actions.length; ++i){
             actionsInternal[i] = actions[i]._ptr();
         }
-        ptr = Bridge.arpirobot.ActionSeries_create(actionsInternal, actionsInternal.length, finishedAction._ptr());
+        //ptr = Bridge.arpirobot.ActionSeries_create(actionsInternal, actionsInternal.length, finishedAction._ptr());
     }
 
     @Override

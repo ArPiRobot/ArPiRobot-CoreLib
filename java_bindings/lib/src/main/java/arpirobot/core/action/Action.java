@@ -4,6 +4,8 @@ import arpirobot.Bridge;
 import arpirobot.DestroyableObject;
 import arpirobot.core.device.BaseDevice;
 
+import com.sun.jna.Pointer;
+
 
 /**
  * Generic action class. User actions should inherit this class and implement the four pure virtual methods
@@ -30,11 +32,11 @@ public abstract class Action extends DestroyableObject {
      */
     public void lockDevices(BaseDevice[] devices){
         verifyNotDestroyed();
-        long[] devicesInternal = new long[devices.length];
+        Pointer[] devicesInternal = new Pointer[devices.length];
         for(int i = 0; i < devices.length; ++i){
             devicesInternal[i] = devices[i]._ptr();
         }
-        Bridge.arpirobot.Action_lockDevices(ptr, devicesInternal, devicesInternal.length);
+        //Bridge.arpirobot.Action_lockDevices(ptr, devicesInternal, devicesInternal.length);
     }
 
     /**

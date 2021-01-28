@@ -2,6 +2,8 @@ package arpirobot;
 
 import arpirobot.core.log.Logger;
 
+import com.sun.jna.Pointer;
+
 /**
  * For internal use only.
  * 
@@ -11,35 +13,35 @@ import arpirobot.core.log.Logger;
  * in which case a warning will be printed.
  */
 public abstract class DestroyableObject {
-    protected long ptr = 0;
+    protected Pointer ptr = null;
 
     /**
      * USER CODE SHOULD NEVER USE THIS!!!
      */
-    public long _ptr(){
+    public Pointer _ptr(){
         return ptr;
     }
 
     @Override
     @SuppressWarnings( "deprecation" )
     protected void finalize() throws Throwable {
-        if(ptr != 0){
+        if(ptr != null){
             destroy();
         }
         Logger.logWarning("destroy was not called before object went out of scope.");
     }
 
     public void destroy(){
-        if(ptr != 0){
+        if(ptr != null){
             doDestroy();
-            ptr = 0;
+            ptr = null;
         }
     }
 
     protected abstract void doDestroy();
 
     protected void verifyNotDestroyed(){
-        if(ptr == 0)
+        if(ptr == null)
             throw new RuntimeException("Cannot run functions on an object after destroy.");
     }
 }

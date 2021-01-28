@@ -33,7 +33,6 @@ public class Gamepad extends DestroyableObject {
      * @return The axis value after applying the deadband and (if required) an axis transform
      */
     public double getAxis(int axisNum){
-        verifyNotDestroyed();
         return getAxis(axisNum, 0);
     }
 

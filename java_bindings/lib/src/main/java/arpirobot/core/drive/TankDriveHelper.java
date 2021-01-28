@@ -4,6 +4,8 @@ import arpirobot.Bridge;
 import arpirobot.DestroyableObject;
 import arpirobot.core.device.MotorController;
 
+import com.sun.jna.Pointer;
+
 /**
  * Drive helper for tank drive method.
  * 
@@ -19,8 +21,8 @@ public class TankDriveHelper extends DestroyableObject {
     }
 
     public TankDriveHelper(MotorController[] leftMotors, MotorController[] rightMotors){
-        long[] lmInternal = new long[leftMotors.length];
-        long[] rmInternal = new long[rightMotors.length];
+        Pointer[] lmInternal = new Pointer[leftMotors.length];
+        Pointer[] rmInternal = new Pointer[rightMotors.length];
 
         // Build arrays of internal pointers
         for(int i = 0; i < leftMotors.length; ++i){
@@ -30,7 +32,7 @@ public class TankDriveHelper extends DestroyableObject {
             rmInternal[i] = rightMotors[i]._ptr();
         }
 
-        ptr = Bridge.arpirobot.TankDriveHelper_create(lmInternal, lmInternal.length, rmInternal, rmInternal.length);
+        //ptr = Bridge.arpirobot.TankDriveHelper_create(lmInternal, lmInternal.length, rmInternal, rmInternal.length);
     }
 
     @Override

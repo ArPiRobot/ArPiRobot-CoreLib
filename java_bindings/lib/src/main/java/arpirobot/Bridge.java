@@ -33,23 +33,23 @@ public class Bridge {
         ////////////////////////////////////////////////////////////////////////
         /// BaseRobot bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native long BaseRobot_create(void_void_func_ptr robotStarted, void_void_func_ptr robotEnabled, 
+        public static native Pointer BaseRobot_create(void_void_func_ptr robotStarted, void_void_func_ptr robotEnabled, 
                 void_void_func_ptr robotDisabled, void_void_func_ptr enabledPeriodic, 
                 void_void_func_ptr disabledPeriodic, void_void_func_ptr periodic, 
                 int mainSchedulerThreads, int periodicFunctionRate, 
                 int maxGamepadDataAge, int actionFunctionPeriod);
 
-        public static native void BaseRobot_destroy(long ptr);
+        public static native void BaseRobot_destroy(Pointer ptr);
 
-        public static native void BaseRobot_start(long ptr);
+        public static native void BaseRobot_start(Pointer ptr);
 
-        public static native void BaseRobot_feedWatchdog(long ptr);
+        public static native void BaseRobot_feedWatchdog(Pointer ptr);
 
         ////////////////////////////////////////////////////////////////////////
         /// MainVMon Bridge
         ////////////////////////////////////////////////////////////////////////
 
-        public static native void MainVMon_makeMainVmon(long vmon);
+        public static native void MainVMon_makeMainVmon(Pointer vmon);
 
         ////////////////////////////////////////////////////////////////////////
         /// NetworkTable bridge
@@ -85,334 +85,334 @@ public class Bridge {
         ////////////////////////////////////////////////////////////////////////
         /// BaseDevice bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native Pointer BaseDevice_getDeviceName(long device);
+        public static native Pointer BaseDevice_getDeviceName(Pointer device);
 
         
         ////////////////////////////////////////////////////////////////////////
         /// Gamepad bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native long Gamepad_create(int controllerNum);
+        public static native Pointer Gamepad_create(int controllerNum);
 
-        public static native void Gamepad_destroy(long gamepad);
+        public static native void Gamepad_destroy(Pointer gamepad);
 
-        public static native int Gamepad_getControllerNum(long gamepad);
+        public static native int Gamepad_getControllerNum(Pointer gamepad);
 
-        public static native double Gamepad_getAxis(long gamepad, int axisNum, double deadband);
+        public static native double Gamepad_getAxis(Pointer gamepad, int axisNum, double deadband);
 
-        public static native boolean Gamepad_getButton(long gamepad, int buttonNum);
+        public static native boolean Gamepad_getButton(Pointer gamepad, int buttonNum);
 
-        public static native int Gamepad_getDpad(long gamepad, int dpadNum);
+        public static native int Gamepad_getDpad(Pointer gamepad, int dpadNum);
 
-        public static native void Gamepad_setAxisTransform(long gamepad, int axisNum, long transform);
+        public static native void Gamepad_setAxisTransform(Pointer gamepad, int axisNum, Pointer transform);
 
-        public static native void Gamepad_clearAxisTransform(long gamepad, int axisNum);
+        public static native void Gamepad_clearAxisTransform(Pointer gamepad, int axisNum);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// ButtonPressedTrigger bridge 
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long ButtonPressedTrigger_create(long gamepad, int buttonNum, 
-                long targetAction, boolean doRestart);
+        public static native Pointer ButtonPressedTrigger_create(Pointer gamepad, int buttonNum, 
+                Pointer targetAction, boolean doRestart);
 
-        public static native void ButtonPressedTrigger_destroy(long trigger);
+        public static native void ButtonPressedTrigger_destroy(Pointer trigger);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// ButtonReleasedTrigger bridge
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long ButtonReleasedTrigger_create(long gamepad, int buttonNum, 
-                long targetAction, boolean doRestart);
+        public static native Pointer ButtonReleasedTrigger_create(Pointer gamepad, int buttonNum, 
+                Pointer targetAction, boolean doRestart);
 
-        public static native void ButtonReleasedTrigger_destroy(long trigger);
+        public static native void ButtonReleasedTrigger_destroy(Pointer trigger);
 
         ////////////////////////////////////////////////////////////////////////
         /// MotorController bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native boolean MotorController_isInverted(long motor);
+        public static native boolean MotorController_isInverted(Pointer motor);
 
-        public static native void MotorController_setInverted(long motor, boolean inverted);
+        public static native void MotorController_setInverted(Pointer motor, boolean inverted);
 
-        public static native boolean MotorController_isBrakeMode(long motor);
+        public static native boolean MotorController_isBrakeMode(Pointer motor);
 
-        public static native void MotorController_setBrakeMode(long motor, boolean brakeMode);
+        public static native void MotorController_setBrakeMode(Pointer motor, boolean brakeMode);
 
-        public static native void MotorController_setSpeed(long motor, double speed);
+        public static native void MotorController_setSpeed(Pointer motor, double speed);
 
-        public static native double MotorController_getSpeed(long motor);
+        public static native double MotorController_getSpeed(Pointer motor);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// AdafruitMotorHatMotor bridge (arpirobot/devices/adafruitmotorhat.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long AdafruitMotorHatMotor_create(int motorNum, int address, boolean remapNumbers);
+        public static native Pointer AdafruitMotorHatMotor_create(int motorNum, int address, boolean remapNumbers);
 
-        public static native void AdafruitMotorHatMotor_destroy(long motor);
+        public static native void AdafruitMotorHatMotor_destroy(Pointer motor);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// L298Motor bridge (arpirobot/devices/l298n.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long L298NMotor_create(int in1Pin, int in2Pin, int pwmPin);
+        public static native Pointer L298NMotor_create(int in1Pin, int in2Pin, int pwmPin);
 
-        public static native void L298NMotor_destroy(long motor);
+        public static native void L298NMotor_destroy(Pointer motor);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// TB6612Motor bridge (arpirobot/devices/tb6612.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long TB6612Motor_create(int in1Pin, int in2Pin, int pwmPin);
+        public static native Pointer TB6612Motor_create(int in1Pin, int in2Pin, int pwmPin);
 
-        public static native void TB6612Motor_destroy(long motor);
+        public static native void TB6612Motor_destroy(Pointer motor);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// DRV8833Motor bridge (arpirobot/devices/drv8833.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long DRV8833Motor_create(int in1Pin, int in2Pin, int slpPin);
+        public static native Pointer DRV8833Motor_create(int in1Pin, int in2Pin, int slpPin);
 
-        public static native void DRV8833Motor_destroy(long motor);
+        public static native void DRV8833Motor_destroy(Pointer motor);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// ArcadeDriveHelper bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native long ArcadeDriveHelper_create(long[] leftMotors, int leftMotorCount, 
-            long[] rightMotors, int rightMotorCount);
+        public static native Pointer ArcadeDriveHelper_create(Pointer leftMotors, int leftMotorCount, 
+            Pointer rightMotors, int rightMotorCount);
 
-        public static native void ArcadeDriveHelper_destroy(long helper);
+        public static native void ArcadeDriveHelper_destroy(Pointer helper);
 
-        public static native void ArcadeDriveHelper_updateSpeed(long helper, double speed);
+        public static native void ArcadeDriveHelper_updateSpeed(Pointer helper, double speed);
 
-        public static native void ArcadeDriveHelper_updateRotation(long helper, double rotation);
+        public static native void ArcadeDriveHelper_updateRotation(Pointer helper, double rotation);
 
-        public static native void ArcadeDriveHelper_update(long helper, double speed, double rotation);
+        public static native void ArcadeDriveHelper_update(Pointer helper, double speed, double rotation);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// TankDriveHelper bridge
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long TankDriveHelper_create(long[] leftMotors, int leftMotorCount, 
-            long[] rightMotors, int rightMotorCount);
+        /*public static native Pointer TankDriveHelper_create(Pointer[] leftMotors, int leftMotorCount, 
+            Pointer[] rightMotors, int rightMotorCount);*/
 
-        public static native void TankDriveHelper_destroy(long helper);
+        public static native void TankDriveHelper_destroy(Pointer helper);
 
-        public static native void TankDriveHelper_updateLeftSpeed(long helper, double newLeftSpeed);
+        public static native void TankDriveHelper_updateLeftSpeed(Pointer helper, double newLeftSpeed);
 
-        public static native void TankDriveHelper_updateRightSpeed(long helper, double newRightSpeed);
+        public static native void TankDriveHelper_updateRightSpeed(Pointer helper, double newRightSpeed);
 
-        public static native void TankDriveHelper_update(long helper, double newLeftSpeed, double newRightSpeed);
+        public static native void TankDriveHelper_update(Pointer helper, double newLeftSpeed, double newRightSpeed);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// BaseAxisTransform bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native double BaseAxisTransform_applyTransform(long transform, double rawAxisValue);
+        public static native double BaseAxisTransform_applyTransform(Pointer transform, double rawAxisValue);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// SquareRootAxisTransform bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native long SquareRootAxisTransform_create();
+        public static native Pointer SquareRootAxisTransform_create();
 
-        public static native void SquareRootAxisTransform_destroy(long transform);
+        public static native void SquareRootAxisTransform_destroy(Pointer transform);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// CubicAxisTransform bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native long CubicAxisTransform_create(double minPower, double midPower);
+        public static native Pointer CubicAxisTransform_create(double minPower, double midPower);
 
-        public static native void CubicAxisTransform_destroy(long transform);
+        public static native void CubicAxisTransform_destroy(Pointer transform);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// Action bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native long Action_create(void_void_func_ptr beginPtr,
+        public static native Pointer Action_create(void_void_func_ptr beginPtr,
             void_void_func_ptr processPtr,
             void_bool_func_ptr finishPtr,
             bool_void_func_ptr shouldContinuePtr);
 
-        public static native void Action_destroy(long action);
+        public static native void Action_destroy(Pointer action);
 
-        public static native void Action_lockDevices(long action, long[] devices, int deviceCount);
+        //public static native void Action_lockDevices(Pointer action, Pointer []devices, int deviceCount);
 
-        public static native void Action_lockDevice(long action, long device);
+        public static native void Action_lockDevice(Pointer action, Pointer device);
 
-        public static native boolean Action_isRunning(long action);
+        public static native boolean Action_isRunning(Pointer action);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// ActionManager bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native boolean ActionManager_startAction(long action);
+        public static native boolean ActionManager_startAction(Pointer action);
 
-        public static native boolean ActionManager_stopAction(long action);
+        public static native boolean ActionManager_stopAction(Pointer action);
 
-        public static native void ActionManager_addTrigger(long trigger);
+        public static native void ActionManager_addTrigger(Pointer trigger);
 
-        public static native void ActionManager_removeTrigger(long trigger);
+        public static native void ActionManager_removeTrigger(Pointer trigger);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// ActionSeries bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native long ActionSeries_create(long[] actions, int actionCount, long finishAction);
+        //public static native Pointer ActionSeries_create(Pointer[] actions, int actionCount, Pointer finishAction);
 
-        public static native void ActionSeries_destroy(long actionSeries);
+        public static native void ActionSeries_destroy(Pointer actionSeries);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// BaseArduinoInterface bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native void BaseArduinoInterface_begin(long arduino);
+        public static native void BaseArduinoInterface_begin(Pointer arduino);
 
-        public static native void BaseArduinoInterface_addDevice(long arduino, long device);
+        public static native void BaseArduinoInterface_addDevice(Pointer arduino, Pointer device);
 
-        public static native boolean BaseArduinoInterface_isReady(long arduino);
+        public static native boolean BaseArduinoInterface_isReady(Pointer arduino);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// ArduinoUartInterface bridge
         ////////////////////////////////////////////////////////////////////////
-        public static native long ArduinoUartInterface_create(String tty, int baud);
+        public static native Pointer ArduinoUartInterface_create(String tty, int baud);
 
-        public static native void ArduinoUartInterface_destroy(long iface);
+        public static native void ArduinoUartInterface_destroy(Pointer iface);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// ArduinoDevice bridge
         ////////////////////////////////////////////////////////////////////////
 
-        public static native Pointer ArduinoDevice_getDeviceName(long device);
+        public static native Pointer ArduinoDevice_getDeviceName(Pointer device);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// VoltageMonitor bridge (arpirobot/arduino/sensor.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long VoltageMonitor_create(String pin, double vboard, int r1, 
+        public static native Pointer VoltageMonitor_create(String pin, double vboard, int r1, 
                 int r2, boolean createDevice, int deviceId);
 
-        public static native void VoltageMonitor_destroy(long vmon);
+        public static native void VoltageMonitor_destroy(Pointer vmon);
 
-        public static native double VoltageMonitor_getVoltage(long vmon);
+        public static native double VoltageMonitor_getVoltage(Pointer vmon);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// Ultrasonic4Pin bridge (arpirobot/arduino/sensor.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long Ultrasonic4Pin_create(String triggerPin, String echoPin, 
+        public static native Pointer Ultrasonic4Pin_create(String triggerPin, String echoPin, 
                 boolean createDevice, int deviceId);
 
-        public static native void Ultrasonic4Pin_destroy(long usonic);
+        public static native void Ultrasonic4Pin_destroy(Pointer usonic);
 
-        public static native int Ultrasonic4Pin_getDistance(long usonic);
+        public static native int Ultrasonic4Pin_getDistance(Pointer usonic);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// SingleEncode bridge (arpirobot/arduino/sensor.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long SingleEncoder_create(String pin, boolean useInternalPullup, 
+        public static native Pointer SingleEncoder_create(String pin, boolean useInternalPullup, 
                 boolean createDevice, int deviceId);
 
-        public static native void SingleEncoder_destroy(long enc);
+        public static native void SingleEncoder_destroy(Pointer enc);
 
-        public static native int SingleEncoder_getPosition(long enc);
+        public static native int SingleEncoder_getPosition(Pointer enc);
 
-        public static native void SingleEncoder_setPosition(long enc, int newPosition);
+        public static native void SingleEncoder_setPosition(Pointer enc, int newPosition);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// IRReflectorModule bridge (arpirobot/arduino/sensor.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long IRReflectorModule_create(String digitalPin, String analogPin, 
+        public static native Pointer IRReflectorModule_create(String digitalPin, String analogPin, 
                 boolean createDevice, int deviceId);
 
-        public static native void IRReflectorModule_destroy(long ir);
+        public static native void IRReflectorModule_destroy(Pointer ir);
 
-        public static native boolean IRReflectorModule_getDigitalValue(long ir);
+        public static native boolean IRReflectorModule_getDigitalValue(Pointer ir);
 
-        public static native int IRReflectorModule_getAnalogValue(long ir);
+        public static native int IRReflectorModule_getAnalogValue(Pointer ir);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// OldAdafruit9Dof bridge (arpirobot/arduino/sensor.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long OldAdafruit9Dof_create(boolean createDevice, int deviceId);
+        public static native Pointer OldAdafruit9Dof_create(boolean createDevice, int deviceId);
 
-        public static native void OldAdafruit9Dof_destroy(long imu);
+        public static native void OldAdafruit9Dof_destroy(Pointer imu);
 
-        public static native double OldAdafruit9Dof_getGyroX(long imu);
+        public static native double OldAdafruit9Dof_getGyroX(Pointer imu);
 
-        public static native double OldAdafruit9Dof_getGyroY(long imu);
+        public static native double OldAdafruit9Dof_getGyroY(Pointer imu);
 
-        public static native double OldAdafruit9Dof_getGyroZ(long imu);
+        public static native double OldAdafruit9Dof_getGyroZ(Pointer imu);
 
-        public static native double OldAdafruit9Dof_getAccelX(long imu);
+        public static native double OldAdafruit9Dof_getAccelX(Pointer imu);
 
-        public static native double OldAdafruit9Dof_getAccelY(long imu);
+        public static native double OldAdafruit9Dof_getAccelY(Pointer imu);
 
-        public static native double OldAdafruit9Dof_getAccelZ(long imu);
+        public static native double OldAdafruit9Dof_getAccelZ(Pointer imu);
 
-        public static native void OldAdafruit9Dof_setGyroX(long imu, double newGyroX);
+        public static native void OldAdafruit9Dof_setGyroX(Pointer imu, double newGyroX);
 
-        public static native void OldAdafruit9Dof_setGyroY(long imu, double newGyroY);
+        public static native void OldAdafruit9Dof_setGyroY(Pointer imu, double newGyroY);
 
-        public static native void OldAdafruit9Dof_setGyroZ(long imu, double newGyroZ);
+        public static native void OldAdafruit9Dof_setGyroZ(Pointer imu, double newGyroZ);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// NxpAdafruit9Dof bridge (arpirobot/arduino/sensor.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long NxpAdafruit9Dof_create(boolean createDevice, int deviceId);
+        public static native Pointer NxpAdafruit9Dof_create(boolean createDevice, int deviceId);
 
-        public static native void NxpAdafruit9Dof_destroy(long imu);
+        public static native void NxpAdafruit9Dof_destroy(Pointer imu);
 
-        public static native double NxpAdafruit9Dof_getGyroX(long imu);
+        public static native double NxpAdafruit9Dof_getGyroX(Pointer imu);
 
-        public static native double NxpAdafruit9Dof_getGyroY(long imu);
+        public static native double NxpAdafruit9Dof_getGyroY(Pointer imu);
 
-        public static native double NxpAdafruit9Dof_getGyroZ(long imu);
+        public static native double NxpAdafruit9Dof_getGyroZ(Pointer imu);
 
-        public static native double NxpAdafruit9Dof_getAccelX(long imu);
+        public static native double NxpAdafruit9Dof_getAccelX(Pointer imu);
 
-        public static native double NxpAdafruit9Dof_getAccelY(long imu);
+        public static native double NxpAdafruit9Dof_getAccelY(Pointer imu);
 
-        public static native double NxpAdafruit9Dof_getAccelZ(long imu);
+        public static native double NxpAdafruit9Dof_getAccelZ(Pointer imu);
 
-        public static native void NxpAdafruit9Dof_setGyroX(long imu, double newGyroX);
+        public static native void NxpAdafruit9Dof_setGyroX(Pointer imu, double newGyroX);
 
-        public static native void NxpAdafruit9Dof_setGyroY(long imu, double newGyroY);
+        public static native void NxpAdafruit9Dof_setGyroY(Pointer imu, double newGyroY);
 
-        public static native void NxpAdafruit9Dof_setGyroZ(long imu, double newGyroZ);
+        public static native void NxpAdafruit9Dof_setGyroZ(Pointer imu, double newGyroZ);
 
 
         ////////////////////////////////////////////////////////////////////////
         /// INA260PowerSensor bridge (arpirobot/devices/ina260.hpp)
         ////////////////////////////////////////////////////////////////////////
 
-        public static native long INA260PowerSensor_create();
+        public static native Pointer INA260PowerSensor_create();
 
-        public static native void INA260PowerSensor_destroy(long vmon);
+        public static native void INA260PowerSensor_destroy(Pointer vmon);
 
-        public static native double INA260PowerSensor_getCurrent(long vmon);
+        public static native double INA260PowerSensor_getCurrent(Pointer vmon);
 
-        public static native double INA260PowerSensor_getVoltage(long vmon);
+        public static native double INA260PowerSensor_getVoltage(Pointer vmon);
 
-        public static native double INA260PowerSensor_getPower(long vmon);
+        public static native double INA260PowerSensor_getPower(Pointer vmon);
 
     }
 
