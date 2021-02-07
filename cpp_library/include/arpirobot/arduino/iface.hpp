@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <vector>
+#include <string>
 
 namespace arpirobot{
 

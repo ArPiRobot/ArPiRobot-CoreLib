@@ -72,5 +72,6 @@
         "*.ipp": "cpp",
         "any": "cpp",
         "source_location": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": true
 }

@@ -4,6 +4,7 @@ project (ArPiRobot-CoreLib C CXX)
 # Build pigpio as static library
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pigpio-71 EXCLUDE_FROM_ALL)
+target_compile_options(pigpio PRIVATE -fPIC)
 
 # ArPiRobot core library
 
