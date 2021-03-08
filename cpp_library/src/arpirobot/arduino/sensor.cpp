@@ -479,6 +479,19 @@ Mpu6050Imu::Mpu6050Imu(bool createDevice, int deviceId) : ArduinoDevice(createDe
 
 }
 
+void Mpu6050Imu::calibrate(uint16_t samples){
+    if(arduino == nullptr)
+        return;
+    Logger::logInfoFrom(getDeviceName(), "Starting calibration. Will not get data until calibration is complete.");
+    std::vector<uint8_t> msg;
+    msg.reserve(3);
+    msg.push_back('C'); // Calibrate command
+    auto s = Conversions::convertInt16ToData(samples, true);
+    msg.insert(msg.end(), s.begin(), s.end());
+    // msg = 'C', samples_little_endian
+    arduino->sendFromDevice(this->deviceId, msg);
+}
+
 double Mpu6050Imu::getGyroX(){
     return gyroX + gyroXOffset;
 }

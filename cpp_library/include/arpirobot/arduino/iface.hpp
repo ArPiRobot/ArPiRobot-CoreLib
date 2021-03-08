@@ -40,6 +40,15 @@ namespace arpirobot{
          */
         bool isReady();
 
+        /**
+         * Send a message from a specific device.
+         * THIS SHOULD NOT BE USED FROM USER CODE.
+         * Sends a message to the associated device instance on the arduino.
+         * @param deviceId The sending/receiving device's ID
+         * @param data The data to send
+         */
+        void sendFromDevice(uint8_t deviceId, std::vector<uint8_t> data);
+
     protected:
         
         // Communication functions

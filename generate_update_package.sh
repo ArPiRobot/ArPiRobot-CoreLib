@@ -3,6 +3,9 @@
 DIR=$(realpath $(dirname $0))
 cd "$DIR"
 
+VERSION=$(head -1 ./version.txt)
+PKG_NAME=ArPiRobot-CoreLib-$VERSION.zip
+
 echo "Preparing package directory"
 rm -rf package
 mkdir -p package/
@@ -41,8 +44,9 @@ cp java_bindings/lib/build/libs/*.jar package/java_bindings/
 echo ""
 echo "Generating Package"
 cd package
-zip -r ../ArPiRobot-CoreLib-VERSION.zip ./* > /dev/null
-mv ../ArPiRobot-CoreLib-VERSION.zip ./
+
+zip -r ../$PKG_NAME ./* > /dev/null
+mv ../$PKG_NAME ./
 
 echo ""
 echo "Done."

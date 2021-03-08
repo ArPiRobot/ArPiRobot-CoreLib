@@ -133,13 +133,28 @@ void BaseArduinoInterface::addDevice(ArduinoDevice *device){
         Logger::logWarningFrom(getDeviceName(), "Attempted to add device after calling begin. This will not work.");
         return;
     }
+    if(device->arduino != nullptr){
+        Logger::logWarningFrom(getDeviceName(), 
+            "Attempted to add a device, but it had already been added to an arduino. This is not allowed.");
+        return;
+    }
     if(std::find(devices.begin(), devices.end(), device) == devices.end()){
+        device->setArduino(this);
         devices.push_back(device);
     }
 }
 
 bool BaseArduinoInterface::isReady(){
     return arduinoReady;
+}
+
+void BaseArduinoInterface::sendFromDevice(uint8_t deviceId, std::vector<uint8_t> data){
+    std::vector<uint8_t> sendData;
+    sendData.reserve(data.size() + 2);
+    sendData.push_back('-');
+    sendData.push_back(deviceId);
+    sendData.insert(sendData.end(), data.begin(), data.end());
+    writeData(sendData);
 }
 
 void BaseArduinoInterface::run(){

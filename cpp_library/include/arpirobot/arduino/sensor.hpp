@@ -426,6 +426,15 @@ namespace arpirobot{
         Mpu6050Imu(bool createDevice = true, int deviceId = -1);
 
         /**
+         * Calibrate the IMU. Should reduce gyro drift and accelerometer error
+         * IMU MUST BE STATIONARY DURING CALIBRATION. 
+         * GRAVITATIONAL ACCELERATION MUST BE IN NEGATIVE Z DIRECTION DURING CALIBRATION.
+         * @param samples The number of samples to take during calibration. 
+         *                More samples may be more accurate, but will take longer.
+         */
+        void calibrate(uint16_t samples);
+
+        /**
          * Get the X rotation
          * @return X rotation in degrees
          */
