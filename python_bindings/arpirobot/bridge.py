@@ -506,6 +506,44 @@ arpirobot.NxpAdafruit9Dof_setGyroZ.restype = None
 
 
 ################################################################################
+# Mpu6050Imu Bridge
+################################################################################
+
+arpirobot.Mpu6050Imu_create.argtypes = [ctypes.c_bool, ctypes.c_int]
+arpirobot.Mpu6050Imu_create.restype = ctypes.c_void_p
+
+arpirobot.Mpu6050Imu_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.Mpu6050Imu_destroy.restype = None
+
+arpirobot.Mpu6050Imu_getGyroX.argtypes = [ctypes.c_void_p]
+arpirobot.Mpu6050Imu_getGyroX.restype = ctypes.c_double
+
+arpirobot.Mpu6050Imu_getGyroY.argtypes = [ctypes.c_void_p]
+arpirobot.Mpu6050Imu_getGyroY.restype = ctypes.c_double
+
+arpirobot.Mpu6050Imu_getGyroZ.argtypes = [ctypes.c_void_p]
+arpirobot.Mpu6050Imu_getGyroZ.restype = ctypes.c_double
+
+arpirobot.Mpu6050Imu_getAccelX.argtypes = [ctypes.c_void_p]
+arpirobot.Mpu6050Imu_getAccelX.restype = ctypes.c_double
+
+arpirobot.Mpu6050Imu_getAccelY.argtypes = [ctypes.c_void_p]
+arpirobot.Mpu6050Imu_getAccelY.restype = ctypes.c_double
+
+arpirobot.Mpu6050Imu_getAccelZ.argtypes = [ctypes.c_void_p]
+arpirobot.Mpu6050Imu_getAccelZ.restype = ctypes.c_double
+
+arpirobot.Mpu6050Imu_setGyroX.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.Mpu6050Imu_setGyroX.restype = None
+
+arpirobot.Mpu6050Imu_setGyroY.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.Mpu6050Imu_setGyroY.restype = None
+
+arpirobot.Mpu6050Imu_setGyroZ.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.Mpu6050Imu_setGyroZ.restype = None
+
+
+################################################################################
 # INA260PowerSensor Bridge
 ################################################################################
 

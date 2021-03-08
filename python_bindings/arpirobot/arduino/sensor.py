@@ -213,3 +213,58 @@ class NxpAdafruit9Dof(ArduinoDevice):
     #  @param newGyroZ The new Z rotation to set
     def set_gyro_z(self, new_gyro_z: float):
         bridge.arpirobot.NxpAdafruit9Dof_setGyroZ(self._ptr, new_gyro_z)
+
+
+## MPU6050 IMU
+class Mpu6050Imu(ArduinoDevice):
+    def __init__(self, create_device = True, device_id = -1):
+        super().__init__()
+        self._ptr = bridge.arpirobot.Mpu6050Imu_create(create_device, device_id)
+    
+    def __del__(self):
+        bridge.arpirobot.Mpu6050Imu_destroy(self._ptr)
+    
+    ## Get the X rotation
+    #  @returns X rotation in degrees
+    def get_gyro_x(self) -> float:
+        return bridge.arpirobot.Mpu6050Imu_getGyroX(self._ptr)
+    
+    ## Get the Y rotation
+    #  @returns Y rotation in degrees
+    def get_gyro_y(self) -> float:
+        return bridge.arpirobot.Mpu6050Imu_getGyroY(self._ptr)
+
+    ## Get the Z rotation
+    #  @returns Z rotation in degrees
+    def get_gyro_z(self) -> float:
+        return bridge.arpirobot.Mpu6050Imu_getGyroZ(self._ptr)
+
+    ## Get the X axis acceleration
+    #  @returns X acceleration in m/s^2
+    def get_accel_x(self) -> float:
+        return bridge.arpirobot.Mpu6050Imu_getAccelX(self._ptr)
+
+    ## Get the Y axis acceleration
+    #  @returns Y acceleration in m/s^2
+    def get_accel_y(self) -> float:
+        return bridge.arpirobot.Mpu6050Imu_getAccelY(self._ptr)
+
+    ## Get the Z axis acceleration
+    #  @returns Z acceleration in m/s^2
+    def get_accel_z(self) -> float:
+        return bridge.arpirobot.Mpu6050Imu_getAccelZ(self._ptr)
+
+    ## Set current X rotation to the given value
+    #  @param newGyroX The new X rotation to set
+    def set_gyro_x(self, new_gyro_x: float):
+        bridge.arpirobot.Mpu6050Imu_setGyroX(self._ptr, new_gyro_x)
+
+    ## Set current Y rotation to the given value
+    #  @param newGyroY The new Y rotation to set
+    def set_gyro_y(self, new_gyro_y: float):
+        bridge.arpirobot.Mpu6050Imu_setGyroY(self._ptr, new_gyro_y)
+
+    ## Set current Z rotation to the given value
+    #  @param newGyroZ The new Z rotation to set
+    def set_gyro_z(self, new_gyro_z: float):
+        bridge.arpirobot.Mpu6050Imu_setGyroZ(self._ptr, new_gyro_z)

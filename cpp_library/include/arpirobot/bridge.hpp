@@ -124,14 +124,14 @@ BRIDGE_FUNC void Logger_logNewline();
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// BaseDevice bridge (arpirobot/core/device.hpp)
+/// BaseDevice bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC char *BaseDevice_getDeviceName(BaseDevice *device);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Gamepad bridge (arpirobot/devices/gamepad.hpp)
+/// Gamepad bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC Gamepad *Gamepad_create(int controllerNum);
@@ -152,7 +152,7 @@ BRIDGE_FUNC void Gamepad_clearAxisTransform(Gamepad *gamepad, int axisNum);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ButtonPressedTrigger bridge (arpirobot/devices/gamepad.hpp)
+/// ButtonPressedTrigger bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ButtonPressedTrigger *ButtonPressedTrigger_create(Gamepad *gamepad, int buttonNum, 
@@ -162,7 +162,7 @@ BRIDGE_FUNC void ButtonPressedTrigger_destroy(ButtonPressedTrigger *trigger);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ButtonReleasedTrigger bridge (arpirobot/devices/gamepad.hpp)
+/// ButtonReleasedTrigger bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ButtonReleasedTrigger *ButtonReleasedTrigger_create(Gamepad *gamepad, int buttonNum, 
@@ -172,7 +172,7 @@ BRIDGE_FUNC void ButtonReleasedTrigger_destroy(ButtonReleasedTrigger *trigger);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// MotorController bridge (arpirobot/core/device.hpp)
+/// MotorController bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC bool MotorController_isInverted(MotorController *motor);
@@ -189,7 +189,7 @@ BRIDGE_FUNC double MotorController_getSpeed(MotorController *motor);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// AdafruitMotorHatMotor bridge (arpirobot/devices/adafruitmotorhat.hpp)
+/// AdafruitMotorHatMotor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, int address, bool remapNumbers);
@@ -198,7 +198,7 @@ BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// L298Motor bridge (arpirobot/devices/l298n.hpp)
+/// L298Motor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC L298NMotor *L298NMotor_create(int in1Pin, int in2Pin, int pwmPin);
@@ -207,7 +207,7 @@ BRIDGE_FUNC void L298NMotor_destroy(L298NMotor *motor);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// TB6612Motor bridge (arpirobot/devices/tb6612.hpp)
+/// TB6612Motor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC TB6612Motor *TB6612Motor_create(int in1Pin, int in2Pin, int pwmPin);
@@ -216,7 +216,7 @@ BRIDGE_FUNC void TB6612Motor_destroy(TB6612Motor *motor);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// DRV8833Motor bridge (arpirobot/devices/drv8833.hpp)
+/// DRV8833Motor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC DRV8833Motor *DRV8833Motor_create(int in1Pin, int in2Pin, int slpPin);
@@ -225,7 +225,7 @@ BRIDGE_FUNC void DRV8833Motor_destroy(DRV8833Motor *motor);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ArcadeDriveHelper bridge (arpirobot/core/drive.hpp)
+/// ArcadeDriveHelper bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ArcadeDriveHelper *ArcadeDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
@@ -241,7 +241,7 @@ BRIDGE_FUNC void ArcadeDriveHelper_update(ArcadeDriveHelper *helper, double spee
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// TankDriveHelper bridge (arpirobot/core/drive.hpp)
+/// TankDriveHelper bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC TankDriveHelper *TankDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
@@ -257,14 +257,14 @@ BRIDGE_FUNC void TankDriveHelper_update(TankDriveHelper *helper, double newLeftS
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// BaseAxisTransform bridge (arpirobot/core/drive.hpp)
+/// BaseAxisTransform bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC double BaseAxisTransform_applyTransform(BaseAxisTransform *transform, double rawAxisValue);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// SquareRootAxisTransform bridge (arpirobot/core/drive.hpp)
+/// SquareRootAxisTransform bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC SquareRootAxisTransform *SquareRootAxisTransform_create();
@@ -273,7 +273,7 @@ BRIDGE_FUNC void SquareRootAxisTransform_destroy(SquareRootAxisTransform *transf
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// CubicAxisTransform bridge (arpirobot/core/drive.hpp)
+/// CubicAxisTransform bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC CubicAxisTransform *CubicAxisTransform_create(double minPower, double midPower);
@@ -282,7 +282,7 @@ BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Action Bridge (arpirobot/core/action.hpp)
+/// Action Bridge 
 ////////////////////////////////////////////////////////////////////////////////
 
 
@@ -320,7 +320,7 @@ BRIDGE_FUNC bool Action_isRunning(Action *action);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ActionManager Bridge (arpirobot/core/action.hpp)
+/// ActionManager Bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC bool ActionManager_startAction(Action *action);
@@ -333,7 +333,7 @@ BRIDGE_FUNC void ActionManager_removeTrigger(BaseActionTrigger *trigger);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ActionSeries Bridge (arpirobot/core/action.hpp)
+/// ActionSeries Bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ActionSeries *ActionSeries_create(Action **actions, size_t actionCount, Action* finishAction);
@@ -342,7 +342,7 @@ BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// BaseArduinoInterface bridge (arpirobot/arduino/iface.hpp)
+/// BaseArduinoInterface bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC void BaseArduinoInterface_begin(BaseArduinoInterface *arduino);
@@ -353,7 +353,7 @@ BRIDGE_FUNC bool BaseArduinoInterface_isReady(BaseArduinoInterface *arduino);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ArduinoUartInterface bridge (arpirobot/arduino/iface.hpp)
+/// ArduinoUartInterface bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ArduinoUartInterface *ArduinoUartInterface_create(const char *tty, int baud);
@@ -362,14 +362,14 @@ BRIDGE_FUNC void ArduinoUartInterface_destroy(ArduinoUartInterface *interface);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// ArduinoDevice bridge (arpirobot/arduino/device.hpp)
+/// ArduinoDevice bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC char *ArduinoDevice_getDeviceName(ArduinoDevice *device);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// VoltageMonitor bridge (arpirobot/arduino/sensor.hpp)
+/// VoltageMonitor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC VoltageMonitor *VoltageMonitor_create(const char *pin, double vboard, int r1, 
@@ -381,7 +381,7 @@ BRIDGE_FUNC double VoltageMonitor_getVoltage(VoltageMonitor *vmon);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// Ultrasonic4Pin bridge (arpirobot/arduino/sensor.hpp)
+/// Ultrasonic4Pin bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC Ultrasonic4Pin *Ultrasonic4Pin_create(const char *triggerPin, const char *echoPin, 
@@ -393,7 +393,7 @@ BRIDGE_FUNC int Ultrasonic4Pin_getDistance(Ultrasonic4Pin *usonic);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// SingleEncode bridge (arpirobot/arduino/sensor.hpp)
+/// SingleEncode bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC SingleEncoder *SingleEncoder_create(const char *pin, bool useInternalPullup, 
@@ -407,7 +407,7 @@ BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int newPosition);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// IRReflectorModule bridge (arpirobot/arduino/sensor.hpp)
+/// IRReflectorModule bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC IRReflectorModule *IRReflectorModule_create(const char *digitalPin, const char *analogPin, 
@@ -421,7 +421,7 @@ BRIDGE_FUNC int IRReflectorModule_getAnalogValue(IRReflectorModule *ir);
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// OldAdafruit9Dof bridge (arpirobot/arduino/sensor.hpp)
+/// OldAdafruit9Dof bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC OldAdafruit9Dof *OldAdafruit9Dof_create(bool createDevice, int deviceId);
@@ -448,7 +448,7 @@ BRIDGE_FUNC void OldAdafruit9Dof_setGyroZ(OldAdafruit9Dof *imu, double newGyroZ)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// NxpAdafruit9Dof bridge (arpirobot/arduino/sensor.hpp)
+/// NxpAdafruit9Dof bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC NxpAdafruit9Dof *NxpAdafruit9Dof_create(bool createDevice, int deviceId);
@@ -475,7 +475,34 @@ BRIDGE_FUNC void NxpAdafruit9Dof_setGyroZ(NxpAdafruit9Dof *imu, double newGyroZ)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// INA260PowerSensor bridge (arpirobot/devices/ina260.hpp)
+/// Mpu6050Imu bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC Mpu6050Imu *Mpu6050Imu_create(bool createDevice, int deviceId);
+
+BRIDGE_FUNC void Mpu6050Imu_destroy(Mpu6050Imu *imu);
+
+BRIDGE_FUNC double Mpu6050Imu_getGyroX(Mpu6050Imu *imu);
+
+BRIDGE_FUNC double Mpu6050Imu_getGyroY(Mpu6050Imu *imu);
+
+BRIDGE_FUNC double Mpu6050Imu_getGyroZ(Mpu6050Imu *imu);
+
+BRIDGE_FUNC double Mpu6050Imu_getAccelX(Mpu6050Imu *imu);
+
+BRIDGE_FUNC double Mpu6050Imu_getAccelY(Mpu6050Imu *imu);
+
+BRIDGE_FUNC double Mpu6050Imu_getAccelZ(Mpu6050Imu *imu);
+
+BRIDGE_FUNC void Mpu6050Imu_setGyroX(Mpu6050Imu *imu, double newGyroX);
+
+BRIDGE_FUNC void Mpu6050Imu_setGyroY(Mpu6050Imu *imu, double newGyroY);
+
+BRIDGE_FUNC void Mpu6050Imu_setGyroZ(Mpu6050Imu *imu, double newGyroZ);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// INA260PowerSensor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC INA260PowerSensor *INA260PowerSensor_create();

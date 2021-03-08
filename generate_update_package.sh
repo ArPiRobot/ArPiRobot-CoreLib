@@ -19,7 +19,7 @@ rm -rf build
 mkdir -p build
 cd build
 cmake -DCMAKE_TOOLCHAIN_FILE=../arpirobot-cross.cmake -DCMAKE_BUILD_TYPE=Release -G "Unix Makefiles" ..
-cmake --build .
+make -j
 cp libarpirobot-core.so ../../package/lib/
 cp -r ../include ../../package/
 cp -r ../deps/asio-*/include/* ../../package/include/

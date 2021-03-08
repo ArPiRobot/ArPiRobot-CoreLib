@@ -416,6 +416,33 @@ public class Bridge {
 
 
         ////////////////////////////////////////////////////////////////////////
+        /// Mpu6050Imu bridge (arpirobot/arduino/sensor.hpp)
+        ////////////////////////////////////////////////////////////////////////
+
+        public static native Pointer Mpu6050Imu_create(boolean createDevice, int deviceId);
+
+        public static native void Mpu6050Imu_destroy(Pointer imu);
+
+        public static native double Mpu6050Imu_getGyroX(Pointer imu);
+
+        public static native double Mpu6050Imu_getGyroY(Pointer imu);
+
+        public static native double Mpu6050Imu_getGyroZ(Pointer imu);
+
+        public static native double Mpu6050Imu_getAccelX(Pointer imu);
+
+        public static native double Mpu6050Imu_getAccelY(Pointer imu);
+
+        public static native double Mpu6050Imu_getAccelZ(Pointer imu);
+
+        public static native void Mpu6050Imu_setGyroX(Pointer imu, double newGyroX);
+
+        public static native void Mpu6050Imu_setGyroY(Pointer imu, double newGyroY);
+
+        public static native void Mpu6050Imu_setGyroZ(Pointer imu, double newGyroZ);
+
+
+        ////////////////////////////////////////////////////////////////////////
         /// INA260PowerSensor bridge (arpirobot/devices/ina260.hpp)
         ////////////////////////////////////////////////////////////////////////
 
