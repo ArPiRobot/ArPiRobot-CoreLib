@@ -423,6 +423,8 @@ public class Bridge {
 
         public static native void Mpu6050Imu_destroy(Pointer imu);
 
+        public static native void Mpu6050Imu_calibrate(Pointer imu, int samples);
+
         public static native double Mpu6050Imu_getGyroX(Pointer imu);
 
         public static native double Mpu6050Imu_getGyroY(Pointer imu);

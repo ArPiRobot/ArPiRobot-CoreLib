@@ -224,6 +224,14 @@ class Mpu6050Imu(ArduinoDevice):
     def __del__(self):
         bridge.arpirobot.Mpu6050Imu_destroy(self._ptr)
     
+    ## Calibrate the IMU. Should reduce gyro drift and accelerometer error
+    #  IMU MUST BE STATIONARY DURING CALIBRATION. 
+    #  GRAVITATIONAL ACCELERATION MUST BE IN NEGATIVE Z DIRECTION DURING CALIBRATION.
+    #  @param samples The number of samples to take during calibration. 
+    #                 More samples may be more accurate, but will take longer.
+    def calibrate(self, samples: int):
+        bridge.arpirobot.Mpu6050Imu_calibrate(self._ptr, samples)
+
     ## Get the X rotation
     #  @returns X rotation in degrees
     def get_gyro_x(self) -> float:

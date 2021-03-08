@@ -482,6 +482,8 @@ BRIDGE_FUNC Mpu6050Imu *Mpu6050Imu_create(bool createDevice, int deviceId);
 
 BRIDGE_FUNC void Mpu6050Imu_destroy(Mpu6050Imu *imu);
 
+BRIDGE_FUNC void Mpu6050Imu_calibrate(Mpu6050Imu *imu, int samples);
+
 BRIDGE_FUNC double Mpu6050Imu_getGyroX(Mpu6050Imu *imu);
 
 BRIDGE_FUNC double Mpu6050Imu_getGyroY(Mpu6050Imu *imu);

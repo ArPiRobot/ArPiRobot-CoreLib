@@ -515,6 +515,9 @@ arpirobot.Mpu6050Imu_create.restype = ctypes.c_void_p
 arpirobot.Mpu6050Imu_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.Mpu6050Imu_destroy.restype = None
 
+arpirobot.Mpu6050Imu_calibrate.argtypes = [ctypes.c_void_p, ctypes.c_int]
+arpirobot.Mpu6050Imu_calibrate.restype = None
+
 arpirobot.Mpu6050Imu_getGyroX.argtypes = [ctypes.c_void_p]
 arpirobot.Mpu6050Imu_getGyroX.restype = ctypes.c_double
 

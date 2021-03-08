@@ -755,6 +755,10 @@ BRIDGE_FUNC void Mpu6050Imu_destroy(Mpu6050Imu *imu){
     delete imu;
 }
 
+BRIDGE_FUNC void Mpu6050Imu_calibrate(Mpu6050Imu *imu, int samples){
+    imu->calibrate(samples);
+}
+
 BRIDGE_FUNC double Mpu6050Imu_getGyroX(Mpu6050Imu *imu){
     return imu->getGyroX();
 }
