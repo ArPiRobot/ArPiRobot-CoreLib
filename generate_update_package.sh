@@ -14,6 +14,7 @@ mkdir -p package/lib
 mkdir -p package/java_bindings
 cp version.txt package/
 cp what.txt package/
+cp COPYING package/
 
 echo ""
 echo "Building C++ Library"
