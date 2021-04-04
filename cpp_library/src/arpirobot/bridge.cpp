@@ -1,9 +1,10 @@
 #include <arpirobot/bridge.hpp>
-#include <arpirobot/core/network.hpp>
-#include <arpirobot/core/log.hpp>
-#include <arpirobot/core/drive.hpp>
+#include <arpirobot/core/network/NetworkTable.hpp>
+#include <arpirobot/core/log/Logger.hpp>
+//#include <arpirobot/core/drive.hpp>
 
 #include <iostream>
+#include <cstring>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// General/Helper

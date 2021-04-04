@@ -1,9 +1,9 @@
 #pragma once
 
-#include <arpirobot/core/robot.hpp>
-#include <arpirobot/core/drive.hpp>
-#include <arpirobot/devices/adafruitmotorhat.hpp>
-#include <arpirobot/devices/gamepad.hpp>
+#include <arpirobot/core/robot/BaseRobot.hpp>
+#include <arpirobot/core/drive/ArcadeDriveHelper.hpp>
+#include <arpirobot/devices/adafruitmotorhat/AdafruitMotorHatMotor.hpp>
+#include <arpirobot/devices/gamepad/Gamepad.hpp>
 
 using namespace arpirobot;
 

@@ -1,20 +1,56 @@
 #pragma once
 
-#include <arpirobot/core/robot.hpp>
-#include <arpirobot/core/log.hpp>
-#include <arpirobot/devices/gamepad.hpp>
-#include <arpirobot/core/network.hpp>
-#include <arpirobot/devices/adafruitmotorhat.hpp>
-#include <arpirobot/devices/l298n.hpp>
-#include <arpirobot/devices/tb6612.hpp>
-#include <arpirobot/devices/drv8833.hpp>
-#include <arpirobot/core/drive.hpp>
-#include <arpirobot/core/device.hpp>
-#include <arpirobot/core/action.hpp>
-#include <arpirobot/arduino/iface.hpp>
-#include <arpirobot/arduino/device.hpp>
-#include <arpirobot/arduino/sensor.hpp>
-#include <arpirobot/devices/ina260.hpp>
+#include <arpirobot/core/robot/BaseRobot.hpp>
+#include <arpirobot/core/robot/RobotProfile.hpp>
+
+#include <arpirobot/core/log/Logger.hpp>
+
+#include <arpirobot/devices/gamepad/Gamepad.hpp>
+#include <arpirobot/devices/gamepad/ButtonPressedTrigger.hpp>
+#include <arpirobot/devices/gamepad/ButtonReleasedTrigger.hpp>
+
+#include <arpirobot/core/network/NetworkTable.hpp>
+
+#include <arpirobot/devices/adafruitmotorhat/AdafruitMotorHatMotor.hpp>
+
+#include <arpirobot/devices/l298n/L298NModule.hpp>
+#include <arpirobot/devices/l298n/L298NMotor.hpp>
+
+#include <arpirobot/devices/tb6612/TB6612Module.hpp>
+#include <arpirobot/devices/tb6612/TB6612Motor.hpp>
+
+#include <arpirobot/devices/drv8833/DRV8833Module.hpp>
+#include <arpirobot/devices/drv8833/DRV8833Motor.hpp>
+
+#include <arpirobot/core/drive/ArcadeDriveHelper.hpp>
+#include <arpirobot/core/drive/BaseAxisTransform.hpp>
+#include <arpirobot/core/drive/CubicAxisTransform.hpp>
+#include <arpirobot/core/drive/SquareRootAxisTransform.hpp>
+#include <arpirobot/core/drive/TankDriveHelper.hpp>
+
+
+#include <arpirobot/core/device/BaseDevice.hpp>
+#include <arpirobot/core/device/MotorController.hpp>
+
+#include <arpirobot/core/action/Action.hpp>
+#include <arpirobot/core/action/ActionManager.hpp>
+#include <arpirobot/core/action/ActionSeries.hpp>
+#include <arpirobot/core/action/BaseActionTrigger.hpp>
+
+#include <arpirobot/arduino/iface/BaseArduinoInterface.hpp>
+#include <arpirobot/arduino/iface/ArduinoUartInterface.hpp>
+
+#include <arpirobot/arduino/device/ArduinoDevice.hpp>
+
+#include <arpirobot/arduino/sensor/IRReflectorModule.hpp>
+#include <arpirobot/arduino/sensor/Mpu6050Imu.hpp>
+#include <arpirobot/arduino/sensor/NxpAdafruit9Dof.hpp>
+#include <arpirobot/arduino/sensor/OldAdafruit9Dof.hpp>
+#include <arpirobot/arduino/sensor/SingleEncoder.hpp>
+#include <arpirobot/arduino/sensor/Ultrasonic4Pin.hpp>
+#include <arpirobot/arduino/sensor/VoltageMonitor.hpp>
+
+#include <arpirobot/devices/ina260/INA260PowerSensor.hpp>
 #include <string>
 
 using namespace arpirobot;

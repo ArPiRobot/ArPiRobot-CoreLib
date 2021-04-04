@@ -1,6 +1,6 @@
 #include <robot.hpp>
-#include <arpirobot/core/action.hpp>
-#include <arpirobot/core/log.hpp>
+#include <arpirobot/core/action/Action.hpp>
+#include <arpirobot/core/log/Logger.hpp>
 #include <actions.hpp>
 
 void Robot::robotStarted(){

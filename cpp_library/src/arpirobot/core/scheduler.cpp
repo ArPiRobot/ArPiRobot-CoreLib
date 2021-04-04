@@ -1,5 +1,5 @@
 #include <arpirobot/core/scheduler.hpp>
-#include <arpirobot/core/log.hpp>
+#include <arpirobot/core/log/Logger.hpp>
 #include <algorithm>
 
 using namespace arpirobot;
