@@ -6,7 +6,7 @@
 
 namespace arpirobot{
     /**
-     * \class MotorController device.hpp arpirobot/core/device.hpp
+     * \class MotorController MotorController.hpp arpirobot/core/device/MotorController.hpp
      * 
      * Base class for motor controllers.
      */

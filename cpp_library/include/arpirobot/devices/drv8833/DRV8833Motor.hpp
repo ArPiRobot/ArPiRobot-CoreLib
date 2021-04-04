@@ -5,7 +5,7 @@
 namespace arpirobot{
 
     /**
-     * \class DRV8833Motor drv8833.hpp arpirobot/devices/drv8833.hpp
+     * \class DRV8833Motor DRV8833Motor.hpp arpirobot/devices/drv8833/DRV8833Motor.hpp
      * 
      * Motor on DRV8833 module
      */

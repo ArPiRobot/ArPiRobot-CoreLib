@@ -5,7 +5,7 @@
 
 namespace arpirobot{
     /**
-     * \class NxpAdafruit9Dof sensor.hpp arpirobot/arduino/sensor.hpp
+     * \class NxpAdafruit9Dof NxpAdafruit9Dof.hpp arpirobot/arduino/sensor/NxpAdafruit9Dof.hpp
      * 
      * Newer adafruit 9-DOF NXP IMU
      */

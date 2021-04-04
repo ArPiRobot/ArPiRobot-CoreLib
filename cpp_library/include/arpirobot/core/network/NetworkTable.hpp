@@ -6,7 +6,7 @@
 
 namespace arpirobot{
     /**
-     * \class NetworkTable network.hpp arpirobot/core/network.hpp
+     * \class NetworkTable NetworkTable.hpp arpirobot/core/network/NetworkTable.hpp
      * 
      * Helper class used to manage network table key/value pairs
      */

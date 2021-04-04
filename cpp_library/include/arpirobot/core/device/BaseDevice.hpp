@@ -8,7 +8,7 @@ namespace arpirobot{
     class Action; // Forward declare b/c this header is included by action.hpp
 
     /**
-     * \class BaseDevice device.hpp arpirobot/core/device.hpp
+     * \class BaseDevice BaseDevice.hpp arpirobot/core/device/BaseDevice.hpp
      * 
      * Base class for any device connected to the raspberry pi.
      */

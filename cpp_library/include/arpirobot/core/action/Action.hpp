@@ -10,7 +10,7 @@
 namespace arpirobot{
 
     /**
-     * \class Action action.hpp arpirobot/core/action.hpp
+     * \class Action Action.hpp arpirobot/core/action/Action.hpp
      * 
      * Generic action class. User actions should inherit this class and implement the four pure virtual methods
      */

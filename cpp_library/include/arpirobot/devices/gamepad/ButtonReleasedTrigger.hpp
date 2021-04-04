@@ -6,6 +6,7 @@
 
 namespace arpirobot{
     /**
+     * \class ButtonReleasedTrigger ButtonReleasedTrigger.hpp arpirobot/devices/gamepad/ButtonReleasedTrigger.hpp
      * Action trigger for when a button on a gamepad is released
      */
     class ButtonReleasedTrigger : public BaseActionTrigger {

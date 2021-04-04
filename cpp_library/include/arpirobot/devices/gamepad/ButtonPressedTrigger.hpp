@@ -6,6 +6,7 @@
 
 namespace arpirobot{
     /**
+     * \class ButtonPressedTrigger ButtonPressedTrigger.hpp arpirobot/devices/gamepad/ButtonPressedTrigger.hpp
      * Action trigger for when a button on a gamepad is pressed
      */
     class ButtonPressedTrigger : public BaseActionTrigger{

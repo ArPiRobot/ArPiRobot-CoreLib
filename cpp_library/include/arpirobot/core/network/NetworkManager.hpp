@@ -74,7 +74,7 @@ namespace arpirobot{
     const extern std::string NET_TABLE_END_SYNC_DATA;
 
     /**
-     * \class NetworkManager network.hpp arpirobot/core/network.hpp
+     * \class NetworkManager NetworkManager.hpp arpirobot/core/network/NetworkManager.hpp
      * 
      * Used by BaseRobot to manage networking (with drive station)
      * Should not be used directly from user code

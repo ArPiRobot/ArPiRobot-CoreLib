@@ -9,6 +9,7 @@
 namespace arpirobot{
 
     /**
+     * \class Gamepad Gamepad.hpp arpirobot/devices/gamepad/Gamepad.hpp
      * Gamepad receiving data from drive station
      */
     class Gamepad : public BaseDevice{

@@ -4,7 +4,7 @@
 
 namespace arpirobot{
     /**
-     * \class L298NModule l298n.hpp arpirobot/devices/l298n.hpp
+     * \class L298NModule L298NModule.hpp arpirobot/devices/L298NModule.hpp
      * 
      * L298N Module (two motors)
      */

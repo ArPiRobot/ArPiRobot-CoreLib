@@ -5,7 +5,7 @@
 namespace arpirobot{
 
     /**
-     * \class TB6612Motor tb6612.hpp arpirobot/devices/tb6612.hpp
+     * \class TB6612Motor TB6612Motor.hpp arpirobot/devices/TB6612Motor.hpp
      * 
      * Motor on TB6612 module
      */

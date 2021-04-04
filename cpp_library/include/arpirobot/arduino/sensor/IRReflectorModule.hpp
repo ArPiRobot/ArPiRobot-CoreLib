@@ -5,7 +5,7 @@
 
 namespace arpirobot{
     /**
-     * \class IRReflectorModule sensor.hpp arpirobot/arduino/sensor.hpp
+     * \class IRReflectorModule IRReflectorModule.hpp arpirobot/arduino/sensor/IRReflectorModule.hpp
      * 
      * Infrared reflection detector module
      */

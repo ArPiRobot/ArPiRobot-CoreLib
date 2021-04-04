@@ -7,7 +7,7 @@
 
 namespace arpirobot{
     /**
-     * \class BaseAxisTransform drive.hpp arpirobot/core/drive.hpp
+     * \class BaseAxisTransform BaseAxisTransform.hpp arpirobot/core/drive/BaseAxisTransform.hpp
      * 
      * Base class for axis transforms. Axis transforms take an analog axis value (-1.0 to 1.0)
      * and apply a fixed calculation to modify the curve of the axis.

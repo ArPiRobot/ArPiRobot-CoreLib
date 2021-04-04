@@ -3,7 +3,7 @@
 namespace arpirobot{
 
     /**
-     * \class RobotProfile robot.hpp arpirobot/core/robot.hpp
+     * \class RobotProfile RobotProfile.hpp arpirobot/core/robot/RobotProfile.hpp
      * 
      * Settings to configure general robot behavior
      */

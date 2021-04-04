@@ -6,7 +6,7 @@
 
 namespace arpirobot{
     /**
-     * \class VoltageMonitor sensor.hpp arpirobot/arduino/sensor.hpp
+     * \class VoltageMonitor VoltageMonitor.hpp arpirobot/arduino/sensor/VoltageMonitor.hpp
      * 
      * Simple analog input voltage monitor (using voltage divider) connected to arduino analog input.
      */

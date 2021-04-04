@@ -7,7 +7,7 @@
 
 namespace arpirobot{
     /**
-     * \class ArcadeDriveHelper drive.hpp arpirobot/core/drive.hpp
+     * \class ArcadeDriveHelper ArcadeDriveHelper.hpp arpirobot/core/drive/ArcadeDriveHelper.hpp
      * 
      * Drive helper for arcade drive method.
      * 

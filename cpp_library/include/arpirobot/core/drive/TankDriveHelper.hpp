@@ -7,7 +7,7 @@
 
 namespace arpirobot{
     /**
-     * \class TankDriveHelper drive.hpp arpirobot/core/drive.hpp
+     * \class TankDriveHelper TankDriveHelper.hpp arpirobot/core/drive/TankDriveHelper.hpp
      * 
      * Drive helper for tank drive method.
      * 

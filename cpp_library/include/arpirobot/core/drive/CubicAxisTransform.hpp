@@ -8,7 +8,7 @@
 
 namespace arpirobot{
     /**
-     * \class CubicAxisTransform drive.hpp arpirobot/core/drive.hpp
+     * \class CubicAxisTransform CubicAxisTransform.hpp arpirobot/core/drive/CubicAxisTransform.hpp
      * 
      * Transform that applies a cubic function to the magnitude of the input.
      * The cubic function is fit to the data set (0, minPower), (0.5, midPower), (1, 1)

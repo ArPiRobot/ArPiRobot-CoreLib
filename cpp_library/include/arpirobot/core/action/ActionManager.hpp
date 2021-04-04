@@ -8,7 +8,7 @@
 
 namespace arpirobot{
     /**
-     * \class ActionManager action.hpp arpirobot/core/action.hpp
+     * \class ActionManager ActionManager.hpp arpirobot/core/action/ActionManager.hpp
      * 
      * Static helper class to manage actions and triggers
      */

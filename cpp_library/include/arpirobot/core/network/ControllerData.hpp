@@ -10,7 +10,7 @@ namespace arpirobot{
     ////////////////////////////////////////////////////////////////////////////
 
     /**
-     * \class ControllerData network.hpp arpirobot/core/network.hpp
+     * \class ControllerData ControllerData.hpp arpirobot/core/network/ControllerData.hpp
      * 
      * Class to hold and data for a single controller and parse data received from network
      */

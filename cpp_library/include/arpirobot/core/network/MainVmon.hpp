@@ -3,7 +3,7 @@
 namespace arpirobot{
 
     /**
-     * \class MainVmon network.hpp arpirobot/core/network.hpp
+     * \class MainVmon MainVmon.hpp arpirobot/core/network/MainVmon.hpp
      * 
      * Main voltage monitor interface
      * Any sensor (arduino or pi device) can implement this interface to be able to be used as a main vmon

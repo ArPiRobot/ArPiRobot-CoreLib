@@ -9,7 +9,7 @@
 namespace arpirobot{
 
     /**
-     * \class ArduinoUartInterface iface.hpp arpirobot/arduino/iface.hpp
+     * \class ArduinoUartInterface ArduinoUartInterface.hpp arpirobot/arduino/iface/ArduinoUartInterface.hpp
      * 
      * Arduino interface implementation using UART to communicate with the arduino.
      */

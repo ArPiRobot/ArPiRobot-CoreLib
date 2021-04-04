@@ -5,7 +5,7 @@
 
 namespace arpirobot{
     /**
-     * \class OldAdafruit9Dof sensor.hpp arpirobot/arduino/sensor.hpp
+     * \class OldAdafruit9Dof OldAdafruit9Dof.hpp arpirobot/arduino/sensor/OldAdafruit9Dof.hpp
      * 
      * Now discontinued Adafruit 9-DOF IMU
      * https://www.adafruit.com/product/1714

@@ -5,7 +5,7 @@
 
 namespace arpirobot{
     /**
-     * \class Ultrasonic4Pin sensor.hpp arpirobot/arduino/sensor.hpp
+     * \class Ultrasonic4Pin Ultrasonic4Pin.hpp arpirobot/arduino/sensor/Ultrasonic4Pin.hpp
      * 
      * Device for 4-pin ultrasonic sensor.
      */

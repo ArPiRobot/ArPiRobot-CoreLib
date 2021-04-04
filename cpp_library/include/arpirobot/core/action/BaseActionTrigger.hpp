@@ -10,7 +10,7 @@
 
 namespace arpirobot{
     /**
-     * \class BaseActionTrigger action.hpp arpirobot/core/action.hpp
+     * \class BaseActionTrigger BaseActionTrigger.hpp arpirobot/core/action/BaseActionTrigger.hpp
      * 
      * Generic action trigger. Triggers are registered with the action manager. When some event occurs
      * a trigger will run the designated action.

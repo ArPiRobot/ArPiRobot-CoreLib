@@ -5,7 +5,7 @@
 
 namespace arpirobot{
     /**
-     * \class SingleEncoder sensor.hpp arpirobot/arduino/sensor.hpp
+     * \class SingleEncoder SingleEncoder.hpp arpirobot/arduino/sensor/SingleEncoder.hpp
      * 
      * Single-channel encoder
      */

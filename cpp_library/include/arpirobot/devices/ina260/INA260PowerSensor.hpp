@@ -98,6 +98,7 @@ namespace arpirobot{
     }
 
     /**
+     * \class INA260PowerSensor INA260PowerSensor.hpp arpirobot/devices/ina260/INA260PowerSensor.hpp
      * INA260 Power sensor
      */
     class INA260PowerSensor : public BaseDevice, public MainVmon{

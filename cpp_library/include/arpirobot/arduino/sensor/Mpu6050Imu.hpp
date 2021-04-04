@@ -7,7 +7,7 @@
 namespace arpirobot{
     
     /**
-     * \class Mpu6050Imu sensor.hpp arpirobot/arduino/sensor.hpp
+     * \class Mpu6050Imu Mpu6050Imu.hpp arpirobot/arduino/sensor/Mpu6050Imu.hpp
      * 
      * MPU6050 IMU
      * https://www.adafruit.com/product/1714

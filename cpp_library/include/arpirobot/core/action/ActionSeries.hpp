@@ -6,7 +6,7 @@
 
 namespace arpirobot{
     /**
-     * \class ActionSeries action.hpp arpirobot/core/action.hpp
+     * \class ActionSeries ActionSeries.hpp arpirobot/core/action/ActionSeries.hpp
      * 
      * A special action that will run a sequential set of actions (one at a time)
      */

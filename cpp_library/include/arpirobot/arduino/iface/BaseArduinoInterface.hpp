@@ -10,7 +10,7 @@ namespace arpirobot{
     class ArduinoDevice;
 
     /**
-     * \class BaseArduinoInterface iface.hpp arpirobot/arduino/iface.hpp
+     * \class BaseArduinoInterface BaseArduinoInterface.hpp arpirobot/arduino/iface/BaseArduinoInterface.hpp
      * 
      * Common base class (communication protocol agnostic) for an arduino (or other microcontroller) sensor coprocessor.
      * This class handles all the high-level data between the arduino and pi, without implementing a specific

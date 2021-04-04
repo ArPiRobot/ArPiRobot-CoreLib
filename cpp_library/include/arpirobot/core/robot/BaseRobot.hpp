@@ -11,7 +11,7 @@
 namespace arpirobot{
 
     /**
-     * \class BaseRobot robot.hpp arpirobot/core/robot.hpp
+     * \class BaseRobot BaseRobot.hpp arpirobot/core/robot/BaseRobot.hpp
      * 
      * Base class to facilitate general robot code structure/flow
      * Each robot program should have a single class that inherits from this class and

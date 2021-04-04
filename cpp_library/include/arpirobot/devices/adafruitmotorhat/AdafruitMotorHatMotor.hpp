@@ -93,7 +93,7 @@ namespace arpirobot{
     }
 
     /**
-     * \class AdafruitMotorHatMotor adafruitmotorhatmotor.hpp arpirobot/devices/adafruitmotorhatmotor.hpp
+     * \class AdafruitMotorHatMotor AdafruitMotorHatMotor.hpp arpirobot/devices/adafruitmotorhatmotor/AdafruitMotorHatMotor.hpp
      * 
      * Motor for Adafruit Motor Hat
      */

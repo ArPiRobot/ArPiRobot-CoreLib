@@ -6,7 +6,7 @@
 namespace arpirobot {
 
     /**
-     * \class Logger log.hpp arpirobot/core/log.hpp
+     * \class Logger Logger.hpp arpirobot/core/log/Logger.hpp
      * 
      * Helper class with static methods for logging messages.
      * Log messages will be printed to stdout and sent to a connected DS.
