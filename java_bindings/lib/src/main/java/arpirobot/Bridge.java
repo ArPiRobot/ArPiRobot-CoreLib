@@ -396,6 +396,8 @@ public class Bridge {
 
         public static native void NxpAdafruit9Dof_destroy(Pointer imu);
 
+        public static native void NxpAdafruit9Dof_calibrate(Pointer imu, int samples);
+
         public static native double NxpAdafruit9Dof_getGyroX(Pointer imu);
 
         public static native double NxpAdafruit9Dof_getGyroY(Pointer imu);

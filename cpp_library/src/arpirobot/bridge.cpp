@@ -706,6 +706,10 @@ BRIDGE_FUNC void NxpAdafruit9Dof_destroy(NxpAdafruit9Dof *imu){
     delete imu;
 }
 
+BRIDGE_FUNC void NxpAdafruit9Dof_calibrate(NxpAdafruit9Dof *imu, int samples){
+    imu->calibrate(samples);
+}
+
 BRIDGE_FUNC double NxpAdafruit9Dof_getGyroX(NxpAdafruit9Dof *imu){
     return imu->getGyroX();
 }

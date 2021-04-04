@@ -321,6 +321,19 @@ OldAdafruit9Dof::OldAdafruit9Dof(bool createDevice, int deviceId) : ArduinoDevic
 
 }
 
+void OldAdafruit9Dof::calibrate(uint16_t samples){
+    if(arduino == nullptr)
+        return;
+    Logger::logInfoFrom(getDeviceName(), "Starting calibration. Will not get data until calibration is complete.");
+    std::vector<uint8_t> msg;
+    msg.reserve(3);
+    msg.push_back('C'); // Calibrate command
+    auto s = Conversions::convertInt16ToData(samples, true);
+    msg.insert(msg.end(), s.begin(), s.end());
+    // msg = 'C', samples_little_endian
+    arduino->sendFromDevice(this->deviceId, msg);
+}
+
 double OldAdafruit9Dof::getGyroX(){
     return gyroX + gyroXOffset;
 }
@@ -398,6 +411,19 @@ void OldAdafruit9Dof::handleData(const std::vector<uint8_t> &data){
 
 NxpAdafruit9Dof::NxpAdafruit9Dof(bool createDevice, int deviceId) : ArduinoDevice(createDevice, deviceId){
 
+}
+
+void NxpAdafruit9Dof::calibrate(uint16_t samples){
+    if(arduino == nullptr)
+        return;
+    Logger::logInfoFrom(getDeviceName(), "Starting calibration. Will not get data until calibration is complete.");
+    std::vector<uint8_t> msg;
+    msg.reserve(3);
+    msg.push_back('C'); // Calibrate command
+    auto s = Conversions::convertInt16ToData(samples, true);
+    msg.insert(msg.end(), s.begin(), s.end());
+    // msg = 'C', samples_little_endian
+    arduino->sendFromDevice(this->deviceId, msg);
 }
 
 double NxpAdafruit9Dof::getGyroX(){

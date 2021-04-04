@@ -477,6 +477,9 @@ arpirobot.NxpAdafruit9Dof_create.restype = ctypes.c_void_p
 arpirobot.NxpAdafruit9Dof_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.NxpAdafruit9Dof_destroy.restype = None
 
+arpirobot.NxpAdafruit9Dof_calibrate.argtypes = [ctypes.c_void_p, ctypes.c_int]
+arpirobot.NxpAdafruit9Dof_calibrate.restype = None
+
 arpirobot.NxpAdafruit9Dof_getGyroX.argtypes = [ctypes.c_void_p]
 arpirobot.NxpAdafruit9Dof_getGyroX.restype = ctypes.c_double
 

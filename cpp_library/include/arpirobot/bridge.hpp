@@ -455,6 +455,8 @@ BRIDGE_FUNC NxpAdafruit9Dof *NxpAdafruit9Dof_create(bool createDevice, int devic
 
 BRIDGE_FUNC void NxpAdafruit9Dof_destroy(NxpAdafruit9Dof *imu);
 
+BRIDGE_FUNC void NxpAdafruit9Dof_calibrate(NxpAdafruit9Dof *imu, int samples);
+
 BRIDGE_FUNC double NxpAdafruit9Dof_getGyroX(NxpAdafruit9Dof *imu);
 
 BRIDGE_FUNC double NxpAdafruit9Dof_getGyroY(NxpAdafruit9Dof *imu);
