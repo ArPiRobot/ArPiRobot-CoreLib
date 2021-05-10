@@ -20,11 +20,11 @@ fi
 
 # Delete folder & create empty one
 printf "**Removing old files form the pi.**\n"
-ssh -l pi $ROBOT_IP "sudo mount -o rw,remount /;mkdir -p /home/pi/CPPLibTest/;sudo rm -rf /home/pi/CPPLibTest/*"
+ssh -l pi $ROBOT_IP "sudo mount -o rw,remount /;mkdir -p /home/pi/CoreLib-Test/;sudo rm -rf /home/pi/CoreLib-Test/*"
 
 
 # Copy from this PC to Pi
 printf "\n**Copying files to the pi.**\n"
-scp -r cpp_library/build/libarpirobot-core.so cpp_library/build/testrobot python_bindings/arpirobot/ python_bindings/testrobot-py java_bindings/lib/build/libs/*.jar java_bindings/testrobot/build/libs/robot.jar start-cpp.sh start-py.sh start-java.sh  pi@$ROBOT_IP:/home/pi/CPPLibTest
+scp -r cpp_library/build/libarpirobot-core.so cpp_library/build/testrobot python_bindings/arpirobot/ python_bindings/testrobot-py start-cpp.sh start-py.sh start-java.sh  pi@$ROBOT_IP:/home/pi/CoreLib-Test
 
 printf "\n**THE PI IS NOW READ/WRITE!**\n"

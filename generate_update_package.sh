@@ -11,7 +11,6 @@ rm -rf package
 mkdir -p package/
 mkdir -p package/python_bindings
 mkdir -p package/lib
-mkdir -p package/java_bindings
 cp version.txt package/
 cp what.txt package/
 cp COPYING package/
@@ -34,13 +33,6 @@ cd ../..
 echo ""
 echo "Adding Python Bindings"
 cp -r python_bindings/arpirobot package/python_bindings
-
-
-echo "Adding Java Bindings"
-cd java_bindings
-./gradlew build
-cd ..
-cp java_bindings/lib/build/libs/*.jar package/java_bindings/
 
 echo ""
 echo "Generating Package"
