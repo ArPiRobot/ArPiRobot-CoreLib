@@ -19,7 +19,7 @@
 
 
 #include <arpirobot/core/io/IoDevice.hpp>
-#include <arpirobot/core/log/Logger.hpp>
+#include <arpirobot/core/io/Io.hpp>
 
 #include <stdexcept>
 
@@ -27,7 +27,7 @@ using namespace arpirobot;
 
 
 IoDevice::IoDevice(std::function<void()> closeFunc) : closeFunc(closeFunc) {
-    IoProvider::addDevice(this);
+    Io::addDevice(this);
 }
 
 void IoDevice::close(){
@@ -36,5 +36,5 @@ void IoDevice::close(){
 
 IoDevice::~IoDevice(){
     close();
-    IoProvider::removeDevice(this);
+    Io::removeDevice(this);
 }

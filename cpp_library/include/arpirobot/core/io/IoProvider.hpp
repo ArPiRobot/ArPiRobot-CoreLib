@@ -25,42 +25,23 @@
 #include <vector>
 #include <mutex>
 
-
 namespace arpirobot {
-
-    // Forward declare
-    class IoDevice;
-
-    // This API closely matches pigpio's API as it is a basic C-style API
+    
     class IoProvider{
     public:
         IoProvider(const IoProvider &other) = delete;
         IoProvider &operator=(const IoProvider &other) = delete;
         virtual ~IoProvider() { }
 
-        ////////////////////////////////////////////////////////////////////////
-        /// Constants / Static
-        ////////////////////////////////////////////////////////////////////////
-        static IoProvider *instance;
-
         const static unsigned int GPIO_OUT = 0;
         const static unsigned int GPIO_IN = 1;
         const static unsigned int GPIO_LOW = 0;
         const static unsigned int GPIO_HIGH = 1;
 
-        const static char *PROVIDER_PIGPIO;      // PIGPIO library
-        const static char *PROVIDER_DUMMY;       // Fake provider. Prints log messages.
+    protected:
 
-        ////////////////////////////////////////////////////////////////////////
-        /// Configuration / Control
-        ////////////////////////////////////////////////////////////////////////
-        static void init(std::string provider = "");
-
-        static void terminate();
-
-        static void addDevice(IoDevice *device);
-
-        static void removeDevice(IoDevice *device);
+        // Protected default constructor ensures direct instantiation is not possible
+        IoProvider() = default;
 
         ////////////////////////////////////////////////////////////////////////
         /// GPIO & PWM
@@ -73,7 +54,7 @@ namespace arpirobot {
 
         virtual void gpioSetPwmFrequency(unsigned int pin, unsigned int frequency) = 0;
 
-        virtual unsigned int gpioPwm(unsigned int pin, unsigned int value) = 0;
+        virtual void gpioPwm(unsigned int pin, unsigned int value) = 0;
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -106,7 +87,7 @@ namespace arpirobot {
         
         // Bus = spi bus 
         // Channel = which builtin CS pin
-        virtual unsigned int spiOpen(unsigned int bus, unsigned int channel) = 0;
+        virtual unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud) = 0;
 
         virtual void spiClose(unsigned int handle) = 0;
 
@@ -129,12 +110,7 @@ namespace arpirobot {
 
         virtual void uartRead(unsigned int handle, char *buf, unsigned int count) = 0;
 
-    protected:
-        IoProvider();
-
-    private:
-        static std::vector<IoDevice*> ioDevices;
-        static std::mutex ioDevicesLock;
+        friend class Io;
     };
 
 }

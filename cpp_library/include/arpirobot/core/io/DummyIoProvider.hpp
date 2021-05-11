@@ -50,7 +50,7 @@ namespace arpirobot{
 
         void gpioSetPwmFrequency(unsigned int pin, unsigned int frequency) override;
 
-        unsigned int gpioPwm(unsigned int pin, unsigned int value) override;
+        void gpioPwm(unsigned int pin, unsigned int value) override;
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -83,7 +83,7 @@ namespace arpirobot{
         
         // Bus = spi bus 
         // Channel = which builtin CS pin
-        unsigned int spiOpen(unsigned int bus, unsigned int channel) override;
+        unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud) override;
 
         void spiClose(unsigned int handle) override;
 

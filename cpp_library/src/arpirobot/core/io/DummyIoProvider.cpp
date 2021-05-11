@@ -55,9 +55,8 @@ void DummyIoProvider::gpioSetPwmFrequency(unsigned int pin, unsigned int frequen
     Logger::logDebugFrom("DummyIoProvider", "gpioSetPwmFrequency(" + std::to_string(pin) + ", " + std::to_string(frequency) + ")");
 }
 
-unsigned int DummyIoProvider::gpioPwm(unsigned int pin, unsigned int value){
+void DummyIoProvider::gpioPwm(unsigned int pin, unsigned int value){
     Logger::logDebugFrom("DummyIoProvider", "gpioPwm(" + std::to_string(pin) + ", " + std::to_string(value) + ")");
-    return 0;
 }
 
 
@@ -113,8 +112,8 @@ uint16_t DummyIoProvider::i2cReadReg16(unsigned int handle, uint8_t reg){
 /// SPI
 ////////////////////////////////////////////////////////////////////////
 
-unsigned int DummyIoProvider::spiOpen(unsigned int bus, unsigned int channel){
-    Logger::logDebugFrom("DummyIoProvider", "spiOpen(" + std::to_string(bus) + ", " + std::to_string(channel) + ")");
+unsigned int DummyIoProvider::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud){
+    Logger::logDebugFrom("DummyIoProvider", "spiOpen(" + std::to_string(bus) + ", " + std::to_string(channel) + ", " + std::to_string(baud) + ")");
     return 0;
 }
 
