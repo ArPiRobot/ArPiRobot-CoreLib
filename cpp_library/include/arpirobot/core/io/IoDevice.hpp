@@ -21,6 +21,7 @@
 #pragma once
 
 #include <arpirobot/core/io/IoProvider.hpp>
+#include <functional>
 
 namespace arpirobot{
 
@@ -28,12 +29,14 @@ namespace arpirobot{
     public:
         virtual ~IoDevice();
 
+        void close();
+
     protected:
+        // Close function is assigned by child class.
+        // Cannot use virtual func as this is run from destructor.
+        IoDevice(std::function<void()> closeFunc);
 
-        IoDevice();
-
-        // This will be called automatically when the IOProvider is shutting down
-        virtual void close();
+        std::function<void()> closeFunc;
 
         friend class IoProvider;
     };

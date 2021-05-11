@@ -83,15 +83,19 @@ namespace arpirobot {
 
         virtual void i2cClose(unsigned int handle) = 0;
 
-        virtual unsigned int i2cWriteByte(unsigned int handle, uint8_t data) = 0;
+        virtual void i2cWriteByte(unsigned int handle, uint8_t data) = 0;
 
         virtual uint8_t i2cReadByte(unsigned int handle) = 0;
 
-        virtual uint8_t i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value) = 0;
+        virtual void i2cWriteBytes(unsigned int handle, uint8_t *buf, unsigned int count) = 0;
+
+        virtual void i2cReadBytes(unsigned int handle, uint8_t *buf, unsigned int count) = 0;
+
+        virtual void i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value) = 0;
 
         virtual uint8_t i2cReadReg8(unsigned int handle, uint8_t reg) = 0;
 
-        virtual uint16_t i2cWriteReg16(unsigned int handle, uint8_t reg, uint16_t value) = 0;
+        virtual void i2cWriteReg16(unsigned int handle, uint8_t reg, uint16_t value) = 0;
 
         virtual uint16_t i2cReadReg16(unsigned int handle, uint8_t reg) = 0;
 
@@ -106,24 +110,24 @@ namespace arpirobot {
 
         virtual void spiClose(unsigned int handle) = 0;
 
-        virtual void spiWrite(unsigned int handle, uint8_t *buf, unsigned int count) = 0;
+        virtual void spiWrite(unsigned int handle, char *buf, unsigned int count) = 0;
 
-        virtual void spiRead(unsigned int handle, uint8_t *buf, unsigned int count) = 0;
+        virtual void spiRead(unsigned int handle, char *buf, unsigned int count) = 0;
 
 
         ////////////////////////////////////////////////////////////////////////
         /// UART
         ////////////////////////////////////////////////////////////////////////
         
-        virtual unsigned int uartOpen(const char *port, unsigned int buad) = 0;
+        virtual unsigned int uartOpen(char *port, unsigned int baud) = 0;
     
         virtual void uartClose(unsigned int handle) = 0;
 
         virtual unsigned int uartAvailable(unsigned int handle) = 0;
 
-        virtual void uartWrite(unsigned int handle, const char* buf, unsigned int count) = 0;
+        virtual void uartWrite(unsigned int handle, char* buf, unsigned int count) = 0;
 
-        virtual void uartRead(unsigned int handle, const char *buf, unsigned int count) = 0;
+        virtual void uartRead(unsigned int handle, char *buf, unsigned int count) = 0;
 
     protected:
         IoProvider();

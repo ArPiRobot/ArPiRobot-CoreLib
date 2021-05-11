@@ -17,24 +17,21 @@
  * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+#pragma once
 
-#include <arpirobot/core/io/IoDevice.hpp>
-#include <arpirobot/core/log/Logger.hpp>
-
-#include <stdexcept>
-
-using namespace arpirobot;
+#include <exception>
+#include <string>
 
 
-IoDevice::IoDevice(std::function<void()> closeFunc) : closeFunc(closeFunc) {
-    IoProvider::addDevice(this);
-}
+namespace arpirobot{
+    class IoException{
+    public:
+        IoException(const char *msg);
+        IoException(std::string msg);
 
-void IoDevice::close(){
-    closeFunc();
-}
+        const char *what() const throw();
 
-IoDevice::~IoDevice(){
-    close();
-    IoProvider::removeDevice(this);
+    private:
+        std::string msg;
+    };
 }
