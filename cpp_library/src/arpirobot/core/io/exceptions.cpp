@@ -1,0 +1,87 @@
+/*
+ * Copyright 2021 Marcus Behel
+ *
+ * This file is part of ArPiRobot-CoreLib.
+ * 
+ * ArPiRobot-CoreLib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * ArPiRobot-CoreLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+
+#include <arpirobot/core/io/exceptions.hpp>
+using namespace arpirobot;
+
+////////////////////////////////////////////////////////////////////////////////
+/// NotImplementedByProviderException
+////////////////////////////////////////////////////////////////////////////////
+const char *NotImplementedByProviderException::what() const noexcept {
+    return "Attempted to use functionality not implemented by the current IoProvider.";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// InvalidParameterException
+////////////////////////////////////////////////////////////////////////////////
+const char *InvalidParameterException::what() const noexcept {
+    return "Invalid parameter specified.";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// InvalidPinException
+////////////////////////////////////////////////////////////////////////////////
+const char *InvalidPinException::what() const noexcept {
+    return "Attempted to use an invalid GPIO pin number";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// I2cWriteFailedException
+////////////////////////////////////////////////////////////////////////////////
+const char *I2cWriteFailedException::what() const noexcept {
+    return "I2C write operation failed.";
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// I2cReadFailedException
+////////////////////////////////////////////////////////////////////////////////
+const char *I2cReadFailedException::what() const noexcept {
+    return "I2C read operation failed.";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// SpiWriteFailedException
+////////////////////////////////////////////////////////////////////////////////
+const char *SpiWriteFailedException::what() const noexcept {
+    return "SPI write operation failed.";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// SpiReadFailedException
+////////////////////////////////////////////////////////////////////////////////
+const char *SpiReadFailedException::what() const noexcept {
+    return "SPI read operation failed.";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// UartWriteFailedException
+////////////////////////////////////////////////////////////////////////////////
+const char *UartWriteFailedException::what() const noexcept {
+    return "UART write operation failed.";
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// UartReadFailedException
+////////////////////////////////////////////////////////////////////////////////
+const char *UartReadFailedException::what() const noexcept {
+    return "UART read operation failed.";
+}
+
