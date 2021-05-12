@@ -33,7 +33,7 @@ namespace arpirobot{
      * 
      */
     class DummyIoProvider : public IoProvider{
-    public:
+    protected:
 
         DummyIoProvider();
 
@@ -109,5 +109,7 @@ namespace arpirobot{
         void uartWriteByte(unsigned int handle, uint8_t b) override;
 
         uint8_t uartReadByte(unsigned int handle) override;
+
+        friend class Io;
     };
 }

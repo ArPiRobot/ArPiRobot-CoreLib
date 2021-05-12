@@ -28,11 +28,11 @@ DummyIoProvider::DummyIoProvider() : IoProvider(){
     Logger::logWarning("The dummy IO provider has been started. This provider CANNOT be used to" 
             "interact with devices. It is intended for debugging purposes only. It will only log IO "
             "operations. They will NOT actually be performed.");
-    Logger::logDebugFrom("DummyIoProvider", "IO Provider initialized.");
+    Logger::logInfoFrom("DummyIoProvider", "IO Provider initialized.");
 }
         
 DummyIoProvider::~DummyIoProvider(){
-    Logger::logDebugFrom("DummyIoProvider", "IO Provider terminated.");
+    Logger::logInfoFrom("DummyIoProvider", "IO Provider terminated.");
 }
 
 ////////////////////////////////////////////////////////////////////////

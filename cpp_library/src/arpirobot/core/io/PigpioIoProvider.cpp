@@ -22,11 +22,24 @@
 
 
 #include <arpirobot/core/io/PigpioIoProvider.hpp>
+#include <arpirobot/core/log/Logger.hpp>
 #include <arpirobot/core/io/exceptions.hpp>
 
 #include <pigpio.h>
 
 using namespace arpirobot;
+
+
+PigpioIoProvider::PigpioIoProvider() : IoProvider(){
+    int res = gpioInitialise();
+    handlePigpioError(res, false);
+    Logger::logInfoFrom("PigpioIoProvider", "IO Provider initialized.");
+}
+        
+PigpioIoProvider::~PigpioIoProvider(){
+    gpioTerminate();
+    Logger::logInfoFrom("PigpioIoProvider", "IO Provider terminated.");
+}
 
 
 ////////////////////////////////////////////////////////////////////////

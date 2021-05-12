@@ -27,6 +27,11 @@
 namespace arpirobot{
     class PigpioIoProvider : public IoProvider{
     protected:
+
+        PigpioIoProvider();
+
+        ~PigpioIoProvider();
+
         ////////////////////////////////////////////////////////////////////////
         /// GPIO & PWM
         ////////////////////////////////////////////////////////////////////////
@@ -108,6 +113,8 @@ namespace arpirobot{
         int toPigpioState(int state);
 
         int fromPigpioState(int state);
+
+        friend class Io;
     };
 }
 
