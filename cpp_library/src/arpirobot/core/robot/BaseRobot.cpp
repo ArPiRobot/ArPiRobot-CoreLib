@@ -68,6 +68,8 @@ void BaseRobot::start(){
         exit(1);
     }
 
+    atexit(Io::terminate);
+
     // On interrupt set stop = true
     // This will cause runWatchdog to return and cleanup can be run
     signal(SIGINT, &BaseRobot::sigintHandler);
@@ -124,8 +126,10 @@ void BaseRobot::start(){
         device->disable();
     }
 
-    Io::terminate();
     NetworkManager::stopNetworking();
+
+    // No need to call this here. This will be called at exit (atexit handler)
+    // Io::terminate();
 }
 
 void BaseRobot::feedWatchdog(){
