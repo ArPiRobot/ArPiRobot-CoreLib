@@ -73,14 +73,9 @@ const int AdafruitINA260::COUNT_1024 = 7;
 
 AdafruitINA260::AdafruitINA260(int address, int bus) : IoDevice(std::bind(&AdafruitINA260::close, this)){
     handle = Io::i2cOpen(bus, address);
-    if(handle < 0){
-        throw std::runtime_error("Unable to open I2C device for adafruit INA260.");
-    }
 
-    // Make sure there is a device at that address
-    if(Io::i2cReadByte(handle) < 0){
-        throw std::runtime_error("Unable to open I2C device for adafruit INA260.");
-    }
+    // Make sure there is a device at that address (will throw exception if read fails)
+    Io::i2cReadByte(handle);
 }
 
 AdafruitINA260::AdafruitINA260::~AdafruitINA260(){
@@ -113,7 +108,11 @@ void AdafruitINA260::reset(){
 }
 
 void AdafruitINA260::close(){
-    Io::i2cClose(handle);
+    try{
+        Io::i2cClose(handle);
+    }catch(const std::exception &e){
+        // Silently fail
+    }
 }
 
 double AdafruitINA260::readCurrent(){
@@ -252,9 +251,15 @@ double INA260PowerSensor::getPower(){
 }
 
 void INA260PowerSensor::begin(){
-    sensor = std::make_shared<AdafruitINA260>(0x40);
+    try{
+        sensor = std::make_shared<AdafruitINA260>(0x40);
+    }catch(const std::exception &e){
+        Logger::logErrorFrom(getDeviceName(), "Failed to initialize sensor.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
+    }
     if(!sensor->begin()){
-        Logger::logWarningFrom(getDeviceName(), "Failed to initialize sensor.");
+        Logger::logErrorFrom(getDeviceName(), "Failed to initialize sensor.");
+        Logger::logDebugFrom(getDeviceName(), "Incorrect device at given adddress.");
         return;
     }
     BaseRobot::runOnceSoon(std::bind(&INA260PowerSensor::feed, this));
@@ -290,8 +295,9 @@ void INA260PowerSensor::feed(){
 
             if(isMainVmon())
                 sendMainBatteryVoltage(voltage);
-        }catch(const std::runtime_error &ignored){
-
+        }catch(const std::exception &e){
+            Logger::logWarningFrom(getDeviceName(), "Failed to read data.");
+            Logger::logDebugFrom(getDeviceName(), e.what());
         }
 
         // Instead of running this every 50ms (using scheduler repeated task)

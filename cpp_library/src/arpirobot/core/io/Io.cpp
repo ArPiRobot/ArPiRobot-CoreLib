@@ -63,7 +63,11 @@ void Io::terminate(){
     if(instance != nullptr){
         ioDevicesLock.lock();
         for(IoDevice *dev : ioDevices){
-            dev->close();
+            try{
+                dev->close();
+            }catch(std::exception &e){
+                // Silently fail closing device. Device was likely not opened properly anyways
+            }
         }
         ioDevices.clear();
         ioDevicesLock.unlock();

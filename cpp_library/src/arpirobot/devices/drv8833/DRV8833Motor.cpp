@@ -39,34 +39,48 @@ std::string DRV8833Motor::getDeviceName(){
 }
 
 void DRV8833Motor::begin(){
-    Io::gpioPwm(in1, 0);
-    Io::gpioPwm(in2, 0);
-    Io::gpioWrite(slp, 1);
+    try{
+        Io::gpioPwm(in1, 0);
+        Io::gpioPwm(in2, 0);
+        Io::gpioWrite(slp, Io::GPIO_HIGH);
+    }catch(const std::exception &e){
+        Logger::logErrorFrom(getDeviceName(), "Failed to initialize device. GPIO error.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
+    }
 }
 
 void DRV8833Motor::run(){
-    if(speed == 0){
-        if(brakeMode){
-            Io::gpioPwm(in1, 255);
-            Io::gpioPwm(in2, 255);
+    try{
+        if(speed == 0){
+            if(brakeMode){
+                Io::gpioPwm(in1, 255);
+                Io::gpioPwm(in2, 255);
+            }else{
+                Io::gpioPwm(in1, 0);
+                Io::gpioPwm(in2, 0);
+            }
         }else{
-            Io::gpioPwm(in1, 0);
-            Io::gpioPwm(in2, 0);
+            int spd = (int)(std::abs(speed) * 255);
+            if(speed > 0){
+                Io::gpioPwm(in1, spd);
+                Io::gpioPwm(in2, 0);
+            }else{
+                Io::gpioPwm(in1, 0);
+                Io::gpioPwm(in2, spd);
+            }
         }
-    }else{
-        int spd = (int)(std::abs(speed) * 255);
-        if(speed > 0){
-            Io::gpioPwm(in1, spd);
-            Io::gpioPwm(in2, 0);
-        }else{
-            Io::gpioPwm(in1, 0);
-            Io::gpioPwm(in2, spd);
-        }
+    }catch(const std::exception &e){
+        Logger::logWarningFrom(getDeviceName(), "Failed to set motor speed.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
     }
 }
 
 void DRV8833Motor::close(){
-    Io::gpioPwm(in1, 0);
-    Io::gpioPwm(in2, 0);
-    Io::gpioWrite(slp, 0);
+    try{
+        Io::gpioPwm(in1, 0);
+        Io::gpioPwm(in2, 0);
+        Io::gpioWrite(slp, 0);
+    }catch(const std::exception &e){
+        // Silently fail
+    }
 }

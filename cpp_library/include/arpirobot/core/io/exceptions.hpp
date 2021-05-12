@@ -24,6 +24,16 @@
 
 namespace arpirobot{
 
+    class BadHandleException : public std::exception{
+    public:
+        const char *what() const noexcept override;
+    };
+
+    class OpenFailedException : public std::exception{
+    public: 
+        const char *what() const noexcept override;
+    };
+
     class NotImplementedByProviderException : public std::exception{
     public:
         const char *what() const noexcept override;
@@ -39,33 +49,14 @@ namespace arpirobot{
         const char *what() const noexcept override;
     };
 
-    class I2cWriteFailedException : public std::exception{
+    class WriteFailedException : public std::exception{
     public:
         const char *what() const noexcept override;
     };
 
-    class I2cReadFailedException : public std::exception{
+    class ReadFailedException : public std::exception{
     public:
         const char *what() const noexcept override;
     };
 
-    class SpiWriteFailedException : public std::exception{
-    public:
-        const char *what() const noexcept override;
-    };
-
-    class SpiReadFailedException : public std::exception{
-    public:
-        const char *what() const noexcept override;
-    };
-
-    class UartWriteFailedException : public std::exception{
-    public:
-        const char *what() const noexcept override;
-    };
-
-    class UartReadFailedException : public std::exception{
-    public:
-        const char *what() const noexcept override;
-    };
 }

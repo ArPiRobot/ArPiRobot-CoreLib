@@ -22,6 +22,7 @@
 
 #include <arpirobot/core/io/IoProvider.hpp>
 #include <arpirobot/core/io/IoDevice.hpp>
+#include <arpirobot/core/io/exceptions.hpp>
 
 namespace arpirobot{
 

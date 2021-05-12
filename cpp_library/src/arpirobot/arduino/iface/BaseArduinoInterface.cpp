@@ -51,11 +51,17 @@ bool BaseArduinoInterface::begin(){
     parseStarted = false;
     parseEscaped = false;
 
-    if(!isOpen())
-        open();
+    try{
+        if(!isOpen())
+            open();
+    }catch(const std::exception &e){
+        Logger::logErrorFrom(getDeviceName(), "Unable to open arduino interface.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
+        return false;
+    }
     
     if(!isOpen()){
-        Logger::logWarningFrom(getDeviceName(), "Unable to open arduino interface");
+        Logger::logErrorFrom(getDeviceName(), "Unable to open arduino interface. Unknown error.");
         return false;
     }
 
@@ -76,7 +82,7 @@ bool BaseArduinoInterface::begin(){
             Logger::logWarningFrom(getDeviceName(), "Timed out while waiting for the Arduino to become ready.");
             return false;
         }
-    }catch(const std::runtime_error &e){
+    }catch(const std::exception &e){
         Logger::logWarningFrom(getDeviceName(), "Error while configuring devices.");
         Logger::logDebugFrom(getDeviceName(), e.what());
         return false;
@@ -108,7 +114,7 @@ bool BaseArduinoInterface::begin(){
                 }
             }
         }
-    }catch(const std::runtime_error &e){
+    }catch(const std::exception &e){
         Logger::logWarningFrom(getDeviceName(), "Error while configuring devices.");
         Logger::logDebugFrom(getDeviceName(), e.what());
         return false;
@@ -123,7 +129,7 @@ bool BaseArduinoInterface::begin(){
             Logger::logWarningFrom(getDeviceName(), "Timed out while starting sensor processing.");
             return false;
         }
-    }catch(const std::runtime_error &e){
+    }catch(const std::exception &e){
         Logger::logWarningFrom(getDeviceName(), "Error while configuring devices.");
         Logger::logDebugFrom(getDeviceName(), e.what());
         return false;
@@ -162,12 +168,17 @@ bool BaseArduinoInterface::isReady(){
 }
 
 void BaseArduinoInterface::sendFromDevice(uint8_t deviceId, std::vector<uint8_t> data){
-    std::vector<uint8_t> sendData;
-    sendData.reserve(data.size() + 2);
-    sendData.push_back('-');
-    sendData.push_back(deviceId);
-    sendData.insert(sendData.end(), data.begin(), data.end());
-    writeData(sendData);
+    try{
+        std::vector<uint8_t> sendData;
+        sendData.reserve(data.size() + 2);
+        sendData.push_back('-');
+        sendData.push_back(deviceId);
+        sendData.insert(sendData.end(), data.begin(), data.end());
+        writeData(sendData);
+    }catch(std::exception &e){
+        Logger::logWarningFrom(getDeviceName(), "Failed to send message to device with ID " + std::to_string(deviceId) + ".");
+        Logger::logDebugFrom(getDeviceName(), e.what());
+    }
 }
 
 void BaseArduinoInterface::run(){
@@ -188,7 +199,7 @@ void BaseArduinoInterface::run(){
                     }
                 }
             }
-        }catch(const std::runtime_error &e){
+        }catch(const std::exception &e){
             Logger::logWarningFrom(getDeviceName(), "Lost communication with the arduino. Sensor data is now INVALID!. Will reconfigure.");
             Logger::logDebugFrom(getDeviceName(), e.what());
             arduinoReady = false;
@@ -218,33 +229,27 @@ uint16_t BaseArduinoInterface::calcCCittFalse(const std::vector<uint8_t> &data, 
     return crc;
 }
 
-bool BaseArduinoInterface::writeData(const std::vector<uint8_t> &data){
-    try{
-        write(START_BYTE);
-        for(int i = 0; i < data.size(); ++i){
-            const uint8_t &b = data[i];
-            if(b == START_BYTE || b == END_BYTE || b == ESCAPE_BYTE)
-                write(ESCAPE_BYTE);
-            write(b);
-        }
-
-        // Calculate CRC
-        uint16_t crc = calcCCittFalse(data, data.size());
-        const uint8_t crc_low = crc & 0x00FF;
-        const uint8_t crc_high = crc >> 8 & 0x00FF;
-        if(crc_high == START_BYTE || crc_high == END_BYTE || crc_high == ESCAPE_BYTE)
+void BaseArduinoInterface::writeData(const std::vector<uint8_t> &data){
+    write(START_BYTE);
+    for(int i = 0; i < data.size(); ++i){
+        const uint8_t &b = data[i];
+        if(b == START_BYTE || b == END_BYTE || b == ESCAPE_BYTE)
             write(ESCAPE_BYTE);
-        write(crc_high);
-        if(crc_low == START_BYTE || crc_low == END_BYTE || crc_low == ESCAPE_BYTE)
-            write(ESCAPE_BYTE);
-        write(crc_low);
-
-        write(END_BYTE);
-
-    }catch(const std::runtime_error &e){
-        Logger::logDebugFrom(getDeviceName(), e.what());
+        write(b);
     }
-    return false;
+
+    // Calculate CRC
+    uint16_t crc = calcCCittFalse(data, data.size());
+    const uint8_t crc_low = crc & 0x00FF;
+    const uint8_t crc_high = crc >> 8 & 0x00FF;
+    if(crc_high == START_BYTE || crc_high == END_BYTE || crc_high == ESCAPE_BYTE)
+        write(ESCAPE_BYTE);
+    write(crc_high);
+    if(crc_low == START_BYTE || crc_low == END_BYTE || crc_low == ESCAPE_BYTE)
+        write(ESCAPE_BYTE);
+    write(crc_low);
+
+    write(END_BYTE);
 }
 
 bool BaseArduinoInterface::readData(){

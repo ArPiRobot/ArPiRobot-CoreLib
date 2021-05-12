@@ -40,34 +40,48 @@ std::string TB6612Motor::getDeviceName(){
 }
 
 void TB6612Motor::begin(){
-    Io::gpioMode(in1, Io::GPIO_OUT);
-    Io::gpioMode(in2, Io::GPIO_OUT);
-    Io::gpioPwm(pwm, 0);
+    try{
+        Io::gpioMode(in1, Io::GPIO_OUT);
+        Io::gpioMode(in2, Io::GPIO_OUT);
+        Io::gpioPwm(pwm, 0);
+    }catch(const std::exception &e){
+        Logger::logErrorFrom(getDeviceName(), "Failed to initialize device. GPIO error.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
+    }
 }
 
 void TB6612Motor::run(){
-    if(speed == 0){
-        if(brakeMode){
-            Io::gpioWrite(in1, 1);
-            Io::gpioWrite(in2, 1);
+    try{
+        if(speed == 0){
+            if(brakeMode){
+                Io::gpioWrite(in1, 1);
+                Io::gpioWrite(in2, 1);
+            }else{
+                Io::gpioWrite(in1, 0);
+                Io::gpioWrite(in2, 0);
+            }
         }else{
-            Io::gpioWrite(in1, 0);
-            Io::gpioWrite(in2, 0);
+            if(speed > 0){
+                Io::gpioWrite(in1, 1);
+                Io::gpioWrite(in2, 0);
+            }else{
+                Io::gpioWrite(in1, 0);
+                Io::gpioWrite(in2, 1);
+            }
+            Io::gpioPwm(pwm, (int)(std::abs(speed) * 255));
         }
-    }else{
-        if(speed > 0){
-            Io::gpioWrite(in1, 1);
-            Io::gpioWrite(in2, 0);
-        }else{
-            Io::gpioWrite(in1, 0);
-            Io::gpioWrite(in2, 1);
-        }
-        Io::gpioPwm(pwm, (int)(std::abs(speed) * 255));
+    }catch(const std::exception &e){
+        Logger::logWarningFrom(getDeviceName(), "Failed to set motor speed.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
     }
 }
 
 void TB6612Motor::close(){
-    Io::gpioWrite(in1, 0);
-    Io::gpioWrite(in2, 0);
-    Io::gpioPwm(pwm, 0);
+    try{
+        Io::gpioWrite(in1, 0);
+        Io::gpioWrite(in2, 0);
+        Io::gpioPwm(pwm, 0);
+    }catch(const std::exception &e){
+        // Silently fail
+    }
 }

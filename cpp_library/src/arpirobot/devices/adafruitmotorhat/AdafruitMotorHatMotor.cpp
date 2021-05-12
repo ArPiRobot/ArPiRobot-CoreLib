@@ -113,14 +113,9 @@ void AdafruitMotorHat::LowLevelDCMotor::kill(){
 
 AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus) : IoDevice(std::bind(&AdafruitMotorHat::close, this)) {
     handle = Io::i2cOpen(bus, address);
-    if(handle < 0){
-        throw std::runtime_error("Unable to open I2C device for adafruit motor hat.");
-    }
 
-    // Make sure there is a device at that address
-    if(Io::i2cReadByte(handle) < 0){
-        throw std::runtime_error("Unable to open I2C device for adafruit motor hat.");
-    }
+    // Make sure there is a device at that address (will throw exception if read fails)
+    Io::i2cReadByte(handle);
 
     motors[0] = std::make_shared<LowLevelDCMotor>(this, 0);
     motors[1] = std::make_shared<LowLevelDCMotor>(this, 1);
@@ -151,11 +146,15 @@ void AdafruitMotorHat::startup(){
 }
 
 void AdafruitMotorHat::close(){
-    motors[0]->run(MotorCommand::RELEASE);
-    motors[1]->run(MotorCommand::RELEASE);
-    motors[2]->run(MotorCommand::RELEASE);
-    motors[3]->run(MotorCommand::RELEASE);
-    Io::i2cClose(handle);
+    try{
+        motors[0]->run(MotorCommand::RELEASE);
+        motors[1]->run(MotorCommand::RELEASE);
+        motors[2]->run(MotorCommand::RELEASE);
+        motors[3]->run(MotorCommand::RELEASE);
+        Io::i2cClose(handle);
+    }catch(const std::exception &e){
+        // Silently fail
+    }
 }
 
 void AdafruitMotorHat::setPin(uint8_t pin, bool isHigh){
@@ -241,7 +240,12 @@ void AdafruitMotorHatMotor::begin(){
     if(hatMap.find(hatAddress) != hatMap.end()){
         hat = hatMap[hatAddress];
     }else{
-        hat = std::make_shared<AdafruitMotorHat>(hatAddress);
+        try{
+            hat = std::make_shared<AdafruitMotorHat>(hatAddress);
+        }catch(const std::exception &e){
+            Logger::logWarningFrom(getDeviceName(), "Failed to initialize motor hat.");
+            Logger::logDebugFrom(getDeviceName(), e.what());
+        }
         hatMap[hatAddress] = hat;
     }
 
@@ -275,7 +279,7 @@ void AdafruitMotorHatMotor::doDetectAddress(){
     try{
         testHat = new AdafruitMotorHat(ADAFRUIT_ADDR);
         detectedAddress = ADAFRUIT_ADDR;
-    }catch(const std::runtime_error &e){   
+    }catch(const std::exception &e){   
         detectedAddress = GEEKWORM_ADDR;
     }
     if(testHat != nullptr){
@@ -284,18 +288,23 @@ void AdafruitMotorHatMotor::doDetectAddress(){
 }
 
 void AdafruitMotorHatMotor::run(){
-    if(speed < 0){
-        motor->setSpeed(speed * -1);
-        motor->run(MotorCommand::BACKWARD);
-    }else if (speed > 0){
-        motor->setSpeed(speed);
-        motor->run(MotorCommand::FORWARD);
-    }else if(brakeMode){
-        motor->setSpeed(0);
-        motor->run(MotorCommand::BRAKE);
-    }else{
-        motor->setSpeed(0);
-        motor->run(MotorCommand::RELEASE);
+    try{
+        if(speed < 0){
+            motor->setSpeed(speed * -1);
+            motor->run(MotorCommand::BACKWARD);
+        }else if (speed > 0){
+            motor->setSpeed(speed);
+            motor->run(MotorCommand::FORWARD);
+        }else if(brakeMode){
+            motor->setSpeed(0);
+            motor->run(MotorCommand::BRAKE);
+        }else{
+            motor->setSpeed(0);
+            motor->run(MotorCommand::RELEASE);
+        }
+    }catch(const std::exception &e){
+        Logger::logWarningFrom(getDeviceName(), "Failed to set motor speed.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
     }
 }
 
