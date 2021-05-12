@@ -81,12 +81,13 @@ uint8_t DummyIoProvider::i2cReadByte(unsigned int handle){
     return 0;
 }
 
-void DummyIoProvider::i2cWriteBytes(unsigned int handle, uint8_t *buf, unsigned int count){
+void DummyIoProvider::i2cWriteBytes(unsigned int handle, char *buf, unsigned int count){
     Logger::logDebugFrom("DummyIoProvider", "i2cWriteBytes(" + std::to_string(handle) + ", buf, " + std::to_string(count) + ")");
 }
 
-void DummyIoProvider::i2cReadBytes(unsigned int handle, uint8_t *buf, unsigned int count){
+unsigned int DummyIoProvider::i2cReadBytes(unsigned int handle, char *buf, unsigned int count){
     Logger::logDebugFrom("DummyIoProvider", "i2cReadBytes(" + std::to_string(handle) + ", buf, " + std::to_string(count) + ")");
+    return 0;
 }
 
 void DummyIoProvider::i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value){
@@ -125,8 +126,9 @@ void DummyIoProvider::spiWrite(unsigned int handle, char *buf, unsigned int coun
     Logger::logDebugFrom("DummyIoProvider", "spiWrite(" + std::to_string(handle) + ", buf, " + std::to_string(count) + ")");
 }
 
-void DummyIoProvider::spiRead(unsigned int handle, char *buf, unsigned int count){
+unsigned int DummyIoProvider::spiRead(unsigned int handle, char *buf, unsigned int count){
     Logger::logDebugFrom("DummyIoProvider", "spiRead(" + std::to_string(handle) + ", buf, " + std::to_string(count) + ")");
+    return 0;
 }
 
 
@@ -152,8 +154,9 @@ void DummyIoProvider::uartWrite(unsigned int handle, char* buf, unsigned int cou
     Logger::logDebugFrom("DummyIoProvider", "uartWrite(" + std::to_string(handle) + ", buf, " + std::to_string(count)  + ")");
 }
 
-void DummyIoProvider::uartRead(unsigned int handle, char *buf, unsigned int count){
+unsigned int DummyIoProvider::uartRead(unsigned int handle, char *buf, unsigned int count){
     Logger::logDebugFrom("DummyIoProvider", "uartRead(" + std::to_string(handle) + ", buf, " + std::to_string(count) + ")");
+    return 0;
 }
 
 void DummyIoProvider::uartWriteByte(unsigned int handle, uint8_t b){

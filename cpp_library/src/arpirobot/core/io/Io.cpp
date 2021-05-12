@@ -153,16 +153,17 @@ uint8_t Io::i2cReadByte(unsigned int handle){
     return 0;
 }
 
-void Io::i2cWriteBytes(unsigned int handle, uint8_t *buf, unsigned int count){
+void Io::i2cWriteBytes(unsigned int handle, char *buf, unsigned int count){
     if(instance != nullptr){
         instance->i2cWriteBytes(handle, buf, count);
     }
 }
 
-void Io::i2cReadBytes(unsigned int handle, uint8_t *buf, unsigned int count){
+unsigned int Io::i2cReadBytes(unsigned int handle, char *buf, unsigned int count){
     if(instance != nullptr){
-        instance->i2cReadBytes(handle, buf, count);
+        return instance->i2cReadBytes(handle, buf, count);
     }
+    return 0;
 }
 
 void Io::i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value){
@@ -211,10 +212,11 @@ void Io::spiWrite(unsigned int handle, char *buf, unsigned int count){
     }
 }
 
-void Io::spiRead(unsigned int handle, char *buf, unsigned int count){
+unsigned int Io::spiRead(unsigned int handle, char *buf, unsigned int count){
     if(instance != nullptr){
-        instance->spiRead(handle, buf, count);
+        return instance->spiRead(handle, buf, count);
     }
+    return 0;
 }
 
 
@@ -244,10 +246,11 @@ void Io::uartWrite(unsigned int handle, char* buf, unsigned int count){
     }
 }
 
-void Io::uartRead(unsigned int handle, char *buf, unsigned int count){
+unsigned int Io::uartRead(unsigned int handle, char *buf, unsigned int count){
     if(instance != nullptr){
-        instance->uartRead(handle, buf, count);
+        return instance->uartRead(handle, buf, count);
     }
+    return 0;
 }
 
 void Io::uartWriteByte(unsigned int handle, uint8_t b){

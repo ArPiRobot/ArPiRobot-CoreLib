@@ -68,9 +68,9 @@ namespace arpirobot {
 
         virtual uint8_t i2cReadByte(unsigned int handle) = 0;
 
-        virtual void i2cWriteBytes(unsigned int handle, uint8_t *buf, unsigned int count) = 0;
+        virtual void i2cWriteBytes(unsigned int handle, char *buf, unsigned int count) = 0;
 
-        virtual void i2cReadBytes(unsigned int handle, uint8_t *buf, unsigned int count) = 0;
+        virtual unsigned int i2cReadBytes(unsigned int handle, char *buf, unsigned int count) = 0;
 
         virtual void i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value) = 0;
 
@@ -87,13 +87,14 @@ namespace arpirobot {
         
         // Bus = spi bus 
         // Channel = which builtin CS pin
+        // TODO: need a way to support SPI modes
         virtual unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud) = 0;
 
         virtual void spiClose(unsigned int handle) = 0;
 
         virtual void spiWrite(unsigned int handle, char *buf, unsigned int count) = 0;
 
-        virtual void spiRead(unsigned int handle, char *buf, unsigned int count) = 0;
+        virtual unsigned int spiRead(unsigned int handle, char *buf, unsigned int count) = 0;
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -108,7 +109,7 @@ namespace arpirobot {
 
         virtual void uartWrite(unsigned int handle, char* buf, unsigned int count) = 0;
 
-        virtual void uartRead(unsigned int handle, char *buf, unsigned int count) = 0;
+        virtual unsigned int uartRead(unsigned int handle, char *buf, unsigned int count) = 0;
 
         virtual void uartWriteByte(unsigned int handle, uint8_t b) = 0;
 

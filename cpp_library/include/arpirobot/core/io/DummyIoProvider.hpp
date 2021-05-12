@@ -64,9 +64,9 @@ namespace arpirobot{
 
         uint8_t i2cReadByte(unsigned int handle) override;
 
-        void i2cWriteBytes(unsigned int handle, uint8_t *buf, unsigned int count) override;
+        void i2cWriteBytes(unsigned int handle, char *buf, unsigned int count) override;
 
-        void i2cReadBytes(unsigned int handle, uint8_t *buf, unsigned int count) override;
+        unsigned int i2cReadBytes(unsigned int handle, char *buf, unsigned int count) override;
 
         void i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value) override;
 
@@ -89,7 +89,7 @@ namespace arpirobot{
 
         void spiWrite(unsigned int handle, char *buf, unsigned int count) override;
 
-        void spiRead(unsigned int handle, char *buf, unsigned int count) override;
+        unsigned int spiRead(unsigned int handle, char *buf, unsigned int count) override;
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,7 @@ namespace arpirobot{
 
         void uartWrite(unsigned int handle, char* buf, unsigned int count) override;
 
-        void uartRead(unsigned int handle, char *buf, unsigned int count) override;
+        unsigned int uartRead(unsigned int handle, char *buf, unsigned int count) override;
 
         void uartWriteByte(unsigned int handle, uint8_t b) override;
 
