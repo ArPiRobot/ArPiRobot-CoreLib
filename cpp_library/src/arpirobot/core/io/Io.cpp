@@ -51,7 +51,11 @@ void Io::init(std::string provider){
 
     // Instantiate the requested provider. These can throw exceptions if a fatal error occurs
     if(provider == PROVIDER_PIGPIO){
-        // instance = new PigpioIoProvider();
+#if defined(__linux__) && defined(__arm__)
+        instance = new PigpioIoProvider();
+#else
+        throw std::runtime_error("The IO provider '" + provider + "' is not supported on this platform.");
+#endif
     }else if(provider == PROVIDER_DUMMY){
         instance = new DummyIoProvider();
     }else{
