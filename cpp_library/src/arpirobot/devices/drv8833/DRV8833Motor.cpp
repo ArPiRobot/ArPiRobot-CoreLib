@@ -24,15 +24,14 @@
 
 using namespace arpirobot;
 
-DRV8833Motor::DRV8833Motor(int in1Pin, int in2Pin, int slpPin) : in1(in1Pin), in2(in2Pin), slp(slpPin){
+DRV8833Motor::DRV8833Motor(int in1Pin, int in2Pin, int slpPin) : 
+        IoDevice(std::bind(&DRV8833Motor::close, this)), in1(in1Pin), in2(in2Pin), slp(slpPin){
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }
 
 DRV8833Motor::~DRV8833Motor(){
-    Io::gpioPwm(in1, 0);
-    Io::gpioPwm(in2, 0);
-    Io::gpioWrite(slp, 0);
+    close();
 }
 
 std::string DRV8833Motor::getDeviceName(){
@@ -64,4 +63,10 @@ void DRV8833Motor::run(){
             Io::gpioPwm(in2, spd);
         }
     }
+}
+
+void DRV8833Motor::close(){
+    Io::gpioPwm(in1, 0);
+    Io::gpioPwm(in2, 0);
+    Io::gpioWrite(slp, 0);
 }

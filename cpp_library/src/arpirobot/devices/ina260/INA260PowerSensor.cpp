@@ -71,7 +71,7 @@ const int AdafruitINA260::COUNT_256 = 5;
 const int AdafruitINA260::COUNT_512 = 6;
 const int AdafruitINA260::COUNT_1024 = 7;
 
-AdafruitINA260::AdafruitINA260(int address, int bus){
+AdafruitINA260::AdafruitINA260(int address, int bus) : IoDevice(std::bind(&AdafruitINA260::close, this)){
     handle = Io::i2cOpen(bus, address);
     if(handle < 0){
         throw std::runtime_error("Unable to open I2C device for adafruit INA260.");
@@ -84,9 +84,7 @@ AdafruitINA260::AdafruitINA260(int address, int bus){
 }
 
 AdafruitINA260::AdafruitINA260::~AdafruitINA260(){
-    if(handle >= 0){
-        Io::i2cClose(handle);
-    }
+    close();
 }
 
 bool AdafruitINA260::begin(){
@@ -112,6 +110,10 @@ void AdafruitINA260::reset(){
     int value = i2cReadWordHelper(REG_CONFIG);
     value |= 0x8000;
     i2cWriteWordHelper(REG_CONFIG, value);
+}
+
+void AdafruitINA260::close(){
+    Io::i2cClose(handle);
 }
 
 double AdafruitINA260::readCurrent(){

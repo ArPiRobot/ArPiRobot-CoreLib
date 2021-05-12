@@ -22,6 +22,7 @@
 #include <arpirobot/core/device/BaseDevice.hpp>
 #include <arpirobot/core/scheduler.hpp>
 #include <arpirobot/core/network/MainVmon.hpp>
+#include <arpirobot/core/io/IoDevice.hpp>
 
 namespace arpirobot{
 
@@ -29,7 +30,7 @@ namespace arpirobot{
         /**
          * Adafruit INA260 module internal driver
          */
-        class AdafruitINA260{
+        class AdafruitINA260 : public IoDevice{
         public:
             /**
              * @param address Address for the INA260 (I2C)
@@ -42,6 +43,8 @@ namespace arpirobot{
             bool begin();
 
             void reset();
+
+            void close();
 
             // mA
             double readCurrent();

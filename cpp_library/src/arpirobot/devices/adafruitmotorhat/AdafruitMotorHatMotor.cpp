@@ -111,7 +111,7 @@ void AdafruitMotorHat::LowLevelDCMotor::kill(){
 /// AdafruitMotorHat
 ////////////////////////////////////////////////////////////////////////////////
 
-AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus){
+AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus) : IoDevice(std::bind(&AdafruitMotorHat::close, this)) {
     handle = Io::i2cOpen(bus, address);
     if(handle < 0){
         throw std::runtime_error("Unable to open I2C device for adafruit motor hat.");
@@ -132,9 +132,7 @@ AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus){
 }
 
 AdafruitMotorHat::~AdafruitMotorHat(){
-    if(handle >=0){
-        Io::i2cClose(handle);
-    }
+    close();
 }
 
 std::shared_ptr<AdafruitMotorHat::LowLevelDCMotor> AdafruitMotorHat::getMotor(int index){
@@ -150,6 +148,14 @@ void AdafruitMotorHat::startup(){
     mode1 = mode1 & ~__SLEEP;
     Io::i2cWriteReg8(handle, __MODE1, mode1);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
+}
+
+void AdafruitMotorHat::close(){
+    motors[0]->run(MotorCommand::RELEASE);
+    motors[1]->run(MotorCommand::RELEASE);
+    motors[2]->run(MotorCommand::RELEASE);
+    motors[3]->run(MotorCommand::RELEASE);
+    Io::i2cClose(handle);
 }
 
 void AdafruitMotorHat::setPin(uint8_t pin, bool isHigh){

@@ -21,6 +21,7 @@
 
 #include <string>
 #include <arpirobot/core/device/MotorController.hpp>
+#include <arpirobot/core/io/IoDevice.hpp>
 
 namespace arpirobot{
 
@@ -29,7 +30,7 @@ namespace arpirobot{
      * 
      * Motor on L298N module
      */
-    class L298NMotor : public MotorController{
+    class L298NMotor : public MotorController, public IoDevice{
     public:
 
         /**
@@ -50,6 +51,8 @@ namespace arpirobot{
         void begin();
         
         void run();
+
+        void close();
 
     private:
         int in1, in2, pwm;

@@ -25,6 +25,12 @@ target_include_directories(arpirobot-core PUBLIC
 target_link_libraries(arpirobot-core pthread)
 target_compile_options(arpirobot-core PRIVATE -Wno-psabi)
 
+# Enable building on windows for testing purposes
+if(WIN32)
+     target_compile_definitions(arpirobot-core PUBLIC _WIN32_WINNT=0x0501)
+     target_link_libraries(arpirobot-core ws2_32 wsock32)
+endif()
+
 
 file (GLOB_RECURSE SOURCES_TESTROBOT
      ${PROJECT_SOURCE_DIR}/testrobot/src/*.cpp

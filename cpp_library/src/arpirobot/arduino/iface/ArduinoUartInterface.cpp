@@ -27,7 +27,8 @@
 
 using namespace arpirobot;
 
-ArduinoUartInterface::ArduinoUartInterface(std::string port, int baud) : port(port), baud(baud){
+ArduinoUartInterface::ArduinoUartInterface(std::string port, int baud) : 
+        IoDevice(std::bind(&ArduinoUartInterface::close, this)), port(port), baud(baud){
 
 }
 
@@ -40,9 +41,7 @@ void ArduinoUartInterface::open() {
 }
 
 void ArduinoUartInterface::close() {
-	if(handle >= 0){
-        Io::uartClose(handle);
-    }
+    Io::uartClose(handle);
 }
 
 bool ArduinoUartInterface::isOpen() {

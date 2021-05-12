@@ -23,7 +23,6 @@
 #include <arpirobot/core/robot/BaseRobot.hpp>
 #include <functional>
 #include <algorithm>
-#include <pigpio.h>
 #include <cstring>
 
 using namespace arpirobot;

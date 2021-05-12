@@ -25,15 +25,14 @@
 
 using namespace arpirobot;
 
-L298NMotor::L298NMotor(int in1Pin, int in2Pin, int pwmPin) : in1(in1Pin), in2(in2Pin), pwm(pwmPin){
+L298NMotor::L298NMotor(int in1Pin, int in2Pin, int pwmPin) : 
+        IoDevice(std::bind(&L298NMotor::close, this)), in1(in1Pin), in2(in2Pin), pwm(pwmPin){
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }
 
 L298NMotor::~L298NMotor(){
-    Io::gpioWrite(in1, 0);
-    Io::gpioWrite(in2, 0);
-    Io::gpioPwm(pwm, 0);
+    close();
 }
 
 std::string L298NMotor::getDeviceName(){
@@ -65,4 +64,10 @@ void L298NMotor::run(){
         }
         Io::gpioPwm(pwm, (int)(std::abs(speed) * 255));
     }
+}
+
+void L298NMotor::close(){
+    Io::gpioWrite(in1, 0);
+    Io::gpioWrite(in2, 0);
+    Io::gpioPwm(pwm, 0);
 }

@@ -25,15 +25,14 @@
 
 using namespace arpirobot;
 
-TB6612Motor::TB6612Motor(int in1Pin, int in2Pin, int pwmPin) : in1(in1Pin), in2(in2Pin), pwm(pwmPin){
+TB6612Motor::TB6612Motor(int in1Pin, int in2Pin, int pwmPin) : 
+        IoDevice(std::bind(&TB6612Motor::close, this)), in1(in1Pin), in2(in2Pin), pwm(pwmPin){
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }
 
 TB6612Motor::~TB6612Motor(){
-    Io::gpioWrite(in1, 0);
-    Io::gpioWrite(in2, 0);
-    Io::gpioPwm(pwm, 0);
+    close();
 }
 
 std::string TB6612Motor::getDeviceName(){
@@ -65,4 +64,10 @@ void TB6612Motor::run(){
         }
         Io::gpioPwm(pwm, (int)(std::abs(speed) * 255));
     }
+}
+
+void TB6612Motor::close(){
+    Io::gpioWrite(in1, 0);
+    Io::gpioWrite(in2, 0);
+    Io::gpioPwm(pwm, 0);
 }

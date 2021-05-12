@@ -24,6 +24,7 @@
 #include <string>
 
 #include <arpirobot/arduino/iface/BaseArduinoInterface.hpp>
+#include <arpirobot/core/io/IoDevice.hpp>
 
 namespace arpirobot{
 
@@ -32,7 +33,7 @@ namespace arpirobot{
      * 
      * Arduino interface implementation using UART to communicate with the arduino.
      */
-    class ArduinoUartInterface : public BaseArduinoInterface{
+    class ArduinoUartInterface : public BaseArduinoInterface, public IoDevice{
     public:
 
         /**

@@ -69,7 +69,7 @@ unsigned int DummyIoProvider::i2cOpen(unsigned int bus, unsigned int address){
 }
 
 void DummyIoProvider::i2cClose(unsigned int handle){
-    Logger::logDebugFrom("DummyIoProvider", "i2cClose(");
+    Logger::logDebugFrom("DummyIoProvider", "i2cClose(" + std::to_string(handle) + ")");
 }
 
 void DummyIoProvider::i2cWriteByte(unsigned int handle, uint8_t data){
