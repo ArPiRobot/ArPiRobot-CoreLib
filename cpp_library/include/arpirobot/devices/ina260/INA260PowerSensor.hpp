@@ -100,7 +100,7 @@ namespace arpirobot{
         private:
             int i2cReadWordHelper(int reg);
 
-            int i2cWriteWordHelper(int reg, int data);
+            void i2cWriteWordHelper(int reg, int data);
 
             // Registers
             const static int REG_CONFIG;

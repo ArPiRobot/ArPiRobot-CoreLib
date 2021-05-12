@@ -20,9 +20,9 @@
 #include <arpirobot/arduino/iface/ArduinoUartInterface.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 #include <arpirobot/core/robot/BaseRobot.hpp>
+#include <arpirobot/core/io/Io.hpp>
 #include <functional>
 #include <algorithm>
-#include <pigpio.h>
 #include <cstring>
 
 using namespace arpirobot;
@@ -35,13 +35,13 @@ void ArduinoUartInterface::open() {
     if(handle < 0){
         char tty[port.length() + 1];
         strcpy(tty, port.c_str());
-        handle = serOpen(tty, baud, 0);
+        handle = Io::uartOpen(tty, baud);
     }
 }
 
 void ArduinoUartInterface::close() {
 	if(handle >= 0){
-        serClose(handle);
+        Io::uartClose(handle);
     }
 }
 
@@ -52,7 +52,7 @@ bool ArduinoUartInterface::isOpen() {
 int ArduinoUartInterface::available() {
     if(handle < 0)
         return 0;
-    return serDataAvailable(handle);
+    return Io::uartAvailable(handle);
 }
 
 uint8_t ArduinoUartInterface::readOne() {
@@ -60,7 +60,7 @@ uint8_t ArduinoUartInterface::readOne() {
     while(!available()){
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
-    int b = serReadByte(handle);
+    int b = Io::uartReadByte(handle);
     if(b < 0){
         throw std::runtime_error("Failed to read from serial port.");
     }
@@ -78,10 +78,7 @@ std::vector<uint8_t> ArduinoUartInterface::readAll() {
 }
 
 void ArduinoUartInterface::write(const uint8_t &b) {
-	int res = serWriteByte(handle, b);
-    if(res < 0){
-        throw std::runtime_error("Failed to write to serial port.");
-    }
+    Io::uartWriteByte(handle, b);
 }
 
 std::string ArduinoUartInterface::getDeviceName() {

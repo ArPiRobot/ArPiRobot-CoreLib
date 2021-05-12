@@ -21,8 +21,8 @@
 
 #include <arpirobot/core/log/Logger.hpp>
 #include <arpirobot/core/robot/BaseRobot.hpp>
+#include <arpirobot/core/io/Io.hpp>
 
-#include <pigpio.h>
 #include <stdexcept>
 #include <thread>
 #include <chrono>
@@ -72,20 +72,20 @@ const int AdafruitINA260::COUNT_512 = 6;
 const int AdafruitINA260::COUNT_1024 = 7;
 
 AdafruitINA260::AdafruitINA260(int address, int bus){
-    handle = i2cOpen(bus, address, 0);
+    handle = Io::i2cOpen(bus, address);
     if(handle < 0){
         throw std::runtime_error("Unable to open I2C device for adafruit INA260.");
     }
 
     // Make sure there is a device at that address
-    if(i2cReadByte(handle) < 0){
+    if(Io::i2cReadByte(handle) < 0){
         throw std::runtime_error("Unable to open I2C device for adafruit INA260.");
     }
 }
 
 AdafruitINA260::AdafruitINA260::~AdafruitINA260(){
     if(handle >= 0){
-        i2cClose(handle);
+        Io::i2cClose(handle);
     }
 }
 
@@ -211,13 +211,13 @@ bool AdafruitINA260::conversionReady(){
 
 int AdafruitINA260::i2cReadWordHelper(int reg){
     // pigpio reads little endian. Need to read big endian.
-    int value = i2cReadWordData(handle, reg);
+    int value = Io::i2cReadReg16(handle, reg);
     return (value >> 8 & 0x00FF) | (value << 8 & 0xFF00);
 }
 
-int AdafruitINA260::i2cWriteWordHelper(int reg, int data){
+void AdafruitINA260::i2cWriteWordHelper(int reg, int data){
     data = (data >> 8 & 0x00FF) | (data << 8 & 0xFF00);
-    return i2cWriteWordData(handle, reg, data);
+    Io::i2cWriteReg16(handle, reg, data);
 }
 
 

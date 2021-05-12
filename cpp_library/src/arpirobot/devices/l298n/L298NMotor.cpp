@@ -20,8 +20,8 @@
 #include <arpirobot/devices/l298n/L298NMotor.hpp>
 #include <arpirobot/core/robot/BaseRobot.hpp>
 #include <arpirobot/core/log/Logger.hpp>
+#include <arpirobot/core/io/Io.hpp>
 
-#include <pigpio.h>
 
 using namespace arpirobot;
 
@@ -31,9 +31,9 @@ L298NMotor::L298NMotor(int in1Pin, int in2Pin, int pwmPin) : in1(in1Pin), in2(in
 }
 
 L298NMotor::~L298NMotor(){
-    gpioWrite(in1, 0);
-    gpioWrite(in2, 0);
-    gpioPWM(pwm, 0);
+    Io::gpioWrite(in1, 0);
+    Io::gpioWrite(in2, 0);
+    Io::gpioPwm(pwm, 0);
 }
 
 std::string L298NMotor::getDeviceName(){
@@ -41,28 +41,28 @@ std::string L298NMotor::getDeviceName(){
 }
 
 void L298NMotor::begin(){
-    gpioSetMode(in1, PI_OUTPUT);
-    gpioSetMode(in2, PI_OUTPUT);
-    gpioPWM(pwm, 0);
+    Io::gpioMode(in1, Io::GPIO_OUT);
+    Io::gpioMode(in2, Io::GPIO_OUT);
+    Io::gpioPwm(pwm, 0);
 }
 
 void L298NMotor::run(){
     if(speed == 0){
-        gpioWrite(in1, 0);
-        gpioWrite(in2, 0);
+        Io::gpioWrite(in1, 0);
+        Io::gpioWrite(in2, 0);
         if(brakeMode){
-            gpioPWM(pwm, 255);
+            Io::gpioPwm(pwm, 255);
         }else{
-            gpioPWM(pwm, 0);
+            Io::gpioPwm(pwm, 0);
         }
     }else{
         if(speed > 0){
-            gpioWrite(in1, 1);
-            gpioWrite(in2, 0);
+            Io::gpioWrite(in1, 1);
+            Io::gpioWrite(in2, 0);
         }else{
-            gpioWrite(in1, 0);
-            gpioWrite(in2, 1);
+            Io::gpioWrite(in1, 0);
+            Io::gpioWrite(in2, 1);
         }
-        gpioPWM(pwm, (int)(std::abs(speed) * 255));
+        Io::gpioPwm(pwm, (int)(std::abs(speed) * 255));
     }
 }

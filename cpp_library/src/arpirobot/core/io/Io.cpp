@@ -46,10 +46,10 @@ void Io::init(std::string provider){
 #endif
     }
 
-    // Terminate old provider first
+    // Terminate old provider first (if one)
     terminate();
 
-    // Instantiate the requested provider
+    // Instantiate the requested provider. These can throw exceptions if a fatal error occurs
     if(provider == PROVIDER_PIGPIO){
         // instance = new PigpioIoProvider();
     }else if(provider == PROVIDER_DUMMY){
@@ -61,7 +61,6 @@ void Io::init(std::string provider){
 
 void Io::terminate(){
     if(instance != nullptr){
-
         ioDevicesLock.lock();
         for(IoDevice *dev : ioDevices){
             dev->close();
@@ -245,4 +244,17 @@ void Io::uartRead(unsigned int handle, char *buf, unsigned int count){
     if(instance != nullptr){
         instance->uartRead(handle, buf, count);
     }
+}
+
+void Io::uartWriteByte(unsigned int handle, uint8_t b){
+    if(instance != nullptr){
+        instance->uartWriteByte(handle, b);
+    }
+}
+
+uint8_t Io::uartReadByte(unsigned int handle){
+    if(instance != nullptr){
+        return instance->uartReadByte(handle);
+    }
+    return 0;
 }

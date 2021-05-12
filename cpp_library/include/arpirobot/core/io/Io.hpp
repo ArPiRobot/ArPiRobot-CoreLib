@@ -126,6 +126,10 @@ namespace arpirobot{
 
         static void uartRead(unsigned int handle, char *buf, unsigned int count);
 
+        static void uartWriteByte(unsigned int handle, uint8_t b);
+
+        static uint8_t uartReadByte(unsigned int handle);
+
     private:
         static IoProvider *instance;
         static std::vector<IoDevice*> ioDevices;

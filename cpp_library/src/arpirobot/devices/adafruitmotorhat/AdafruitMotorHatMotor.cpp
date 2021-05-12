@@ -21,7 +21,7 @@
 #include <arpirobot/core/robot/BaseRobot.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 
-#include <pigpio.h>
+#include <arpirobot/core/io/Io.hpp>
 
 #include <thread>
 #include <chrono>
@@ -112,13 +112,13 @@ void AdafruitMotorHat::LowLevelDCMotor::kill(){
 ////////////////////////////////////////////////////////////////////////////////
 
 AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus){
-    handle = i2cOpen(bus, address, 0);
+    handle = Io::i2cOpen(bus, address);
     if(handle < 0){
         throw std::runtime_error("Unable to open I2C device for adafruit motor hat.");
     }
 
     // Make sure there is a device at that address
-    if(i2cReadByte(handle) < 0){
+    if(Io::i2cReadByte(handle) < 0){
         throw std::runtime_error("Unable to open I2C device for adafruit motor hat.");
     }
 
@@ -133,7 +133,7 @@ AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus){
 
 AdafruitMotorHat::~AdafruitMotorHat(){
     if(handle >=0){
-        i2cClose(handle);
+        Io::i2cClose(handle);
     }
 }
 
@@ -143,12 +143,12 @@ std::shared_ptr<AdafruitMotorHat::LowLevelDCMotor> AdafruitMotorHat::getMotor(in
 
 void AdafruitMotorHat::startup(){
     setAllPWM(0, 0);
-    i2cWriteByteData(handle, __MODE2, __OUTDRV);
-    i2cWriteByteData(handle, __MODE1, __ALLCALL);
+    Io::i2cWriteReg8(handle, __MODE2, __OUTDRV);
+    Io::i2cWriteReg8(handle, __MODE1, __ALLCALL);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    uint8_t mode1 = i2cReadByteData(handle, __MODE1);
+    uint8_t mode1 = Io::i2cReadReg8(handle, __MODE1);
     mode1 = mode1 & ~__SLEEP;
-    i2cWriteByteData(handle, __MODE1, mode1);
+    Io::i2cWriteReg8(handle, __MODE1, mode1);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
 }
 
@@ -166,27 +166,27 @@ void AdafruitMotorHat::setPWMFreq(int freq){
     prescaleval /= (float)freq;
     prescaleval -= 1.0;
     double prescale = std::floor(prescaleval + 0.5);
-    int oldmode = i2cReadByteData(handle, __MODE1);
+    int oldmode = Io::i2cReadReg8(handle, __MODE1);
     int newMode = (oldmode & 0x7F) | 0x10;
-    i2cWriteByteData(handle, __MODE1, newMode);
-    i2cWriteByteData(handle, __PRESCALE, (int)std::floor(prescale));
-    i2cWriteByteData(handle, __MODE1, oldmode);
+    Io::i2cWriteReg8(handle, __MODE1, newMode);
+    Io::i2cWriteReg8(handle, __PRESCALE, (int)std::floor(prescale));
+    Io::i2cWriteReg8(handle, __MODE1, oldmode);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    i2cWriteByteData(handle, __MODE1, oldmode | 0x80);
+    Io::i2cWriteReg8(handle, __MODE1, oldmode | 0x80);
 }
 
 void AdafruitMotorHat::setPWM(uint8_t channel, int on, int off){
-    i2cWriteByteData(handle, __LED0_ON_L+4*channel, on & 0xFF);
-    i2cWriteByteData(handle, __LED0_ON_H+4*channel, on >> 8);
-    i2cWriteByteData(handle, __LED0_OFF_L+4*channel, off & 0xFF);
-    i2cWriteByteData(handle, __LED0_OFF_H+4*channel, off >> 8);
+    Io::i2cWriteReg8(handle, __LED0_ON_L+4*channel, on & 0xFF);
+    Io::i2cWriteReg8(handle, __LED0_ON_H+4*channel, on >> 8);
+    Io::i2cWriteReg8(handle, __LED0_OFF_L+4*channel, off & 0xFF);
+    Io::i2cWriteReg8(handle, __LED0_OFF_H+4*channel, off >> 8);
 }
 
 void AdafruitMotorHat::setAllPWM(int on, int off){
-    i2cWriteByteData(handle, __ALL_LED_ON_L, on & 0xFF);
-    i2cWriteByteData(handle, __ALL_LED_ON_H, on >> 8);
-    i2cWriteByteData(handle, __ALL_LED_OFF_L, off & 0xFF);
-    i2cWriteByteData(handle, __ALL_LED_OFF_H, off >> 8);
+    Io::i2cWriteReg8(handle, __ALL_LED_ON_L, on & 0xFF);
+    Io::i2cWriteReg8(handle, __ALL_LED_ON_H, on >> 8);
+    Io::i2cWriteReg8(handle, __ALL_LED_OFF_L, off & 0xFF);
+    Io::i2cWriteReg8(handle, __ALL_LED_OFF_H, off >> 8);
 }
 
 

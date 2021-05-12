@@ -155,3 +155,12 @@ void DummyIoProvider::uartWrite(unsigned int handle, char* buf, unsigned int cou
 void DummyIoProvider::uartRead(unsigned int handle, char *buf, unsigned int count){
     Logger::logDebugFrom("DummyIoProvider", "uartRead(" + std::to_string(handle) + ", buf, " + std::to_string(count) + ")");
 }
+
+void DummyIoProvider::uartWriteByte(unsigned int handle, uint8_t b){
+    Logger::logDebugFrom("DummyIoProvider", "uartWriteByte(" + std::to_string(handle) + ", " + std::to_string(b) + ")");
+}
+
+uint8_t DummyIoProvider::uartReadByte(unsigned int handle){
+    Logger::logDebugFrom("DummyIoProvider", "uartReadByte(" + std::to_string(handle) + ")");
+    return 0;
+}

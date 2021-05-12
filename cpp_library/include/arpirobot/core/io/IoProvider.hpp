@@ -110,6 +110,10 @@ namespace arpirobot {
 
         virtual void uartRead(unsigned int handle, char *buf, unsigned int count) = 0;
 
+        virtual void uartWriteByte(unsigned int handle, uint8_t b) = 0;
+
+        virtual uint8_t uartReadByte(unsigned int handle) = 0;
+
         friend class Io;
     };
 

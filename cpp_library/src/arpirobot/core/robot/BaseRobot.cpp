@@ -23,11 +23,14 @@
 #include <arpirobot/core/network/NetworkManager.hpp>
 #include <arpirobot/core/action/ActionManager.hpp>
 #include <arpirobot/core/conversions.hpp>
+#include <arpirobot/core/io/Io.hpp>
 
+
+#include <stdexcept>
 #include <chrono>
 #include <csignal>
+#include <cstdlib>
 
-#include <pigpio.h>
 
 using namespace arpirobot;
 
@@ -57,11 +60,12 @@ void BaseRobot::start(){
     scheduler = new Scheduler(profile.mainSchedulerThreads);
     currentRobot = this;
 
-    int err = gpioInitialise();
-    if(err < 0){
-        Logger::logError("Failed to initialize pigpio.");
-        Logger::logDebug("Pigpio error code " + std::to_string(err));
-        throw std::runtime_error("Initialization of hardware interfaces failed.");
+    try{
+        Io::init();
+    }catch(std::runtime_error &e){
+        Logger::logError("Failed to initialize IO library.");
+        Logger::logDebug(e.what());
+        exit(1);
     }
 
     // On interrupt set stop = true
@@ -120,10 +124,7 @@ void BaseRobot::start(){
         device->disable();
     }
 
-    // Do not call this here. Registered as atexit func by pigpio
-    // Calling this here may just cause issues when BaseDevice object destructors run
-    // gpioTerminate();
-
+    Io::terminate();
     NetworkManager::stopNetworking();
 }
 

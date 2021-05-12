@@ -105,5 +105,9 @@ namespace arpirobot{
         void uartWrite(unsigned int handle, char* buf, unsigned int count) override;
 
         void uartRead(unsigned int handle, char *buf, unsigned int count) override;
+
+        void uartWriteByte(unsigned int handle, uint8_t b) override;
+
+        uint8_t uartReadByte(unsigned int handle) override;
     };
 }
