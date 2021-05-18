@@ -76,10 +76,12 @@ namespace arpirobot{
 
             std::shared_ptr<LowLevelDCMotor> getMotor(int index);
 
+        protected:
+            void close() override;
+
         private:
             void startup();
 
-            void close();
 
             void setPin(uint8_t pin, bool isHigh);
             void setPWMFreq(int freq);

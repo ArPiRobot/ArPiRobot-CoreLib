@@ -80,8 +80,14 @@ void BaseRobot::start(std::string ioProvider){
 
     // Begin any devices that were instantiated before the robot was started
     for(BaseDevice *device : devicesToBegin){
-        devices.push_back(device);
-        device->doBegin();
+        try{
+            devices.push_back(device);
+            device->doBegin();
+        }catch(const std::exception &e){
+            Logger::logError("Failed to begin device " + device->getDeviceName());
+            Logger::logDebug(e.what());
+            exit(1);
+        }
     }
     devicesToBegin.clear();
 

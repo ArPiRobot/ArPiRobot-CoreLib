@@ -28,16 +28,12 @@ namespace arpirobot{
     public:
         virtual ~IoDevice();
 
-        void close();
-
     protected:
-        // Close function is assigned by child class.
-        // Cannot use virtual func as this is run from destructor.
-        IoDevice(std::function<void()> closeFunc);
-
-        std::function<void()> closeFunc;
-
-        friend class IoProvider;
+        IoDevice();
+        
+        virtual void close() = 0;
+        
+        friend class Io;
     };
 
 }

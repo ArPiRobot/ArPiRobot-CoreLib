@@ -26,15 +26,12 @@
 using namespace arpirobot;
 
 
-IoDevice::IoDevice(std::function<void()> closeFunc) : closeFunc(closeFunc) {
+IoDevice::IoDevice() {
     Io::addDevice(this);
 }
 
-void IoDevice::close(){
-    closeFunc();
-}
-
 IoDevice::~IoDevice(){
-    close();
+    // Cannot run close() from here as this would run IoDevice::close not the child class's close
+    // Must rely on child class destructors to call close()
     Io::removeDevice(this);
 }

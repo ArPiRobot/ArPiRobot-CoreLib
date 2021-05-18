@@ -52,7 +52,7 @@ namespace arpirobot{
         
         void run();
 
-        void close();
+        void close() override;
 
     private:
         int in1, in2, pwm;

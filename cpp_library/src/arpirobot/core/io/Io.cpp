@@ -65,16 +65,17 @@ void Io::init(std::string provider){
 
 void Io::terminate(){
     if(instance != nullptr){
-        ioDevicesLock.lock();
-        for(IoDevice *dev : ioDevices){
-            try{
-                dev->close();
-            }catch(std::exception &e){
-                // Silently fail closing device. Device was likely not opened properly anyways
+        {
+            std::lock_guard<std::mutex> l(ioDevicesLock);
+            for(IoDevice *dev : ioDevices){
+                try{
+                    dev->close();
+                }catch(std::exception &e){
+                    // Silently fail closing device. Device was likely not opened properly anyways
+                }
             }
+            ioDevices.clear();
         }
-        ioDevices.clear();
-        ioDevicesLock.unlock();
 
         delete instance;
         instance = nullptr;
@@ -82,20 +83,18 @@ void Io::terminate(){
 }
 
 void Io::addDevice(IoDevice *device){
-    ioDevicesLock.lock();
+    std::lock_guard<std::mutex> l(ioDevicesLock);
     if(std::find(ioDevices.begin(), ioDevices.end(), device) == ioDevices.end()){
         ioDevices.push_back(device);
     }
-    ioDevicesLock.unlock();
 }
 
 void Io::removeDevice(IoDevice *device){
-    ioDevicesLock.lock();
+    std::lock_guard<std::mutex> l(ioDevicesLock);
     auto it = std::find(ioDevices.begin(), ioDevices.end(), device);
     if(it != ioDevices.end()){
         ioDevices.erase(it);
     }
-    ioDevicesLock.unlock();
 }
 
 

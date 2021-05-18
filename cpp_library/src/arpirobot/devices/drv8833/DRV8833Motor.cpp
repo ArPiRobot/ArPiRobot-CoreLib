@@ -25,7 +25,7 @@
 using namespace arpirobot;
 
 DRV8833Motor::DRV8833Motor(int in1Pin, int in2Pin, int slpPin) : 
-        IoDevice(std::bind(&DRV8833Motor::close, this)), in1(in1Pin), in2(in2Pin), slp(slpPin){
+        IoDevice(), in1(in1Pin), in2(in2Pin), slp(slpPin){
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }

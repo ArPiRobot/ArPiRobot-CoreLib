@@ -111,19 +111,22 @@ void AdafruitMotorHat::LowLevelDCMotor::kill(){
 /// AdafruitMotorHat
 ////////////////////////////////////////////////////////////////////////////////
 
-AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus) : IoDevice(std::bind(&AdafruitMotorHat::close, this)) {
+AdafruitMotorHat::AdafruitMotorHat(uint8_t address, uint8_t bus) : IoDevice() {
     handle = Io::i2cOpen(bus, address);
+    try{
+        // Make sure there is a device at that address (will throw exception if read fails)
+        Io::i2cReadByte(handle);
+        motors[0] = std::make_shared<LowLevelDCMotor>(this, 0);
+        motors[1] = std::make_shared<LowLevelDCMotor>(this, 1);
+        motors[2] = std::make_shared<LowLevelDCMotor>(this, 2);
+        motors[3] = std::make_shared<LowLevelDCMotor>(this, 3);
 
-    // Make sure there is a device at that address (will throw exception if read fails)
-    Io::i2cReadByte(handle);
-
-    motors[0] = std::make_shared<LowLevelDCMotor>(this, 0);
-    motors[1] = std::make_shared<LowLevelDCMotor>(this, 1);
-    motors[2] = std::make_shared<LowLevelDCMotor>(this, 2);
-    motors[3] = std::make_shared<LowLevelDCMotor>(this, 3);
-
-    startup();
-    setPWMFreq(1600);
+        startup();
+        setPWMFreq(1600);
+    }catch(const std::exception &e){
+        Io::i2cClose(handle);
+        throw e;
+    }
 }
 
 AdafruitMotorHat::~AdafruitMotorHat(){
@@ -275,15 +278,23 @@ int AdafruitMotorHatMotor::remapMotorNumber(int hatAddress, int motorNum){
 }
 
 void AdafruitMotorHatMotor::doDetectAddress(){
-    AdafruitMotorHat *testHat = nullptr;
     try{
-        testHat = new AdafruitMotorHat(ADAFRUIT_ADDR);
+        Logger::logDebug("STARTING THING");
+        AdafruitMotorHat *testHat = new AdafruitMotorHat(ADAFRUIT_ADDR);
+        Logger::logDebug("THINGS WORKED 1");
         detectedAddress = ADAFRUIT_ADDR;
-    }catch(const std::exception &e){   
-        detectedAddress = GEEKWORM_ADDR;
-    }
-    if(testHat != nullptr){
         delete testHat;
+    }catch(const std::exception &e){
+        Logger::logDebug("GOT EXCEPTION 1");
+        try{
+            AdafruitMotorHat *testHat = new AdafruitMotorHat(GEEKWORM_ADDR);
+            Logger::logDebug("THINGS WORKED 2");
+            detectedAddress = GEEKWORM_ADDR;
+            delete testHat;
+        }catch(const std::exception &e){
+            Logger::logDebug("GOT EXCEPTION 2");
+            detectedAddress = DETECT_ADDR; // Failed to detect motor hat address
+        }
     }
 }
 

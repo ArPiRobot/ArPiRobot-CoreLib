@@ -71,7 +71,7 @@ const int AdafruitINA260::COUNT_256 = 5;
 const int AdafruitINA260::COUNT_512 = 6;
 const int AdafruitINA260::COUNT_1024 = 7;
 
-AdafruitINA260::AdafruitINA260(int address, int bus) : IoDevice(std::bind(&AdafruitINA260::close, this)){
+AdafruitINA260::AdafruitINA260(int address, int bus) : IoDevice(){
     handle = Io::i2cOpen(bus, address);
 
     // Make sure there is a device at that address (will throw exception if read fails)

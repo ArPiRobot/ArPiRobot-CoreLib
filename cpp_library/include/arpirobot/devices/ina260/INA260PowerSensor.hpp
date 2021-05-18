@@ -44,8 +44,6 @@ namespace arpirobot{
 
             void reset();
 
-            void close();
-
             // mA
             double readCurrent();
 
@@ -99,6 +97,10 @@ namespace arpirobot{
             const static int COUNT_256;
             const static int COUNT_512;
             const static int COUNT_1024;
+
+        protected:
+
+            void close() override;
 
         private:
             int i2cReadWordHelper(int reg);
