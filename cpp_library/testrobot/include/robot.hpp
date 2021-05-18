@@ -2,7 +2,7 @@
 
 #include <arpirobot/core/robot/BaseRobot.hpp>
 #include <arpirobot/core/drive/ArcadeDriveHelper.hpp>
-#include <arpirobot/devices/tb6612/TB6612Motor.hpp>
+#include <arpirobot/devices/adafruitmotorhat/AdafruitMotorHatMotor.hpp>
 #include <arpirobot/devices/gamepad/Gamepad.hpp>
 
 using namespace arpirobot;
@@ -24,6 +24,11 @@ public:
 
     Gamepad gp0 {0};
 
-    TB6612Motor motor {1, 2, 3};
+    AdafruitMotorHatMotor flmotor {3};
+    AdafruitMotorHatMotor rlmotor {4};
+    AdafruitMotorHatMotor frmotor {2};
+    AdafruitMotorHatMotor rrmotor {1};
+
+    ArcadeDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
 
 };

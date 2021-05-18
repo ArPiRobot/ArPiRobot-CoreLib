@@ -47,7 +47,7 @@ BaseRobot::~BaseRobot(){
     
 }
 
-void BaseRobot::start(){
+void BaseRobot::start(std::string ioProvider){
 
     // Make sure conversions helper is configured properly before starting robot
     Conversions::checkBigEndian();
@@ -61,7 +61,7 @@ void BaseRobot::start(){
     currentRobot = this;
 
     try{
-        Io::init();
+        Io::init(ioProvider);
     }catch(std::runtime_error &e){
         Logger::logError("Failed to initialize IO library.");
         Logger::logDebug(e.what());
