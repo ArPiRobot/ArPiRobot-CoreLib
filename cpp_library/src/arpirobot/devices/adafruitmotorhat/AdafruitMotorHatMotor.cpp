@@ -279,20 +279,15 @@ int AdafruitMotorHatMotor::remapMotorNumber(int hatAddress, int motorNum){
 
 void AdafruitMotorHatMotor::doDetectAddress(){
     try{
-        Logger::logDebug("STARTING THING");
         AdafruitMotorHat *testHat = new AdafruitMotorHat(ADAFRUIT_ADDR);
-        Logger::logDebug("THINGS WORKED 1");
         detectedAddress = ADAFRUIT_ADDR;
         delete testHat;
     }catch(const std::exception &e){
-        Logger::logDebug("GOT EXCEPTION 1");
         try{
             AdafruitMotorHat *testHat = new AdafruitMotorHat(GEEKWORM_ADDR);
-            Logger::logDebug("THINGS WORKED 2");
             detectedAddress = GEEKWORM_ADDR;
             delete testHat;
         }catch(const std::exception &e){
-            Logger::logDebug("GOT EXCEPTION 2");
             detectedAddress = DETECT_ADDR; // Failed to detect motor hat address
         }
     }
