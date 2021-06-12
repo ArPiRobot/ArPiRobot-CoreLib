@@ -29,14 +29,18 @@ using namespace arpirobot;
 
 ArduinoUartInterface::ArduinoUartInterface(std::string port, int baud) : 
         IoDevice(), port(port), baud(baud){
+    // Need a mutable C string
+    portCStr = new char[port.length() + 1];
+    strcpy(portCStr, port.c_str());
+}
 
+ArduinoUartInterface::~ArduinoUartInterface(){
+    delete portCStr;
 }
 
 void ArduinoUartInterface::open() {
     if(handle < 0){
-        char tty[port.length() + 1];
-        strcpy(tty, port.c_str());
-        handle = Io::uartOpen(tty, baud);
+        handle = Io::uartOpen(portCStr, baud);
     }
 }
 

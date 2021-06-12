@@ -24,6 +24,7 @@
 #include <arpirobot/core/action/ActionManager.hpp>
 #include <arpirobot/core/conversions.hpp>
 #include <arpirobot/core/io/Io.hpp>
+#include <arpirobot/core/audio/AudioManager.hpp>
 
 
 #include <stdexcept>
@@ -69,6 +70,8 @@ void BaseRobot::start(std::string ioProvider){
     }
 
     atexit(Io::terminate);
+
+    AudioManager::init();
 
     // On interrupt set stop = true
     // This will cause runWatchdog to return and cleanup can be run
@@ -136,6 +139,8 @@ void BaseRobot::start(std::string ioProvider){
 
     // No need to call this here. This will be called at exit (atexit handler)
     // Io::terminate();
+
+    AudioManager::finish();
 }
 
 void BaseRobot::feedWatchdog(){
@@ -146,7 +151,7 @@ void BaseRobot::feedWatchdog(){
             for(BaseDevice *device : devices){
                 if(!device->isEnabled() && device->shouldDisableWithWatchdog()){
                     // Don't enable device with watchdog if it should be disabled with robot
-                    if(!device->shouldMatchRobotState() or isEnabled){
+                    if(!device->shouldMatchRobotState() || isEnabled){
                         device->enable();
                     }
                 }

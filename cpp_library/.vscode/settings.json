@@ -71,7 +71,8 @@
         "variant": "cpp",
         "*.ipp": "cpp",
         "any": "cpp",
-        "source_location": "cpp"
+        "source_location": "cpp",
+        "xstring": "cpp"
     },
     "cmake.configureOnOpen": true
 }

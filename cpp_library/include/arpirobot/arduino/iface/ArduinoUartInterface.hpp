@@ -42,6 +42,8 @@ namespace arpirobot{
          */
         ArduinoUartInterface(std::string port, int baud);
 
+        ~ArduinoUartInterface();
+
     protected:
         void open() override;
         void close() override;
@@ -54,6 +56,7 @@ namespace arpirobot{
     
     private:
         std::string port;
+        char *portCStr;
         int baud;
         int handle = -1;
     };

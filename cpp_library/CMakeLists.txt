@@ -17,11 +17,12 @@ file (GLOB_RECURSE SOURCES
      ${PROJECT_SOURCE_DIR}/include/*.hpp
 )
 
-add_library(arpirobot-core SHARED ${SOURCES})
+add_library(arpirobot-core SHARED ${SOURCES} ${PROJECT_SOURCE_DIR}/deps/miniaudio/miniaudio.h)
 target_include_directories(arpirobot-core PUBLIC 
      ${PROJECT_SOURCE_DIR}/include 
      ${PROJECT_SOURCE_DIR}/deps 
-     ${PROJECT_SOURCE_DIR}/deps/asio-1.18.1/include)
+     ${PROJECT_SOURCE_DIR}/deps/asio-1.18.1/include
+     ${PROJECT_SOURCE_DIR}/deps/miniaudio/)
 target_link_libraries(arpirobot-core pthread)
 target_compile_options(arpirobot-core PRIVATE -Wno-psabi)
 
@@ -34,6 +35,11 @@ if(${BUILDING_PIGPIO})
      add_custom_command(TARGET arpirobot-core POST_BUILD
           COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pigpio> ${CMAKE_CURRENT_BINARY_DIR}
      )
+endif()
+
+if(NOT WIN32)
+     # miniaudio requires dl (dlfcn) library on Linux
+     target_link_libraries(arpirobot-core dl)
 endif()
 
 # Enable building on windows for testing purposes
