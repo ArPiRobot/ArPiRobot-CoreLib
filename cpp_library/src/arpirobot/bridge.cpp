@@ -20,6 +20,8 @@
 #include <arpirobot/bridge.hpp>
 #include <arpirobot/core/network/NetworkTable.hpp>
 #include <arpirobot/core/log/Logger.hpp>
+#include <arpirobot/core/audio/AudioManager.hpp>
+#include <arpirobot/core/audio/AudioDeviceInfo.hpp>
 //#include <arpirobot/core/drive.hpp>
 
 #include <iostream>
@@ -846,4 +848,46 @@ BRIDGE_FUNC double INA260PowerSensor_getPower(INA260PowerSensor *vmon){
 
 BRIDGE_FUNC void INA260PowerSensor_makeMainVmon(INA260PowerSensor *vmon){
     vmon->makeMainVmon();
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// AudioManager bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC size_t AudioManager_getPlaybackDevicesCount(){
+    return AudioManager::getPlaybackDevices().size();
+}
+
+BRIDGE_FUNC void AudioManager_getPlaybackDevice(size_t index, uint32_t *id, char **name, bool *isDefault){
+    AudioDeviceInfo info = AudioManager::getPlaybackDevices()[index];
+    *id = info.id;
+    *name = new char[info.name.length() + 1];
+    std::strcpy(*name, info.name.c_str());
+    *isDefault = info.isDefault;
+}
+
+BRIDGE_FUNC size_t AudioManager_getCaptureDevicesCount(){
+    return AudioManager::getCaptureDevices().size();
+}
+
+BRIDGE_FUNC void AudioManager_getCaptureDevice(size_t index, uint32_t *id, char **name, bool *isDefault){
+    AudioDeviceInfo info = AudioManager::getCaptureDevices()[index];
+    *id = info.id;
+    *name = new char[info.name.length() + 1];
+    std::strcpy(*name, info.name.c_str());
+    *isDefault = info.isDefault;
+}
+
+BRIDGE_FUNC bool AudioManager_playSound(const char *filename){
+    std::string cppFilename(filename);
+    return AudioManager::playSound(cppFilename);
+}
+
+BRIDGE_FUNC bool AudioManager_playSoundWithDevice(const char *filename, uint32_t playbackDeviceId, const char *playbackDeviceName, bool playbackDeviceIsDefault){
+    std::string cppFilename(filename);
+    AudioDeviceInfo info;
+    info.id = playbackDeviceId;
+    info.name = playbackDeviceName;
+    info.isDefault = playbackDeviceIsDefault;
+    return AudioManager::playSound(cppFilename, info);
 }

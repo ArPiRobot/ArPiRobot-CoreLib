@@ -589,3 +589,25 @@ arpirobot.INA260PowerSensor_getPower.restype = ctypes.c_double
 
 arpirobot.INA260PowerSensor_makeMainVmon.argtypes = [ctypes.c_void_p]
 arpirobot.INA260PowerSensor_makeMainVmon.restype = None
+
+################################################################################
+# AudioManager Bridge
+################################################################################
+
+arpirobot.AudioManager_getPlaybackDevicesCount.argtypes = []
+arpirobot.AudioManager_getPlaybackDevicesCount.restype = ctypes.c_size_t
+
+arpirobot.AudioManager_getPlaybackDevice.argtypes = [ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_bool)]
+arpirobot.AudioManager_getPlaybackDevice.restype = None
+
+arpirobot.AudioManager_getCaptureDevicesCount.argtypes = []
+arpirobot.AudioManager_getCaptureDevicesCount.restype = ctypes.c_size_t
+
+arpirobot.AudioManager_getCaptureDevice.argtypes = [ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_bool)]
+arpirobot.AudioManager_getCaptureDevice.restype = None
+
+arpirobot.AudioManager_playSound.argtypes = [ctypes.c_char_p]
+arpirobot.AudioManager_playSound.restype = ctypes.c_bool
+
+arpirobot.AudioManager_playSoundWithDevice.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_char_p, ctypes.c_bool]
+arpirobot.AudioManager_playSoundWithDevice.restype = ctypes.c_bool
