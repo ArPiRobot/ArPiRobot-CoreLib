@@ -29,7 +29,7 @@ class AudioDeviceInfo:
     is_default: bool = False
 
 
-class AudioDeviceManager:
+class AudioManager:
     @staticmethod
     def get_playback_devices() -> List[AudioDeviceInfo]:
         count: int = bridge.arpirobot.AudioManager_getPlaybackDevicesCount()
@@ -38,7 +38,7 @@ class AudioDeviceManager:
         is_default = ctypes.c_bool(False)
         lst = []
         for i in range(count):
-            bridge.arpirobot.AudioManager_getPlaybackDevice(i, ctypes.POINTER(id), ctypes.POINTER(name), ctypes.POINTER(is_default))
+            bridge.arpirobot.AudioManager_getPlaybackDevice(i, ctypes.byref(id), ctypes.byref(name), ctypes.byref(is_default))
             info = AudioDeviceInfo()
             info.id = id.value
             info.name = name.value
@@ -55,7 +55,7 @@ class AudioDeviceManager:
         is_default = ctypes.c_bool(False)
         lst = []
         for i in range(count):
-            bridge.arpirobot.AudioManager_getCaptureDevice(i, ctypes.POINTER(id), ctypes.POINTER(name), ctypes.POINTER(is_default))
+            bridge.arpirobot.AudioManager_getCaptureDevice(i, ctypes.byref(id), ctypes.byref(name), ctypes.byref(is_default))
             info = AudioDeviceInfo()
             info.id = id.value
             info.name = name.value.decode()
