@@ -23,11 +23,15 @@
 #include <arpirobot/core/network/NetworkManager.hpp>
 #include <arpirobot/core/action/ActionManager.hpp>
 #include <arpirobot/core/conversions.hpp>
+#include <arpirobot/core/io/Io.hpp>
+#include <arpirobot/core/audio/AudioManager.hpp>
 
+
+#include <stdexcept>
 #include <chrono>
 #include <csignal>
+#include <cstdlib>
 
-#include <pigpio.h>
 
 using namespace arpirobot;
 
@@ -44,7 +48,7 @@ BaseRobot::~BaseRobot(){
     
 }
 
-void BaseRobot::start(){
+void BaseRobot::start(std::string ioProvider){
 
     // Make sure conversions helper is configured properly before starting robot
     Conversions::checkBigEndian();
@@ -57,12 +61,17 @@ void BaseRobot::start(){
     scheduler = new Scheduler(profile.mainSchedulerThreads);
     currentRobot = this;
 
-    int err = gpioInitialise();
-    if(err < 0){
-        Logger::logError("Failed to initialize pigpio.");
-        Logger::logDebug("Pigpio error code " + std::to_string(err));
-        throw std::runtime_error("Initialization of hardware interfaces failed.");
+    try{
+        Io::init(ioProvider);
+    }catch(std::runtime_error &e){
+        Logger::logError("Failed to initialize IO library.");
+        Logger::logDebug(e.what());
+        exit(1);
     }
+
+    atexit(Io::terminate);
+
+    AudioManager::init();
 
     // On interrupt set stop = true
     // This will cause runWatchdog to return and cleanup can be run
@@ -74,8 +83,14 @@ void BaseRobot::start(){
 
     // Begin any devices that were instantiated before the robot was started
     for(BaseDevice *device : devicesToBegin){
-        devices.push_back(device);
-        device->doBegin();
+        try{
+            devices.push_back(device);
+            device->doBegin();
+        }catch(const std::exception &e){
+            Logger::logError("Failed to begin device " + device->getDeviceName());
+            Logger::logDebug(e.what());
+            exit(1);
+        }
     }
     devicesToBegin.clear();
 
@@ -120,11 +135,12 @@ void BaseRobot::start(){
         device->disable();
     }
 
-    // Do not call this here. Registered as atexit func by pigpio
-    // Calling this here may just cause issues when BaseDevice object destructors run
-    // gpioTerminate();
-
     NetworkManager::stopNetworking();
+
+    // No need to call this here. This will be called at exit (atexit handler)
+    // Io::terminate();
+
+    AudioManager::finish();
 }
 
 void BaseRobot::feedWatchdog(){
@@ -135,7 +151,7 @@ void BaseRobot::feedWatchdog(){
             for(BaseDevice *device : devices){
                 if(!device->isEnabled() && device->shouldDisableWithWatchdog()){
                     // Don't enable device with watchdog if it should be disabled with robot
-                    if(!device->shouldMatchRobotState() or isEnabled){
+                    if(!device->shouldMatchRobotState() || isEnabled){
                         device->enable();
                     }
                 }

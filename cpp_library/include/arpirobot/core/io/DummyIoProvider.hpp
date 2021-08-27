@@ -22,45 +22,59 @@
 #include <arpirobot/core/io/IoProvider.hpp>
 
 namespace arpirobot{
+
+    /**
+     * \class DummyIoProvider DummyIoProvider.hpp arpirobot/core/io/DummyIoProvider.hpp
+     * 
+     * Fake IoProvider that is used as a fallback on any platform.
+     * 
+     * Prints IO operations to the log without actually performing the operations. 
+     * Useful for debugging purposes.
+     * 
+     */
     class DummyIoProvider : public IoProvider{
-    public:
+    protected:
 
         DummyIoProvider();
-        
+
         ~DummyIoProvider();
 
         ////////////////////////////////////////////////////////////////////////
         /// GPIO & PWM
         ////////////////////////////////////////////////////////////////////////
-        void gpioMode(unsigned int pin, unsigned int mode);
+        void gpioMode(unsigned int pin, unsigned int mode) override;
 
-        void gpioWrite(unsigned int pin, unsigned int state);
+        void gpioWrite(unsigned int pin, unsigned int state) override;
 
-        unsigned int gpioRead(unsigned int pin);
+        unsigned int gpioRead(unsigned int pin) override;
 
-        void gpioSetPwmFrequency(unsigned int pin, unsigned int frequency);
+        void gpioSetPwmFrequency(unsigned int pin, unsigned int frequency) override;
 
-        unsigned int gpioPwm(unsigned int pin, unsigned int value);
+        void gpioPwm(unsigned int pin, unsigned int value) override;
 
 
         ////////////////////////////////////////////////////////////////////////
         /// I2C
         ////////////////////////////////////////////////////////////////////////
-        unsigned int i2cOpen(unsigned int bus, unsigned int address);
+        unsigned int i2cOpen(unsigned int bus, unsigned int address) override;
 
-        void i2cClose(unsigned int handle);
+        void i2cClose(unsigned int handle) override;
 
-        unsigned int i2cWriteByte(unsigned int handle, uint8_t data);
+        void i2cWriteByte(unsigned int handle, uint8_t data) override;
 
-        uint8_t i2cReadByte(unsigned int handle);
+        uint8_t i2cReadByte(unsigned int handle) override;
 
-        uint8_t i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value);
+        void i2cWriteBytes(unsigned int handle, char *buf, unsigned int count) override;
 
-        uint8_t i2cReadReg8(unsigned int handle, uint8_t reg);
+        unsigned int i2cReadBytes(unsigned int handle, char *buf, unsigned int count) override;
 
-        uint16_t i2cWriteReg16(unsigned int handle, uint8_t reg, uint16_t value);
+        void i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value) override;
 
-        uint16_t i2cReadReg16(unsigned int handle, uint8_t reg);
+        uint8_t i2cReadReg8(unsigned int handle, uint8_t reg) override;
+
+        void i2cWriteReg16(unsigned int handle, uint8_t reg, uint16_t value) override;
+
+        uint16_t i2cReadReg16(unsigned int handle, uint8_t reg) override;
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -69,27 +83,33 @@ namespace arpirobot{
         
         // Bus = spi bus 
         // Channel = which builtin CS pin
-        unsigned int spiOpen(unsigned int bus, unsigned int channel);
+        unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud) override;
 
-        void spiClose(unsigned int handle);
+        void spiClose(unsigned int handle) override;
 
-        void spiWrite(unsigned int handle, uint8_t *buf, unsigned int count);
+        void spiWrite(unsigned int handle, char *buf, unsigned int count) override;
 
-        void spiRead(unsigned int handle, uint8_t *buf, unsigned int count);
+        unsigned int spiRead(unsigned int handle, char *buf, unsigned int count) override;
 
 
         ////////////////////////////////////////////////////////////////////////
         /// UART
         ////////////////////////////////////////////////////////////////////////
         
-        unsigned int uartOpen(const char *port, unsigned int buad);
+        unsigned int uartOpen(char *port, unsigned int baud) override;
     
-        void uartClose(unsigned int handle);
+        void uartClose(unsigned int handle) override;
 
-        unsigned int uartAvailable(unsigned int handle);
+        unsigned int uartAvailable(unsigned int handle) override;
 
-        void uartWrite(unsigned int handle, const char* buf, unsigned int count);
+        void uartWrite(unsigned int handle, char* buf, unsigned int count) override;
 
-        void uartRead(unsigned int handle, const char *buf, unsigned int count);
+        unsigned int uartRead(unsigned int handle, char *buf, unsigned int count) override;
+
+        void uartWriteByte(unsigned int handle, uint8_t b) override;
+
+        uint8_t uartReadByte(unsigned int handle) override;
+
+        friend class Io;
     };
 }

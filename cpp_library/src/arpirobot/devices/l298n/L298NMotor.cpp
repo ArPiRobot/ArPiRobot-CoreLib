@@ -20,20 +20,19 @@
 #include <arpirobot/devices/l298n/L298NMotor.hpp>
 #include <arpirobot/core/robot/BaseRobot.hpp>
 #include <arpirobot/core/log/Logger.hpp>
+#include <arpirobot/core/io/Io.hpp>
 
-#include <pigpio.h>
 
 using namespace arpirobot;
 
-L298NMotor::L298NMotor(int in1Pin, int in2Pin, int pwmPin) : in1(in1Pin), in2(in2Pin), pwm(pwmPin){
+L298NMotor::L298NMotor(int in1Pin, int in2Pin, int pwmPin) : 
+        IoDevice(), in1(in1Pin), in2(in2Pin), pwm(pwmPin){
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }
 
 L298NMotor::~L298NMotor(){
-    gpioWrite(in1, 0);
-    gpioWrite(in2, 0);
-    gpioPWM(pwm, 0);
+    close();
 }
 
 std::string L298NMotor::getDeviceName(){
@@ -41,28 +40,48 @@ std::string L298NMotor::getDeviceName(){
 }
 
 void L298NMotor::begin(){
-    gpioSetMode(in1, PI_OUTPUT);
-    gpioSetMode(in2, PI_OUTPUT);
-    gpioPWM(pwm, 0);
+    try{
+        Io::gpioMode(in1, Io::GPIO_OUT);
+        Io::gpioMode(in2, Io::GPIO_OUT);
+        Io::gpioPwm(pwm, 0);
+    }catch(const std::exception &e){
+        Logger::logErrorFrom(getDeviceName(), "Failed to initialize device. GPIO error.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
+    }
 }
 
 void L298NMotor::run(){
-    if(speed == 0){
-        gpioWrite(in1, 0);
-        gpioWrite(in2, 0);
-        if(brakeMode){
-            gpioPWM(pwm, 255);
+    try{
+        if(speed == 0){
+            Io::gpioWrite(in1, 0);
+            Io::gpioWrite(in2, 0);
+            if(brakeMode){
+                Io::gpioPwm(pwm, 255);
+            }else{
+                Io::gpioPwm(pwm, 0);
+            }
         }else{
-            gpioPWM(pwm, 0);
+            if(speed > 0){
+                Io::gpioWrite(in1, 1);
+                Io::gpioWrite(in2, 0);
+            }else{
+                Io::gpioWrite(in1, 0);
+                Io::gpioWrite(in2, 1);
+            }
+            Io::gpioPwm(pwm, (int)(std::abs(speed) * 255));
         }
-    }else{
-        if(speed > 0){
-            gpioWrite(in1, 1);
-            gpioWrite(in2, 0);
-        }else{
-            gpioWrite(in1, 0);
-            gpioWrite(in2, 1);
-        }
-        gpioPWM(pwm, (int)(std::abs(speed) * 255));
+    }catch(const std::exception &e){
+        Logger::logWarningFrom(getDeviceName(), "Failed to set motor speed.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
+    }
+}
+
+void L298NMotor::close(){
+    try{
+        Io::gpioWrite(in1, 0);
+        Io::gpioWrite(in2, 0);
+        Io::gpioPwm(pwm, 0);
+    }catch(const std::exception &e){
+        // Silently fail
     }
 }

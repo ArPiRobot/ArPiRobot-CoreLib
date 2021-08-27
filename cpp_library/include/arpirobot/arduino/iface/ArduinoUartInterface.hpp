@@ -24,6 +24,7 @@
 #include <string>
 
 #include <arpirobot/arduino/iface/BaseArduinoInterface.hpp>
+#include <arpirobot/core/io/IoDevice.hpp>
 
 namespace arpirobot{
 
@@ -32,7 +33,7 @@ namespace arpirobot{
      * 
      * Arduino interface implementation using UART to communicate with the arduino.
      */
-    class ArduinoUartInterface : public BaseArduinoInterface{
+    class ArduinoUartInterface : public BaseArduinoInterface, public IoDevice{
     public:
 
         /**
@@ -41,18 +42,21 @@ namespace arpirobot{
          */
         ArduinoUartInterface(std::string port, int baud);
 
+        ~ArduinoUartInterface();
+
     protected:
-        void open();
-        void close();
-        bool isOpen();
-        int available();
-        uint8_t readOne();
-        std::vector<uint8_t> readAll();
-        void write(const uint8_t &b);
-        std::string getDeviceName();
+        void open() override;
+        void close() override;
+        bool isOpen() override;
+        int available() override;
+        uint8_t readOne() override;
+        std::vector<uint8_t> readAll() override;
+        void write(const uint8_t &b) override;
+        std::string getDeviceName() override;
     
     private:
         std::string port;
+        char *portCStr;
         int baud;
         int handle = -1;
     };

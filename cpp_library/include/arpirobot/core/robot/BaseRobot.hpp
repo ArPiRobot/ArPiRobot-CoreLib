@@ -45,7 +45,7 @@ namespace arpirobot{
         /**
          * Start the robot. Only one robot instance my run at a time
          */
-        void start();
+        void start(std::string ioProvider = "");
 
         /**
          * Feed the watchdog so devices don't become disabled

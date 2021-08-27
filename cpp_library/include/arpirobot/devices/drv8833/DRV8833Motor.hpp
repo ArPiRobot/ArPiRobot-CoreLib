@@ -20,6 +20,7 @@
 #pragma once
 
 #include <arpirobot/core/device/MotorController.hpp>
+#include <arpirobot/core/io/IoDevice.hpp>
 
 namespace arpirobot{
 
@@ -28,7 +29,7 @@ namespace arpirobot{
      * 
      * Motor on DRV8833 module
      */
-    class DRV8833Motor : public MotorController{
+    class DRV8833Motor : public MotorController, public IoDevice{
     public:
 
         /**
@@ -50,6 +51,8 @@ namespace arpirobot{
         void begin();
         
         void run();
+
+        void close() override;
 
     private:
         int in1, in2, slp;

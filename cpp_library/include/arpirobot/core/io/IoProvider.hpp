@@ -25,42 +25,23 @@
 #include <vector>
 #include <mutex>
 
-
 namespace arpirobot {
-
-    // Forward declare
-    class IoDevice;
-
-    // This API closely matches pigpio's API as it is a basic C-style API
+    
     class IoProvider{
     public:
         IoProvider(const IoProvider &other) = delete;
         IoProvider &operator=(const IoProvider &other) = delete;
         virtual ~IoProvider() { }
 
-        ////////////////////////////////////////////////////////////////////////
-        /// Constants / Static
-        ////////////////////////////////////////////////////////////////////////
-        static IoProvider *instance;
-
         const static unsigned int GPIO_OUT = 0;
         const static unsigned int GPIO_IN = 1;
         const static unsigned int GPIO_LOW = 0;
         const static unsigned int GPIO_HIGH = 1;
 
-        const static char *PROVIDER_PIGPIO;      // PIGPIO library
-        const static char *PROVIDER_DUMMY;       // Fake provider. Prints log messages.
+    protected:
 
-        ////////////////////////////////////////////////////////////////////////
-        /// Configuration / Control
-        ////////////////////////////////////////////////////////////////////////
-        static void init(std::string provider = "");
-
-        static void terminate();
-
-        static void addDevice(IoDevice *device);
-
-        static void removeDevice(IoDevice *device);
+        // Protected default constructor ensures direct instantiation is not possible
+        IoProvider() = default;
 
         ////////////////////////////////////////////////////////////////////////
         /// GPIO & PWM
@@ -73,7 +54,7 @@ namespace arpirobot {
 
         virtual void gpioSetPwmFrequency(unsigned int pin, unsigned int frequency) = 0;
 
-        virtual unsigned int gpioPwm(unsigned int pin, unsigned int value) = 0;
+        virtual void gpioPwm(unsigned int pin, unsigned int value) = 0;
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -83,15 +64,19 @@ namespace arpirobot {
 
         virtual void i2cClose(unsigned int handle) = 0;
 
-        virtual unsigned int i2cWriteByte(unsigned int handle, uint8_t data) = 0;
+        virtual void i2cWriteByte(unsigned int handle, uint8_t data) = 0;
 
         virtual uint8_t i2cReadByte(unsigned int handle) = 0;
 
-        virtual uint8_t i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value) = 0;
+        virtual void i2cWriteBytes(unsigned int handle, char *buf, unsigned int count) = 0;
+
+        virtual unsigned int i2cReadBytes(unsigned int handle, char *buf, unsigned int count) = 0;
+
+        virtual void i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value) = 0;
 
         virtual uint8_t i2cReadReg8(unsigned int handle, uint8_t reg) = 0;
 
-        virtual uint16_t i2cWriteReg16(unsigned int handle, uint8_t reg, uint16_t value) = 0;
+        virtual void i2cWriteReg16(unsigned int handle, uint8_t reg, uint16_t value) = 0;
 
         virtual uint16_t i2cReadReg16(unsigned int handle, uint8_t reg) = 0;
 
@@ -102,35 +87,35 @@ namespace arpirobot {
         
         // Bus = spi bus 
         // Channel = which builtin CS pin
-        virtual unsigned int spiOpen(unsigned int bus, unsigned int channel) = 0;
+        // TODO: need a way to support SPI modes
+        virtual unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud) = 0;
 
         virtual void spiClose(unsigned int handle) = 0;
 
-        virtual void spiWrite(unsigned int handle, uint8_t *buf, unsigned int count) = 0;
+        virtual void spiWrite(unsigned int handle, char *buf, unsigned int count) = 0;
 
-        virtual void spiRead(unsigned int handle, uint8_t *buf, unsigned int count) = 0;
+        virtual unsigned int spiRead(unsigned int handle, char *buf, unsigned int count) = 0;
 
 
         ////////////////////////////////////////////////////////////////////////
         /// UART
         ////////////////////////////////////////////////////////////////////////
         
-        virtual unsigned int uartOpen(const char *port, unsigned int buad) = 0;
+        virtual unsigned int uartOpen(char *port, unsigned int baud) = 0;
     
         virtual void uartClose(unsigned int handle) = 0;
 
         virtual unsigned int uartAvailable(unsigned int handle) = 0;
 
-        virtual void uartWrite(unsigned int handle, const char* buf, unsigned int count) = 0;
+        virtual void uartWrite(unsigned int handle, char* buf, unsigned int count) = 0;
 
-        virtual void uartRead(unsigned int handle, const char *buf, unsigned int count) = 0;
+        virtual unsigned int uartRead(unsigned int handle, char *buf, unsigned int count) = 0;
 
-    protected:
-        IoProvider();
+        virtual void uartWriteByte(unsigned int handle, uint8_t b) = 0;
 
-    private:
-        static std::vector<IoDevice*> ioDevices;
-        static std::mutex ioDevicesLock;
+        virtual uint8_t uartReadByte(unsigned int handle) = 0;
+
+        friend class Io;
     };
 
 }

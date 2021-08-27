@@ -17,21 +17,14 @@
  * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+#pragma once
 
-#include <arpirobot/core/io/IoDevice.hpp>
-#include <arpirobot/core/io/Io.hpp>
+#include <string>
 
-#include <stdexcept>
-
-using namespace arpirobot;
-
-
-IoDevice::IoDevice() {
-    Io::addDevice(this);
-}
-
-IoDevice::~IoDevice(){
-    // Cannot run close() from here as this would run IoDevice::close not the child class's close
-    // Must rely on child class destructors to call close()
-    Io::removeDevice(this);
+namespace arpirobot{
+    struct AudioDeviceInfo{
+        uint32_t id;
+        std::string name;
+        bool isDefault;
+    };
 }

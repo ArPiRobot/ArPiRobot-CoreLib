@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include <arpirobot/core/io/IoProvider.hpp>
+#include <functional>
 
 namespace arpirobot{
 
@@ -29,13 +29,11 @@ namespace arpirobot{
         virtual ~IoDevice();
 
     protected:
-
         IoDevice();
-
-        // This will be called automatically when the IOProvider is shutting down
-        virtual void close();
-
-        friend class IoProvider;
+        
+        virtual void close() = 0;
+        
+        friend class Io;
     };
 
 }

@@ -71,7 +71,9 @@
         "variant": "cpp",
         "*.ipp": "cpp",
         "any": "cpp",
-        "source_location": "cpp"
+        "source_location": "cpp",
+        "xstring": "cpp"
     },
-    "cmake.configureOnOpen": true
+    "cmake.configureOnOpen": true,
+    "cmake.configureArgs": ["-DCMAKE_COLOR_MAKEFILE=OFF"]
 }

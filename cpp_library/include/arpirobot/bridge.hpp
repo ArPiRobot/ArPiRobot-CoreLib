@@ -573,3 +573,19 @@ BRIDGE_FUNC double INA260PowerSensor_getCurrent(INA260PowerSensor *vmon);
 BRIDGE_FUNC double INA260PowerSensor_getVoltage(INA260PowerSensor *vmon);
 
 BRIDGE_FUNC double INA260PowerSensor_getPower(INA260PowerSensor *vmon);
+
+////////////////////////////////////////////////////////////////////////////////
+/// AudioManager bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC size_t AudioManager_getPlaybackDevicesCount();
+
+BRIDGE_FUNC void AudioManager_getPlaybackDevice(size_t index, uint32_t *id, char **name, bool *isDefault);
+
+BRIDGE_FUNC size_t AudioManager_getCaptureDevicesCount();
+
+BRIDGE_FUNC void AudioManager_getCaptureDevice(size_t index, uint32_t *id, char **name, bool *isDefault);
+
+BRIDGE_FUNC bool AudioManager_playSound(const char *filename);
+
+BRIDGE_FUNC bool AudioManager_playSoundWithDevice(const char *filename, uint32_t playbackDeviceId, const char *playbackDeviceName, bool playbackDeviceIsDefault);

@@ -20,6 +20,7 @@
 #pragma once
 
 #include <arpirobot/core/device/MotorController.hpp>
+#include <arpirobot/core/io/IoDevice.hpp>
 
 namespace arpirobot{
 
@@ -28,7 +29,7 @@ namespace arpirobot{
      * 
      * Motor on TB6612 module
      */
-    class TB6612Motor : public MotorController{
+    class TB6612Motor : public MotorController, public IoDevice{
     public:
         /**
          * @param in1Pin pin for side 1 directional control
@@ -48,6 +49,8 @@ namespace arpirobot{
         void begin();
         
         void run();
+
+        void close() override;
 
     private:
         int in1, in2, pwm;

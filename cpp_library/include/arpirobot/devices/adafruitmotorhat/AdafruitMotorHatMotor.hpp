@@ -20,6 +20,7 @@
 #pragma once
 
 #include <arpirobot/core/device/MotorController.hpp>
+#include <arpirobot/core/io/IoDevice.hpp>
 
 #include <cstdint>
 #include <mutex>
@@ -37,7 +38,7 @@ namespace arpirobot{
          * arpirobot BaseDevice implementatio is built on top of this
          * Based on https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library/blob/master/Adafruit_MotorHAT/
          */
-        class AdafruitMotorHat{
+        class AdafruitMotorHat : public IoDevice{
         public:
             // Motor commands
             enum class MotorCommand {FORWARD, BACKWARD, BRAKE, RELEASE};
@@ -75,8 +76,12 @@ namespace arpirobot{
 
             std::shared_ptr<LowLevelDCMotor> getMotor(int index);
 
+        protected:
+            void close() override;
+
         private:
             void startup();
+
 
             void setPin(uint8_t pin, bool isHigh);
             void setPWMFreq(int freq);

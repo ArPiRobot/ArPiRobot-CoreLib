@@ -78,8 +78,9 @@ namespace arpirobot{
 
         /**
          * Writes a message to the arduino using proper escape sequences
+         * This funcion will throw exceptions from lower level I/O functions
          */
-        bool writeData(const std::vector<uint8_t> &data);
+        void writeData(const std::vector<uint8_t> &data);
 
         /**
          * This method blocks until at least one byte is available. One byte is then read
@@ -88,6 +89,7 @@ namespace arpirobot{
          * When a full dataset has been read into the workingBuffer it is moved into the read_dataset.
          * Then, this method return true.
          * Otherwise it returns false
+         * This function will throw exceptions from lower level I/O functions
          */
         bool readData();
 
@@ -97,9 +99,11 @@ namespace arpirobot{
          */
         bool checkData();
 
+        // This function will throw exceptions from lower level I/O functoins
         std::vector<uint8_t> waitForMessage(const std::vector<uint8_t> &prefix, int timeoutMs);
 
-        // Implementation specific
+        // Implementation specific (these can and should throw exceptions on errors)
+        //     Exceptions thrown should be from arpirobot/core/io/exceptions.hpp
         virtual void open() = 0;
         virtual void close() = 0;
         virtual bool isOpen() = 0;

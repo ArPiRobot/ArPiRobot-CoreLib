@@ -21,20 +21,18 @@
 #include <arpirobot/devices/tb6612/TB6612Module.hpp>
 #include <arpirobot/core/robot/BaseRobot.hpp>
 #include <arpirobot/core/log/Logger.hpp>
-
-#include <pigpio.h>
+#include <arpirobot/core/io/Io.hpp>
 
 using namespace arpirobot;
 
-TB6612Motor::TB6612Motor(int in1Pin, int in2Pin, int pwmPin) : in1(in1Pin), in2(in2Pin), pwm(pwmPin){
+TB6612Motor::TB6612Motor(int in1Pin, int in2Pin, int pwmPin) : 
+        IoDevice(), in1(in1Pin), in2(in2Pin), pwm(pwmPin){
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }
 
 TB6612Motor::~TB6612Motor(){
-    gpioWrite(in1, 0);
-    gpioWrite(in2, 0);
-    gpioPWM(pwm, 0);
+    close();
 }
 
 std::string TB6612Motor::getDeviceName(){
@@ -42,28 +40,48 @@ std::string TB6612Motor::getDeviceName(){
 }
 
 void TB6612Motor::begin(){
-    gpioSetMode(in1, PI_OUTPUT);
-    gpioSetMode(in2, PI_OUTPUT);
-    gpioPWM(pwm, 0);
+    try{
+        Io::gpioMode(in1, Io::GPIO_OUT);
+        Io::gpioMode(in2, Io::GPIO_OUT);
+        Io::gpioPwm(pwm, 0);
+    }catch(const std::exception &e){
+        Logger::logErrorFrom(getDeviceName(), "Failed to initialize device. GPIO error.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
+    }
 }
 
 void TB6612Motor::run(){
-    if(speed == 0){
-        if(brakeMode){
-            gpioWrite(in1, 1);
-            gpioWrite(in2, 1);
+    try{
+        if(speed == 0){
+            if(brakeMode){
+                Io::gpioWrite(in1, 1);
+                Io::gpioWrite(in2, 1);
+            }else{
+                Io::gpioWrite(in1, 0);
+                Io::gpioWrite(in2, 0);
+            }
         }else{
-            gpioWrite(in1, 0);
-            gpioWrite(in2, 0);
+            if(speed > 0){
+                Io::gpioWrite(in1, 1);
+                Io::gpioWrite(in2, 0);
+            }else{
+                Io::gpioWrite(in1, 0);
+                Io::gpioWrite(in2, 1);
+            }
+            Io::gpioPwm(pwm, (int)(std::abs(speed) * 255));
         }
-    }else{
-        if(speed > 0){
-            gpioWrite(in1, 1);
-            gpioWrite(in2, 0);
-        }else{
-            gpioWrite(in1, 0);
-            gpioWrite(in2, 1);
-        }
-        gpioPWM(pwm, (int)(std::abs(speed) * 255));
+    }catch(const std::exception &e){
+        Logger::logWarningFrom(getDeviceName(), "Failed to set motor speed.");
+        Logger::logDebugFrom(getDeviceName(), e.what());
+    }
+}
+
+void TB6612Motor::close(){
+    try{
+        Io::gpioWrite(in1, 0);
+        Io::gpioWrite(in2, 0);
+        Io::gpioPwm(pwm, 0);
+    }catch(const std::exception &e){
+        // Silently fail
     }
 }
