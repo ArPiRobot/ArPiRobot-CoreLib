@@ -41,7 +41,7 @@ class AudioManager:
             bridge.arpirobot.AudioManager_getPlaybackDevice(i, ctypes.byref(id), ctypes.byref(name), ctypes.byref(is_default))
             info = AudioDeviceInfo()
             info.id = id.value
-            info.name = name.value
+            info.name = name.value.decode()
             info.is_default = is_default.value
             lst.append(info)
             bridge.arpirobot.freeString(name)
@@ -67,6 +67,6 @@ class AudioManager:
     @staticmethod
     def play_sound(filename: str, info: AudioDeviceInfo = None) -> bool:
         if info is None:
-            return bridge.arpirobot.AudioManager_playSound(filename)
+            return bridge.arpirobot.AudioManager_playSound(filename.encode())
         else:
-            return bridge.arpirobot.AudioManager_playSoundWithDevice(filename, info.id, info.name.encode(), info.is_default)
+            return bridge.arpirobot.AudioManager_playSoundWithDevice(filename.encode(), info.id, info.name.encode(), info.is_default)

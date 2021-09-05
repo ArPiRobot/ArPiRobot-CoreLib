@@ -31,6 +31,10 @@ using namespace arpirobot;
 
 
 PigpioIoProvider::PigpioIoProvider() : IoProvider(){
+
+    // This configures pigpio to use PWM clock not PCM clock for DMA transfers
+    // This prevents use of pigpio from breaking audio playback through the I2S interface
+    gpioCfgClock(5, 0, 0);
     int res = gpioInitialise();
     handlePigpioError(res, false);
     Logger::logInfoFrom("PigpioIoProvider", "IO Provider initialized.");
