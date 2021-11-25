@@ -43,3 +43,16 @@ cmake --build .
 ```
 sudo LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH PYTHONPATH=. ./main
 ```
+
+## Building for PC (Development Testing ONLY)
+
+***Building for the PC will not be fully functional as no IO provider for a generic PC is fully implemented. This is intended to allow minimal robot programs (ones not using any real hardware features) to be run on a PC instead of the Pi for development testing purposes. This is not useful on a robot.***
+
+Note: Build may fail if not using GCC. MSVC is known to fail.
+
+```sh
+mkdir build
+cd build
+cmake .. -G "Unix Makefiles"  # MinGW Makefiles if on Windows
+cmake --build . -j4 --config Release
+```
