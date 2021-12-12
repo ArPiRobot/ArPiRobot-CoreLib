@@ -7,6 +7,7 @@
 #include <arpirobot/core/drive/ArcadeDriveHelper.hpp>
 #include <arpirobot/arduino/iface/ArduinoUartInterface.hpp>
 #include <arpirobot/arduino/sensor/VoltageMonitor.hpp>
+#include <arpirobot/devices/led/StatusLED.hpp>
 
 using namespace arpirobot;
 
@@ -26,11 +27,5 @@ public:
     void periodic();
 
 private:
-    Gamepad gp0 {0};
-    AdafruitMotorHatMotor leftMotor {2};
-    AdafruitMotorHatMotor rightMotor {3};
-    ArcadeDriveHelper driveHelper {&leftMotor, &rightMotor};
-
-    ArduinoUartInterface arduino{"/dev/ttyUSB0", 57600};
-    VoltageMonitor vmon {"A0", 4.85, 30000, 7500};
+    StatusLED led {12};
 };
