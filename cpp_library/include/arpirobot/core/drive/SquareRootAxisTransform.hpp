@@ -34,6 +34,6 @@ namespace arpirobot{
      */
     class SquareRootAxisTransform : public BaseAxisTransform {
     public:
-        double applyTransform(double rawAxisValue);
+        double applyTransform(double rawAxisValue) override;
     };
 }

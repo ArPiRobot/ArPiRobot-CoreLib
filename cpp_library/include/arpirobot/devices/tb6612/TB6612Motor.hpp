@@ -37,18 +37,23 @@ namespace arpirobot{
          * @param pwmPin pin for pwm of motor
          */
         TB6612Motor(int in1Pin, int in2Pin, int pwmPin);
+
+        TB6612Motor(const TB6612Motor &other) = delete;
+        
         ~TB6612Motor();
+
+        TB6612Motor &operator=(const TB6612Motor &other) = delete;
 
         /**
          * Get the human-readable name of the device
          * @return the devices human readable name
          */
-        std::string getDeviceName();
+        std::string getDeviceName() override;
 
     protected:
-        void begin();
+        void begin() override;
         
-        void run();
+        void run() override;
 
         void close() override;
 

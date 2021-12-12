@@ -39,6 +39,11 @@ namespace arpirobot{
     public:
         virtual ~BaseArduinoInterface();
 
+        BaseArduinoInterface() = default;
+
+        BaseArduinoInterface(const BaseArduinoInterface &other) = delete;
+        BaseArduinoInterface &operator=(const BaseArduinoInterface &other) = delete;
+
         /**
          * Create devices (as needed) and start processing sensor data. After this is called devices can 
          * no longer be added to this arduino using BaseArduinoInterface::addDevice.

@@ -27,7 +27,7 @@ using namespace arpirobot;
 
 
 double SquareRootAxisTransform::applyTransform(double rawAxisValue){
-    double y = std::abs(rawAxisValue);
+    double y = std::sqrt(std::abs(rawAxisValue));
     if(rawAxisValue < 0)
         return -1 * y;
     return y;

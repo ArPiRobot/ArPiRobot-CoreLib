@@ -110,9 +110,9 @@ namespace arpirobot{
         std::string getDeviceName();
 
     protected:
-        void applyDefaultState();
-        std::vector<uint8_t> getCreateData();
-        void handleData(const std::vector<uint8_t> &data);
+        void applyDefaultState() override;
+        std::vector<uint8_t> getCreateData() override;
+        void handleData(const std::vector<uint8_t> &data) override;
     
     private:
         double gyroX = 0, gyroY = 0, gyroZ = 0, accelX = 0, accelY = 0, accelZ = 0;

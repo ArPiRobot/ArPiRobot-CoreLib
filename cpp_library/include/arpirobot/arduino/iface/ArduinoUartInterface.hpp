@@ -44,6 +44,10 @@ namespace arpirobot{
 
         ~ArduinoUartInterface();
 
+        ArduinoUartInterface(const ArduinoUartInterface &other) = delete;
+        
+        ArduinoUartInterface &operator=(const ArduinoUartInterface &other) = delete;
+
     protected:
         void open() override;
         void close() override;

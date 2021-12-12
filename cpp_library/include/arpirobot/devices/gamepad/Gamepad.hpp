@@ -38,6 +38,9 @@ namespace arpirobot{
          */
         Gamepad(int controllerNum);
 
+        Gamepad(const Gamepad &other) = delete;
+        Gamepad &operator=(const Gamepad &other) = delete;
+
         /**
          * Get the controller number for this gamepad
          * @return The controller number
@@ -83,20 +86,20 @@ namespace arpirobot{
          * Get the human-readable name of the device
          * @return the devices human readable name
          */
-        std::string getDeviceName();
+        std::string getDeviceName() override;
     
     protected:
-        void begin();
+        void begin() override;
 
-        bool isEnabled();
+        bool isEnabled() override;
 
-        bool shouldMatchRobotState();
+        bool shouldMatchRobotState() override;
 
-        bool shouldDisableWithWatchdog();
+        bool shouldDisableWithWatchdog() override;
 
-        void enable();
+        void enable() override;
 
-        void disable();
+        void disable() override;
 
     private:
         int controllerNum;

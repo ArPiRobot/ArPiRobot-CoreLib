@@ -39,8 +39,11 @@ namespace arpirobot{
     class BaseRobot{
     public:
         BaseRobot(RobotProfile profile = RobotProfile());
+        BaseRobot(const BaseRobot &other) = delete;
 
-        virtual ~BaseRobot();
+        virtual ~BaseRobot() = default;
+
+        BaseRobot &operator=(const BaseRobot &other) = delete;
 
         /**
          * Start the robot. Only one robot instance my run at a time

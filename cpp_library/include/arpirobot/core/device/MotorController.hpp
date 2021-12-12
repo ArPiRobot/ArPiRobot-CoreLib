@@ -32,7 +32,7 @@ namespace arpirobot{
     class MotorController : public BaseDevice{
     public:
 
-        virtual ~MotorController();
+        virtual ~MotorController() = default;
 
         /**
          * Check if the motor direction is inverted (positive and negative speed switched)
@@ -71,15 +71,15 @@ namespace arpirobot{
         void setSpeed(double speed);
 
     protected:
-        bool isEnabled();
+        bool isEnabled() override;
 
-        bool shouldMatchRobotState();
+        bool shouldMatchRobotState() override;
 
-        bool shouldDisableWithWatchdog();
+        bool shouldDisableWithWatchdog() override;
 
-        void enable();
+        void enable() override;
 
-        void disable();
+        void disable() override;
         
         virtual void run() = 0;
 

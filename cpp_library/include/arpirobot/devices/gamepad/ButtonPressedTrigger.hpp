@@ -38,7 +38,7 @@ namespace arpirobot{
          */
         ButtonPressedTrigger(Gamepad *gamepad, int buttonNum, Action *targetAction, bool doRestart = true);
 
-        bool shouldRun();
+        bool shouldRun() override;
     
     private:
         Gamepad *gamepad;

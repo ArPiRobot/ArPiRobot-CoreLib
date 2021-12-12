@@ -38,7 +38,11 @@ namespace arpirobot{
              */
             AdafruitINA260(int address, int bus = 1);
 
+            AdafruitINA260(const AdafruitINA260 &other) = delete;
+
             ~AdafruitINA260();
+
+            AdafruitINA260 &operator=(const AdafruitINA260 &other) = delete;
 
             bool begin();
 
@@ -129,9 +133,13 @@ namespace arpirobot{
     public:
         INA260PowerSensor();
 
+        INA260PowerSensor(const INA260PowerSensor &other) = delete;
+
         ~INA260PowerSensor();
 
-        std::string getDeviceName();
+        INA260PowerSensor &operator=(const INA260PowerSensor &other) = delete;
+
+        std::string getDeviceName() override;
 
         /**
          * Get current measurement
@@ -152,17 +160,17 @@ namespace arpirobot{
         double getPower();
 
     protected:
-        void begin();
+        void begin() override;
 
-        bool isEnabled();
+        bool isEnabled() override;
 
-        bool shouldMatchRobotState();
+        bool shouldMatchRobotState() override;
 
-        bool shouldDisableWithWatchdog();
+        bool shouldDisableWithWatchdog() override;
 
-        void enable();
+        void enable() override;
 
-        void disable();
+        void disable() override;
 
     private:
 

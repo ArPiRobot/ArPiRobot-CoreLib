@@ -44,10 +44,6 @@ BaseRobot::BaseRobot(RobotProfile profile) : profile(profile) {
     
 }
 
-BaseRobot::~BaseRobot(){
-    
-}
-
 void BaseRobot::start(std::string ioProvider){
 
     // Make sure conversions helper is configured properly before starting robot

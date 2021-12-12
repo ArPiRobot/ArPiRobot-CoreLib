@@ -39,18 +39,23 @@ namespace arpirobot{
          * @param pwmPin pin for pwm of motor
          */
         L298NMotor(int in1Pin, int in2Pin, int pwmPin);
+
+        L298NMotor(const L298NMotor &other) = delete;
+        
         ~L298NMotor();
+
+        L298NMotor &operator=(const L298NMotor &other) = delete;
 
         /**
          * Get the human-readable name of the device
          * @return the devices human readable name
          */
-        std::string getDeviceName();
+        std::string getDeviceName() override;
 
     protected:
-        void begin();
+        void begin() override;
         
-        void run();
+        void run() override;
 
         void close() override;
 

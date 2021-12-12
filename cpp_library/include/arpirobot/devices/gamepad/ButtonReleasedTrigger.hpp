@@ -37,7 +37,7 @@ namespace arpirobot{
          * @param doRestart If true this will restart the action if it is running when this occurs
          */
         ButtonReleasedTrigger(Gamepad *gamepad, int buttonNum, Action *targetAction, bool doRestart = true);
-        bool shouldRun();
+        bool shouldRun() override;
     
     private:
         Gamepad *gamepad;

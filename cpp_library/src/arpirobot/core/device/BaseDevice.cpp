@@ -29,10 +29,6 @@ using namespace arpirobot;
 /// BaseDevice
 ////////////////////////////////////////////////////////////////////////////////
 
-BaseDevice::~BaseDevice(){
-    
-}
-
 void BaseDevice::lockDevice(Action *action){
     std::lock_guard<std::mutex> l(actionLock);
     

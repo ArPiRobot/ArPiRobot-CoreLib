@@ -44,7 +44,11 @@ namespace arpirobot{
             enum class MotorCommand {FORWARD, BACKWARD, BRAKE, RELEASE};
 
             AdafruitMotorHat(uint8_t address, uint8_t bus = 1);
+            AdafruitMotorHat(const AdafruitMotorHat &other) = delete;
+
             ~AdafruitMotorHat();
+
+            AdafruitMotorHat &operator=(const AdafruitMotorHat &other) = delete;
 
             /**
              * Motor object instantiated by the motor hat
@@ -136,16 +140,19 @@ namespace arpirobot{
          */
         AdafruitMotorHatMotor(int motorNum, int address = DETECT_ADDR, bool remapNumbers = true);
 
+        AdafruitMotorHatMotor(const AdafruitMotorHatMotor &other) = delete;
+        AdafruitMotorHatMotor &operator=(const AdafruitMotorHatMotor &other) = delete;
+
         /**
          * Get the human-readable name of the device
          * @return the devices human readable name
          */
-        std::string getDeviceName();
+        std::string getDeviceName() override;
 
     protected:
-        void begin();
+        void begin() override;
         
-        void run();
+        void run() override;
 
     private:
         static int remapMotorNumber(int hatAddress, int motorNum);

@@ -42,7 +42,7 @@ namespace arpirobot{
          */
         CubicAxisTransform(double minPower, double midPower);
 
-        double applyTransform(double rawAxisValue);
+        double applyTransform(double rawAxisValue) override;
 
     private:
         // a*(x^3) + b*(x^2) + c*x + d

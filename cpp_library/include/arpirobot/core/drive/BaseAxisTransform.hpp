@@ -35,7 +35,7 @@ namespace arpirobot{
      */
     class BaseAxisTransform{
     public:
-        virtual ~BaseAxisTransform(){}
+        virtual ~BaseAxisTransform() = default;
 
         /**
          * Axis transforms should override this function to implement specific calculations.

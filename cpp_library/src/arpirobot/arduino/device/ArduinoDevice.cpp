@@ -26,10 +26,6 @@ using namespace arpirobot;
 ArduinoDevice::ArduinoDevice(bool createDevice, int deviceId) : createDevice(createDevice), deviceId(deviceId){
 
 }
-    
-ArduinoDevice::~ArduinoDevice(){
-
-}
 
 std::vector<uint8_t> ArduinoDevice::stringToData(const std::string &str){
     std::vector<uint8_t> data;

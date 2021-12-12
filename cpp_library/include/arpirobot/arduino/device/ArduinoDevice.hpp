@@ -42,7 +42,7 @@ namespace arpirobot{
          */
         ArduinoDevice(bool createDevice, int deviceId);
     
-        virtual ~ArduinoDevice();
+        virtual ~ArduinoDevice() = default;
 
         /**
          * Get the human-readable name for this device

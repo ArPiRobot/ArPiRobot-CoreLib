@@ -23,10 +23,6 @@
 using namespace arpirobot;
 
 
-MotorController::~MotorController(){
-    
-}
-
 bool MotorController::isInverted(){
     return speedFactor == -1;
 }

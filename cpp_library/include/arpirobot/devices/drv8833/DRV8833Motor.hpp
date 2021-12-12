@@ -39,18 +39,22 @@ namespace arpirobot{
          */
         DRV8833Motor(int in1Pin, int in2Pin, int slpPin);
 
+        DRV8833Motor(const DRV8833Motor &other) = delete;
+
         ~DRV8833Motor();
+
+        DRV8833Motor &operator=(const DRV8833Motor &other) = delete;
 
         /**
          * Get the human-readable name of the device
          * @return the devices human readable name
          */
-        std::string getDeviceName();
+        std::string getDeviceName() override;
 
     protected:
-        void begin();
+        void begin() override;
         
-        void run();
+        void run() override;
 
         void close() override;
 

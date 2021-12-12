@@ -34,7 +34,7 @@ namespace arpirobot{
     class BaseDevice{
     public:
 
-        virtual ~BaseDevice();
+        virtual ~BaseDevice() = default;
 
         /**
          * Get the human-readable name of the device

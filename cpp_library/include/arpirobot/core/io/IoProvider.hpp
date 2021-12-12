@@ -31,7 +31,7 @@ namespace arpirobot {
     public:
         IoProvider(const IoProvider &other) = delete;
         IoProvider &operator=(const IoProvider &other) = delete;
-        virtual ~IoProvider() { }
+        virtual ~IoProvider() = default;
 
         const static unsigned int GPIO_OUT = 0;
         const static unsigned int GPIO_IN = 1;
