@@ -8,19 +8,17 @@ from arpirobot.core.log import Logger
 from arpirobot.arduino.iface import ArduinoUartInterface
 from arpirobot.arduino.sensor import VoltageMonitor, NxpAdafruit9Dof
 from arpirobot.core.audio import AudioManager
+from arpirobot.devices.led import StatusLED
 
 
 class Robot(BaseRobot):
     def __init__(self):
         super().__init__()
+
+        self.led = StatusLED(12)
     
     def robot_started(self):
-        devs = AudioManager.get_playback_devices()
-        for dev in devs:
-            print(f"ID: {dev.id}")
-            print(f"NAME: {dev.name}")
-            print(f"IS_DEFAULT: {dev.is_default}")
-            print()
+        pass
 
     def robot_enabled(self):
         pass

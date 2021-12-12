@@ -70,6 +70,9 @@
 #include <arpirobot/arduino/sensor/VoltageMonitor.hpp>
 
 #include <arpirobot/devices/ina260/INA260PowerSensor.hpp>
+
+#include <arpirobot/devices/led/StatusLED.hpp>
+
 #include <string>
 
 using namespace arpirobot;
@@ -573,6 +576,16 @@ BRIDGE_FUNC double INA260PowerSensor_getCurrent(INA260PowerSensor *vmon);
 BRIDGE_FUNC double INA260PowerSensor_getVoltage(INA260PowerSensor *vmon);
 
 BRIDGE_FUNC double INA260PowerSensor_getPower(INA260PowerSensor *vmon);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// StatusLED bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC StatusLED *StatusLED_create(int pin);
+
+BRIDGE_FUNC void StatusLED_destroy(StatusLED *led);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// AudioManager bridge
