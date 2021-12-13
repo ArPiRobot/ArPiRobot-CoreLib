@@ -854,13 +854,55 @@ BRIDGE_FUNC void INA260PowerSensor_makeMainVmon(INA260PowerSensor *vmon){
 /// StatusLED bridge
 ////////////////////////////////////////////////////////////////////////////////
 
-BRIDGE_FUNC StatusLED *StatusLED_create(int pin){
+BRIDGE_FUNC StatusLED *StatusLED_create(unsigned int pin){
     return new StatusLED(pin);
 }
 
 BRIDGE_FUNC void StatusLED_destroy(StatusLED *led){
     delete led;
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// GPIOPin bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC GPIOPin *GPIOPin_create(unsigned int pin){
+    return new GPIOPin(pin);
+}
+
+BRIDGE_FUNC void GPIOPin_destroy(GPIOPin *dev){
+    delete dev;
+}
+
+BRIDGE_FUNC void GPIOPin_setMode(GPIOPin *dev, int mode){
+    dev->setMode(static_cast<GPIOPin::Mode>(mode));
+}
+
+BRIDGE_FUNC void GPIOPin_setLevel(GPIOPin *dev, int level){
+    dev->setLevel(static_cast<GPIOPin::Level>(level));
+}
+
+BRIDGE_FUNC int GPIOPin_getLevel(GPIOPin *dev){
+    return static_cast<int>(dev->getLevel());
+}
+
+BRIDGE_FUNC void GPIOPin_setPwmValue(GPIOPin *dev, uint8_t val){
+    dev->setPwmValue(val);
+}
+
+BRIDGE_FUNC uint8_t GPIOPin_getPwmValue(GPIOPin *dev){
+    return dev->getPwmValue();
+}
+
+BRIDGE_FUNC void GPIOPin_setPwmFrequency(GPIOPin *dev, unsigned int freq){
+    dev->setPwmFrequency(freq);
+}
+
+BRIDGE_FUNC unsigned int GPIOPin_getPwmFrequency(GPIOPin *dev){
+    return dev->getPwmFrequency();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// AudioManager bridge

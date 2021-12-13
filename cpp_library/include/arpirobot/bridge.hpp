@@ -72,6 +72,7 @@
 #include <arpirobot/devices/ina260/INA260PowerSensor.hpp>
 
 #include <arpirobot/devices/gpio/StatusLED.hpp>
+#include <arpirobot/devices/gpio/GPIOPin.hpp>
 
 #include <string>
 
@@ -582,9 +583,32 @@ BRIDGE_FUNC double INA260PowerSensor_getPower(INA260PowerSensor *vmon);
 /// StatusLED bridge
 ////////////////////////////////////////////////////////////////////////////////
 
-BRIDGE_FUNC StatusLED *StatusLED_create(int pin);
+BRIDGE_FUNC StatusLED *StatusLED_create(unsigned int pin);
 
 BRIDGE_FUNC void StatusLED_destroy(StatusLED *led);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// GPIOPin bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC GPIOPin *GPIOPin_create(unsigned int pin);
+
+BRIDGE_FUNC void GPIOPin_destroy(GPIOPin *dev);
+
+BRIDGE_FUNC void GPIOPin_setMode(GPIOPin *dev, int mode);
+
+BRIDGE_FUNC void GPIOPin_setLevel(GPIOPin *dev, int level);
+
+BRIDGE_FUNC int GPIOPin_getLevel(GPIOPin *dev);
+
+BRIDGE_FUNC void GPIOPin_setPwmValue(GPIOPin *dev, uint8_t val);
+
+BRIDGE_FUNC uint8_t GPIOPin_getPwmValue(GPIOPin *dev);
+
+BRIDGE_FUNC void GPIOPin_setPwmFrequency(GPIOPin *dev, unsigned int freq);
+
+BRIDGE_FUNC unsigned int GPIOPin_getPwmFrequency(GPIOPin *dev);
 
 
 ////////////////////////////////////////////////////////////////////////////////

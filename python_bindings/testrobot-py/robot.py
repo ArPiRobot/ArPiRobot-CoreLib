@@ -8,17 +8,17 @@ from arpirobot.core.log import Logger
 from arpirobot.arduino.iface import ArduinoUartInterface
 from arpirobot.arduino.sensor import VoltageMonitor, NxpAdafruit9Dof
 from arpirobot.core.audio import AudioManager
-from arpirobot.devices.gpio import StatusLED
+from arpirobot.devices.gpio import GPIOPin
 
 
 class Robot(BaseRobot):
     def __init__(self):
         super().__init__()
-
-        self.led = StatusLED(12)
+        self.led = GPIOPin(12)
     
     def robot_started(self):
         pass
+
 
     def robot_enabled(self):
         pass

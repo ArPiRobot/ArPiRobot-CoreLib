@@ -27,11 +27,13 @@
 namespace arpirobot{
 
     /**
-     * \class StatusLED StatusLED.hpp arpirobot/devices/gpio/StatusLED.hpp
-     * Controls an LED connected to a GPIO pin to add a visual indicator of robot status.
-     * While a robot program is running, the LED indicates the robot's state.
-     * While the robot is disabled, the LED is solid.
-     * While the robot is enabled, the LED blinks.
+     * \class GPIOPin GPIOPin.hpp arpirobot/devices/gpio/GPIOPin.hpp
+     * Use this device to directly control a GPIO pin
+     * This allows using the pin either as an input or an output
+     * Supported operations:
+     * - Digital Write & Read
+     * - PWM Value (0-255)
+     * - PWM Frequency (Hz)
      */
     class GPIOPin : public BaseDevice, public IoDevice{
     public:

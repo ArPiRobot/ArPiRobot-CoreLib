@@ -21,7 +21,6 @@ import ctypes
 
 arpirobot = ctypes.CDLL("libarpirobot-core.so")
 
-
 # NOTE: If returning dynamically allocated string restype should be ptr (ctypes.c_void_p)
 #       Using c_char_p will convert to python bytes then can't call free
 
@@ -600,6 +599,37 @@ arpirobot.StatusLED_create.restype = ctypes.c_void_p
 
 arpirobot.StatusLED_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.StatusLED_destroy.restype = None
+
+################################################################################
+# GPIOPin Bridge
+################################################################################
+
+arpirobot.GPIOPin_create.argtypes = [ctypes.c_uint]
+arpirobot.GPIOPin_create.restype = ctypes.c_void_p
+
+arpirobot.GPIOPin_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.GPIOPin_destroy.restype = None
+
+arpirobot.GPIOPin_setMode.argtypes = [ctypes.c_void_p, ctypes.c_int]
+arpirobot.GPIOPin_setMode.restype = None
+
+arpirobot.GPIOPin_setLevel.argtypes = [ctypes.c_void_p, ctypes.c_int]
+arpirobot.GPIOPin_setLevel.restype = None
+
+arpirobot.GPIOPin_getLevel.argtypes = [ctypes.c_void_p]
+arpirobot.GPIOPin_getLevel.restype = ctypes.c_int
+
+arpirobot.GPIOPin_setPwmValue.argtypes = [ctypes.c_void_p, ctypes.c_uint8]
+arpirobot.GPIOPin_setPwmValue.restype = None
+
+arpirobot.GPIOPin_getPwmValue.argtypes = [ctypes.c_void_p]
+arpirobot.GPIOPin_getPwmValue.restype = ctypes.c_uint8
+
+arpirobot.GPIOPin_setPwmFrequency.argtypes = [ctypes.c_void_p, ctypes.c_uint]
+arpirobot.GPIOPin_setPwmFrequency.restype = None
+
+arpirobot.GPIOPin_getPwmFrequency.argtypes = [ctypes.c_void_p]
+arpirobot.GPIOPin_getPwmFrequency.restype = ctypes.c_uint
 
 
 ################################################################################
