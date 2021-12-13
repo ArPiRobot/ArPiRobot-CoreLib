@@ -7,7 +7,7 @@
 #include <arpirobot/core/drive/ArcadeDriveHelper.hpp>
 #include <arpirobot/arduino/iface/ArduinoUartInterface.hpp>
 #include <arpirobot/arduino/sensor/VoltageMonitor.hpp>
-#include <arpirobot/devices/led/StatusLED.hpp>
+#include <arpirobot/devices/gpio/GPIOPin.hpp>
 
 using namespace arpirobot;
 
@@ -27,5 +27,5 @@ public:
     void periodic();
 
 private:
-    StatusLED led {12};
+    GPIOPin led {12};
 };

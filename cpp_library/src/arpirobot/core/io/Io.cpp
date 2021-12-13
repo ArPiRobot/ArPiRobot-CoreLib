@@ -123,6 +123,14 @@ void Io::gpioSetPwmFrequency(unsigned int pin, unsigned int frequency){
     }
 }
 
+unsigned int Io::gpioGetPwmFrequency(unsigned int pin){
+    if(instance != nullptr){
+        return instance->gpioGetPwmFrequency(pin);
+    }
+    return 0;
+}
+
+
 void Io::gpioPwm(unsigned int pin, unsigned int value){
     if(instance != nullptr){
         instance->gpioPwm(pin, value);

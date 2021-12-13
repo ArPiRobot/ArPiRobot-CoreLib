@@ -55,6 +55,11 @@ void DummyIoProvider::gpioSetPwmFrequency(unsigned int pin, unsigned int frequen
     Logger::logDebugFrom("DummyIoProvider", "gpioSetPwmFrequency(" + std::to_string(pin) + ", " + std::to_string(frequency) + ")");
 }
 
+unsigned int DummyIoProvider::gpioGetPwmFrequency(unsigned int pin){
+    Logger::logDebugFrom("DummyIoProvider", "gpioGetPwmFrequency(" + std::to_string(pin) + ")");
+    return 0;
+}
+
 void DummyIoProvider::gpioPwm(unsigned int pin, unsigned int value){
     Logger::logDebugFrom("DummyIoProvider", "gpioPwm(" + std::to_string(pin) + ", " + std::to_string(value) + ")");
 }

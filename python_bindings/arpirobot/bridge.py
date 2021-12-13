@@ -595,7 +595,7 @@ arpirobot.INA260PowerSensor_makeMainVmon.restype = None
 # StatusLED Bridge
 ################################################################################
 
-arpirobot.StatusLED_create.argtypes = [ctypes.c_int]
+arpirobot.StatusLED_create.argtypes = [ctypes.c_uint]
 arpirobot.StatusLED_create.restype = ctypes.c_void_p
 
 arpirobot.StatusLED_destroy.argtypes = [ctypes.c_void_p]

@@ -18,7 +18,7 @@
  * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-#include <arpirobot/devices/led/StatusLED.hpp>
+#include <arpirobot/devices/gpio/StatusLED.hpp>
 #include <arpirobot/core/io/Io.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 #include <arpirobot/core/robot/BaseRobot.hpp>
@@ -29,12 +29,14 @@ using namespace arpirobot;
 /// StatusLED
 ////////////////////////////////////////////////////////////////////////////////
 
-StatusLED::StatusLED(int pin) : pin(pin){
+StatusLED::StatusLED(unsigned int pin) : pin(pin){
     BaseRobot::beginWhenReady(this);
 }
 
 StatusLED::~StatusLED(){
-    stop = true;
+    if(schedulerTask != nullptr){
+        BaseRobot::removeTaskFromScheduler(schedulerTask);
+    }
     close();
 }
 
@@ -53,11 +55,10 @@ void StatusLED::begin(){
         Logger::logErrorFrom(getDeviceName(), "Failed to initialize device. GPIO error.");
         Logger::logDebugFrom(getDeviceName(), e.what());
     }
-    BaseRobot::runOnceSoon(std::bind(&StatusLED::feed, this));
 }
 
 bool StatusLED::isEnabled(){
-    return enabled;
+    return schedulerTask != nullptr;
 }
 
 bool StatusLED::shouldMatchRobotState(){
@@ -69,36 +70,23 @@ bool StatusLED::shouldDisableWithWatchdog(){
 }
 
 void StatusLED::enable(){
-    enabled = true;
+    schedulerTask = BaseRobot::scheduleRepeatedFunction(
+        std::bind(&StatusLED::blink, this), std::chrono::milliseconds(500));
 }
 
 void StatusLED::disable(){
-    enabled = false;
+    if(schedulerTask != nullptr)
+        BaseRobot::removeTaskFromScheduler(schedulerTask);
+    schedulerTask = nullptr;
     Io::gpioWrite(pin, Io::GPIO_HIGH);
 }
 
-void StatusLED::feed(){
-    while(!stop && BaseRobot::currentRobot != nullptr){
-        if(enabled){
-            try{
-                if(ledState){
-                    Io::gpioWrite(pin, Io::GPIO_HIGH);
-                }else{
-                    Io::gpioWrite(pin, Io::GPIO_LOW);
-                }
-                ledState = !ledState;
-            }catch(const std::exception &e){
-                Logger::logWarningFrom(getDeviceName(), "Failed to read data.");
-                Logger::logDebugFrom(getDeviceName(), e.what());
-            }       
-        }else{
-            Io::gpioWrite(pin, Io::GPIO_HIGH);
-            ledState = true;
-        }
-
-        // Instead of running this every 50ms (using scheduler repeated task)
-        // ensure 500ms between end of previous run and start of next
-        // this helps to reduce CPU usage (especially on pi zero)
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+void StatusLED::blink(){
+    if(!isEnabled())
+        return;
+    if(Io::gpioRead(pin) == Io::GPIO_HIGH){
+        Io::gpioWrite(pin, Io::GPIO_LOW);
+    }else{
+        Io::gpioWrite(pin, Io::GPIO_HIGH);
     }
 }

@@ -50,6 +50,8 @@ namespace arpirobot{
 
         void gpioSetPwmFrequency(unsigned int pin, unsigned int frequency) override;
 
+        unsigned int gpioGetPwmFrequency(unsigned int pin) override;
+
         void gpioPwm(unsigned int pin, unsigned int value) override;
 
 

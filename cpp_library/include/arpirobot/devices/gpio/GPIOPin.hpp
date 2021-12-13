@@ -27,23 +27,39 @@
 namespace arpirobot{
 
     /**
-     * \class StatusLED StatusLED.hpp arpirobot/devices/led/StatusLED.hpp
+     * \class StatusLED StatusLED.hpp arpirobot/devices/gpio/StatusLED.hpp
      * Controls an LED connected to a GPIO pin to add a visual indicator of robot status.
      * While a robot program is running, the LED indicates the robot's state.
      * While the robot is disabled, the LED is solid.
      * While the robot is enabled, the LED blinks.
      */
-    class StatusLED : public BaseDevice, public IoDevice{
+    class GPIOPin : public BaseDevice, public IoDevice{
     public:
-        StatusLED(int pin);
+        enum class Mode {Input = 0, Output = 1};
+        enum class Level {Low = 0, High = 1};
 
-        StatusLED(const StatusLED &other) = delete;
+        GPIOPin(unsigned int pin);
 
-        ~StatusLED();
+        GPIOPin(const GPIOPin &other) = delete;
 
-        StatusLED &operator=(const StatusLED &other) = delete;
+        ~GPIOPin();
+
+        GPIOPin &operator=(const GPIOPin &other) = delete;
 
         std::string getDeviceName() override;
+
+        // Pin configuration
+        void setMode(Mode mode);
+
+        // Digital logic
+        void setLevel(Level level);
+        Level getLevel();
+        
+        // PWM
+        void setPwmValue(uint8_t val);
+        uint8_t getPwmValue();
+        void setPwmFrequency(unsigned int freq);
+        unsigned int getPwmFrequency();
 
     protected:
         void close() override;
@@ -61,12 +77,8 @@ namespace arpirobot{
         void disable() override;
 
     private:
-        void feed();
-        bool stop = false;
-
-        int pin;
-        bool enabled = false;
-        bool ledState = true;
+        unsigned int pin;
+        uint8_t lastPwmValue;
     };
 
 }

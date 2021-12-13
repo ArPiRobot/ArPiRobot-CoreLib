@@ -71,6 +71,8 @@ namespace arpirobot{
 
         static void gpioSetPwmFrequency(unsigned int pin, unsigned int frequency);
 
+        static unsigned int gpioGetPwmFrequency(unsigned int pin);
+
         static void gpioPwm(unsigned int pin, unsigned int value);
 
 

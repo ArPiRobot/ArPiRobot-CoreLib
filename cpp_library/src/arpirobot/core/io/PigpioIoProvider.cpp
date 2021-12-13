@@ -70,6 +70,12 @@ void PigpioIoProvider::gpioSetPwmFrequency(unsigned int pin, unsigned int freque
     handlePigpioError(res, false);
 }
 
+unsigned int PigpioIoProvider::gpioGetPwmFrequency(unsigned int pin){
+    int res = ::gpioGetPWMfrequency(pin);
+    handlePigpioError(pin, false);
+    return res;
+}
+
 void PigpioIoProvider::gpioPwm(unsigned int pin, unsigned int value){
     int res = ::gpioPWM(pin, value);
     handlePigpioError(pin, false);

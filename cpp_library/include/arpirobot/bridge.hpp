@@ -71,7 +71,7 @@
 
 #include <arpirobot/devices/ina260/INA260PowerSensor.hpp>
 
-#include <arpirobot/devices/led/StatusLED.hpp>
+#include <arpirobot/devices/gpio/StatusLED.hpp>
 
 #include <string>
 

@@ -8,7 +8,7 @@ from arpirobot.core.log import Logger
 from arpirobot.arduino.iface import ArduinoUartInterface
 from arpirobot.arduino.sensor import VoltageMonitor, NxpAdafruit9Dof
 from arpirobot.core.audio import AudioManager
-from arpirobot.devices.led import StatusLED
+from arpirobot.devices.gpio import StatusLED
 
 
 class Robot(BaseRobot):

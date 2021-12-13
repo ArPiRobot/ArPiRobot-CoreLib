@@ -54,6 +54,8 @@ namespace arpirobot {
 
         virtual void gpioSetPwmFrequency(unsigned int pin, unsigned int frequency) = 0;
 
+        virtual unsigned int gpioGetPwmFrequency(unsigned int pin) = 0;
+
         virtual void gpioPwm(unsigned int pin, unsigned int value) = 0;
 
 
