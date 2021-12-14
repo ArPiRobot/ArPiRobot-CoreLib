@@ -1,10 +1,6 @@
 #include <robot.hpp>
-#include <arpirobot/core/action/Action.hpp>
-#include <arpirobot/core/log/Logger.hpp>
-#include <arpirobot/core/drive/CubicAxisTransform.hpp>
-#include <arpirobot/core/drive/SquareRootAxisTransform.hpp>
 #include <actions.hpp>
-#include <iostream>
+#include <arpirobot/core/log/Logger.hpp>
 
 void Robot::robotStarted(){
     
