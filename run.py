@@ -20,7 +20,7 @@ try:
     elif args.program == "python":
         os.environ["PYTHONPATH"] = os.path.join(script_dir, "python_bindings")
         if platform.system() == "Windows":
-            pass
+            os.environ["PATH"] = os.path.join(script_dir, "cpp_library", "build") + os.pathsep + os.environ["PATH"]
         else:
             if "LD_LIBRARY_PATH" not in os.environ:
                 os.environ["LD_LIBRARY_PATH"] = ""

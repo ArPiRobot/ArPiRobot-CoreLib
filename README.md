@@ -33,3 +33,7 @@ Python bindings for the ArPiRobot core library (C++). The python library matches
         - `dev-deploy.py`: Used to copy built library and language bindings to the robot (192.168.10.1) via SCP. Files deployed to `/home/pi/CoreLibTest`. *Make sure you build the C++ library before deploying or some files will be missing.*
         - `start-cpp.sh`: Used to start the C++ testrobot program (run this on the robot using SSH)
         - `start-py.sh`: Used to start the Python testrobot program (run this on the robot using SSH)
+
+- Running on dev PC for testing
+    - You must first build the cpp library for your pc (native build)
+    - Use the `run.py` script to run either the python or cpp test robot on your development computer

@@ -59,3 +59,20 @@ add_dependencies(testrobot arpirobot-core)
 target_include_directories(testrobot PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/testrobot/include)
 target_link_libraries(testrobot arpirobot-core)
 target_compile_options(testrobot PRIVATE -Wno-psabi)
+
+# This is only necessary because of how window search paths and python's ctypes interact
+# Even if mingw bin is in the path, ctypes fails to load the dll unless dependency dlls are in the same folder
+# There's probably a better way to do this than hard coding these, but...
+if(MINGW)
+     get_filename_component(COMPILER_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+
+     add_custom_target(copy_dlls ALL)
+     add_custom_command(TARGET copy_dlls PRE_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy "${COMPILER_DIR}/libstdc++-6.dll" $<TARGET_FILE_DIR:arpirobot-core>)
+     add_custom_command(TARGET copy_dlls PRE_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy "${COMPILER_DIR}/libgcc_s_seh-1.dll" $<TARGET_FILE_DIR:arpirobot-core>)
+     add_custom_command(TARGET copy_dlls PRE_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy "${COMPILER_DIR}/libwinpthread-1.dll" $<TARGET_FILE_DIR:arpirobot-core>)
+endif()
+
+

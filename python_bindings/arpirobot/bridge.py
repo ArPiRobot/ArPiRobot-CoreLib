@@ -18,8 +18,13 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import ctypes
+import platform
 
-arpirobot = ctypes.CDLL("libarpirobot-core.so")
+if platform.system() == "Windows":
+    from ctypes.util import find_library
+    arpirobot = ctypes.CDLL(find_library("libarpirobot-core.dll"))
+else:
+    arpirobot = ctypes.CDLL("libarpirobot-core.so")
 
 # NOTE: If returning dynamically allocated string restype should be ptr (ctypes.c_void_p)
 #       Using c_char_p will convert to python bytes then can't call free
@@ -335,6 +340,12 @@ arpirobot.ActionManager_startAction.restype = ctypes.c_bool
 
 arpirobot.ActionManager_stopAction.argtypes = [ctypes.c_void_p]
 arpirobot.ActionManager_stopAction.restype = ctypes.c_bool
+
+arpirobot.ActionManager_addTrigger.argtypes = [ctypes.c_void_p]
+arpirobot.ActionManager_addTrigger.restype = None
+
+arpirobot.ActionManager_removeTrigger.argtypes = [ctypes.c_void_p]
+arpirobot.ActionManager_removeTrigger.restype = None
 
 
 ################################################################################
