@@ -22,13 +22,13 @@ class JSDriveAction(Action):
 class SpeakAction(Action):
     def begin(self):
         Logger.log_info_from("SpeakAction", "begin")
-        AudioManager.play_sound("C:\\test.wav")
+        AudioManager.play_sound("/home/marcus/test.wav")
     
     def process(self):
-        Logger.log_info_from("JSDriveAction", "process")
+        Logger.log_info_from("SpeakAction", "process")
     
     def finish(self, was_interrupted: bool):
-        Logger.log_info_from("JSDriveAction", "finish")
+        Logger.log_info_from("SpeakAction", "finish")
     
     def should_continue(self) -> bool:
         return False
