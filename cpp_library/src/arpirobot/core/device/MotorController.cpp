@@ -39,6 +39,12 @@ bool MotorController::isBrakeMode(){
 
 void MotorController::setBrakeMode(bool brakeMode){
     this->brakeMode = brakeMode;
+
+    // Update brake mode even if motor is disabled
+    {
+        std::lock_guard<std::mutex> l(lock);
+        run();
+    }
 }
 
 double MotorController::getSpeed(){
