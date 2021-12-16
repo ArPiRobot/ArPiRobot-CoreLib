@@ -93,14 +93,18 @@ void SchedSleeper::interrupt(){
 Scheduler::Scheduler(unsigned int maxThreads) : done(false), threads(maxThreads + 1){
     // Use an extra thread in this pool to run the scheduler itself (so scheduler is not blocking)
     threads.push([this](int) {
-        while (!done) {
-            if (tasks.empty()) {
-                sleeper.sleep();
-            } else {
-                auto time_of_first_task = (*tasks.begin()).first;
-                sleeper.sleep_until(time_of_first_task);
+        try{
+            while (!done) {
+                if (tasks.empty()) {
+                    sleeper.sleep();
+                } else {
+                    auto time_of_first_task = (*tasks.begin()).first;
+                    sleeper.sleep_until(time_of_first_task);
+                }
+                serviceTasks();
             }
-            serviceTasks();
+        }catch(...){
+            Logger::logErrorFrom("Scheduler", "Error on thread running the scheduler. Scheduler is now dead.");
         }
     });
 }
@@ -163,7 +167,17 @@ void Scheduler::serviceTasks(){
             auto &task = i->second;
             // Start the task (in the threadpool)
             threads.push([task](int) {
-                task->targetFunction();
+                try{
+                    task->targetFunction();
+                }catch(const std::exception &e){
+                    Logger::logErrorFrom("Scheduler", "Error in scheduled task.");
+                    Logger::logDebugFrom("Scheduler", std::string(e.what()));
+                }catch(const std::string &e){
+                    Logger::logErrorFrom("Scheduler", "Error in scheduled task.");
+                    Logger::logDebugFrom("Scheduler", e);
+                }catch(...){
+                    Logger::logErrorFrom("Scheduler", "Error in scheduled task.");
+                }
             });
             // Calculate the next run time for the task
             if(task->doesRepeat()){

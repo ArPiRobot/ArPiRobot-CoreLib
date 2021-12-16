@@ -91,54 +91,63 @@ bool AudioManager::playSound(std::string file){
 }
 
 bool AudioManager::playSound(std::string file, AudioDeviceInfo info){
-    std::lock_guard<std::mutex> lock(amMutex);
-    if(usedDevices.find(info.id) == usedDevices.end()){
-        // Add a "Device" object cooresponding to the id of the AudioDeviceInfo object
-        usedDevices[info.id] = Device();
-    }
-    
-    // This device object is a container for a ma_device, ma_decoder, and ma_
-    Device &dev = usedDevices[info.id];
+    {
+        std::lock_guard<std::mutex> lock(amMutex);
+        if(usedDevices.find(info.id) == usedDevices.end()){
+            // Add a "Device" object cooresponding to the id of the AudioDeviceInfo object
+            usedDevices[info.id] = Device();
+        }
+        
+        // This device object is a container for a ma_device, ma_decoder, and ma_
+        Device &dev = usedDevices[info.id];
 
-    // Ensure device is stopped
-    ma_device_stop(&dev.device);
+        Logger::logDebugFrom("playSound2", "Point A");
+        Logger::logDebugFrom("playSound2", "dev: " + std::to_string((long int)(&dev)));
+        Logger::logDebugFrom("playSound2", "dev.device: " + std::to_string((long int)(&dev.device)));
 
-    // Ensure device is not inited so the device can be re-inited with a new config
-    ma_device_uninit(&dev.device);
+        // Ensure device is stopped
+        // THIS LINE CAUSES FREEZE!!!
+        ma_device_stop(&dev.device);
 
-    // Ensure proper cleanup of decoder
-    ma_decoder_uninit(&dev.decoder);
+        Logger::logDebugFrom("playSound2", "Point B");
 
-    // Create decoder for the given file and init device
-    ma_result res = ma_decoder_init_file(file.c_str(), NULL, &dev.decoder);
-    if(res != MA_SUCCESS){
-        Logger::logWarningFrom("AudioManager", "Failed to find decoder for audio file " + file);
-        return false;
-    }
-
-    dev.deviceConfig = ma_device_config_init(ma_device_type_playback);
-    dev.deviceConfig.playback.pDeviceID = 
-            &playbackDeviceInfos[info.id].id; // ID for playback device matches index in infos array
-    dev.deviceConfig.playback.format = dev.decoder.outputFormat;
-    dev.deviceConfig.playback.channels = dev.decoder.outputChannels;
-    dev.deviceConfig.sampleRate = dev.decoder.outputSampleRate;
-    dev.deviceConfig.dataCallback = &AudioManager::playbackDataCallback;
-    dev.deviceConfig.stopCallback = &AudioManager::playbackStopCallback;
-    dev.deviceConfig.pUserData = &dev.decoder;
-
-    if(ma_device_init(&context, &dev.deviceConfig, &dev.device) != MA_SUCCESS){
-        Logger::logWarningFrom("AudioManager", "Failed to init device while playing audio.");
-        ma_decoder_uninit(&dev.decoder);
-        return false;
-    }
-
-    if(ma_device_start(&dev.device) != MA_SUCCESS){
-        Logger::logWarningFrom("AudioManager", "Failed to start playback device.");
+        // Ensure device is not inited so the device can be re-inited with a new config
         ma_device_uninit(&dev.device);
+
+        // Ensure proper cleanup of decoder
         ma_decoder_uninit(&dev.decoder);
-        return false;
+
+        // Create decoder for the given file and init device
+        ma_result res = ma_decoder_init_file(file.c_str(), NULL, &dev.decoder);
+        if(res != MA_SUCCESS){
+            Logger::logWarningFrom("AudioManager", "Failed to find decoder for audio file " + file);
+            return false;
+        }
+
+        dev.deviceConfig = ma_device_config_init(ma_device_type_playback);
+        dev.deviceConfig.playback.pDeviceID = 
+                &playbackDeviceInfos[info.id].id; // ID for playback device matches index in infos array
+        dev.deviceConfig.playback.format = dev.decoder.outputFormat;
+        dev.deviceConfig.playback.channels = dev.decoder.outputChannels;
+        dev.deviceConfig.sampleRate = dev.decoder.outputSampleRate;
+        dev.deviceConfig.dataCallback = &AudioManager::playbackDataCallback;
+        dev.deviceConfig.stopCallback = &AudioManager::playbackStopCallback;
+        dev.deviceConfig.pUserData = &dev.decoder;
+
+        if(ma_device_init(&context, &dev.deviceConfig, &dev.device) != MA_SUCCESS){
+            Logger::logWarningFrom("AudioManager", "Failed to init device while playing audio.");
+            ma_decoder_uninit(&dev.decoder);
+            return false;
+        }
+
+        if(ma_device_start(&dev.device) != MA_SUCCESS){
+            Logger::logWarningFrom("AudioManager", "Failed to start playback device.");
+            ma_device_uninit(&dev.device);
+            ma_decoder_uninit(&dev.decoder);
+            return false;
+        }
+        return true;
     }
-    return true;
 }
 
 void AudioManager::playbackDataCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount){
