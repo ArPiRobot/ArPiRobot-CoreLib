@@ -56,7 +56,7 @@ arpirobot.BaseRobot_create.restype = ctypes.c_void_p
 arpirobot.BaseRobot_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.BaseRobot_destroy.restype = None
 
-arpirobot.BaseRobot_start.argtypes = [ctypes.c_void_p]
+arpirobot.BaseRobot_start.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
 arpirobot.BaseRobot_start.restype = None
 
 arpirobot.BaseRobot_feedWatchdog.argtypes = [ctypes.c_void_p]

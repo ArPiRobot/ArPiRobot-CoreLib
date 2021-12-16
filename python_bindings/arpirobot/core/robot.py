@@ -86,8 +86,8 @@ class BaseRobot(ABC):
         bridge.arpirobot.BaseRobot_destroy(self._ptr)
 
     ## Start the robot. Only one robot instance my run at a time
-    def start(self):
-        bridge.arpirobot.BaseRobot_start(self._ptr)
+    def start(self, io_provider = ""):
+        bridge.arpirobot.BaseRobot_start(self._ptr, io_provider.encode())
 
     ## Feed the watchdog so devices don't become disabled
     def feed_watchdog(self):

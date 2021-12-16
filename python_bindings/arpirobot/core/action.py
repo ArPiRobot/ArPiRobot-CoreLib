@@ -42,7 +42,7 @@ class Action(ABC):
         
         @ctypes.CFUNCTYPE(ctypes.c_bool)
         def should_continue() -> bool:
-            return self.should_continue();
+            return self.should_continue()
         
         # Have to keep reference to these or will be garbage collected then seg fault
         self.b_internal = begin

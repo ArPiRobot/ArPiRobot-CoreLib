@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 
 EC_MISSING_DEP = 1
 EC_CONN_ERROR = 2
@@ -11,6 +12,11 @@ from typing import List, Tuple
 import os
 import glob
 
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(levelname)s: %(message)s"
+)
 
 try:
     from ssh2.session import Session
@@ -32,7 +38,7 @@ deploy_dir = "/home/pi/CoreLib-Test"
 
 # Globals used for connection
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-session: Session = None
+session = None
 
 
 def parse_arguments():
@@ -189,6 +195,12 @@ def sftp_copy_directory(sftp, local_path: str, remote_dest: str):
         logging.debug(type(e).__name__)
         exit(EC_FILE_ERROR)       
 
+def remove_prefix(text, prefix):
+    if text.startswith(prefix):
+        return text[len(prefix):]
+    return text
+
+
 def sftp_send(patterns: List[str]):
     # Send files matching the given paterns with respect to the directory the script is stored in
     script_dir = os.path.dirname(os.path.realpath(__file__))
@@ -197,7 +209,7 @@ def sftp_send(patterns: List[str]):
         sftp = session.sftp_init()
         for pattern in patterns:
             for file in glob.glob(f"{script_dir}/{pattern}"):
-                filename = file.removeprefix(script_dir + '/').replace('\\', '/')
+                filename = remove_prefix(file, script_dir + '/').replace('\\', '/')
                 logging.info(f"\tCopying {filename}")
                 if os.path.isfile(file):
                     sftp_copy_file(sftp, file.replace("\\", "/"), deploy_dir)
@@ -210,13 +222,7 @@ def sftp_send(patterns: List[str]):
 
 
 
-def main():    
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(levelname)s: %(message)s"
-    )
-    
+def main():       
     parse_arguments()
     connect_to_host()
     ssh_connect()
