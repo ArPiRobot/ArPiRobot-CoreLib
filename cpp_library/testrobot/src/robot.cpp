@@ -8,9 +8,9 @@ void Robot::robotStarted(){
 }
 
 void Robot::robotEnabled(){
-    int jobc = AudioManager::playSound("C:\\c4.mp3");
+    int jobc = AudioManager::playSound("/home/pi/sound_files/c4.mp3");
     // AudioManager::stopJob(jobc);
-    int jobg = AudioManager::playSound("C:\\g4.mp3");
+    int jobg = AudioManager::playSound("/home/pi/sound_files/g4.mp3");
     Logger::logInfo("Job C = " + std::to_string(jobc));
     Logger::logInfo("Job G = " + std::to_string(jobg));
 }

@@ -650,17 +650,14 @@ arpirobot.GPIOPin_getPwmFrequency.restype = ctypes.c_uint
 arpirobot.AudioManager_getPlaybackDevicesCount.argtypes = []
 arpirobot.AudioManager_getPlaybackDevicesCount.restype = ctypes.c_size_t
 
-arpirobot.AudioManager_getPlaybackDevice.argtypes = [ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_bool)]
+arpirobot.AudioManager_getPlaybackDevice.argtypes = [ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_bool), ctypes.POINTER(ctypes.c_uint8)]
 arpirobot.AudioManager_getPlaybackDevice.restype = None
 
-arpirobot.AudioManager_getCaptureDevicesCount.argtypes = []
-arpirobot.AudioManager_getCaptureDevicesCount.restype = ctypes.c_size_t
-
-arpirobot.AudioManager_getCaptureDevice.argtypes = [ctypes.c_size_t, ctypes.POINTER(ctypes.c_uint32), ctypes.POINTER(ctypes.c_char_p), ctypes.POINTER(ctypes.c_bool)]
-arpirobot.AudioManager_getCaptureDevice.restype = None
-
 arpirobot.AudioManager_playSound.argtypes = [ctypes.c_char_p]
-arpirobot.AudioManager_playSound.restype = ctypes.c_bool
+arpirobot.AudioManager_playSound.restype = ctypes.c_int
 
-arpirobot.AudioManager_playSoundWithDevice.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_char_p, ctypes.c_bool]
-arpirobot.AudioManager_playSoundWithDevice.restype = ctypes.c_bool
+arpirobot.AudioManager_playSoundWithDevice.argtypes = [ctypes.c_char_p, ctypes.c_uint32, ctypes.c_char_p, ctypes.c_bool, ctypes.c_uint8]
+arpirobot.AudioManager_playSoundWithDevice.restype = ctypes.c_int
+
+arpirobot.AudioManager_stopJob.argtypes = [ctypes.c_int]
+arpirobot.AudioManager_stopJob.restype = None

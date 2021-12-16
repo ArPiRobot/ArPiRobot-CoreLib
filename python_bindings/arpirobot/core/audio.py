@@ -24,9 +24,14 @@ import ctypes
 
 
 class AudioDeviceInfo:
-    id: int = -1
-    name: str = ""
-    is_default: bool = False
+    TYPE_PLAYBACK = 0
+    TYPE_CAPTURE = 1
+
+    def __init__(self):
+        self.id: int = -1
+        self.name: str = ""
+        self.is_default: bool = False
+        self.type: int = 0
 
 
 class AudioManager:
@@ -36,37 +41,26 @@ class AudioManager:
         id = ctypes.c_uint32(0)
         name = ctypes.c_char_p(b"")
         is_default = ctypes.c_bool(False)
+        type = ctypes.c_uint8(0)
         lst = []
         for i in range(count):
-            bridge.arpirobot.AudioManager_getPlaybackDevice(i, ctypes.byref(id), ctypes.byref(name), ctypes.byref(is_default))
+            bridge.arpirobot.AudioManager_getPlaybackDevice(i, ctypes.byref(id), ctypes.byref(name), ctypes.byref(is_default), ctypes.byref(type))
             info = AudioDeviceInfo()
             info.id = id.value
             info.name = name.value.decode()
             info.is_default = is_default.value
+            info.type = type.value
             lst.append(info)
             bridge.arpirobot.freeString(name)
         return lst
 
     @staticmethod
-    def get_capture_devices() -> List[AudioDeviceInfo]:
-        count: int = bridge.arpirobot.AudioManager_getCaptureDevicesCount()
-        id = ctypes.c_uint32(0)
-        name = ctypes.c_char_p(b"")
-        is_default = ctypes.c_bool(False)
-        lst = []
-        for i in range(count):
-            bridge.arpirobot.AudioManager_getCaptureDevice(i, ctypes.byref(id), ctypes.byref(name), ctypes.byref(is_default))
-            info = AudioDeviceInfo()
-            info.id = id.value
-            info.name = name.value.decode()
-            info.is_default = is_default.value
-            lst.append(info)
-            bridge.arpirobot.freeString(name)
-        return lst
-
-    @staticmethod
-    def play_sound(filename: str, info: AudioDeviceInfo = None) -> bool:
+    def play_sound(filename: str, info: AudioDeviceInfo = None) -> int:
         if info is None:
             return bridge.arpirobot.AudioManager_playSound(filename.encode())
         else:
-            return bridge.arpirobot.AudioManager_playSoundWithDevice(filename.encode(), info.id, info.name.encode(), info.is_default)
+            return bridge.arpirobot.AudioManager_playSoundWithDevice(filename.encode(), info.id, info.name.encode(), info.is_default, info.type)
+
+    @staticmethod
+    def stop_job(job_id: int):
+        bridge.arpirobot.AudioManager_stopJob(job_id)

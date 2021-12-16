@@ -912,24 +912,30 @@ BRIDGE_FUNC size_t AudioManager_getPlaybackDevicesCount(){
     return AudioManager::getPlaybackDevices().size();
 }
 
-BRIDGE_FUNC void AudioManager_getPlaybackDevice(size_t index, uint32_t *id, char **name, bool *isDefault){
+BRIDGE_FUNC void AudioManager_getPlaybackDevice(size_t index, uint32_t *id, char **name, bool *isDefault, uint8_t *type){
     AudioDeviceInfo info = AudioManager::getPlaybackDevices()[index];
     *id = info.id;
     *name = new char[info.name.length() + 1];
     std::strcpy(*name, info.name.c_str());
     *isDefault = info.isDefault;
+    *type = info.type;
 }
 
-BRIDGE_FUNC bool AudioManager_playSound(const char *filename){
+BRIDGE_FUNC int AudioManager_playSound(const char *filename){
     std::string cppFilename(filename);
     return AudioManager::playSound(cppFilename);
 }
 
-BRIDGE_FUNC bool AudioManager_playSoundWithDevice(const char *filename, uint32_t playbackDeviceId, const char *playbackDeviceName, bool playbackDeviceIsDefault){
+BRIDGE_FUNC int AudioManager_playSoundWithDevice(const char *filename, uint32_t playbackDeviceId, const char *playbackDeviceName, bool playbackDeviceIsDefault, uint8_t playbackDeviceType){
     std::string cppFilename(filename);
     AudioDeviceInfo info;
     info.id = playbackDeviceId;
     info.name = playbackDeviceName;
     info.isDefault = playbackDeviceIsDefault;
+    info.type = playbackDeviceType;
     return AudioManager::playSound(cppFilename, info);
+}
+
+BRIDGE_FUNC void AudioManager_stopJob(int jobId){
+    AudioManager::stopJob(jobId);
 }

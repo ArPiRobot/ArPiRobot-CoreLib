@@ -617,12 +617,10 @@ BRIDGE_FUNC unsigned int GPIOPin_getPwmFrequency(GPIOPin *dev);
 
 BRIDGE_FUNC size_t AudioManager_getPlaybackDevicesCount();
 
-BRIDGE_FUNC void AudioManager_getPlaybackDevice(size_t index, uint32_t *id, char **name, bool *isDefault);
+BRIDGE_FUNC void AudioManager_getPlaybackDevice(size_t index, uint32_t *id, char **name, bool *isDefault, uint8_t *type);
 
-BRIDGE_FUNC size_t AudioManager_getCaptureDevicesCount();
+BRIDGE_FUNC int AudioManager_playSound(const char *filename);
 
-BRIDGE_FUNC void AudioManager_getCaptureDevice(size_t index, uint32_t *id, char **name, bool *isDefault);
+BRIDGE_FUNC int AudioManager_playSoundWithDevice(const char *filename, uint32_t playbackDeviceId, const char *playbackDeviceName, bool playbackDeviceIsDefault, uint8_t playbackDeviceType);
 
-BRIDGE_FUNC bool AudioManager_playSound(const char *filename);
-
-BRIDGE_FUNC bool AudioManager_playSoundWithDevice(const char *filename, uint32_t playbackDeviceId, const char *playbackDeviceName, bool playbackDeviceIsDefault);
+BRIDGE_FUNC void AudioManager_stopJob(int jobId);
