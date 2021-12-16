@@ -101,15 +101,8 @@ bool AudioManager::playSound(std::string file, AudioDeviceInfo info){
         // This device object is a container for a ma_device, ma_decoder, and ma_
         Device &dev = usedDevices[info.id];
 
-        Logger::logDebugFrom("playSound2", "Point A");
-        Logger::logDebugFrom("playSound2", "dev: " + std::to_string((long int)(&dev)));
-        Logger::logDebugFrom("playSound2", "dev.device: " + std::to_string((long int)(&dev.device)));
-
         // Ensure device is stopped
-        // THIS LINE CAUSES FREEZE!!!
         ma_device_stop(&dev.device);
-
-        Logger::logDebugFrom("playSound2", "Point B");
 
         // Ensure device is not inited so the device can be re-inited with a new config
         ma_device_uninit(&dev.device);
