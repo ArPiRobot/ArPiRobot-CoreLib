@@ -21,30 +21,41 @@
 #include <miniaudio.h>
 
 #include <arpirobot/core/audio/AudioManager.hpp>
+#include <arpirobot/core/robot/BaseRobot.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 
 using namespace arpirobot;
 
-// Static members
+
+////////////////////////////////////////////////////////////////////////////////
+/// AudioManager Static Members
+////////////////////////////////////////////////////////////////////////////////
 bool AudioManager::initDone = false;
 ma_context AudioManager::context;
-ma_device_info *AudioManager::playbackDeviceInfos = nullptr;
-ma_uint32 AudioManager::playbackDeviceCount = 0;
-ma_device_info *AudioManager::captureDeviceInfos = nullptr;
-ma_uint32 AudioManager::captureDeviceCount = 0;
-std::unordered_map<int, AudioManager::Device> AudioManager::usedDevices;
-std::mutex AudioManager::amMutex;
+ma_device_info *AudioManager::playbackDeviceInfos;
+ma_uint32 AudioManager::playbackDeviceCount;
+ma_device_info *AudioManager::captureDeviceInfos;
+ma_uint32 AudioManager::captureDeviceCount;
 
+std::unordered_map<ma_device*, AudioManager::PlaybackSetup*> AudioManager::playbackSetups;
+std::unordered_map<int, ma_device*> AudioManager::jobIdMap;
+
+std::mutex AudioManager::lock;
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// AudioManager Functions
+////////////////////////////////////////////////////////////////////////////////
 
 std::vector<AudioDeviceInfo> AudioManager::getPlaybackDevices(){
-    std::lock_guard<std::mutex> lock(amMutex);
     if(initDone){
         std::vector<AudioDeviceInfo> infos;
         for(ma_uint32 i = 0; i < playbackDeviceCount; ++i){
             AudioDeviceInfo inf;
-            inf.id = i; // Playback device IDs start at zero
+            inf.id = i; // This id is the index in the playbackDeviceInfos array
             inf.name = std::string(playbackDeviceInfos[i].name);
             inf.isDefault = playbackDeviceInfos[i].isDefault;
+            inf.type = AudioDeviceInfo::TYPE_PLAYBACK;
             infos.push_back(inf);
         }
         return infos;
@@ -52,117 +63,122 @@ std::vector<AudioDeviceInfo> AudioManager::getPlaybackDevices(){
     return {};
 }
 
-std::vector<AudioDeviceInfo> AudioManager::getCaptureDevices(){
-    std::lock_guard<std::mutex> lock(amMutex);
-    if(initDone){
-        std::vector<AudioDeviceInfo> infos;
-        for(ma_uint32 i = 0; i < captureDeviceCount; ++i){
-            AudioDeviceInfo inf;
-            inf.id = i + playbackDeviceCount; // Capture device IDs start after playback
-            inf.name = std::string(captureDeviceInfos[i].name);
-            inf.isDefault = captureDeviceInfos[i].isDefault;
-            infos.push_back(inf);
+
+int AudioManager::playSound(std::string file){
+    for(ma_uint32 i = 0; i < playbackDeviceCount; ++i){
+        if(playbackDeviceInfos[i].isDefault){
+            AudioDeviceInfo info;
+            info.id = i;
+            info.name = std::string(playbackDeviceInfos[i].name);
+            info.isDefault = true;
+            info.type = AudioDeviceInfo::TYPE_PLAYBACK;
+            return AudioManager::playSound(file, info);
         }
-        return infos;
     }
-    return {};
+    Logger::logWarningFrom("AudioManager", "Attempted to play sound with default audio device, but none exists.");
+    return false;
 }
 
-bool AudioManager::playSound(std::string file){
-    AudioDeviceInfo info;
-    {
-        std::lock_guard<std::mutex> lock(amMutex);
-        ma_int64 idx = -1;
-        for(ma_uint32 i = 0; i < playbackDeviceCount; ++i){
-            if(playbackDeviceInfos[i].isDefault){
-                idx = i;
-                break;
-            }
-        }
-        if(idx == -1){
-            Logger::logWarningFrom("AudioManager", "Attempted to play sound with default audio device, but none exists.");
-            return false;
-        }
-        info.id = idx; // ID for playback devices matches index
-        info.name = playbackDeviceInfos[idx].name;
-        info.isDefault = true;
+int AudioManager::playSound(std::string file, AudioDeviceInfo info){
+
+    // This function modifies playbackSetups and jobIdMap. Acquire lock
+    std::lock_guard<std::mutex> lg(lock);
+
+    PlaybackSetup *setup = new PlaybackSetup();
+    setup->jobId = nextJobId();
+
+    // Store this so it can be deleted once playback is done
+    playbackSetups[&setup->device] = setup;
+
+    // Init the decoder for the given file
+    if(ma_decoder_init_file(file.c_str(), NULL, &setup->decoder) != MA_SUCCESS){
+        Logger::logWarningFrom("AudioManager", "Cannot find decoder for file " + file);
+        playbackSetups.erase(&setup->device);
+        delete setup;
+        return -1;
     }
-    return playSound(file, info);
+
+    ma_device_config deviceConfig = ma_device_config_init(ma_device_type_playback);
+    deviceConfig.playback.pDeviceID = &playbackDeviceInfos[info.id].id;
+    deviceConfig.playback.format = setup->decoder.outputFormat;
+    deviceConfig.playback.channels = setup->decoder.outputChannels;
+    deviceConfig.sampleRate = setup->decoder.outputSampleRate;
+    deviceConfig.dataCallback = &AudioManager::playbackDataCallback;
+
+    ma_result res = ma_device_init(NULL, &deviceConfig, &setup->device);
+    if(res != MA_SUCCESS){
+        Logger::logWarningFrom("AudioManager", "Unable to init device for playback.");
+        Logger::logDebugFrom("AudioManager", "Error code: " + std::to_string(res));
+        ma_decoder_uninit(&setup->decoder);
+        playbackSetups.erase(&setup->device);
+        delete  setup;
+        return -1;
+    }
+
+    res = ma_device_start(&setup->device);
+    if(res != MA_SUCCESS){
+        Logger::logWarningFrom("AudioManager", "Unable to start device for playback.");
+        Logger::logDebugFrom("AudioManager", "Error code: " + std::to_string(res));
+        ma_device_uninit(&setup->device);
+        ma_decoder_uninit(&setup->decoder);
+        playbackSetups.erase(&setup->device);
+        delete setup;
+        return -1;
+    }
+
+    // Playback was started successfully.
+    jobIdMap[setup->jobId] = &setup->device;
+    return setup->jobId;
 }
 
-bool AudioManager::playSound(std::string file, AudioDeviceInfo info){
-    {
-        std::lock_guard<std::mutex> lock(amMutex);
-        if(usedDevices.find(info.id) == usedDevices.end()){
-            // Add a "Device" object cooresponding to the id of the AudioDeviceInfo object
-            usedDevices[info.id] = Device();
-        }
-        
-        // This device object is a container for a ma_device, ma_decoder, and ma_
-        Device &dev = usedDevices[info.id];
+void AudioManager::stopJob(int jobId){
+    // This function modifies playbackSetups and jobIdMap. Acquire lock
+    std::lock_guard<std::mutex> lg(lock);
 
-        // Ensure device is stopped
-        ma_device_stop(&dev.device);
-
-        // Ensure device is not inited so the device can be re-inited with a new config
-        ma_device_uninit(&dev.device);
-
-        // Ensure proper cleanup of decoder
-        ma_decoder_uninit(&dev.decoder);
-
-        // Create decoder for the given file and init device
-        ma_result res = ma_decoder_init_file(file.c_str(), NULL, &dev.decoder);
-        if(res != MA_SUCCESS){
-            Logger::logWarningFrom("AudioManager", "Failed to find decoder for audio file " + file);
-            return false;
-        }
-
-        dev.deviceConfig = ma_device_config_init(ma_device_type_playback);
-        dev.deviceConfig.playback.pDeviceID = 
-                &playbackDeviceInfos[info.id].id; // ID for playback device matches index in infos array
-        dev.deviceConfig.playback.format = dev.decoder.outputFormat;
-        dev.deviceConfig.playback.channels = dev.decoder.outputChannels;
-        dev.deviceConfig.sampleRate = dev.decoder.outputSampleRate;
-        dev.deviceConfig.dataCallback = &AudioManager::playbackDataCallback;
-        dev.deviceConfig.stopCallback = &AudioManager::playbackStopCallback;
-        dev.deviceConfig.pUserData = &dev.decoder;
-
-        if(ma_device_init(&context, &dev.deviceConfig, &dev.device) != MA_SUCCESS){
-            Logger::logWarningFrom("AudioManager", "Failed to init device while playing audio.");
-            ma_decoder_uninit(&dev.decoder);
-            return false;
-        }
-
-        if(ma_device_start(&dev.device) != MA_SUCCESS){
-            Logger::logWarningFrom("AudioManager", "Failed to start playback device.");
-            ma_device_uninit(&dev.device);
-            ma_decoder_uninit(&dev.decoder);
-            return false;
-        }
-        return true;
+    if(jobIdMap.find(jobId) != jobIdMap.end()){
+        PlaybackSetup *setup = playbackSetups[jobIdMap[jobId]];
+        ma_device_stop(&setup->device);
+        ma_device_uninit(&setup->device);
+        ma_decoder_uninit(&setup->decoder);
+        jobIdMap.erase(jobId);
+        playbackSetups.erase(&setup->device);
+        delete setup;
     }
 }
 
-void AudioManager::playbackDataCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount){
-    // Do not use ActionManager mutex here. This is mutexed in the audio libary.
-    ma_decoder* decoder = (ma_decoder*)device->pUserData;
-    if (decoder == NULL) {
+void AudioManager::playbackDataCallback(ma_device *device, void *output, const void *input, ma_uint32 frameCount){
+    // Do not continue if no decoder for this device exists. This should never happen...
+    if(playbackSetups.find(device) == playbackSetups.end()){
+        Logger::logWarningFrom("AudioManager", "Data provided with no decoder. This should never happen...");
         return;
     }
-    ma_decoder_read_pcm_frames(decoder, output, frameCount);
+
+    // Handle data
+    ma_uint32 framesRead = ma_decoder_read_pcm_frames(&playbackSetups[device]->decoder, output, frameCount);
+    
+    // Fewer frames read than requested. Have reached the end.
+    if(framesRead < frameCount){
+        // Can't call stopJob directly. This would cause a deadlock (miniaudio internal mutex)
+        // Instead run this "soon" on a different thread in the robot's scheduler
+        int jobId = playbackSetups[device]->jobId;
+        BaseRobot::runOnceSoon([jobId](){
+            stopJob(jobId);
+        });
+    }
 }
 
-void AudioManager::playbackStopCallback(ma_device *device){
-    // TODO: Use this to have a way to inform user-code that audio has finished playing
+int AudioManager::nextJobId(){
+    for(int i = 0; i < INT_MAX; ++i){
+        if(jobIdMap.find(i) == jobIdMap.end())
+            return i;
+    }
+    return -1;
 }
 
 void AudioManager::init(){
-    std::lock_guard<std::mutex> lock(amMutex);
     if(!initDone){
-        ma_result res;
-
         // Init library
-        res = ma_context_init(NULL, 0, NULL, &context);
+        ma_result res = ma_context_init(NULL, 0, NULL, &context);
         if(res != MA_SUCCESS){
             Logger::logWarningFrom("AudioManager", "Failed to initialize audio library. Error code " + std::to_string(res));
             return;
@@ -179,12 +195,5 @@ void AudioManager::init(){
 }
 
 void AudioManager::finish(){
-    std::lock_guard<std::mutex> lock(amMutex);
-    if(initDone){
-        for(auto &it : usedDevices){
-            ma_device_uninit(&it.second.device);
-        }
-        ma_context_uninit(&context);
-    }
-    initDone = false;
+    // TODO: Close anything that needs to be closed
 }

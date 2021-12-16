@@ -31,22 +31,23 @@ namespace arpirobot{
     class AudioManager{
     public:
         static std::vector<AudioDeviceInfo> getPlaybackDevices();
-        static std::vector<AudioDeviceInfo> getCaptureDevices();
 
-        static bool playSound(std::string file);
-        static bool playSound(std::string file, AudioDeviceInfo info);
+        static int playSound(std::string file);
+        static int playSound(std::string file, AudioDeviceInfo info);
+
+        static void stopJob(int jobId);
     
     private:
-
-        class Device{
+        class PlaybackSetup{
         public:
+            int jobId;
+            ma_device device;
             ma_decoder decoder;
             ma_device_config deviceConfig;
-            ma_device device;
         };
 
-        static void playbackDataCallback(ma_device* device, void* output, const void* input, ma_uint32 frameCount);
-        static void playbackStopCallback(ma_device *device);
+        static void playbackDataCallback(ma_device *device, void *output, const void *input, ma_uint32 frameCount);
+        static int nextJobId();
 
         static void init();
         static void finish();
@@ -57,15 +58,14 @@ namespace arpirobot{
         static ma_uint32 playbackDeviceCount;
         static ma_device_info *captureDeviceInfos;
         static ma_uint32 captureDeviceCount;
-        static std::mutex amMutex;
-        
-        // Map IDs to devices that have been inited.
-        // Since IDs are related to indices in playbackDeviceInfos and captureDeviceInfos, 
-        //      but are in the same map here, they need to be unique.
-        // To handle this, capture device IDs start after playback IDs (capture device at 
-        //      index 0 has id playbackDeviceCount)
-        static std::unordered_map<int, Device> usedDevices;
 
+        static std::unordered_map<ma_device*, PlaybackSetup*> playbackSetups;
+        static std::unordered_map<int, ma_device*> jobIdMap;
+
+        static std::mutex lock;
+
+        static AudioDeviceInfo defaultPlaybackDeviceInfo;
+        
         friend class BaseRobot;
     };
 }

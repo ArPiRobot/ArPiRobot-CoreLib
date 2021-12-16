@@ -20,11 +20,17 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 
 namespace arpirobot{
-    struct AudioDeviceInfo{
+    class AudioDeviceInfo{
+    public:
+        static const uint8_t TYPE_PLAYBACK = 0;
+        static const uint8_t TYPE_CAPTURE = 1;
+
         uint32_t id;
         std::string name;
         bool isDefault;
+        uint8_t type;
     };
 }

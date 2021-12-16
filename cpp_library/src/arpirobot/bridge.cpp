@@ -920,18 +920,6 @@ BRIDGE_FUNC void AudioManager_getPlaybackDevice(size_t index, uint32_t *id, char
     *isDefault = info.isDefault;
 }
 
-BRIDGE_FUNC size_t AudioManager_getCaptureDevicesCount(){
-    return AudioManager::getCaptureDevices().size();
-}
-
-BRIDGE_FUNC void AudioManager_getCaptureDevice(size_t index, uint32_t *id, char **name, bool *isDefault){
-    AudioDeviceInfo info = AudioManager::getCaptureDevices()[index];
-    *id = info.id;
-    *name = new char[info.name.length() + 1];
-    std::strcpy(*name, info.name.c_str());
-    *isDefault = info.isDefault;
-}
-
 BRIDGE_FUNC bool AudioManager_playSound(const char *filename){
     std::string cppFilename(filename);
     return AudioManager::playSound(cppFilename);
