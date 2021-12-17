@@ -473,7 +473,14 @@ void BridgeAction::finish(bool interrupted){
 }
 
 bool BridgeAction::shouldContinue(){
-    return shouldContinuePtr();
+    // When this is a pointer to a function from ctypes (python)
+    // Optimizations regarding this variable cause errors
+    // The variable is treated as 32-bit, but ctypes only sets the lowest byte
+    // As such the upper three bytes are "garbage" and unless that garbage happens to be zero,
+    // this will always be treated as "true"
+    // Disabling optimizations keeps this from happening
+    volatile bool res = shouldContinuePtr();
+    return res;
 }
 
 BRIDGE_FUNC Action *Action_create(void (*beginPtr)(void),
