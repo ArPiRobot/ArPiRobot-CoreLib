@@ -7,14 +7,29 @@ else()
 endif()
 
 set(POSSIBLE_PREFIXES
-    arm-linux-gnueabihf
+    # Software float, 32-bit
+    arm-linux-gnueabi
     armv6-rpi-linux-gnueabi
     armv7-rpi2-linux-gnueabi
     armv8-rpi3-linux-gnueabi
     armv8-rpi4-linux-gnueabi
-    aarch64-linux-gnueabihf
+
+    # Hardware float, 32-bit
+    arm-linux-gnueabihf
+    armv6-rpi-linux-gnueabihf
+    armv7-rpi2-linux-gnueabihf
+    armv8-rpi3-linux-gnueabihf
+    armv8-rpi4-linux-gnueabihf
+
+    # Software float, 64-bit
+    aarch64-linux-gnueabi
     aarch64-rpi3-linux-gnueabi
     aarch64-rpi4-linux-gnueabi
+
+    # Hardware float, 64-bit
+    aarch64-linux-gnueabihf
+    aarch64-rpi3-linux-gnueabihf
+    aarch64-rpi4-linux-gnueabihf
 )
 
 set(target_host "")
