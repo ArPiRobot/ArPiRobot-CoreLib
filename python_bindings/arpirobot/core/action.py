@@ -153,7 +153,7 @@ class ActionManager:
 
 
 ## A special action that will run a sequential set of actions (one at a time)
-class ActionSeries(Action):
+class ActionSeries:
     ## @param actions A vector of actions to run sequentially
     #  @param finishedAction An action to transition to once other actions are complete
     def __init__(self, actions: List[Action], finished_action: Action):
@@ -171,4 +171,8 @@ class ActionSeries(Action):
     
     def __del__(self):
         bridge.arpirobot.ActionSeries_destroy(self._ptr)
+    
+    ## @returns true if the action has been started, but has not finished or been stopped.
+    def is_running(self) -> bool:
+        return bridge.arpirobot.Action_isRunning(self._ptr)
 
