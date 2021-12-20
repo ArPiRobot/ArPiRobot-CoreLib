@@ -153,7 +153,7 @@ class ActionManager:
 
 
 ## A special action that will run a sequential set of actions (one at a time)
-class ActionSeries:
+class ActionSeries(Action):
     ## @param actions A vector of actions to run sequentially
     #  @param finishedAction An action to transition to once other actions are complete
     def __init__(self, actions: List[Action], finished_action: Action):
