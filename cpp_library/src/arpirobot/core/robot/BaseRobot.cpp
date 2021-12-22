@@ -71,7 +71,13 @@ void BaseRobot::start(std::string ioProvider){
 
     // On interrupt set stop = true
     // This will cause runWatchdog to return and cleanup can be run
-    signal(SIGINT, &BaseRobot::sigintHandler);
+    signal(SIGINT, &BaseRobot::stopSignalHandler);
+    signal(SIGTERM, &BaseRobot::stopSignalHandler);
+    signal(SIGABRT, &BaseRobot::stopSignalHandler);
+#ifdef __linux__
+    signal(SIGKILL, &BaseRobot::stopSignalHandler);
+    signal(SIGCONT, &BaseRobot::ignoreSignalHandler);
+#endif
 
     NetworkManager::startNetworking(std::bind(&BaseRobot::onEnable, this), std::bind(&BaseRobot::onDisable, this));
 
@@ -187,8 +193,13 @@ void BaseRobot::beginWhenReady(BaseDevice *device){
     }
 }
 
-void BaseRobot::sigintHandler(int signal){
+void BaseRobot::stopSignalHandler(int signal){
     stop = true;
+}
+
+void BaseRobot::ignoreSignalHandler(int signal){
+    // This is mostly used to prevent signals from being handled by 
+    // pigpio's signal handler and terminating the program unexpectedly
 }
 
 void BaseRobot::modeBasedPeriodic(){

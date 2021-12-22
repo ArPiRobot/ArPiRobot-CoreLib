@@ -35,6 +35,7 @@ PigpioIoProvider::PigpioIoProvider() : IoProvider(){
     // This configures pigpio to use PWM clock not PCM clock for DMA transfers
     // This prevents use of pigpio from breaking audio playback through the I2S interface
     gpioCfgClock(5, 0, 0);
+    // gpioCfgSetInternals(gpioCfgGetInternals() | PI_CFG_NOSIGHANDLER);
     int res = gpioInitialise();
     handlePigpioError(res, false);
     Logger::logInfoFrom("PigpioIoProvider", "IO Provider initialized.");

@@ -121,7 +121,9 @@ namespace arpirobot{
         RobotProfile profile;
 
     private:
-        static void sigintHandler(int signal);
+        static void stopSignalHandler(int signal);
+
+        static void ignoreSignalHandler(int signal);
 
         void modeBasedPeriodic();
 
