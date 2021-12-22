@@ -81,7 +81,18 @@ std::vector<uint8_t> ArduinoUartInterface::readAll() {
 }
 
 void ArduinoUartInterface::write(const uint8_t &b) {
-    Io::uartWriteByte(handle, b);
+    // Some boards, cables, power supplies, etc may cause scenarios where writes fail.
+    // Allow three retries
+    for(uint8_t i = 0; i < 3; ++i){
+        try{
+            Io::uartWriteByte(handle, b);
+            break;
+        }catch(const WriteFailedException &e){
+            if(i == 2)
+                throw e;
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        }
+    }
 }
 
 std::string ArduinoUartInterface::getDeviceName() {
