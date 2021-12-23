@@ -2,17 +2,19 @@
 #include <actions.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 #include <arpirobot/core/audio/AudioManager.hpp>
+#include <arpirobot/core/network/NetworkTable.hpp>
 
 void Robot::robotStarted(){
-    
+    arduino.addDevice(&vmon);
+    arduino.addDevice(&lencoder);
+    arduino.addDevice(&rencoder);
+    arduino.begin();
+
+    vmon.makeMainVmon();
 }
 
 void Robot::robotEnabled(){
-    int jobc = AudioManager::playSound("/home/pi/sound_files/c4.mp3");
-    // AudioManager::stopJob(jobc);
-    int jobg = AudioManager::playSound("/home/pi/sound_files/g4.mp3");
-    Logger::logInfo("Job C = " + std::to_string(jobc));
-    Logger::logInfo("Job G = " + std::to_string(jobg));
+    
 }
 
 void Robot::robotDisabled(){
@@ -28,5 +30,7 @@ void Robot::disabledPeriodic(){
 }
 
 void Robot::periodic(){
+    NetworkTable::set("L Pos", std::to_string(lencoder.getPosition()));
+    NetworkTable::set("R Pos", std::to_string(rencoder.getPosition()));
     feedWatchdog();
 }

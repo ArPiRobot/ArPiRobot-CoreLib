@@ -2,6 +2,10 @@
 
 #include <arpirobot/core/robot/BaseRobot.hpp>
 
+#include <arpirobot/arduino/iface/ArduinoUartInterface.hpp>
+#include <arpirobot/arduino/sensor/VoltageMonitor.hpp>
+#include <arpirobot/arduino/sensor/SingleEncoder.hpp>
+
 using namespace arpirobot;
 
 
@@ -19,6 +23,8 @@ public:
 
     void periodic();
 
-private:
-
+    VoltageMonitor vmon { "A0", 5.00, 30000, 7500 };
+    SingleEncoder lencoder { 2, false };
+    SingleEncoder rencoder { 3, false };
+    ArduinoUartInterface arduino { "COM4", 57600 };
 };

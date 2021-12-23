@@ -19,18 +19,31 @@
 
 #pragma once
 
-#ifdef HAS_PIGPIO
-
 #include <arpirobot/core/io/IoProvider.hpp>
-#include <pigpio.h>
+
+#include <unordered_map>
+
+#ifdef HAS_SERIAL
+
+#include <serial/serial.h>
 
 namespace arpirobot{
-    class PigpioIoProvider : public IoProvider{
+
+    /**
+     * \class SerialIoProvider SerialIoProvider.hpp arpirobot/core/io/SerialIoProvider.hpp
+     * 
+     * Io provider that is capable only of uart (serial) operations. 
+     * Available on any Windows, Linux, or macOS platform.
+     * 
+     * Most IO operations will not be performed. Only UART is supported.
+     * 
+     */
+    class SerialIoProvider : public IoProvider{
     protected:
 
-        PigpioIoProvider();
+        SerialIoProvider();
 
-        ~PigpioIoProvider();
+        ~SerialIoProvider();
 
         ////////////////////////////////////////////////////////////////////////
         /// GPIO & PWM
@@ -104,20 +117,14 @@ namespace arpirobot{
         void uartWriteByte(unsigned int handle, uint8_t b) override;
 
         uint8_t uartReadByte(unsigned int handle) override;
-    
+
     private:
-        void handlePigpioError(int ec, bool opIsWrite);
-        
-        int toPigpioMode(int mode);
-        
-        int fromPigpioMode(int mode);
-
-        int toPigpioState(int state);
-
-        int fromPigpioState(int state);
+        // Map handles to serial instances
+        std::unordered_map<int, serial::Serial*> handleMap;
+        int currentHandle = 0;
 
         friend class Io;
     };
 }
 
-#endif // HAS_PIGPIO
+#endif // HAS_SERIAL

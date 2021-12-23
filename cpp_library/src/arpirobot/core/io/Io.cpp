@@ -21,6 +21,7 @@
 #include <arpirobot/core/io/Io.hpp>
 #include <arpirobot/core/io/DummyIoProvider.hpp>
 #include <arpirobot/core/io/PigpioIoProvider.hpp>
+#include <arpirobot/core/io/SerialIoProvider.hpp>
 
 #include <algorithm>
 
@@ -33,14 +34,17 @@ std::mutex Io::ioDevicesLock;
 
 const char *Io::PROVIDER_PIGPIO = "pigpio";
 const char *Io::PROVIDER_DUMMY = "dummy";
+const char *Io::PROVIDER_SERIAL = "serial";
 
 
 
 void Io::init(std::string provider){
     // Choose a default provider based on the current platform if none is specified
     if(provider == ""){
-#if defined(__linux__) && defined(__arm__)
+#if defined(HAS_PIGPIO)
         provider = "pigpio";
+#elif defined(HAS_SERIAL)
+        provider = "serial";
 #else
         provider = "dummy";
 #endif
@@ -51,8 +55,14 @@ void Io::init(std::string provider){
 
     // Instantiate the requested provider. These can throw exceptions if a fatal error occurs
     if(provider == PROVIDER_PIGPIO){
-#if defined(__linux__) && defined(__arm__)
+#ifdef HAS_PIGPIO
         instance = new PigpioIoProvider();
+#else
+        throw std::runtime_error("The IO provider '" + provider + "' is not supported on this platform.");
+#endif
+    }else if(provider == PROVIDER_SERIAL){
+#ifdef HAS_SERIAL
+        instance = new SerialIoProvider();
 #else
         throw std::runtime_error("The IO provider '" + provider + "' is not supported on this platform.");
 #endif

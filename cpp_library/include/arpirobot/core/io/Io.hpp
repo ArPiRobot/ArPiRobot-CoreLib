@@ -42,6 +42,7 @@ namespace arpirobot{
 
         const static char *PROVIDER_PIGPIO;      // PIGPIO library
         const static char *PROVIDER_DUMMY;       // Fake provider. Prints log messages.
+        const static char *PROVIDER_SERIAL;      // UART only. Works on desktop platforms
 
         ////////////////////////////////////////////////////////////////////////
         /// IoProvider instance and IoDevice management

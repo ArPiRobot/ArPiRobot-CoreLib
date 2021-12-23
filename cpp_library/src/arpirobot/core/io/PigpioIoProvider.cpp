@@ -18,7 +18,7 @@
  */
 
 
-#if defined(__linux__) && defined(__arm__)
+#ifdef HAS_PIGPIO
 
 
 #include <arpirobot/core/io/PigpioIoProvider.hpp>
@@ -286,4 +286,4 @@ int PigpioIoProvider::fromPigpioState(int state){
     throw InvalidParameterException();
 }
 
-#endif
+#endif // HAS_PIGPIO

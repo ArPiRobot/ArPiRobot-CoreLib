@@ -5,7 +5,13 @@ project (ArPiRobot-CoreLib C CXX)
 if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") AND ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm"))
      set(BUILDING_PIGPIO TRUE)
      add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pigpio-71 EXCLUDE_FROM_ALL)
-     target_compile_options(pigpio PRIVATE -fPIC)
+     target_compile_options(pigpio PRIVATE -fPIC)     
+endif()
+
+if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows") OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"))
+     set(BUILDING_SERIAL TRUE)
+     add_subdirectory(${PROJECT_SOURCE_DIR}/deps/serial-1.2.1/ EXCLUDE_FROM_ALL)
+     target_compile_options(serial PRIVATE -fPIC)
 endif()
 
 # ArPiRobot core library
@@ -28,12 +34,25 @@ target_compile_options(arpirobot-core PRIVATE -Wno-psabi)
 
 if(${BUILDING_PIGPIO})
      add_dependencies(arpirobot-core pigpio)
+     target_compile_definitions(arpirobot-core PUBLIC HAS_PIGPIO)
      target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/pigpio-71)
      target_link_libraries(arpirobot-core pigpio)
 
      # Copy pigpio library to build directory so it is included in update packages
      add_custom_command(TARGET arpirobot-core POST_BUILD
           COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pigpio> ${CMAKE_CURRENT_BINARY_DIR}
+     )
+endif()
+
+if(${BUILDING_SERIAL})
+     add_dependencies(arpirobot-core serial)
+     target_compile_definitions(arpirobot-core PUBLIC HAS_SERIAL)
+     target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/serial-1.2.1/include)
+     target_link_libraries(arpirobot-core serial)
+
+     # Copy serial library to build directory so it is included in update packages
+     add_custom_command(TARGET arpirobot-core POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:serial> ${CMAKE_CURRENT_BINARY_DIR}
      )
 endif()
 
