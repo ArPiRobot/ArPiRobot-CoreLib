@@ -42,6 +42,17 @@ void SingleEncoder::setPosition(int newPosition){
     countOffset = newPosition - count;
 }
 
+double SingleEncoder::getSpeed(){
+    double counts = 0;
+    double time = 0;
+    for(uint8_t i = 0; i < numSamples; ++i){
+        counts += countSamples[i];
+        time += dtSamples[i];
+    }
+    time /= 1000;
+    return counts / time;
+}
+
 std::string SingleEncoder::getDeviceName(){
     return "SingleEncoder(" + pin + ")";
 }
@@ -75,8 +86,15 @@ std::vector<uint8_t> SingleEncoder::getCreateData(){
 
 void SingleEncoder::handleData(const std::vector<uint8_t> &data){
     // Buffer contains deviceId, data..., crc, crc
+    if(data.size() >= 9){
+        countSamples[samplePos] = Conversions::convertDataToInt16(data, 3, true);
+        dtSamples[samplePos] = Conversions::convertDataToInt16(data, 5, true);
+        samplePos++;
+        if(samplePos == numSamples)
+            samplePos = 0;
+    }
     if(data.size() >= 5){
-        // At least 2 bytes of data
+        // At least 2 bytes of data. Position is included
         count = Conversions::convertDataToInt16(data, 1, true);
     }
 }

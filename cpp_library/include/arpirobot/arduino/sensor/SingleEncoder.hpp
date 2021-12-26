@@ -60,6 +60,12 @@ namespace arpirobot{
         void setPosition(int currentPosition);
 
         /**
+         * Get the current velocity from the encoder
+         * @return The speed in ticks / sec
+         */
+        double getSpeed();
+
+        /**
          * Get the human-readable name for this device
          * @return The device name
          */
@@ -71,10 +77,16 @@ namespace arpirobot{
         void handleData(const std::vector<uint8_t> &data) override;
     
     private:
+        static const uint8_t numSamples = 5;
+
         std::string pin;
         uint8_t useInternalPullup;
         int count = 0;
         int countOffset = 0;
-    };
 
+        // Used to calculate speed
+        int countSamples[numSamples];
+        int dtSamples[numSamples];
+        int samplePos = 0;
+    };
 }

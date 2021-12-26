@@ -31,6 +31,6 @@ void Robot::disabledPeriodic(){
 
 void Robot::periodic(){
     NetworkTable::set("L Pos", std::to_string(lencoder.getPosition()));
-    NetworkTable::set("R Pos", std::to_string(rencoder.getPosition()));
+    NetworkTable::set("L Spd", std::to_string(lencoder.getSpeed()));
     feedWatchdog();
 }
