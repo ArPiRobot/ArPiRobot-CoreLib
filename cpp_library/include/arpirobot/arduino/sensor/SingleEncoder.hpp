@@ -81,12 +81,8 @@ namespace arpirobot{
 
         std::string pin;
         uint8_t useInternalPullup;
-        int count = 0;
-        int countOffset = 0;
-
-        // Used to calculate speed
-        int countSamples[numSamples];
-        int dtSamples[numSamples];
-        int samplePos = 0;
+        uint32_t count = 0;
+        uint32_t countOffset = 0;
+        float velocity = 0;
     };
 }
