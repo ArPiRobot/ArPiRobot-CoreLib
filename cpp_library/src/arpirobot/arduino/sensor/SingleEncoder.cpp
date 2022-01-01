@@ -34,15 +34,15 @@ SingleEncoder::SingleEncoder(std::string pin, bool useInternalPullup, bool creat
 
 }
 
-int SingleEncoder::getPosition(){
+int32_t SingleEncoder::getPosition(){
     return count + countOffset;
 }
 
-void SingleEncoder::setPosition(int newPosition){
+void SingleEncoder::setPosition(int32_t newPosition){
     countOffset = newPosition - count;
 }
 
-double SingleEncoder::getSpeed(){
+float SingleEncoder::getVelocity(){
     return velocity;
 }
 
@@ -53,6 +53,7 @@ std::string SingleEncoder::getDeviceName(){
 void SingleEncoder::applyDefaultState(){
     count = 0;
     countOffset = 0;
+    velocity = 0.0f;
 }
 
 std::vector<uint8_t> SingleEncoder::getCreateData(){

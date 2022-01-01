@@ -24,28 +24,48 @@
 
 namespace arpirobot{
     /**
-     * \class SingleEncoder SingleEncoder.hpp arpirobot/arduino/sensor/SingleEncoder.hpp
+     * \class QuadEncoder QuadEncoder.hpp arpirobot/arduino/sensor/QuadEncoder.hpp
      * 
-     * Single-channel encoder
+     * Quadrature encoder encoder (two channels)
      */
-    class SingleEncoder : public ArduinoDevice{
+    class QuadEncoder : public ArduinoDevice{
     public:
 
         /**
-         * @param pin The digital pin number this encoder is connected to
+         * @param pinA The digital pin number channel A is connected to
+         * @param pinB The digital pin number channel B is connected to
          * @param useInternalPullup Set to true to use the arduino's internal pullup resistor on this pin (if supported)
          * @param createDevice Leave this true unless the device is hard-coded in arduino firmware
          * @param deviceId Set this to the hard-coded deviceId if createDevice is false
          */
-        SingleEncoder(int pin, bool useInternalPullup, bool createDevice = true, int deviceId = -1);
+        QuadEncoder(int pinA, int pinB, bool useInternalPullup, bool createDevice = true, int deviceId = -1);
 
         /**
-         * @param pin The pin number this encoder is connected to (prefix with letter A for analog pin)
+         * @param pinA The pin number channel A is connected to (prefix with letter A for analog pin)
+         * @param pinB The digital pin number channel B is connected to
          * @param useInternalPullup Set to true to use the arduino's internal pullup resistor on this pin (if supported)
          * @param createDevice Leave this true unless the device is hard-coded in arduino firmware
          * @param deviceId Set this to the hard-coded deviceId if createDevice is false
          */
-        SingleEncoder(std::string pin, bool useInternalPullup, bool createDevice = true, int deviceId = -1);
+        QuadEncoder(std::string pinA, int pinB, bool useInternalPullup, bool createDevice = true, int deviceId = -1);
+
+        /**
+         * @param pinA The digital pin number channel A is connected to
+         * @param pinB The pin number channel B is connected to (prefix with letter A for analog pin)
+         * @param useInternalPullup Set to true to use the arduino's internal pullup resistor on this pin (if supported)
+         * @param createDevice Leave this true unless the device is hard-coded in arduino firmware
+         * @param deviceId Set this to the hard-coded deviceId if createDevice is false
+         */
+        QuadEncoder(int pinA, std::string pinB, bool useInternalPullup, bool createDevice = true, int deviceId = -1);
+
+        /**
+         * @param pinA The pin number channel A is connected to (prefix with letter A for analog pin)
+         * @param pinB The pin number channel B is connected to (prefix with letter A for analog pin)
+         * @param useInternalPullup Set to true to use the arduino's internal pullup resistor on this pin (if supported)
+         * @param createDevice Leave this true unless the device is hard-coded in arduino firmware
+         * @param deviceId Set this to the hard-coded deviceId if createDevice is false
+         */
+        QuadEncoder(std::string pinA, std::string pinB, bool useInternalPullup, bool createDevice = true, int deviceId = -1);
 
         /**
          * Get the position (tick count) for this encoder
@@ -79,7 +99,7 @@ namespace arpirobot{
     private:
         static const uint8_t numSamples = 5;
 
-        std::string pin;
+        std::string pinA, pinB;
         uint8_t useInternalPullup;
         int32_t count = 0;
         int32_t countOffset = 0;
