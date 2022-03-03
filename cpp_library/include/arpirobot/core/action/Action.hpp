@@ -36,6 +36,14 @@ namespace arpirobot{
     class Action{
     public:
 
+        /**
+         * Construct an Action
+         * 
+         * @param processRateMs Period between calls of the process function. 
+         *                      Leave as -1 to use the value from the active robot profile
+         */
+        Action(int32_t processRateMs = -1);
+
         virtual ~Action();
 
         /**
@@ -56,6 +64,21 @@ namespace arpirobot{
          * @return true if the action has been started, but has not finished or been stopped.
          */
         bool isRunning();
+
+        /**
+         * Get the rate process function is configured to be called at
+         * 
+         * @return period between process function calls in milliseconds
+         */
+        int32_t getProcessPeriodMs();
+
+        /**
+         * Set the rate the process function should run at.
+         * Must be configured before an action is started to take effect.
+         * 
+         * @param processPeriodMs New process period in milliseconds
+         */
+        void setProcessPeriodMs(int32_t processPeriodMs);
 
     protected:
 
@@ -94,6 +117,7 @@ namespace arpirobot{
         bool isFinished();
 
         std::shared_ptr<Task> _schedulerTask = nullptr;
+        int32_t processRateMs = -1;
 
         std::mutex stateLock;
         bool started = false;

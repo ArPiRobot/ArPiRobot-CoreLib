@@ -32,7 +32,7 @@ using namespace arpirobot;
 void BaseDevice::lockDevice(Action *action){
     std::lock_guard<std::mutex> l(actionLock);
     
-    // If the same actio nis locking the device, don't stop it as this will cause issues with scheduler jobs
+    // If the same action is locking the device, don't stop it as this will cause issues with scheduler jobs
     if(lockingAction != nullptr && lockingAction != action){
         ActionManager::stopAction(lockingAction);
     }

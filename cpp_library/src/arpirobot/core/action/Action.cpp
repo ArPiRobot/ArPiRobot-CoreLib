@@ -23,6 +23,9 @@
 
 using namespace arpirobot;
 
+Action::Action(int32_t processRateMs) : processRateMs(processRateMs) {
+
+}
 
 Action::~Action(){
     
@@ -40,6 +43,14 @@ void Action::lockDevice(BaseDevice *device){
 
 bool Action::isRunning(){
     return started && !finished;
+}
+
+int32_t Action::getProcessPeriodMs(){
+    return processRateMs;
+}
+
+void Action::setProcessPeriodMs(int32_t processPeriodMs){
+    this->processRateMs = processRateMs;
 }
 
 void Action::actionStart(){

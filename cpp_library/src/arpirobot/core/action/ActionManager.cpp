@@ -33,11 +33,16 @@ std::vector<BaseActionTrigger*> ActionManager::triggers;
 bool ActionManager::startAction(Action *action, bool doRestart){
     if(BaseRobot::currentRobot == nullptr)
         return false;
+
+    auto period = (action->processRateMs < 0) ? 
+            std::chrono::milliseconds(BaseRobot::currentRobot->profile.actionFunctionPeriod) :
+            std::chrono::milliseconds(action->processRateMs);
+    
     if(!action->isStarted() || action->isFinished()){
         action->actionStart();
         action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
             std::bind(&Action::actionProcess, action),
-            std::chrono::milliseconds(BaseRobot::currentRobot->profile.actionFunctionPeriod)
+            period
         );
         return true;
     }else if(doRestart){
@@ -47,7 +52,7 @@ bool ActionManager::startAction(Action *action, bool doRestart){
         action->actionStart();
         action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
             std::bind(&Action::actionProcess, action),
-            std::chrono::milliseconds(BaseRobot::currentRobot->profile.actionFunctionPeriod)
+            period
         );
         return true;
     }else{

@@ -12,6 +12,7 @@ using namespace arpirobot;
 void Robot::robotStarted(){
     arduino.addDevice(&enc);
     arduino.begin();
+    volatile auto *test = new TestAction();
 }
 
 void Robot::robotEnabled(){
