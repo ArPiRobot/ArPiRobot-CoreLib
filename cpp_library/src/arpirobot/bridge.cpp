@@ -946,3 +946,80 @@ BRIDGE_FUNC int AudioManager_playSoundWithDevice(const char *filename, uint32_t 
 BRIDGE_FUNC void AudioManager_stopJob(int jobId){
     AudioManager::stopJob(jobId);
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// PID Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC PID *PID_create(double kp, double ki, double kd, double kf, double min, double max){
+    return new PID(kp, ki, kd, kf, min, max);
+}
+
+BRIDGE_FUNC void PID_destroy(PID *pid){
+    delete pid;
+}
+
+BRIDGE_FUNC double PID_getKp(PID *pid){
+    return pid->getKp();
+}
+
+BRIDGE_FUNC void PID_setKp(PID *pid, double kp){
+    pid->setKp(kp);
+}
+
+BRIDGE_FUNC double PID_getKi(PID *pid){
+    return pid->getKi();
+}
+
+BRIDGE_FUNC void PID_setKi(PID *pid, double ki){
+    pid->setKi(ki);
+}
+
+BRIDGE_FUNC double PID_getKd(PID *pid){
+    return pid->getKd();
+}
+
+BRIDGE_FUNC void PID_setKd(PID *pid, double kd){
+    pid->setKd(kd);
+}
+
+BRIDGE_FUNC double PID_getKf(PID *pid){
+    return pid->getKf();
+}
+
+BRIDGE_FUNC void PID_setKf(PID *pid, double kf){
+    pid->setKf(kf);
+}
+
+BRIDGE_FUNC double PID_getMin(PID *pid){
+    return pid->getMin();
+}
+
+BRIDGE_FUNC void PID_setMin(PID *pid, double min){
+    pid->setMin(min);
+}
+
+BRIDGE_FUNC double PID_getMax(PID *pid){
+    return pid->getMax();
+}
+
+BRIDGE_FUNC void PID_setMax(PID *pid, double max){
+    pid->setMax(max);
+}
+
+BRIDGE_FUNC double PID_getSetpoint(PID *pid){
+    return pid->getSetpoint();
+}
+
+BRIDGE_FUNC void PID_setSetpoint(PID *pid, double setpoint){
+    pid->setSetpoint(setpoint);
+}
+
+BRIDGE_FUNC void PID_reset(PID *pid){
+    pid->reset();
+}
+
+BRIDGE_FUNC double PID_getOutput(PID *pid, double currentPv){
+    return pid->getOutput(currentPv);
+}

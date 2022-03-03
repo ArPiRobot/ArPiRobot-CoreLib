@@ -74,6 +74,8 @@
 #include <arpirobot/devices/gpio/StatusLED.hpp>
 #include <arpirobot/devices/gpio/GPIOPin.hpp>
 
+#include <arpirobot/core/control/PID.hpp>
+
 #include <string>
 
 using namespace arpirobot;
@@ -624,3 +626,44 @@ BRIDGE_FUNC int AudioManager_playSound(const char *filename);
 BRIDGE_FUNC int AudioManager_playSoundWithDevice(const char *filename, uint32_t playbackDeviceId, const char *playbackDeviceName, bool playbackDeviceIsDefault, uint8_t playbackDeviceType);
 
 BRIDGE_FUNC void AudioManager_stopJob(int jobId);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// PID Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC PID *PID_create(double kp, double ki, double kd, double kf, double min, double max);
+
+BRIDGE_FUNC void PID_destroy(PID *pid);
+
+BRIDGE_FUNC double PID_getKp(PID *pid);
+
+BRIDGE_FUNC void PID_setKp(PID *pid, double kp);
+
+BRIDGE_FUNC double PID_getKi(PID *pid);
+
+BRIDGE_FUNC void PID_setKi(PID *pid, double ki);
+
+BRIDGE_FUNC double PID_getKd(PID *pid);
+
+BRIDGE_FUNC void PID_setKd(PID *pid, double kd);
+
+BRIDGE_FUNC double PID_getKf(PID *pid);
+
+BRIDGE_FUNC void PID_setKf(PID *pid, double kf);
+
+BRIDGE_FUNC double PID_getMin(PID *pid);
+
+BRIDGE_FUNC void PID_setMin(PID *pid, double min);
+
+BRIDGE_FUNC double PID_getMax(PID *pid);
+
+BRIDGE_FUNC void PID_setMax(PID *pid, double max);
+
+BRIDGE_FUNC double PID_getSetpoint(PID *pid);
+
+BRIDGE_FUNC void PID_setSetpoint(PID *pid, double setpoint);
+
+BRIDGE_FUNC void PID_reset(PID *pid);
+
+BRIDGE_FUNC double PID_getOutput(PID *pid, double currentPv);
