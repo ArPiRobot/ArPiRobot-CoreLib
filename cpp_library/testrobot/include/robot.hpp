@@ -5,8 +5,9 @@
 #include <actions.hpp>
 
 #include <arpirobot/arduino/iface/ArduinoUartInterface.hpp>
-#include <arpirobot/arduino/sensor/QuadEncoder.hpp>
-
+#include <arpirobot/arduino/sensor/Mpu6050Imu.hpp>
+#include <arpirobot/devices/adafruitmotorhat/AdafruitMotorHatMotor.hpp>
+#include <arpirobot/core/drive/ArcadeDriveHelper.hpp>
 
 using namespace arpirobot;
 
@@ -20,7 +21,14 @@ public:
     void disabledPeriodic();
     void periodic();
 
-    ArduinoUartInterface arduino {"COM11", 57600};
+    AdafruitMotorHatMotor flmotor {3};
+    AdafruitMotorHatMotor rlmotor {4};
+    AdafruitMotorHatMotor frmotor {2};
+    AdafruitMotorHatMotor rrmotor {1};
 
-    QuadEncoder enc {2, 3, true};
+    ArcadeDriveHelper driveHelper {{&flmotor, &rlmotor}, {&frmotor, &rrmotor}};
+
+    ArduinoUartInterface arduino {"/dev/ttyUSB0", 57600};
+    Mpu6050Imu imu;
+    TestAction myTestAction;
 };

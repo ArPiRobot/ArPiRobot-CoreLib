@@ -10,21 +10,35 @@ using namespace arpirobot;
 
 
 void Robot::robotStarted(){
-    arduino.addDevice(&enc);
+    arduino.addDevice(&imu);
     arduino.begin();
-    volatile auto *test = new TestAction();
+    imu.calibrate(10);
+
+    NetworkTable::set("P", "1.0");
+    NetworkTable::set("I", "0.0");
+    NetworkTable::set("D", "0.0");
+
+    flmotor.setInverted(true);
+    frmotor.setInverted(true);
+
+    flmotor.setBrakeMode(true);
+    frmotor.setBrakeMode(true);
+    rrmotor.setBrakeMode(true);
+    rlmotor.setBrakeMode(true);
+
+    myTestAction.setProcessPeriodMs(20);
 }
 
 void Robot::robotEnabled(){
-
+    ActionManager::startAction(&myTestAction);
 }
 
 void Robot::robotDisabled(){
-
+    ActionManager::stopAction(&myTestAction);
 }
 
 void Robot::enabledPeriodic(){
-
+    
 }
 
 void Robot::disabledPeriodic(){
@@ -32,11 +46,7 @@ void Robot::disabledPeriodic(){
 }
 
 void Robot::periodic(){
+    NetworkTable::set("Gyro", std::to_string(imu.getGyroZ()));
     // Do not remove this line or some devices will be disabled.
     feedWatchdog();
-
-    // Put some sensor data in the network table
-    // This can be viewed in the drive station
-    NetworkTable::set("Pos", std::to_string(enc.getPosition()));
-    NetworkTable::set("Vel", std::to_string(enc.getVelocity()));
 }

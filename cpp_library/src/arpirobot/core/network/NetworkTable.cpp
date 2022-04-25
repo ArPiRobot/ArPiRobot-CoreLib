@@ -32,6 +32,7 @@ using namespace std::placeholders;
 
 
 std::unordered_map<std::string, std::string> NetworkTable::data;
+std::unordered_map<std::string, bool> NetworkTable::dataChanged;
 std::mutex NetworkTable::lock;
 bool NetworkTable::inSync = false;
 
@@ -43,6 +44,7 @@ std::string NetworkTable::get(std::string key){
     std::lock_guard<std::mutex> l(lock);
     auto it = data.find(key);
     if(it != data.end()){
+        dataChanged[key] = false;
         return data[key];
     }
     return "";
@@ -52,6 +54,14 @@ bool NetworkTable::has(std::string key){
     std::lock_guard<std::mutex> l(lock);
     auto it = data.find(key);
     return it != data.end();
+}
+
+bool NetworkTable::changed(std::string key){
+    auto it = dataChanged.find(key);
+    if(it != dataChanged.end()){
+        return dataChanged[key];
+    }
+    return false;
 }
 
 
@@ -92,6 +102,7 @@ void NetworkTable::finishSync(std::unordered_map<std::string, std::string> dataF
 
     for(const auto &it : dataFromDs){
         data[it.first] = it.second;
+        dataChanged[it.first] = true;
     }
 
     inSync = false;
@@ -119,4 +130,5 @@ void NetworkTable::setFromRobot(std::string key, std::string value){
 void NetworkTable::setFromDs(std::string key, std::string value){
     std::lock_guard<std::mutex> l(lock);
     data[key] = value;
+    dataChanged[key] = true;
 }

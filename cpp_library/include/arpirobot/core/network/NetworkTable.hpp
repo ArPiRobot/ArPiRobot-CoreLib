@@ -53,6 +53,14 @@ namespace arpirobot{
          */
         static bool has(std::string key);
 
+        /**
+         * Check if a key's value has changed since last call to get (only due to drive station)
+         * @param key Key to check
+         * @return true If the key has been changed by the drive station since get was last called
+         * @return false If the key has not been changed
+         */
+        static bool changed(std::string key);
+
     private:
         static bool isInSync();
         static void startSync();
@@ -64,6 +72,7 @@ namespace arpirobot{
         static void setFromDs(std::string key, std::string value);
     
         static std::unordered_map<std::string, std::string> data;
+        static std::unordered_map<std::string, bool> dataChanged;
         static std::mutex lock;
         static bool inSync;
 
