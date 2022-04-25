@@ -144,6 +144,10 @@ BRIDGE_FUNC bool NetworkTable_has(const char *key){
     return NetworkTable::has(key);
 }
 
+BRIDGE_FUNC bool NetworkTable_changed(const char *key){
+    return NetworkTable::changed(key);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /// Logger Bridge
 ////////////////////////////////////////////////////////////////////////////////
@@ -509,6 +513,10 @@ BRIDGE_FUNC void Action_lockDevice(Action *action, BaseDevice *device){
 
 BRIDGE_FUNC bool Action_isRunning(Action *action){
     return action->isRunning();
+}
+
+BRIDGE_FUNC void Action_setProcessPeriodMs(Action *action, int32_t processPeriodMs){
+    action->setProcessPeriodMs(processPeriodMs);
 }
 
 

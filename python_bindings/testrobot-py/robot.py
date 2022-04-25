@@ -1,39 +1,62 @@
 
 from arpirobot.core.action import ActionManager
 from arpirobot.core.log import Logger
+from arpirobot.core.network import NetworkTable
 from arpirobot.core.robot import BaseRobot
-from arpirobot.core.audio import AudioManager
-
-from actions import PlaySoundAction
+from arpirobot.devices.adafruitmotorhat import AdafruitMotorHatMotor
+from arpirobot.core.drive import ArcadeDriveHelper
+from arpirobot.arduino.iface import ArduinoUartInterface
+from arpirobot.arduino.sensor import Mpu6050Imu
+from actions import TestAction
 
 class Robot(BaseRobot):
     def __init__(self):
         super().__init__()
 
-    def robot_started(self):
-        self.playSoundAction = PlaySoundAction("/home/pi/sound_files/g4.mp3")
+        self.flmotor = AdafruitMotorHatMotor(3)
+        self.rlmotor = AdafruitMotorHatMotor(4)
+        self.frmotor = AdafruitMotorHatMotor(2)
+        self.rrmotor = AdafruitMotorHatMotor(1)
 
+        self.drive_helper = ArcadeDriveHelper([self.flmotor, self.rlmotor], [self.frmotor, self.rrmotor])
+
+        self.arduino = ArduinoUartInterface("/dev/ttyUSB0", 57600)
+        self.imu = Mpu6050Imu()
+
+        self.test_action = TestAction()
+
+    def robot_started(self):
+        self.arduino.add_device(self.imu)
+        self.arduino.begin()
+        self.imu.calibrate(10)
+
+        NetworkTable.set("P", "1.0")
+        NetworkTable.set("I", "0.0")
+        NetworkTable.set("D", "0.0")
+
+        self.flmotor.set_inverted(True)
+        self.frmotor.set_inverted(True)
+
+        self.flmotor.set_brake_mode(True)
+        self.frmotor.set_brake_mode(True)
+        self.rrmotor.set_brake_mode(True)
+        self.rlmotor.set_brake_mode(True)
+
+        self.test_action.set_process_period_ms(20)
 
     def robot_enabled(self):
-        # Run once each time the robot becomes enabled
-        ActionManager.start_action(self.playSoundAction)
+        ActionManager.start_action(self.test_action)
 
     def robot_disabled(self):
-        # Runs once each time the robot becomes disabled
-        pass
+        ActionManager.stop_action(self.test_action)
 
     def periodic(self):
+        NetworkTable.set("Gyro", str(self.imu.get_gyro_z()))
         # Always make sure to feed the watchdog to make sure devices don't get disabled
-        #NetworkTable.set("distance", str(self.ultra_mon.get_distance()))
         self.feed_watchdog()
     
     def enabled_periodic(self):
-        # Runs periodically while robot is enabled
         pass
 
     def disabled_periodic(self):
-        # Runs periodically while robot is disabled
-        pass
-
-    def set_brakemode(self, brake_mode: bool):
         pass

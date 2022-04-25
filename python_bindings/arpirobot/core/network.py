@@ -58,3 +58,11 @@ class NetworkTable:
     @staticmethod
     def has(key: str) -> bool:
         return bridge.arpirobot.NetworkTable_has(key.encode())
+    
+    ## Check if a key's value has changed since last call to get (only due to drive station)
+    #  @param key Key to check
+    #  @return True If the key has been changed by the drive station since get was last called
+    #  @return False If the key has not been changed
+    @staticmethod
+    def changed(key: str) -> bool:
+        return bridge.arpirobot.NetworkTable_changed(key.encode())

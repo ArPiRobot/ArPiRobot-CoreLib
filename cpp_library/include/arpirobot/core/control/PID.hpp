@@ -40,7 +40,7 @@ namespace arpirobot{
          * @param max Maximum value to cap PID output at
          */
         PID(double kp = 0, double ki = 0, double kd = 0,
-            double kf = 0, double min = 0, double max = 0);
+            double kf = 0, double min = -1.0, double max = 1.0);
 
         /**
          * Get the proportional gain

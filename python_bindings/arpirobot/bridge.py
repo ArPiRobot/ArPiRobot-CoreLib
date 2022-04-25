@@ -83,6 +83,8 @@ arpirobot.NetworkTable_get.restype = ctypes.c_void_p
 arpirobot.NetworkTable_has.argtypes = [ctypes.c_char_p]
 arpirobot.NetworkTable_has.restype = ctypes.c_bool
 
+arpirobot.NetworkTable_changed.argtypes = [ctypes.c_char_p]
+arpirobot.NetworkTable_changed.restype = ctypes.c_bool
 
 ################################################################################
 # Logger Bridge
@@ -330,6 +332,8 @@ arpirobot.Action_lockDevice.restype = None
 arpirobot.Action_isRunning.argtypes = [ctypes.c_void_p]
 arpirobot.Action_isRunning.restype = ctypes.c_bool
 
+arpirobot.Action_setProcessPeriodMs.argtypes = [ctypes.c_void_p, ctypes.c_int32]
+arpirobot.Action_setProcessPeriodMs.restype = None
 
 ################################################################################
 # ActionManager Bridge
@@ -661,3 +665,63 @@ arpirobot.AudioManager_playSoundWithDevice.restype = ctypes.c_int
 
 arpirobot.AudioManager_stopJob.argtypes = [ctypes.c_int]
 arpirobot.AudioManager_stopJob.restype = None
+
+
+################################################################################
+# PID Bridge
+################################################################################
+
+arpirobot.PID_create.argtypes = [ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double, ctypes.c_double]
+arpirobot.PID_create.restype = ctypes.c_void_p
+
+arpirobot.PID_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.PID_destroy.restype = None
+
+arpirobot.PID_getKp.argtypes = [ctypes.c_void_p]
+arpirobot.PID_getKp.restype = ctypes.c_double
+
+arpirobot.PID_setKp.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.PID_setKp.restype = None
+
+arpirobot.PID_getKi.argtypes = [ctypes.c_void_p]
+arpirobot.PID_getKi.restype = ctypes.c_double
+
+arpirobot.PID_setKi.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.PID_setKi.restype = None
+
+arpirobot.PID_getKd.argtypes = [ctypes.c_void_p]
+arpirobot.PID_getKd.restype = ctypes.c_double
+
+arpirobot.PID_setKd.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.PID_setKd.restype = None
+
+arpirobot.PID_getKf.argtypes = [ctypes.c_void_p]
+arpirobot.PID_getKf.restype = ctypes.c_double
+
+arpirobot.PID_setKf.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.PID_setKf.restype = None
+
+arpirobot.PID_getMin.argtypes = [ctypes.c_void_p]
+arpirobot.PID_getMin.restype = ctypes.c_double
+
+arpirobot.PID_setMin.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.PID_setMin.restype = None
+
+arpirobot.PID_getMax.argtypes = [ctypes.c_void_p]
+arpirobot.PID_getMax.restype = ctypes.c_double
+
+arpirobot.PID_setMax.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.PID_setMax.restype = None
+
+arpirobot.PID_getSetpoint.argtypes = [ctypes.c_void_p]
+arpirobot.PID_getSetpoint.restype = ctypes.c_double
+
+arpirobot.PID_setSetpoint.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.PID_setSetpoint.restype = None
+
+arpirobot.PID_reset.argtypes = [ctypes.c_void_p]
+arpirobot.PID_reset.restype = None
+
+arpirobot.PID_getOutput.argtypes = [ctypes.c_void_p, ctypes.c_double]
+arpirobot.PID_getOutput.restype = ctypes.c_double
+

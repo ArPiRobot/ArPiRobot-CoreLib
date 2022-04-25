@@ -77,6 +77,12 @@ class Action(ABC):
     def is_running(self) -> bool:
         return bridge.arpirobot.Action_isRunning(self._ptr)
 
+    ## Set the rate the process function should run at.
+    #  Must be configured before an action is started to take effect.
+    #  @param processPeriodMs New process period in milliseconds
+    def set_process_period_ms(self, process_period_ms: int):
+        bridge.arpirobot.Action_setProcessPeriodMs(self._ptr, process_period_ms)
+
     @abstractmethod
     def begin(self):
         pass

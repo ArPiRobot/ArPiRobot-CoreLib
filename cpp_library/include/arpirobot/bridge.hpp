@@ -160,6 +160,7 @@ BRIDGE_FUNC char *NetworkTable_get(const char *key);
 
 BRIDGE_FUNC bool NetworkTable_has(const char *key);
 
+BRIDGE_FUNC bool NetworkTable_changed(const char *key);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// Logger Bridge
@@ -379,6 +380,7 @@ BRIDGE_FUNC void Action_lockDevice(Action *action, BaseDevice *device);
 
 BRIDGE_FUNC bool Action_isRunning(Action *action);
 
+BRIDGE_FUNC void Action_setProcessPeriodMs(Action *action, int32_t processPeriodMs);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// ActionManager Bridge
