@@ -73,11 +73,15 @@ file (GLOB_RECURSE SOURCES_TESTROBOT
      ${PROJECT_SOURCE_DIR}/testrobot/include/*.hpp
 )
 
-add_executable(testrobot ${SOURCES_TESTROBOT})
-add_dependencies(testrobot arpirobot-core)
-target_include_directories(testrobot PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/testrobot/include)
-target_link_libraries(testrobot arpirobot-core)
-target_compile_options(testrobot PRIVATE -Wno-psabi)
+list(LENGTH SOURCES_TESTROBOT TR_LEN)
+
+if(${TR_LEN} GREATER 0)
+     add_executable(testrobot ${SOURCES_TESTROBOT})
+     add_dependencies(testrobot arpirobot-core)
+     target_include_directories(testrobot PUBLIC ${PROJECT_SOURCE_DIR}/include ${PROJECT_SOURCE_DIR}/testrobot/include)
+     target_link_libraries(testrobot arpirobot-core)
+     target_compile_options(testrobot PRIVATE -Wno-psabi)
+endif()
 
 # This is only necessary because of how window search paths and python's ctypes interact
 # Even if mingw bin is in the path, ctypes fails to load the dll unless dependency dlls are in the same folder
