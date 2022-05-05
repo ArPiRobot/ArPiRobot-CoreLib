@@ -147,7 +147,13 @@ bool BaseArduinoInterface::begin(){
     return true;
 }
 
-void BaseArduinoInterface::addDevice(ArduinoDevice *device){
+void BaseArduinoInterface::addDevice(ArduinoDevice &device){
+    // This is reference to statically allocated object
+    // Lifetime of this object must outlast this object's lifetime
+    addDevice(std::shared_ptr<ArduinoDevice>(std::shared_ptr<ArduinoDevice>{}, &device));
+}
+
+void BaseArduinoInterface::addDevice(std::shared_ptr<ArduinoDevice> device){
     if(initialized){
         Logger::logWarningFrom(getDeviceName(), "Attempted to add device after calling begin. This will not work.");
         return;

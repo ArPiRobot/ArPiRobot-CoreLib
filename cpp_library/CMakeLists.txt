@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.0)
 project (ArPiRobot-CoreLib C CXX)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Build pigpio as shared library on supported platforms
 if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") AND ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm"))
@@ -97,5 +99,3 @@ if(MINGW)
      add_custom_command(TARGET copy_dlls PRE_BUILD
           COMMAND ${CMAKE_COMMAND} -E copy "${COMPILER_DIR}/libwinpthread-1.dll" $<TARGET_FILE_DIR:arpirobot-core>)
 endif()
-
-

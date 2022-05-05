@@ -568,7 +568,8 @@ BRIDGE_FUNC void BaseArduinoInterface_begin(BaseArduinoInterface *arduino){
 }
 
 BRIDGE_FUNC void BaseArduinoInterface_addDevice(BaseArduinoInterface *arduino, ArduinoDevice *device){
-    arduino->addDevice(device);
+    // Uses reference version of function as lifetime of passed pointer is managed by language calling bridge
+    arduino->addDevice(*device);
 }
 
 BRIDGE_FUNC bool BaseArduinoInterface_isReady(BaseArduinoInterface *arduino){

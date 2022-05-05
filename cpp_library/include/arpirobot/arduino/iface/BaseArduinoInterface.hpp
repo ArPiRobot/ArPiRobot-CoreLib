@@ -22,6 +22,9 @@
 #include <thread>
 #include <vector>
 #include <string>
+#include <functional>
+#include <memory>
+#include <unordered_map>
 
 namespace arpirobot{
 
@@ -53,9 +56,16 @@ namespace arpirobot{
         /**
          * Add a device to this arduino interface instance. 
          * You cannot add devices after BaseArduinoInterface::begin is called
-         * @param device The ArduinoDevice instance to add
+         * @param device The ArduinoDevice instance to add. Referenced object must stay in scope.
          */
-        void addDevice(ArduinoDevice *device);
+        void addDevice(ArduinoDevice &device);
+
+        /**
+         * Add a device to this arduino interface instance. 
+         * You cannot add devices after BaseArduinoInterface::begin is called
+         * @param device The ArduinoDevice instance to add.
+         */
+        void addDevice(std::shared_ptr<ArduinoDevice> device);
 
         /**
          * Returns true when the arduino is ready to process sensor data (after BaseArduinoInterface::begin 
@@ -128,7 +138,7 @@ namespace arpirobot{
         bool parseStarted = false;
         bool parseEscaped = false;
         std::thread *processThread = nullptr;
-        std::vector<ArduinoDevice*> devices;
+        std::vector<std::shared_ptr<ArduinoDevice>> devices;
         bool initialized = false;
         bool arduinoReady = false;
 
