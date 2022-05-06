@@ -37,16 +37,28 @@ namespace arpirobot{
     class ArcadeDriveHelper{
     public:
         /**
-         * @param leftMotor A singular left side motor
-         * @param rightMotor A singular right side motor
+         * @param leftMotor A singular left side motor (reference, must remain in scope)
+         * @param rightMotor A singular right side motor (reference, must remain in scope)
          */
-        ArcadeDriveHelper(MotorController *leftMotor, MotorController *rightMotor);
+        ArcadeDriveHelper(MotorController &leftMotor, MotorController &rightMotor);
 
         /**
-         * @param leftMotors A set of left motors
-         * @param rightMotors A set of right motors
+         * @param leftMotor A singular left side motor (shared_ptr)
+         * @param rightMotor A singular right side motor (shared_ptr)
          */
-        ArcadeDriveHelper(std::vector<MotorController*> leftMotors, std::vector<MotorController*> rightMotors);
+        ArcadeDriveHelper(std::shared_ptr<MotorController> leftMotor, std::shared_ptr<MotorController> rightMotor);
+
+        /**
+         * @param leftMotors A set of left motors (references, must remain in scope)
+         * @param rightMotors A set of right motors (references, must remain in scope)
+         */
+        ArcadeDriveHelper(std::vector<std::reference_wrapper<MotorController>> leftMotors, std::vector<std::reference_wrapper<MotorController>> rightMotors);
+
+        /**
+         * @param leftMotors A set of left motors (shared_ptrs)
+         * @param rightMotors A set of right motors (shared_ptrs)
+         */
+        ArcadeDriveHelper(std::vector<std::shared_ptr<MotorController>> leftMotors, std::vector<std::shared_ptr<MotorController>> rightMotors);
 
         /**
          * Set a new speed value. Speeds will be re-calculated and updated for each motor
@@ -77,8 +89,8 @@ namespace arpirobot{
 
         void doUpdate();
 
-        std::vector<MotorController*> leftMotors;
-        std::vector<MotorController*> rightMotors;
+        std::vector<std::shared_ptr<MotorController>> leftMotors;
+        std::vector<std::shared_ptr<MotorController>> rightMotors;
         double speed = 0;
         double rotation = 0;
     };

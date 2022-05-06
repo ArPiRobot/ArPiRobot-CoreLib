@@ -24,19 +24,29 @@
 
 using namespace arpirobot;
 
+ArcadeDriveHelper::ArcadeDriveHelper(MotorController &leftMotor, MotorController &rightMotor) : 
+        leftMotors({std::shared_ptr<MotorController>(std::shared_ptr<MotorController>{}, &leftMotor)}), 
+        rightMotors({std::shared_ptr<MotorController>(std::shared_ptr<MotorController>{}, &rightMotor)}){
 
-ArcadeDriveHelper::ArcadeDriveHelper(MotorController *leftMotor, MotorController *rightMotor){
-    this->leftMotors.push_back(leftMotor);
-    this->rightMotors.push_back(rightMotor);
 }
 
-ArcadeDriveHelper::ArcadeDriveHelper(std::vector<MotorController*> leftMotors, std::vector<MotorController*> rightMotors){
+ArcadeDriveHelper::ArcadeDriveHelper(std::shared_ptr<MotorController> leftMotor, std::shared_ptr<MotorController> rightMotor) : 
+        leftMotors({leftMotor}), rightMotors({rightMotor}){
+
+}
+
+ArcadeDriveHelper::ArcadeDriveHelper(std::vector<std::reference_wrapper<MotorController>> leftMotors, std::vector<std::reference_wrapper<MotorController>> rightMotors){
     for(auto &motor : leftMotors){
-        this->leftMotors.push_back(motor);
+        this->leftMotors.push_back(std::shared_ptr<MotorController>(std::shared_ptr<MotorController>{}, &motor.get()));
     }
     for(auto &motor : rightMotors){
-        this->rightMotors.push_back(motor);
+        this->rightMotors.push_back(std::shared_ptr<MotorController>(std::shared_ptr<MotorController>{}, &motor.get()));
     }
+}
+
+ArcadeDriveHelper::ArcadeDriveHelper(std::vector<std::shared_ptr<MotorController>> leftMotors, std::vector<std::shared_ptr<MotorController>> rightMotors) : 
+        leftMotors(leftMotors), rightMotors(rightMotors) {
+    
 }
 
 void ArcadeDriveHelper::updateSpeed(double newSpeed){

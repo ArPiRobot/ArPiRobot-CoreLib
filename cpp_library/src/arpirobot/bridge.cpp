@@ -366,15 +366,15 @@ BRIDGE_FUNC void DRV8833Motor_destroy(DRV8833Motor *motor){
 
 BRIDGE_FUNC ArcadeDriveHelper *ArcadeDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
         MotorController **rightMotors, size_t rightMotorCount){
-    std::vector<MotorController*> lm;
-    std::vector<MotorController*> rm;
+    std::vector<std::reference_wrapper<MotorController>> lm;
+    std::vector<std::reference_wrapper<MotorController>> rm;
     lm.reserve(leftMotorCount);
     rm.reserve(rightMotorCount);
     for(int i = 0; i < leftMotorCount; ++i){
-        lm.push_back(leftMotors[i]);
+        lm.push_back(*leftMotors[i]);
     }
     for(int i = 0; i < rightMotorCount; ++i){
-        rm.push_back(rightMotors[i]);
+        rm.push_back(*rightMotors[i]);
     }
     return new ArcadeDriveHelper(lm, rm);
 }
@@ -402,15 +402,15 @@ BRIDGE_FUNC void ArcadeDriveHelper_update(ArcadeDriveHelper *helper, double spee
 
 BRIDGE_FUNC TankDriveHelper *TankDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
         MotorController **rightMotors, size_t rightMotorCount){
-    std::vector<MotorController*> lm;
-    std::vector<MotorController*> rm;
+    std::vector<std::reference_wrapper<MotorController>> lm;
+    std::vector<std::reference_wrapper<MotorController>> rm;
     lm.reserve(leftMotorCount);
     rm.reserve(rightMotorCount);
     for(int i = 0; i < leftMotorCount; ++i){
-        lm.push_back(leftMotors[i]);
+        lm.push_back(*leftMotors[i]);
     }
     for(int i = 0; i < rightMotorCount; ++i){
-        rm.push_back(rightMotors[i]);
+        rm.push_back(*rightMotors[i]);
     }
     return new TankDriveHelper(lm, rm);
 }

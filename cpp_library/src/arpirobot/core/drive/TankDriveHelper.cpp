@@ -25,18 +25,29 @@
 
 using namespace arpirobot;
 
-TankDriveHelper::TankDriveHelper(MotorController *leftMotor, MotorController *rightMotor){
-    this->leftMotors.push_back(leftMotor);
-    this->rightMotors.push_back(rightMotor);
+TankDriveHelper::TankDriveHelper(MotorController &leftMotor, MotorController &rightMotor) : 
+        leftMotors({std::shared_ptr<MotorController>(std::shared_ptr<MotorController>{}, &leftMotor)}), 
+        rightMotors({std::shared_ptr<MotorController>(std::shared_ptr<MotorController>{}, &rightMotor)}){
+
 }
 
-TankDriveHelper::TankDriveHelper(std::vector<MotorController*> leftMotors, std::vector<MotorController*> rightMotors){
+TankDriveHelper::TankDriveHelper(std::shared_ptr<MotorController> leftMotor, std::shared_ptr<MotorController> rightMotor) : 
+        leftMotors({leftMotor}), rightMotors({rightMotor}){
+
+}
+
+TankDriveHelper::TankDriveHelper(std::vector<std::reference_wrapper<MotorController>> leftMotors, std::vector<std::reference_wrapper<MotorController>> rightMotors){
     for(auto &motor : leftMotors){
-        this->leftMotors.push_back(motor);
+        this->leftMotors.push_back(std::shared_ptr<MotorController>(std::shared_ptr<MotorController>{}, &motor.get()));
     }
     for(auto &motor : rightMotors){
-        this->rightMotors.push_back(motor);
+        this->rightMotors.push_back(std::shared_ptr<MotorController>(std::shared_ptr<MotorController>{}, &motor.get()));
     }
+}
+
+TankDriveHelper::TankDriveHelper(std::vector<std::shared_ptr<MotorController>> leftMotors, std::vector<std::shared_ptr<MotorController>> rightMotors) : 
+        leftMotors(leftMotors), rightMotors(rightMotors) {
+    
 }
 
 void TankDriveHelper::updateLeftSpeed(double newLeftSpeed){

@@ -21,6 +21,7 @@
 
 #include <string>
 #include <mutex>
+#include <memory>
 
 namespace arpirobot{
 
@@ -54,14 +55,14 @@ namespace arpirobot{
 
     private:
 
-        void lockDevice(Action *action);
+        void lockDevice(std::shared_ptr<Action> action);
 
         bool isLockedByAction();
 
         void doBegin();
 
         std::mutex actionLock;
-        Action *lockingAction = nullptr;
+        std::shared_ptr<Action> lockingAction = nullptr;
 
         friend class Action; // Needs to call lockDevice
         friend class BaseRobot; // Needs doBegin, enable, disable
