@@ -22,6 +22,8 @@
 #include <arpirobot/core/action/Action.hpp>
 
 #include <vector>
+#include <memory>
+#include <functional>
 
 namespace arpirobot{
     /**
@@ -32,10 +34,28 @@ namespace arpirobot{
     class ActionSeries : public Action{
     public:
         /**
-         * @param actions A vector of actions to run sequentially
-         * @param finishedAction An action to transition to once other actions are complete
+         * @param actions A vector of actions to run sequentially (actions must remain in scope for lifetime of ActionSeries)
+         * @param finishedAction An action to transition to once other actions are complete (must remain in scope)
          */
-        ActionSeries(std::vector<Action*> actions, Action *finishedAction);
+        ActionSeries(std::vector<std::reference_wrapper<Action>> actions, Action &finishedAction);
+
+        /**
+         * @param actions A vector of actions to run sequentially (shared_ptrs to can use std::make_shared)
+         * @param finishedAction An action to transition to once other actions are complete (must remain in scope)
+         */
+        ActionSeries(std::vector<std::shared_ptr<Action>> actions, Action &finishedAction);
+
+        /**
+         * @param actions A vector of actions to run sequentially (actions must remain in scope for lifetime of ActionSeries)
+         * @param finishedAction An action to transition to once other actions are complete (can use std::make_shared)
+         */
+        ActionSeries(std::vector<std::reference_wrapper<Action>> actions, std::shared_ptr<Action> finishedAction);
+
+        /**
+         * @param actions A vector of actions to run sequentially (shared_ptrs to can use std::make_shared)
+         * @param finishedAction An action to transition to once other actions are complete (can use std::make_shared)
+         */
+        ActionSeries(std::vector<std::shared_ptr<Action>> actions, std::shared_ptr<Action> finishedAction);
 
     protected:
         void begin();
@@ -47,8 +67,8 @@ namespace arpirobot{
         bool shouldContinue();
     
     private:
-        std::vector<Action*> actions;
-        Action *finishedAction;
+        std::vector<std::shared_ptr<Action>> actions;
+        std::shared_ptr<Action> finishedAction;
 
         int index = 0;
     };

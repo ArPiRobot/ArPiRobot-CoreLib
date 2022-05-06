@@ -124,7 +124,11 @@ int Gamepad::getDpad(int dpadNum){
     }
 }
 
-void Gamepad::setAxisTransform(int axisNum, BaseAxisTransform *transform){
+void Gamepad::setAxisTransform(int axisNum, BaseAxisTransform &transform){
+    setAxisTransform(axisNum, std::shared_ptr<BaseAxisTransform>(std::shared_ptr<BaseAxisTransform>{}, &transform));
+}
+
+void Gamepad::setAxisTransform(int axisNum, std::shared_ptr<BaseAxisTransform> transform){
     axisTransforms[axisNum] = transform;
 }
 

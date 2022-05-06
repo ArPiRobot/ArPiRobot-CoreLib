@@ -39,6 +39,8 @@
 
 #include <iostream>
 #include <cstring>
+#include <memory>
+#include <functional>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// General/Helper
@@ -241,7 +243,7 @@ BRIDGE_FUNC int Gamepad_getDpad(Gamepad *gamepad, int dpadNum){
 }
 
 BRIDGE_FUNC void Gamepad_setAxisTransform(Gamepad *gamepad, int axisNum, BaseAxisTransform *transform){
-    gamepad->setAxisTransform(axisNum, transform);
+    gamepad->setAxisTransform(axisNum, *transform);
 }
 
 BRIDGE_FUNC void Gamepad_clearAxisTransform(Gamepad *gamepad, int axisNum){
@@ -512,16 +514,16 @@ BRIDGE_FUNC void Action_destroy(Action *action){
 }
 
 BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice **devices, size_t deviceCount){
-    std::vector<BaseDevice*> devs;
+    std::vector<std::reference_wrapper<BaseDevice>> devs;
     devs.reserve(deviceCount);
     for(int i = 0; i < deviceCount; ++i){
-        devs.push_back(devices[i]);
+        devs.push_back(*devices[i]);
     }
     action->lockDevices(devs);
 }
 
 BRIDGE_FUNC void Action_lockDevice(Action *action, BaseDevice *device){
-    action->lockDevice(device);
+    action->lockDevice(*device);
 }
 
 BRIDGE_FUNC bool Action_isRunning(Action *action){
@@ -559,12 +561,12 @@ BRIDGE_FUNC void ActionManager_removeTrigger(BaseActionTrigger *trigger){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ActionSeries *ActionSeries_create(Action **actions, size_t actionCount, Action* finishAction){
-    std::vector<Action*> actionsVector;
+    std::vector<std::reference_wrapper<Action>> actionsVector;
     actionsVector.reserve(actionCount);
     for(int i = 0; i < actionCount; ++i){
-        actionsVector.push_back(actions[i]);
+        actionsVector.push_back(*actions[i]);
     }
-    return new ActionSeries(actionsVector, finishAction);
+    return new ActionSeries(actionsVector, *finishAction);
 }
 
 BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries){

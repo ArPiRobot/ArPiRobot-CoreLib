@@ -23,8 +23,26 @@
 
 using namespace arpirobot;
 
+ActionSeries::ActionSeries(std::vector<std::reference_wrapper<Action>> actions, Action &finishedAction) : 
+        finishedAction(std::shared_ptr<Action>(std::shared_ptr<Action>{}, &finishedAction)){
+    for(auto &a : actions){
+        this->actions.push_back(std::shared_ptr<Action>(std::shared_ptr<Action>{}, &a.get()));
+    }
+}
 
-ActionSeries::ActionSeries(std::vector<Action*> actions, Action *finishedAction) : 
+ActionSeries::ActionSeries(std::vector<std::shared_ptr<Action>> actions, Action &finishedAction) : 
+        actions(actions), finishedAction(std::shared_ptr<Action>(std::shared_ptr<Action>{}, &finishedAction)){
+
+}
+
+ActionSeries::ActionSeries(std::vector<std::reference_wrapper<Action>> actions, std::shared_ptr<Action> finishedAction) : 
+        finishedAction(finishedAction){
+    for(auto &a : actions){
+        this->actions.push_back(std::shared_ptr<Action>(std::shared_ptr<Action>{}, &a.get()));
+    }
+}
+
+ActionSeries::ActionSeries(std::vector<std::shared_ptr<Action>> actions, std::shared_ptr<Action> finishedAction) : 
         actions(actions), finishedAction(finishedAction){
 
 }

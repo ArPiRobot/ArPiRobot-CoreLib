@@ -71,10 +71,17 @@ namespace arpirobot{
 
         /**
          * Set the axis transform for a given axis
-         * @param axisNum The axis number to apply a transform to
+         * @param axisNum The axis number to apply a transform to. Referenced object must remain in scope until cleared.
          * @param transform The transform
          */
-        void setAxisTransform(int axisNum, BaseAxisTransform *transform);
+        void setAxisTransform(int axisNum, BaseAxisTransform &transform);
+
+        /**
+         * Set the axis transform for a given axis
+         * @param axisNum The axis number to apply a transform to. Can use with std::make_shared
+         * @param transform The transform
+         */
+        void setAxisTransform(int axisNum, std::shared_ptr<BaseAxisTransform> transform);
 
         /**
          * Remove a transform from an axis
@@ -103,7 +110,7 @@ namespace arpirobot{
 
     private:
         int controllerNum;
-        std::unordered_map<int, BaseAxisTransform*> axisTransforms;
+        std::unordered_map<int, std::shared_ptr<BaseAxisTransform>> axisTransforms;
     };
 
 }

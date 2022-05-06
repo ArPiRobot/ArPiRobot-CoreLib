@@ -31,13 +31,23 @@ Action::~Action(){
     
 }
 
-void Action::lockDevices(std::vector<BaseDevice*> devices){
+void Action::lockDevices(std::vector<std::reference_wrapper<BaseDevice>> devices){
+    for(auto dev : devices){
+        lockDevice(dev.get());
+    }
+}
+
+void Action::lockDevices(std::vector<std::shared_ptr<BaseDevice>> devices){
     for(auto dev : devices){
         lockDevice(dev);
     }
 }
 
-void Action::lockDevice(BaseDevice *device){
+void Action::lockDevice(BaseDevice &device){
+    lockDevice(std::shared_ptr<BaseDevice>(std::shared_ptr<BaseDevice>{}, &device));
+}
+
+void Action::lockDevice(std::shared_ptr<BaseDevice> device){
     device->lockDevice(this);
 }
 

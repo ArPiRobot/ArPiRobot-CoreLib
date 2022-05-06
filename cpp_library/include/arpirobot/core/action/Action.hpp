@@ -25,6 +25,7 @@
 #include <vector>
 #include <mutex>
 #include <memory>
+#include <functional>
 
 namespace arpirobot{
 
@@ -49,16 +50,30 @@ namespace arpirobot{
         /**
          * Use this action to lock a set of devices. 
          * This is the same as calling Action::lockDevice once for each device individually.
-         * @param devices A vector of devices to lock
+         * @param devices A vector of devices to lock (references to)
          */
-        void lockDevices(std::vector<BaseDevice*> devices);
+        void lockDevices(std::vector<std::reference_wrapper<BaseDevice>> devices);
+
+        /**
+         * Use this action to lock a set of devices. 
+         * This is the same as calling Action::lockDevice once for each device individually.
+         * @param devices A vector of devices to lock (shared_ptr to)
+         */
+        void lockDevices(std::vector<std::shared_ptr<BaseDevice>> devices);
 
         /**
          * Use this action to lock a device. When a device is locked by this action, 
          * any action previously locking it will be stopped.
-         * @param device The device to lock
+         * @param device The device to lock (reference to)
          */
-        void lockDevice(BaseDevice *device);
+        void lockDevice(BaseDevice &device);
+
+        /**
+         * Use this action to lock a device. When a device is locked by this action, 
+         * any action previously locking it will be stopped.
+         * @param device The device to lock (shared_ptr to)
+         */
+        void lockDevice(std::shared_ptr<BaseDevice> device);
 
         /**
          * @return true if the action has been started, but has not finished or been stopped.
