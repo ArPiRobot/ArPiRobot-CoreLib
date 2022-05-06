@@ -104,7 +104,7 @@ void ActionManager::removeTrigger(std::shared_ptr<BaseActionTrigger> trigger){
 bool ActionManager::stopActionInternal(std::shared_ptr<Action> action, bool interrupted){
     if(action->isStarted() && !action->isFinished()){
         action->actionStop(interrupted);
-        std::remove(runningActions.begin(), runningActions.end(), action);
+        runningActions.erase(std::remove(runningActions.begin(), runningActions.end(), action), runningActions.end());
         BaseRobot::removeTaskFromScheduler(action->_schedulerTask);
         action->_schedulerTask = nullptr;
         return true;
