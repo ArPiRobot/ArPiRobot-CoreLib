@@ -109,11 +109,8 @@ public:
                         void (*enabledPeriodicPtr)(void), 
                         void (*disabledPeriodicPtr)(void), 
                         void (*periodicPtr)(void),
-                        void (*destoryedPtr)(void),
                         RobotProfile profile);
     
-    ~BridgeBaseRobot();
-
     void robotStarted();
     void robotEnabled();
     void robotDisabled();
@@ -128,7 +125,6 @@ private:
     void (*enabledPeriodicPtr)(void); 
     void (*disabledPeriodicPtr)(void); 
     void (*periodicPtr)(void);
-    void (*destroyedPtr)(void);
 };
 
 BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void), 
@@ -137,7 +133,6 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         void (*enabledPeriodic)(void), 
                         void (*disabledPeriodic)(void), 
                         void (*periodic)(void),
-                        void (*destroyed)(void),
                         int mainSchedulerThreads,
                         int periodicFunctionRate,
                         int maxGamepadDataAge,
@@ -359,10 +354,7 @@ public:
     BridgeAction(void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
-        bool (*shouldContinuePtr)(void),
-        void (*destroyedPtr)(void));
-
-    ~BridgeAction();
+        bool (*shouldContinuePtr)(void));
 
     void begin();
     void process();
@@ -374,14 +366,12 @@ private:
     void (*processPtr)(void);
     void (*finishPtr)(bool);
     bool (*shouldContinuePtr)(void);
-    void (*destroyedPtr)(void);
 };
 
 BRIDGE_FUNC Action *Action_create(void (*beginPtr)(void),
     void (*processPtr)(void),
     void (*finishPtr)(bool),
-    bool (*shouldContinuePtr)(void),
-    void (*destroyedPtr)(void));
+    bool (*shouldContinuePtr)(void));
 
 BRIDGE_FUNC void Action_destroy(Action *action);
 

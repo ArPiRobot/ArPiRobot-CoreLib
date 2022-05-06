@@ -37,7 +37,6 @@
 #include <arpirobot/core/audio/AudioDeviceInfo.hpp>
 //#include <arpirobot/core/drive.hpp>
 
-#include <cstddef>
 #include <iostream>
 #include <cstring>
 #include <memory>
@@ -102,26 +101,14 @@ BridgeBaseRobot::BridgeBaseRobot(void (*robotStartedPtr)(void),
                         void (*enabledPeriodicPtr)(void), 
                         void (*disabledPeriodicPtr)(void), 
                         void (*periodicPtr)(void),
-                        void (*destroyedPtr)(void),
                         RobotProfile profile) : BaseRobot(profile),
                         robotStartedPtr(robotStartedPtr),
                         robotEnabledPtr(robotEnabledPtr),
                         robotDisabledPtr(robotDisabledPtr),
                         enabledPeriodicPtr(enabledPeriodicPtr),
                         disabledPeriodicPtr(disabledPeriodicPtr),
-                        periodicPtr(periodicPtr),
-                        destroyedPtr(destroyedPtr){
+                        periodicPtr(periodicPtr){
     
-}
-
-BridgeBaseRobot::~BridgeBaseRobot(){
-    // Language bindings using bridge must keep object in scope until C++ BaseRobot
-    // object is destroyed. This provides a callback allowing the language bindings
-    // know when it is safe to destory their objects.
-    // This is only relevant if the language bindings pass pointers to functions
-    // that are part of an object they create
-    if(destroyedPtr != NULL)
-        destroyedPtr();
 }
 
 void BridgeBaseRobot::robotStarted(){
@@ -154,7 +141,6 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         void (*enabledPeriodic)(void), 
                         void (*disabledPeriodic)(void), 
                         void (*periodic)(void),
-                        void (*destroyed)(void),
                         int mainSchedulerThreads,
                         int periodicFunctionRate,
                         int maxGamepadDataAge,
@@ -167,7 +153,7 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
     profile.actionFunctionPeriod = actionFunctionPeriod;
 
     auto robot = std::make_shared<BridgeBaseRobot>(robotStarted, robotEnabled, robotDisabled, 
-        enabledPeriodic, disabledPeriodic, periodic, destroyed, profile);
+        enabledPeriodic, disabledPeriodic, periodic, profile);
     bridge_objs.push_back(robot);
     return robot.get();
 }
@@ -553,20 +539,9 @@ BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform){
 BridgeAction::BridgeAction(void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
-        bool (*shouldContinuePtr)(void),
-        void (*destroyedPtr)(void)) : beginPtr(beginPtr), processPtr(processPtr), 
-        finishPtr(finishPtr), shouldContinuePtr(shouldContinuePtr), destroyedPtr(destroyedPtr){
+        bool (*shouldContinuePtr)(void)) : beginPtr(beginPtr), processPtr(processPtr), 
+        finishPtr(finishPtr), shouldContinuePtr(shouldContinuePtr){
     
-}
-
-BridgeAction::~BridgeAction(){
-    // Language bindings using bridge must keep object in scope until C++ BaseRobot
-    // object is destroyed. This provides a callback allowing the language bindings
-    // know when it is safe to destory their objects.
-    // This is only relevant if the language bindings pass pointers to functions
-    // that are part of an object they create
-    if(destroyedPtr != NULL)
-        destroyedPtr();
 }
 
 void BridgeAction::begin(){
@@ -595,9 +570,8 @@ bool BridgeAction::shouldContinue(){
 BRIDGE_FUNC Action *Action_create(void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
-        bool (*shouldContinuePtr)(void),
-        void (*destroyedPtr)(void)){
-    auto action = std::make_shared<BridgeAction>(beginPtr, processPtr, finishPtr, shouldContinuePtr, destroyedPtr);
+        bool (*shouldContinuePtr)(void)){
+    auto action = std::make_shared<BridgeAction>(beginPtr, processPtr, finishPtr, shouldContinuePtr);
     bridge_objs.push_back(action);
     return action.get();
 }
