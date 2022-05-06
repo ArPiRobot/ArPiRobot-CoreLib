@@ -77,6 +77,8 @@
 #include <arpirobot/core/control/PID.hpp>
 
 #include <string>
+#include <memory>
+#include <vector>
 
 using namespace arpirobot;
 
@@ -124,7 +126,6 @@ private:
     void (*disabledPeriodicPtr)(void); 
     void (*periodicPtr)(void);
 };
-
 
 BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void), 
                         void (*robotEnabled)(void), 

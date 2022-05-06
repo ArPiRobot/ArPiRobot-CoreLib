@@ -41,6 +41,37 @@
 #include <cstring>
 #include <memory>
 #include <functional>
+#include <algorithm>
+
+#define REMOVE_VAL_FROM_VEC(vec, val) vec.erase(std::remove(vec.begin(), vec.end(), val), vec.end())
+
+////////////////////////////////////////////////////////////////////////////////
+/// Globals
+////////////////////////////////////////////////////////////////////////////////
+// Objects allocated using bridge create functions
+// Object is allocated using std::make_shared. 
+// shared_ptr is kept here until destory called
+// Create functions still return raw pointer (b/c C API)
+// When bridge is passed a pointer to another ArPiRobot object, it is known
+// that said object was allocated using a std::make_shared. Thus the pointer
+// can be wrapped in a smart pointer and passed to the C++ API functions
+// The C++ objects will then hold a copy of the smart pointer in addition to here
+// When the Destroy functions are called the smart_ptrs are removed from this list
+// If another ArPiRobot object holds a copy, they remain in scope. If not they
+// are deleted. This "replicates" the behavior of Create using new and Destory
+// using delete, except for scenarios when the bridge's calling language (eg python)
+// calls destory, but the allocated object may still be used by the C++ API.
+// For example:
+// In python_bindings an object constructed for an action could be started using
+// gp0.set_axis_transform(1, SquareRootAxisTransform())
+// This should perform the same as the following C++ code
+// gp0.setAxisTransform(std::make_shared<SquareRootAxisTransform>())
+// However, the python SquareRootAxisTransform object leaves scope.
+// When this happens, the python_bindings call destory. If using delete, this would
+// destruct and deallocate the transform, leading to undefined behaviors with getting axis values. 
+// Using the shared_ptr model, the Gampad object in C++ holds a copy
+// of the shared_ptr even though this list no longer does. Thus the transform remains in allocated 
+std::vector<std::shared_ptr<void>> bridge_objs;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// General/Helper
@@ -117,13 +148,14 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
     profile.maxGamepadDataAge = maxGamepadDataAge;
     profile.actionFunctionPeriod = actionFunctionPeriod;
 
-    BaseRobot *robot = new BridgeBaseRobot(robotStarted, robotEnabled, robotDisabled, 
+    auto robot = std::make_shared<BridgeBaseRobot>(robotStarted, robotEnabled, robotDisabled, 
         enabledPeriodic, disabledPeriodic, periodic, profile);
-    return robot;
+    bridge_objs.push_back(robot);
+    return robot.get();
 }
 
 BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot){
-    delete robot;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<BaseRobot>(robot));
 }
 
 BRIDGE_FUNC void BaseRobot_start(BaseRobot *robot, const char *ioProvider){
@@ -218,12 +250,13 @@ BRIDGE_FUNC char *BaseDevice_getDeviceName(BaseDevice *device){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC Gamepad *Gamepad_create(int controllerNum){
-    Gamepad *gamepad = new Gamepad(controllerNum);
-    return gamepad;
+    auto gamepad = std::make_shared<Gamepad>(controllerNum);
+    bridge_objs.push_back(gamepad);
+    return gamepad.get();
 }
 
 BRIDGE_FUNC void Gamepad_destroy(Gamepad *gamepad){
-    delete gamepad;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<Gamepad>(gamepad));
 }
 
 BRIDGE_FUNC int Gamepad_getControllerNum(Gamepad *gamepad){
@@ -257,11 +290,17 @@ BRIDGE_FUNC void Gamepad_clearAxisTransform(Gamepad *gamepad, int axisNum){
 
 BRIDGE_FUNC ButtonPressedTrigger *ButtonPressedTrigger_create(Gamepad *gamepad, int buttonNum, 
     Action *targetAction, bool doRestart){
-    return new ButtonPressedTrigger(*gamepad, buttonNum, *targetAction, doRestart);
+    auto trigger = std::make_shared<ButtonPressedTrigger>(
+        std::shared_ptr<Gamepad>(gamepad), 
+        buttonNum, 
+        std::shared_ptr<Action>(targetAction), 
+        doRestart);
+    bridge_objs.push_back(trigger);
+    return trigger.get();
 }
 
 BRIDGE_FUNC void ButtonPressedTrigger_destroy(ButtonPressedTrigger *trigger){
-    delete trigger;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<ButtonPressedTrigger>(trigger));
 }
 
 
@@ -271,11 +310,17 @@ BRIDGE_FUNC void ButtonPressedTrigger_destroy(ButtonPressedTrigger *trigger){
 
 BRIDGE_FUNC ButtonReleasedTrigger *ButtonReleasedTrigger_create(Gamepad *gamepad, int buttonNum, 
         Action *targetAction, bool doRestart){
-    return new ButtonReleasedTrigger(*gamepad, buttonNum, *targetAction, doRestart);
+    auto trigger = std::make_shared<ButtonReleasedTrigger>(
+        std::shared_ptr<Gamepad>(gamepad), 
+        buttonNum, 
+        std::shared_ptr<Action>(targetAction), 
+        doRestart);
+    bridge_objs.push_back(trigger);
+    return trigger.get();
 }
 
 BRIDGE_FUNC void ButtonReleasedTrigger_destroy(ButtonReleasedTrigger *trigger){
-    delete trigger;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<ButtonReleasedTrigger>(trigger));
 }
 
 
@@ -313,11 +358,13 @@ BRIDGE_FUNC double MotorController_getSpeed(MotorController *motor){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, int address, bool remapNumbers){
-    return new AdafruitMotorHatMotor(motorNum, address, remapNumbers);
+    auto motor = std::make_shared<AdafruitMotorHatMotor>(motorNum, address, remapNumbers);
+    bridge_objs.push_back(motor);
+    return motor.get();
 }
 
 BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor){
-    delete motor;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<AdafruitMotorHatMotor>(motor));
 }
 
 
@@ -326,11 +373,13 @@ BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC L298NMotor *L298NMotor_create(int in1Pin, int in2Pin, int pwmPin){
-    return new L298NMotor(in1Pin, in2Pin, pwmPin);
+    auto motor = std::make_shared<L298NMotor>(in1Pin, in2Pin, pwmPin);
+    bridge_objs.push_back(motor);
+    return motor.get();
 }
 
 BRIDGE_FUNC void L298NMotor_destroy(L298NMotor *motor){
-    delete motor;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<L298NMotor>(motor));
 }
 
 
@@ -339,11 +388,13 @@ BRIDGE_FUNC void L298NMotor_destroy(L298NMotor *motor){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC TB6612Motor *TB6612Motor_create(int in1Pin, int in2Pin, int pwmPin){
-    return new TB6612Motor(in1Pin, in2Pin, pwmPin);
+    auto motor = std::make_shared<TB6612Motor>(in1Pin, in2Pin, pwmPin);
+    bridge_objs.push_back(motor);
+    return motor.get();
 }
 
 BRIDGE_FUNC void TB6612Motor_destroy(TB6612Motor *motor){
-    delete motor;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<TB6612Motor>(motor));
 }
 
 
@@ -352,11 +403,13 @@ BRIDGE_FUNC void TB6612Motor_destroy(TB6612Motor *motor){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC DRV8833Motor *DRV8833Motor_create(int in1Pin, int in2Pin, int slpPin){
-    return new DRV8833Motor(in1Pin, in2Pin, slpPin);
+    auto motor = std::make_shared<DRV8833Motor>(in1Pin, in2Pin, slpPin);
+    bridge_objs.push_back(motor);
+    return motor.get();
 }
 
 BRIDGE_FUNC void DRV8833Motor_destroy(DRV8833Motor *motor){
-    delete motor;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<DRV8833Motor>(motor));
 }
 
 
@@ -366,21 +419,23 @@ BRIDGE_FUNC void DRV8833Motor_destroy(DRV8833Motor *motor){
 
 BRIDGE_FUNC ArcadeDriveHelper *ArcadeDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
         MotorController **rightMotors, size_t rightMotorCount){
-    std::vector<std::reference_wrapper<MotorController>> lm;
-    std::vector<std::reference_wrapper<MotorController>> rm;
+    std::vector<std::shared_ptr<MotorController>> lm;
+    std::vector<std::shared_ptr<MotorController>> rm;
     lm.reserve(leftMotorCount);
     rm.reserve(rightMotorCount);
     for(int i = 0; i < leftMotorCount; ++i){
-        lm.push_back(*leftMotors[i]);
+        lm.push_back(std::shared_ptr<MotorController>(leftMotors[i]));
     }
     for(int i = 0; i < rightMotorCount; ++i){
-        rm.push_back(*rightMotors[i]);
+        rm.push_back(std::shared_ptr<MotorController>(rightMotors[i]));
     }
-    return new ArcadeDriveHelper(lm, rm);
+    auto helper = std::make_shared<ArcadeDriveHelper>(lm, rm);
+    bridge_objs.push_back(helper);
+    return helper.get();
 }
 
 BRIDGE_FUNC void ArcadeDriveHelper_destroy(ArcadeDriveHelper *helper){
-    delete helper;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<ArcadeDriveHelper>(helper));
 }
 
 BRIDGE_FUNC void ArcadeDriveHelper_updateSpeed(ArcadeDriveHelper *helper, double speed){
@@ -402,21 +457,23 @@ BRIDGE_FUNC void ArcadeDriveHelper_update(ArcadeDriveHelper *helper, double spee
 
 BRIDGE_FUNC TankDriveHelper *TankDriveHelper_create(MotorController **leftMotors, size_t leftMotorCount, 
         MotorController **rightMotors, size_t rightMotorCount){
-    std::vector<std::reference_wrapper<MotorController>> lm;
-    std::vector<std::reference_wrapper<MotorController>> rm;
+    std::vector<std::shared_ptr<MotorController>> lm;
+    std::vector<std::shared_ptr<MotorController>> rm;
     lm.reserve(leftMotorCount);
     rm.reserve(rightMotorCount);
     for(int i = 0; i < leftMotorCount; ++i){
-        lm.push_back(*leftMotors[i]);
+        lm.push_back(std::shared_ptr<MotorController>(leftMotors[i]));
     }
     for(int i = 0; i < rightMotorCount; ++i){
-        rm.push_back(*rightMotors[i]);
+        rm.push_back(std::shared_ptr<MotorController>(rightMotors[i]));
     }
-    return new TankDriveHelper(lm, rm);
+    auto helper = std::make_shared<TankDriveHelper>(lm, rm);
+    bridge_objs.push_back(helper);
+    return helper.get();
 }
 
 BRIDGE_FUNC void TankDriveHelper_destroy(TankDriveHelper *helper){
-    delete helper;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<TankDriveHelper>(helper));
 }
 
 BRIDGE_FUNC void TankDriveHelper_updateLeftSpeed(TankDriveHelper *helper, double newLeftSpeed){
@@ -446,11 +503,13 @@ BRIDGE_FUNC double BaseAxisTransform_applyTransform(BaseAxisTransform *transform
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC SquareRootAxisTransform *SquareRootAxisTransform_create(){
-    return new SquareRootAxisTransform();
+    auto transform = std::make_shared<SquareRootAxisTransform>();
+    bridge_objs.push_back(transform);
+    return transform.get();
 }
 
 BRIDGE_FUNC void SquareRootAxisTransform_destroy(SquareRootAxisTransform *transform){
-    delete transform;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<SquareRootAxisTransform>(transform));
 }
 
 
@@ -459,11 +518,13 @@ BRIDGE_FUNC void SquareRootAxisTransform_destroy(SquareRootAxisTransform *transf
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC CubicAxisTransform *CubicAxisTransform_create(double minPower, double midPower){
-    return new CubicAxisTransform(minPower, midPower);
+    auto transform = std::make_shared<CubicAxisTransform>(minPower, midPower);
+    bridge_objs.push_back(transform);
+    return transform.get();
 }
 
 BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform){
-    delete transform;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<CubicAxisTransform>(transform));
 }
 
 
@@ -506,11 +567,13 @@ BRIDGE_FUNC Action *Action_create(void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
         bool (*shouldContinuePtr)(void)){
-    return new BridgeAction(beginPtr, processPtr, finishPtr, shouldContinuePtr);
+    auto action = std::make_shared<BridgeAction>(beginPtr, processPtr, finishPtr, shouldContinuePtr);
+    bridge_objs.push_back(action);
+    return action.get();
 }
 
 BRIDGE_FUNC void Action_destroy(Action *action){
-    delete action;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<Action>(action));
 }
 
 BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice **devices, size_t deviceCount){
@@ -540,19 +603,19 @@ BRIDGE_FUNC void Action_setProcessPeriodMs(Action *action, int32_t processPeriod
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC bool ActionManager_startAction(Action *action){
-    return ActionManager::startAction(*action);
+    return ActionManager::startAction(std::shared_ptr<Action>(action));
 }
 
 BRIDGE_FUNC bool ActionManager_stopAction(Action *action){
-    return ActionManager::stopAction(*action);
+    return ActionManager::stopAction(std::shared_ptr<Action>(action));
 }
 
 BRIDGE_FUNC void ActionManager_addTrigger(BaseActionTrigger *trigger){
-    ActionManager::addTrigger(*trigger);
+    ActionManager::addTrigger(std::shared_ptr<BaseActionTrigger>(trigger));
 }
 
 BRIDGE_FUNC void ActionManager_removeTrigger(BaseActionTrigger *trigger){
-    ActionManager::removeTrigger(*trigger);
+    ActionManager::removeTrigger(std::shared_ptr<BaseActionTrigger>(trigger));
 }
 
 
@@ -561,16 +624,18 @@ BRIDGE_FUNC void ActionManager_removeTrigger(BaseActionTrigger *trigger){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ActionSeries *ActionSeries_create(Action **actions, size_t actionCount, Action* finishAction){
-    std::vector<std::reference_wrapper<Action>> actionsVector;
+    std::vector<std::shared_ptr<Action>> actionsVector;
     actionsVector.reserve(actionCount);
     for(int i = 0; i < actionCount; ++i){
-        actionsVector.push_back(*actions[i]);
+        actionsVector.push_back(std::shared_ptr<Action>(actions[i]));
     }
-    return new ActionSeries(actionsVector, *finishAction);
+    auto series = std::make_shared<ActionSeries>(actionsVector, *finishAction);
+    bridge_objs.push_back(series);
+    return series.get();
 }
 
 BRIDGE_FUNC void ActionSeries_destroy(ActionSeries *actionSeries){
-    delete actionSeries;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<ActionSeries>(actionSeries));
 }
 
 
@@ -583,7 +648,7 @@ BRIDGE_FUNC void BaseArduinoInterface_begin(BaseArduinoInterface *arduino){
 }
 
 BRIDGE_FUNC void BaseArduinoInterface_addDevice(BaseArduinoInterface *arduino, ArduinoDevice *device){
-    arduino->addDevice(*device);
+    arduino->addDevice(std::shared_ptr<ArduinoDevice>(device));
 }
 
 BRIDGE_FUNC bool BaseArduinoInterface_isReady(BaseArduinoInterface *arduino){
@@ -596,11 +661,13 @@ BRIDGE_FUNC bool BaseArduinoInterface_isReady(BaseArduinoInterface *arduino){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC ArduinoUartInterface *ArduinoUartInterface_create(const char *tty, int baud){
-    return new ArduinoUartInterface(std::string(tty), baud);
+    auto interface = std::make_shared<ArduinoUartInterface>(std::string(tty), baud);
+    bridge_objs.push_back(interface);
+    return interface.get();
 }
 
 BRIDGE_FUNC void ArduinoUartInterface_destroy(ArduinoUartInterface *interface){
-    delete interface;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<ArduinoUartInterface>(interface));
 }
 
 
@@ -619,11 +686,13 @@ BRIDGE_FUNC char *ArduinoDevice_getDeviceName(ArduinoDevice *device){
 
 BRIDGE_FUNC VoltageMonitor *VoltageMonitor_create(const char *pin, double vboard, int r1, 
         int r2, bool createDevice, int deviceId){
-    return new VoltageMonitor(pin, vboard, r1, r2, createDevice, deviceId);
+    auto vmon = std::make_shared<VoltageMonitor>(pin, vboard, r1, r2, createDevice, deviceId);
+    bridge_objs.push_back(vmon);
+    return vmon.get();
 }
 
 BRIDGE_FUNC void VoltageMonitor_destroy(VoltageMonitor *vmon){
-    delete vmon;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<VoltageMonitor>(vmon));
 }
 
 BRIDGE_FUNC double VoltageMonitor_getVoltage(VoltageMonitor *vmon){
@@ -641,11 +710,13 @@ BRIDGE_FUNC void VoltageMonitor_makeMainVmon(VoltageMonitor *vmon){
 
 BRIDGE_FUNC Ultrasonic4Pin *Ultrasonic4Pin_create(const char *triggerPin, const char *echoPin, 
         bool createDevice, int deviceId){
-    return new Ultrasonic4Pin(std::string(triggerPin), std::string(echoPin), createDevice, deviceId);
+    auto usonic = std::make_shared<Ultrasonic4Pin>(std::string(triggerPin), std::string(echoPin), createDevice, deviceId);
+    bridge_objs.push_back(usonic);
+    return usonic.get();
 }
 
 BRIDGE_FUNC void Ultrasonic4Pin_destroy(Ultrasonic4Pin *usonic){
-    delete usonic;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<Ultrasonic4Pin>(usonic));
 }
 
 BRIDGE_FUNC int Ultrasonic4Pin_getDistance(Ultrasonic4Pin *usonic){
@@ -659,11 +730,13 @@ BRIDGE_FUNC int Ultrasonic4Pin_getDistance(Ultrasonic4Pin *usonic){
 
 BRIDGE_FUNC SingleEncoder *SingleEncoder_create(const char *pin, bool useInternalPullup, 
         bool createDevice, int deviceId){
-    return new SingleEncoder(std::string(pin), useInternalPullup, createDevice, deviceId);
+    auto enc = std::make_shared<SingleEncoder>(std::string(pin), useInternalPullup, createDevice, deviceId);
+    bridge_objs.push_back(enc);
+    return enc.get();
 }
 
 BRIDGE_FUNC void SingleEncoder_destroy(SingleEncoder *enc){
-    delete enc;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<SingleEncoder>(enc));
 }
 
 BRIDGE_FUNC int SingleEncoder_getPosition(SingleEncoder *enc){
@@ -681,11 +754,13 @@ BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int newPosition){
 
 BRIDGE_FUNC IRReflectorModule *IRReflectorModule_create(const char *digitalPin, const char *analogPin, 
         bool createDevice, int deviceId){
-    return new IRReflectorModule(std::string(digitalPin), std::string(analogPin));
+    auto ir = std::make_shared<IRReflectorModule>(std::string(digitalPin), std::string(analogPin));
+    bridge_objs.push_back(ir);
+    return ir.get();
 }
 
 BRIDGE_FUNC void IRReflectorModule_destroy(IRReflectorModule *ir){
-    delete ir;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<IRReflectorModule>(ir));
 }
 
 BRIDGE_FUNC bool IRReflectorModule_getDigitalValue(IRReflectorModule *ir){
@@ -702,7 +777,9 @@ BRIDGE_FUNC int IRReflectorModule_getAnalogValue(IRReflectorModule *ir){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC OldAdafruit9Dof *OldAdafruit9Dof_create(bool createDevice, int deviceId){
-    return new OldAdafruit9Dof();
+    auto imu = std::make_shared<OldAdafruit9Dof>();
+    bridge_objs.push_back(imu);
+    return imu.get();
 }
 
 BRIDGE_FUNC void OldAdafruit9Dof_destroy(OldAdafruit9Dof *imu){
@@ -751,11 +828,13 @@ BRIDGE_FUNC void OldAdafruit9Dof_setGyroZ(OldAdafruit9Dof *imu, double newGyroZ)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC NxpAdafruit9Dof *NxpAdafruit9Dof_create(bool createDevice, int deviceId){
-    return new NxpAdafruit9Dof();
+    auto imu = std::make_shared<NxpAdafruit9Dof>();
+    bridge_objs.push_back(imu);
+    return imu.get();
 }
 
 BRIDGE_FUNC void NxpAdafruit9Dof_destroy(NxpAdafruit9Dof *imu){
-    delete imu;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<NxpAdafruit9Dof>(imu));
 }
 
 BRIDGE_FUNC void NxpAdafruit9Dof_calibrate(NxpAdafruit9Dof *imu, int samples){
@@ -804,11 +883,13 @@ BRIDGE_FUNC void NxpAdafruit9Dof_setGyroZ(NxpAdafruit9Dof *imu, double newGyroZ)
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC Mpu6050Imu *Mpu6050Imu_create(bool createDevice, int deviceId){
-    return new Mpu6050Imu();
+    auto imu = std::make_shared<Mpu6050Imu>();
+    bridge_objs.push_back(imu);
+    return imu.get();
 }
 
 BRIDGE_FUNC void Mpu6050Imu_destroy(Mpu6050Imu *imu){
-    delete imu;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<Mpu6050Imu>(imu));
 }
 
 BRIDGE_FUNC void Mpu6050Imu_calibrate(Mpu6050Imu *imu, int samples){
@@ -857,11 +938,13 @@ BRIDGE_FUNC void Mpu6050Imu_setGyroZ(Mpu6050Imu *imu, double newGyroZ){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC INA260PowerSensor *INA260PowerSensor_create(){
-    return new INA260PowerSensor();
+    auto vmon = std::make_shared<INA260PowerSensor>();
+    bridge_objs.push_back(vmon);
+    return vmon.get();
 }
 
 BRIDGE_FUNC void INA260PowerSensor_destroy(INA260PowerSensor *vmon){
-    delete vmon;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<INA260PowerSensor>(vmon));
 }
 
 BRIDGE_FUNC double INA260PowerSensor_getCurrent(INA260PowerSensor *vmon){
@@ -885,11 +968,13 @@ BRIDGE_FUNC void INA260PowerSensor_makeMainVmon(INA260PowerSensor *vmon){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC StatusLED *StatusLED_create(unsigned int pin){
-    return new StatusLED(pin);
+    auto led = std::make_shared<StatusLED>(pin);
+    bridge_objs.push_back(led);
+    return led.get();
 }
 
 BRIDGE_FUNC void StatusLED_destroy(StatusLED *led){
-    delete led;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<StatusLED>(led));
 }
 
 
@@ -898,11 +983,13 @@ BRIDGE_FUNC void StatusLED_destroy(StatusLED *led){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC GPIOPin *GPIOPin_create(unsigned int pin){
-    return new GPIOPin(pin);
+    auto dev = std::make_shared<GPIOPin>(pin);
+    bridge_objs.push_back(dev);
+    return dev.get();
 }
 
 BRIDGE_FUNC void GPIOPin_destroy(GPIOPin *dev){
-    delete dev;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<GPIOPin>(dev));
 }
 
 BRIDGE_FUNC void GPIOPin_setMode(GPIOPin *dev, int mode){
@@ -976,11 +1063,13 @@ BRIDGE_FUNC void AudioManager_stopJob(int jobId){
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC PID *PID_create(double kp, double ki, double kd, double kf, double min, double max){
-    return new PID(kp, ki, kd, kf, min, max);
+    auto pid = std::make_shared<PID>(kp, ki, kd, kf, min, max);
+    bridge_objs.push_back(pid);
+    return pid.get();
 }
 
 BRIDGE_FUNC void PID_destroy(PID *pid){
-    delete pid;
+    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<PID>(pid));
 }
 
 BRIDGE_FUNC double PID_getKp(PID *pid){
