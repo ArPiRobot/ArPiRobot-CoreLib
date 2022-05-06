@@ -55,6 +55,10 @@
 // When bridge is passed a pointer to another ArPiRobot object, it is known
 // that said object was allocated using a std::make_shared. Thus the pointer
 // can be wrapped in a smart pointer and passed to the C++ API functions
+// Note that wrapping in shared_ptr in the bridge functions is required.
+// Cannot pass using reference. C++ API assumes referenced objects to be statically
+// allocated, so when it wraps them internally in a shared_ptr, they will have no
+// deleter. This could cause memory leaks. To avoid this, wrap in bridge with default deleter.
 // The C++ objects will then hold a copy of the smart pointer in addition to here
 // When the Destroy functions are called the smart_ptrs are removed from this list
 // If another ArPiRobot object holds a copy, they remain in scope. If not they
@@ -276,7 +280,7 @@ BRIDGE_FUNC int Gamepad_getDpad(Gamepad *gamepad, int dpadNum){
 }
 
 BRIDGE_FUNC void Gamepad_setAxisTransform(Gamepad *gamepad, int axisNum, BaseAxisTransform *transform){
-    gamepad->setAxisTransform(axisNum, *transform);
+    gamepad->setAxisTransform(axisNum, std::shared_ptr<BaseAxisTransform>(transform));
 }
 
 BRIDGE_FUNC void Gamepad_clearAxisTransform(Gamepad *gamepad, int axisNum){
@@ -577,16 +581,16 @@ BRIDGE_FUNC void Action_destroy(Action *action){
 }
 
 BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice **devices, size_t deviceCount){
-    std::vector<std::reference_wrapper<BaseDevice>> devs;
+    std::vector<std::shared_ptr<BaseDevice>> devs;
     devs.reserve(deviceCount);
     for(int i = 0; i < deviceCount; ++i){
-        devs.push_back(*devices[i]);
+        devs.push_back(std::shared_ptr<BaseDevice>(devices[i]));
     }
     action->lockDevices(devs);
 }
 
 BRIDGE_FUNC void Action_lockDevice(Action *action, BaseDevice *device){
-    action->lockDevice(*device);
+    action->lockDevice(std::shared_ptr<BaseDevice>(device));
 }
 
 BRIDGE_FUNC bool Action_isRunning(Action *action){
@@ -629,7 +633,7 @@ BRIDGE_FUNC ActionSeries *ActionSeries_create(Action **actions, size_t actionCou
     for(int i = 0; i < actionCount; ++i){
         actionsVector.push_back(std::shared_ptr<Action>(actions[i]));
     }
-    auto series = std::make_shared<ActionSeries>(actionsVector, *finishAction);
+    auto series = std::make_shared<ActionSeries>(actionsVector, std::shared_ptr<Action>(finishAction));
     bridge_objs.push_back(series);
     return series.get();
 }
