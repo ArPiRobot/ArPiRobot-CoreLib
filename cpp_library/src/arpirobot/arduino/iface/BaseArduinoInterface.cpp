@@ -148,8 +148,6 @@ bool BaseArduinoInterface::begin(){
 }
 
 void BaseArduinoInterface::addDevice(ArduinoDevice &device){
-    // This is reference to statically allocated object
-    // Lifetime of this object must outlast this object's lifetime
     addDevice(std::shared_ptr<ArduinoDevice>(std::shared_ptr<ArduinoDevice>{}, &device));
 }
 

@@ -105,7 +105,8 @@ void Action::actionProcess(){
     }
 
     if(!cont){
-        ActionManager::stopActionInternal(this, false);
+        ActionManager::stopActionInternal(
+            std::shared_ptr<Action>(std::shared_ptr<Action>{}, this), false);
     }
 }
 

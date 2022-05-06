@@ -36,42 +36,74 @@ namespace arpirobot{
 
         /**
          * Start an action
-         * @param action    A pointer to the action to start.
+         * @param action    A reference to the action to start. Referenced action must remain in scope while action is running
          * @param doRestart If true starting an action that is already running will restart the action.
          *                  If false the action will continue running uninterrupted.
          * @return true if the action was started successfully
          */
-        static bool startAction(Action *action, bool doRestart = true);
+        static bool startAction(Action &action, bool doRestart = true);
 
         /**
-         * Add a trigger to start an action when some event occurs.
-         * @param trigger A pointer to the trigger to add.
+         * Start an action
+         * @param action    A shared_ptr to the action to start. Can use with std::make_shared
+         * @param doRestart If true starting an action that is already running will restart the action.
+         *                  If false the action will continue running uninterrupted.
+         * @return true if the action was started successfully
          */
-        static void addTrigger(BaseActionTrigger *trigger);
-
-        /**
-         * Remove a trigger
-         * @param trigger A pointer to the trigger to remove
-         */
-        static void removeTrigger(BaseActionTrigger *trigger);
+        static bool startAction(std::shared_ptr<Action> action, bool doRestart = true);
 
         /**
          * Stop an action (interrupts it)
          * If the action is not running nothing is done.
-         * @param action A pointer to the action to stop
+         * @param action A reference to the action to stop. Referenced action must remain in scope while action is running
          * @return true if the action was stopped. If false, the action was not running.
          */
-        static bool stopAction(Action *action);
+        static bool stopAction(Action &action);
+
+        /**
+         * Stop an action (interrupts it)
+         * If the action is not running nothing is done.
+         * @param action A shared_ptr to the action to stop. Can use with std::make_shared
+         * @return true if the action was stopped. If false, the action was not running.
+         */
+        static bool stopAction(std::shared_ptr<Action> action);
+
+        /**
+         * Add a trigger to start an action when some event occurs.
+         * @param trigger A reference to trigger to add. Must remain in scope until removed.
+         */
+        static void addTrigger(BaseActionTrigger &trigger);
+
+        /**
+         * Add a trigger to start an action when some event occurs.
+         * @param trigger A shared_ptr to the trigger to add. Can use with std::make_shared
+         */
+        static void addTrigger(std::shared_ptr<BaseActionTrigger> trigger);
+
+        /**
+         * Remove a trigger
+         * @param trigger A reference to trigger to remove.
+         */
+        static void removeTrigger(BaseActionTrigger &trigger);
+
+        /**
+         * Remove a trigger
+         * @param trigger A shared_ptr to the trigger to remove
+         */
+        static void removeTrigger(std::shared_ptr<BaseActionTrigger> trigger);
 
     private:
 
-        static bool stopActionInternal(Action *action, bool interrupted);
+        static bool stopActionInternal(std::shared_ptr<Action> action, bool interrupted);
 
         static void checkTriggers();
 
         static std::mutex triggerLock;
 
-        static std::vector<BaseActionTrigger*> triggers;
+        static std::vector<std::shared_ptr<BaseActionTrigger>> triggers;
+
+        // Keep actions started with ActionManager::startAction(std::make_shared) in scope
+        static std::vector<std::shared_ptr<Action>> runningActions;
 
         friend class BaseRobot; // BaseRobot needs to call checkTriggers on its scheduler
         friend class Action;    // Action needs to be able to call stopActionInternal

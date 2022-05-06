@@ -17,6 +17,19 @@
  * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
+/*
+ * Many user-facing functions in the CoreLib have two variants
+ * One that accepts a reference to an object. The object's lifetime must be sufficient.
+ *     The object is persumably static (but doesn't have to be).
+ * The other accepts a shared_ptr to a (presumably) dynamically allocated object.
+ * 
+ * In the bridge, the reference versions are used as the other language (python, etc)
+ *     using the bridge allocates and manages the lifetime of the pointers by calling
+ *     the create and destroy functions. The bridge thus calls the reference versions
+ *     or creates a shared_ptr with no delete fuction specified to prevent early
+ *     deletion of the pointers.
+ */
+
 #include <arpirobot/bridge.hpp>
 #include <arpirobot/core/network/NetworkTable.hpp>
 #include <arpirobot/core/log/Logger.hpp>
@@ -242,7 +255,7 @@ BRIDGE_FUNC void Gamepad_clearAxisTransform(Gamepad *gamepad, int axisNum){
 
 BRIDGE_FUNC ButtonPressedTrigger *ButtonPressedTrigger_create(Gamepad *gamepad, int buttonNum, 
     Action *targetAction, bool doRestart){
-    return new ButtonPressedTrigger(gamepad, buttonNum, targetAction, doRestart);
+    return new ButtonPressedTrigger(*gamepad, buttonNum, *targetAction, doRestart);
 }
 
 BRIDGE_FUNC void ButtonPressedTrigger_destroy(ButtonPressedTrigger *trigger){
@@ -256,7 +269,7 @@ BRIDGE_FUNC void ButtonPressedTrigger_destroy(ButtonPressedTrigger *trigger){
 
 BRIDGE_FUNC ButtonReleasedTrigger *ButtonReleasedTrigger_create(Gamepad *gamepad, int buttonNum, 
         Action *targetAction, bool doRestart){
-    return new ButtonReleasedTrigger(gamepad, buttonNum, targetAction, doRestart);
+    return new ButtonReleasedTrigger(*gamepad, buttonNum, *targetAction, doRestart);
 }
 
 BRIDGE_FUNC void ButtonReleasedTrigger_destroy(ButtonReleasedTrigger *trigger){
@@ -525,19 +538,19 @@ BRIDGE_FUNC void Action_setProcessPeriodMs(Action *action, int32_t processPeriod
 ////////////////////////////////////////////////////////////////////////////////
 
 BRIDGE_FUNC bool ActionManager_startAction(Action *action){
-    return ActionManager::startAction(action);
+    return ActionManager::startAction(*action);
 }
 
 BRIDGE_FUNC bool ActionManager_stopAction(Action *action){
-    return ActionManager::stopAction(action);
+    return ActionManager::stopAction(*action);
 }
 
 BRIDGE_FUNC void ActionManager_addTrigger(BaseActionTrigger *trigger){
-    ActionManager::addTrigger(trigger);
+    ActionManager::addTrigger(*trigger);
 }
 
 BRIDGE_FUNC void ActionManager_removeTrigger(BaseActionTrigger *trigger){
-    ActionManager::removeTrigger(trigger);
+    ActionManager::removeTrigger(*trigger);
 }
 
 
@@ -568,7 +581,6 @@ BRIDGE_FUNC void BaseArduinoInterface_begin(BaseArduinoInterface *arduino){
 }
 
 BRIDGE_FUNC void BaseArduinoInterface_addDevice(BaseArduinoInterface *arduino, ArduinoDevice *device){
-    // Uses reference version of function as lifetime of passed pointer is managed by language calling bridge
     arduino->addDevice(*device);
 }
 

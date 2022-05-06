@@ -34,7 +34,7 @@ void ActionSeries::begin(){
 
     // Start first action
     if(actions.size() >= 1){
-        ActionManager::startAction(actions[index]);
+        ActionManager::startAction(*actions[index]);
     }
 }
 
@@ -47,21 +47,21 @@ void ActionSeries::process(){
         if(actions[index]->isFinished()){
             index += 1;
             if(index < actions.size()){
-                ActionManager::startAction(actions[index]);
+                ActionManager::startAction(*actions[index]);
             }
         }
     }catch(const std::runtime_error &e){
         Logger::logError("An ActionSeries ran into an error handling actions. Its behavior is now unpredictable. The ActionSeries will now be stopped.");
         Logger::logDebug(e.what());
-        ActionManager::stopAction(this);
+        ActionManager::stopAction(*this);
     }
 }
 
 void ActionSeries::finish(bool interrupted){
     if(interrupted){
-        ActionManager::stopAction(actions[index]);
+        ActionManager::stopAction(*actions[index]);
     }else if(finishedAction != nullptr){
-        ActionManager::startAction(finishedAction);
+        ActionManager::startAction(*finishedAction);
     }
 }
 

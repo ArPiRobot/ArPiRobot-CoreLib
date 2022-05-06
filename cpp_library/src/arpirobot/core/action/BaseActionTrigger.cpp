@@ -24,8 +24,13 @@
 
 using namespace arpirobot;
 
+BaseActionTrigger::BaseActionTrigger(Action &targetAction, bool doRestart) : 
+        targetAction(std::shared_ptr<Action>(std::shared_ptr<Action>{}, &targetAction)), 
+        doRestart(doRestart){
+        
+}
 
-BaseActionTrigger::BaseActionTrigger(Action *targetAction, bool doRestart) : 
+BaseActionTrigger::BaseActionTrigger(std::shared_ptr<Action> targetAction, bool doRestart) : 
         targetAction(targetAction), doRestart(doRestart){
     
 }

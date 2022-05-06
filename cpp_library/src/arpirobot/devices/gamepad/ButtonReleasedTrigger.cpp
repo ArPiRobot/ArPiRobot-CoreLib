@@ -22,8 +22,31 @@
 
 using namespace arpirobot;
 
-ButtonReleasedTrigger::ButtonReleasedTrigger(Gamepad *gamepad, int buttonNum, Action *targetAction, 
-        bool doRestart) : BaseActionTrigger(targetAction, doRestart), gamepad(gamepad), buttonNum(buttonNum){
+ButtonReleasedTrigger::ButtonReleasedTrigger(Gamepad &gamepad, int buttonNum, 
+        Action &targetAction, bool doRestart) : 
+            BaseActionTrigger(targetAction, doRestart), 
+            gamepad(std::shared_ptr<Gamepad>(std::shared_ptr<Gamepad>{}, &gamepad)), 
+            buttonNum(buttonNum){
+
+}
+
+ButtonReleasedTrigger::ButtonReleasedTrigger(Gamepad &gamepad, int buttonNum, 
+        std::shared_ptr<Action> targetAction, bool doRestart) : 
+            BaseActionTrigger(targetAction, doRestart), 
+            gamepad(std::shared_ptr<Gamepad>(std::shared_ptr<Gamepad>{}, &gamepad)), 
+            buttonNum(buttonNum){
+
+}
+
+ButtonReleasedTrigger::ButtonReleasedTrigger(std::shared_ptr<Gamepad> gamepad, int buttonNum, 
+        Action &targetAction, bool doRestart) : 
+            BaseActionTrigger(targetAction, doRestart), gamepad(gamepad), buttonNum(buttonNum){
+
+}
+
+ButtonReleasedTrigger::ButtonReleasedTrigger(std::shared_ptr<Gamepad> gamepad, int buttonNum, 
+        std::shared_ptr<Action> targetAction, bool doRestart) : 
+            BaseActionTrigger(targetAction, doRestart), gamepad(gamepad), buttonNum(buttonNum){
 
 }
 

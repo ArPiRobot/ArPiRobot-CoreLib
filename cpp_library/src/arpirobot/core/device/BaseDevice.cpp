@@ -34,7 +34,7 @@ void BaseDevice::lockDevice(Action *action){
     
     // If the same action is locking the device, don't stop it as this will cause issues with scheduler jobs
     if(lockingAction != nullptr && lockingAction != action){
-        ActionManager::stopAction(lockingAction);
+        ActionManager::stopAction(*lockingAction);
     }
     lockingAction = action;
 }

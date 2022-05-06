@@ -27,10 +27,15 @@ using namespace arpirobot;
 
 
 std::mutex ActionManager::triggerLock;
-std::vector<BaseActionTrigger*> ActionManager::triggers;
+std::vector<std::shared_ptr<BaseActionTrigger>> ActionManager::triggers;
+std::vector<std::shared_ptr<Action>> ActionManager::runningActions;
 
 
-bool ActionManager::startAction(Action *action, bool doRestart){
+bool ActionManager::startAction(Action &action, bool doRestart){
+    return startAction(std::shared_ptr<Action>(std::shared_ptr<Action>{}, &action));
+}
+
+bool ActionManager::startAction(std::shared_ptr<Action> action, bool doRestart){
     if(BaseRobot::currentRobot == nullptr)
         return false;
 
@@ -40,6 +45,7 @@ bool ActionManager::startAction(Action *action, bool doRestart){
     
     if(!action->isStarted() || action->isFinished()){
         action->actionStart();
+        runningActions.push_back(action);
         action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
             std::bind(&Action::actionProcess, action),
             period
@@ -50,6 +56,7 @@ bool ActionManager::startAction(Action *action, bool doRestart){
         ActionManager::stopAction(action);
         // Restart action
         action->actionStart();
+        runningActions.push_back(action);
         action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
             std::bind(&Action::actionProcess, action),
             period
@@ -61,14 +68,32 @@ bool ActionManager::startAction(Action *action, bool doRestart){
     }
 }
 
-void ActionManager::addTrigger(BaseActionTrigger *trigger){
+bool ActionManager::stopAction(Action &action){
+    return stopAction(std::shared_ptr<Action>(std::shared_ptr<Action>{}, &action));
+}
+
+bool ActionManager::stopAction(std::shared_ptr<Action> action){
+    // This is the user-facing stop action function. 
+    // Always consider the action interrupted if the user manually stops it
+    return stopActionInternal(action, true);
+}
+
+void ActionManager::addTrigger(BaseActionTrigger &trigger){
+    addTrigger(std::shared_ptr<BaseActionTrigger>(std::shared_ptr<BaseActionTrigger>{}, &trigger));
+}
+
+void ActionManager::addTrigger(std::shared_ptr<BaseActionTrigger> trigger){
     std::lock_guard<std::mutex> l(triggerLock);
     if(std::find(triggers.begin(), triggers.end(), trigger) == triggers.end()){
         triggers.push_back(trigger);
     }
 }
 
-void ActionManager::removeTrigger(BaseActionTrigger *trigger){
+void ActionManager::removeTrigger(BaseActionTrigger &trigger){
+    removeTrigger(std::shared_ptr<BaseActionTrigger>(std::shared_ptr<BaseActionTrigger>{}, &trigger));
+}
+
+void ActionManager::removeTrigger(std::shared_ptr<BaseActionTrigger> trigger){
     std::lock_guard<std::mutex> l(triggerLock);
     auto pos = std::find(triggers.begin(), triggers.end(), trigger);
     if(pos != triggers.end()){
@@ -76,15 +101,10 @@ void ActionManager::removeTrigger(BaseActionTrigger *trigger){
     }
 }
 
-bool ActionManager::stopAction(Action *action){
-    // This is the user-facing stop action function. 
-    // Always consider the action interrupted if the user manually stops it
-    return stopActionInternal(action, true);
-}
-
-bool ActionManager::stopActionInternal(Action *action, bool interrupted){
+bool ActionManager::stopActionInternal(std::shared_ptr<Action> action, bool interrupted){
     if(action->isStarted() && !action->isFinished()){
         action->actionStop(interrupted);
+        std::remove(runningActions.begin(), runningActions.end(), action);
         BaseRobot::removeTaskFromScheduler(action->_schedulerTask);
         action->_schedulerTask = nullptr;
         return true;

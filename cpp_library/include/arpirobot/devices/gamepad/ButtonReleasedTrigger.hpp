@@ -26,21 +26,51 @@
 namespace arpirobot{
     /**
      * \class ButtonReleasedTrigger ButtonReleasedTrigger.hpp arpirobot/devices/gamepad/ButtonReleasedTrigger.hpp
-     * Action trigger for when a button on a gamepad is released
+     * Action trigger for when a button on a gamepad is pressed
      */
-    class ButtonReleasedTrigger : public BaseActionTrigger {
+    class ButtonReleasedTrigger : public BaseActionTrigger{
     public:
+
+        /**
+         * @param gamepad The gamepad to check for button presses on. Referenced gamepad must remain in scope
+         * @param buttonNum The button number
+         * @param targetAction The action to run when this occurs. Referenced action must remain in scope
+         * @param doRestart If true this will restart the action if it is running when this occurs
+         */
+        ButtonReleasedTrigger(Gamepad &gamepad, int buttonNum, 
+                Action &targetAction, bool doRestart = true);
+
+        /**
+         * @param gamepad The gamepad to check for button presses on. Referenced gamepad must remain in scope
+         * @param buttonNum The button number
+         * @param targetAction The action to run when this occurs. Referenced action must remain in scope
+         * @param doRestart If true this will restart the action if it is running when this occurs
+         */
+        ButtonReleasedTrigger(Gamepad &gamepad, int buttonNum, 
+                std::shared_ptr<Action> targetAction, bool doRestart = true);
+
         /**
          * @param gamepad The gamepad to check for button presses on
          * @param buttonNum The button number
          * @param targetAction The action to run when this occurs
          * @param doRestart If true this will restart the action if it is running when this occurs
          */
-        ButtonReleasedTrigger(Gamepad *gamepad, int buttonNum, Action *targetAction, bool doRestart = true);
+        ButtonReleasedTrigger(std::shared_ptr<Gamepad> gamepad, int buttonNum, 
+                Action &targetAction, bool doRestart = true);
+
+        /**
+         * @param gamepad The gamepad to check for button presses on
+         * @param buttonNum The button number
+         * @param targetAction The action to run when this occurs
+         * @param doRestart If true this will restart the action if it is running when this occurs
+         */
+        ButtonReleasedTrigger(std::shared_ptr<Gamepad> gamepad, int buttonNum, 
+                std::shared_ptr<Action> targetAction, bool doRestart = true);
+
         bool shouldRun() override;
     
     private:
-        Gamepad *gamepad;
+        std::shared_ptr<Gamepad> gamepad;
         int buttonNum;
         bool lastValue = false;
     };

@@ -36,7 +36,8 @@ namespace arpirobot{
      */
     class BaseActionTrigger{
     public:
-        BaseActionTrigger(Action *targetAction, bool doRestart = true);
+        BaseActionTrigger(Action &targetAction, bool doRestart = true);
+        BaseActionTrigger(std::shared_ptr<Action> targetAction, bool doRestart = true);
 
     protected:
         virtual bool shouldRun() = 0;
@@ -45,7 +46,7 @@ namespace arpirobot{
 
         void startTargetAction();
 
-        Action *targetAction = nullptr;
+        std::shared_ptr<Action> targetAction = nullptr;
         bool doRestart = true;
 
         friend class ActionManager;
