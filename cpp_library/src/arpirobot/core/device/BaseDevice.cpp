@@ -29,7 +29,7 @@ using namespace arpirobot;
 /// BaseDevice
 ////////////////////////////////////////////////////////////////////////////////
 
-void BaseDevice::lockDevice(std::shared_ptr<Action> action){
+void BaseDevice::lockDevice(Action *action){
     std::lock_guard<std::mutex> l(actionLock);
     
     // If the same action is locking the device, don't stop it as this will cause issues with scheduler jobs

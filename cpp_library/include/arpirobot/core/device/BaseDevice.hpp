@@ -55,14 +55,14 @@ namespace arpirobot{
 
     private:
 
-        void lockDevice(std::shared_ptr<Action> action);
+        void lockDevice(Action *action);
 
         bool isLockedByAction();
 
         void doBegin();
 
         std::mutex actionLock;
-        std::shared_ptr<Action> lockingAction = nullptr;
+        Action *lockingAction = nullptr;
 
         friend class Action; // Needs to call lockDevice
         friend class BaseRobot; // Needs doBegin, enable, disable
