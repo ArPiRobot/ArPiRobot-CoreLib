@@ -36,11 +36,11 @@ bool ActionManager::startAction(Action &action, bool doRestart){
 }
 
 bool ActionManager::startAction(std::shared_ptr<Action> action, bool doRestart){
-    if(BaseRobot::currentRobot == nullptr)
+    if(!BaseRobot::exists)
         return false;
 
     auto period = (action->processRateMs < 0) ? 
-            std::chrono::milliseconds(BaseRobot::currentRobot->profile.actionFunctionPeriod) :
+            std::chrono::milliseconds(RobotProfile::actionFunctionPeriod) :
             std::chrono::milliseconds(action->processRateMs);
     
     if(!action->isStarted() || action->isFinished()){

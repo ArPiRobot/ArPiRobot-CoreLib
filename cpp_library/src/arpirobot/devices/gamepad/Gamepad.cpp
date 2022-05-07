@@ -49,7 +49,7 @@ double Gamepad::getAxis(int axisNum, double deadband){
         }
         int ageMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - data->lastUpdateTime).count();
-        if(ageMillis > BaseRobot::currentRobot->profile.maxGamepadDataAge){
+        if(ageMillis > RobotProfile::maxGamepadDataAge){
             // Data too old
             return 0;
         }
@@ -89,7 +89,7 @@ bool Gamepad::getButton(int buttonNum){
         }
         int ageMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - data->lastUpdateTime).count();
-        if(ageMillis > BaseRobot::currentRobot->profile.maxGamepadDataAge){
+        if(ageMillis > RobotProfile::maxGamepadDataAge){
             // Data too old
             return false;
         }
@@ -115,7 +115,7 @@ int Gamepad::getDpad(int dpadNum){
         }
         int ageMillis = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now() - data->lastUpdateTime).count();
-        if(ageMillis > BaseRobot::currentRobot->profile.maxGamepadDataAge){
+        if(ageMillis > RobotProfile::maxGamepadDataAge){
             // Data too old
             return false;
         }

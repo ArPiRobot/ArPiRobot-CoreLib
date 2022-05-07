@@ -286,8 +286,7 @@ void INA260PowerSensor::disable(){
 }
 
 void INA260PowerSensor::feed(){
-    while(!stop && BaseRobot::currentRobot != nullptr){
-
+    while(!stop && BaseRobot::exists){
         try{
             current = sensor->readCurrent();
             voltage = sensor->readBusVoltage() / 1000.0;

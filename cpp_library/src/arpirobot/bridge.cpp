@@ -100,8 +100,7 @@ BridgeBaseRobot::BridgeBaseRobot(void (*robotStartedPtr)(void),
                         void (*robotDisabledPtr)(void), 
                         void (*enabledPeriodicPtr)(void), 
                         void (*disabledPeriodicPtr)(void), 
-                        void (*periodicPtr)(void),
-                        RobotProfile profile) : BaseRobot(profile),
+                        void (*periodicPtr)(void)) : BaseRobot(),
                         robotStartedPtr(robotStartedPtr),
                         robotEnabledPtr(robotEnabledPtr),
                         robotDisabledPtr(robotDisabledPtr),
@@ -140,20 +139,10 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         void (*robotDisabled)(void), 
                         void (*enabledPeriodic)(void), 
                         void (*disabledPeriodic)(void), 
-                        void (*periodic)(void),
-                        int mainSchedulerThreads,
-                        int periodicFunctionRate,
-                        int maxGamepadDataAge,
-                        int actionFunctionPeriod){
-    RobotProfile profile;
-
-    profile.mainSchedulerThreads = mainSchedulerThreads;
-    profile.periodicFunctionRate = periodicFunctionRate;
-    profile.maxGamepadDataAge = maxGamepadDataAge;
-    profile.actionFunctionPeriod = actionFunctionPeriod;
+                        void (*periodic)(void)){
 
     auto robot = std::make_shared<BridgeBaseRobot>(robotStarted, robotEnabled, robotDisabled, 
-        enabledPeriodic, disabledPeriodic, periodic, profile);
+        enabledPeriodic, disabledPeriodic, periodic);
     bridge_objs.push_back(robot);
     return robot.get();
 }
@@ -163,7 +152,7 @@ BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot){
 }
 
 BRIDGE_FUNC void BaseRobot_start(BaseRobot *robot, const char *ioProvider){
-    robot->start(std::string(ioProvider));
+    BaseRobot::start(std::shared_ptr<BaseRobot>(robot), std::string(ioProvider));
 }
 
 BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot){

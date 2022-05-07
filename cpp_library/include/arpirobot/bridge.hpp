@@ -108,8 +108,7 @@ public:
                         void (*robotDisabledPtr)(void), 
                         void (*enabledPeriodicPtr)(void), 
                         void (*disabledPeriodicPtr)(void), 
-                        void (*periodicPtr)(void),
-                        RobotProfile profile);
+                        void (*periodicPtr)(void));
     
     void robotStarted();
     void robotEnabled();
@@ -132,11 +131,7 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         void (*robotDisabled)(void), 
                         void (*enabledPeriodic)(void), 
                         void (*disabledPeriodic)(void), 
-                        void (*periodic)(void),
-                        int mainSchedulerThreads,
-                        int periodicFunctionRate,
-                        int maxGamepadDataAge,
-                        int actionFunctionPeriod);
+                        void (*periodic)(void));
 
 BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot);
 

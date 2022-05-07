@@ -29,6 +29,10 @@ using namespace arpirobot;
 /// BaseDevice
 ////////////////////////////////////////////////////////////////////////////////
 
+BaseDevice::~BaseDevice(){
+    BaseRobot::deviceDestroyed(this);
+}
+
 void BaseDevice::lockDevice(Action *action){
     std::lock_guard<std::mutex> l(actionLock);
     

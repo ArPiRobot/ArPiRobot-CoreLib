@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Marcus Behel
+ * Copyright 2022 Marcus Behel
  *
  * This file is part of ArPiRobot-CoreLib.
  * 
@@ -17,27 +17,13 @@
  * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
  */
 
-#pragma once
 
-namespace arpirobot{
+#include <arpirobot/core/robot/RobotProfile.hpp>
 
-    /**
-     * \class RobotProfile RobotProfile.hpp arpirobot/core/robot/RobotProfile.hpp
-     * 
-     * Settings to configure general robot behavior
-     */
-    class RobotProfile{
-    public:
-        /// Number of threads to use on the main scheduler
-        static int mainSchedulerThreads; 
+using namespace arpirobot;
 
-        /// Rate to run robot periodic functions at (ms)
-        static int periodicFunctionRate; 
 
-        /// Maximum age gamepad data can be before it is considered invalid (ms)
-        static int maxGamepadDataAge;  
-        
-        /// Rate to run action periodic functions at (ms) 
-        static int actionFunctionPeriod; 
-    };
-}
+int RobotProfile::mainSchedulerThreads = 10;
+int RobotProfile::periodicFunctionRate = 50;
+int RobotProfile::maxGamepadDataAge = 100;
+int RobotProfile::actionFunctionPeriod = 50;

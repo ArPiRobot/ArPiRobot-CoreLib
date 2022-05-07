@@ -37,25 +37,48 @@ using namespace arpirobot;
 
 
 bool BaseRobot::stop = false;
-std::vector<BaseDevice*> BaseRobot::devicesToBegin;
-BaseRobot *BaseRobot::currentRobot = nullptr;
+bool BaseRobot::exists = false;
+bool BaseRobot::devicesBeginNow = false;
+Scheduler *BaseRobot::scheduler = nullptr;
+std::vector<BaseDevice*> BaseRobot::devices;
+std::mutex BaseRobot::devicesLock;
 
-BaseRobot::BaseRobot(RobotProfile profile) : profile(profile) {
-    
+void BaseRobot::feedWatchdog(){
+    watchdogMutex.lock();
+    try{
+        lastWatchdogFeed = std::chrono::steady_clock::now();
+        if(watchdogDidDisable){
+            for(BaseDevice *device : devices){
+                if(!device->isEnabled() && device->shouldDisableWithWatchdog()){
+                    // Don't enable device with watchdog if it should be disabled with robot
+                    if(!device->shouldMatchRobotState() || isEnabled){
+                        device->enable();
+                    }
+                }
+            }
+        }
+    }catch(...){
+
+    }
+    watchdogMutex.unlock();
 }
 
-void BaseRobot::start(std::string ioProvider){
+void BaseRobot::start(BaseRobot &robot, std::string ioProvider){
+    start(std::shared_ptr<BaseRobot>(std::shared_ptr<BaseRobot>{}, &robot), ioProvider);
+}
+
+void BaseRobot::start(std::shared_ptr<BaseRobot> robot, std::string ioProvider){
 
     // Make sure conversions helper is configured properly before starting robot
     Conversions::checkBigEndian();
 
-    if(currentRobot != nullptr){
+    if(exists){
         Logger::logError("Attempted to start a second robot. This is not allowed.");
         return;
     }
 
-    scheduler = new Scheduler(profile.mainSchedulerThreads);
-    currentRobot = this;
+    scheduler = new Scheduler(RobotProfile::mainSchedulerThreads);
+    exists = true;
 
     try{
         Io::init(ioProvider);
@@ -79,22 +102,29 @@ void BaseRobot::start(std::string ioProvider){
     signal(SIGCONT, &BaseRobot::ignoreSignalHandler);
 #endif
 
-    NetworkManager::startNetworking(std::bind(&BaseRobot::onEnable, this), std::bind(&BaseRobot::onDisable, this));
+    NetworkManager::startNetworking(std::bind(&BaseRobot::onEnable, robot.get()), 
+            std::bind(&BaseRobot::onDisable, robot.get()));
 
     NetworkTable::set("robotstate", "DISABLED");
 
     // Begin any devices that were instantiated before the robot was started
-    for(BaseDevice *device : devicesToBegin){
-        try{
-            devices.push_back(device);
-            device->doBegin();
-        }catch(const std::exception &e){
-            Logger::logError("Failed to begin device " + device->getDeviceName());
-            Logger::logDebug(e.what());
-            exit(1);
+    {
+        // Lock to prevent allowing new devices being added to this list now
+        // After this section exits, beginWhenReady will take lock and read
+        // devicesBeginNow as true.
+        std::lock_guard<std::mutex> l(devicesLock);
+        for(BaseDevice *device : devices){
+            try{
+                devices.push_back(device);
+                device->doBegin();
+            }catch(const std::exception &e){
+                Logger::logError("Failed to begin device " + device->getDeviceName());
+                Logger::logDebug(e.what());
+                exit(1);
+            }
         }
+        devicesBeginNow = true;
     }
-    devicesToBegin.clear();
 
     // Make sure all devices start disabled
     for(BaseDevice *device : devices){
@@ -104,29 +134,32 @@ void BaseRobot::start(std::string ioProvider){
     Logger::logInfo("Robot Started.");
 
     // Ensure this runs before periodic functions start running
-    robotStarted();
-    robotDisabled();
+    robot->robotStarted();
+    robot->robotDisabled();
 
     // Start periodic callbacks
-    scheduler->addRepeatedTask(std::bind(&BaseRobot::doPeriodic, this), 
+    scheduler->addRepeatedTask(std::bind(&BaseRobot::doPeriodic, robot), 
         std::chrono::milliseconds(0), 
-        std::chrono::milliseconds(profile.periodicFunctionRate));
-    scheduler->addRepeatedTask(std::bind(&BaseRobot::modeBasedPeriodic, this),
+        std::chrono::milliseconds(RobotProfile::periodicFunctionRate));
+    scheduler->addRepeatedTask(std::bind(&BaseRobot::modeBasedPeriodic, robot),
         std::chrono::milliseconds(0),
-        std::chrono::milliseconds(profile.periodicFunctionRate));
+        std::chrono::milliseconds(RobotProfile::periodicFunctionRate));
     scheduler->addRepeatedTask(&ActionManager::checkTriggers,
         std::chrono::milliseconds(0),
-        std::chrono::milliseconds(profile.periodicFunctionRate)); 
+        std::chrono::milliseconds(RobotProfile::periodicFunctionRate)); 
 
     // Just so there is no instant disable of devices when robot starts
-    feedWatchdog();
+    robot->feedWatchdog();
     // Run watchdog on main thread (don't do this on scheduler b/c it could have all threads in use)
-    runWatchdog();
+    robot->runWatchdog();
+
+    // Devices may not start now
+    devicesBeginNow = false;
 
     Logger::logInfo("Robot stopping.");
     
     // Make sure this is nullptr before stopping scheduler
-    currentRobot = nullptr;
+    exists = false;
 
     // Make sure scheduler stops before devices are disabled
     delete scheduler;
@@ -145,51 +178,37 @@ void BaseRobot::start(std::string ioProvider){
     AudioManager::finish();
 }
 
-void BaseRobot::feedWatchdog(){
-    watchdogMutex.lock();
-    try{
-        lastWatchdogFeed = std::chrono::steady_clock::now();
-        if(watchdogDidDisable){
-            for(BaseDevice *device : devices){
-                if(!device->isEnabled() && device->shouldDisableWithWatchdog()){
-                    // Don't enable device with watchdog if it should be disabled with robot
-                    if(!device->shouldMatchRobotState() || isEnabled){
-                        device->enable();
-                    }
-                }
-            }
-        }
-    }catch(...){
-
-    }
-    watchdogMutex.unlock();
-}
-
 std::shared_ptr<Task> BaseRobot::scheduleRepeatedFunction(const std::function<void()> &&func, sched_clk::duration rate){
-    if(currentRobot == nullptr)
+    if(scheduler == nullptr)
         return nullptr;
-    return currentRobot->scheduler->addRepeatedTask(std::move(func), std::chrono::milliseconds(0), rate);
+    return scheduler->addRepeatedTask(std::move(func), std::chrono::milliseconds(0), rate);
 }
 
 void BaseRobot::runOnceSoon(const std::function<void()> &&func){
-    if(currentRobot == nullptr)
+    if(scheduler == nullptr)
         return;
-    currentRobot->scheduler->addTask(std::move(func), std::chrono::milliseconds(0));
+    scheduler->addTask(std::move(func), std::chrono::milliseconds(0));
 }
 
 void BaseRobot::removeTaskFromScheduler(std::shared_ptr<Task> task){
-    if(currentRobot == nullptr)
+    if(scheduler == nullptr)
         return;
-    currentRobot->scheduler->removeTask(task);
+    scheduler->removeTask(task);
 }
 
 void BaseRobot::beginWhenReady(BaseDevice *device){
+    std::lock_guard<std::mutex> l(devicesLock);
     // Don't run begin on devices until the robot is started
-    if(currentRobot == nullptr){
-        devicesToBegin.push_back(device);
-    }else{
-        currentRobot->devices.push_back(device);
+    if(devicesBeginNow)
         device->doBegin();
+    devices.push_back(device);
+}
+
+void BaseRobot::deviceDestroyed(BaseDevice *device){
+    std::lock_guard<std::mutex> l(devicesLock);
+    auto it = std::find(devices.begin(), devices.end(), device);
+    if(it != devices.end()){
+        devices.erase(it);
     }
 }
 

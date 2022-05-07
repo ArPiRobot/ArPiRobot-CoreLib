@@ -26,6 +26,7 @@
 #include <thread>
 #include <mutex>
 #include <vector>
+#include <memory>
 
 namespace arpirobot{
 
@@ -38,7 +39,7 @@ namespace arpirobot{
      */
     class BaseRobot{
     public:
-        BaseRobot(RobotProfile profile = RobotProfile());
+        BaseRobot() = default;
         BaseRobot(const BaseRobot &other) = delete;
 
         virtual ~BaseRobot() = default;
@@ -46,14 +47,19 @@ namespace arpirobot{
         BaseRobot &operator=(const BaseRobot &other) = delete;
 
         /**
-         * Start the robot. Only one robot instance my run at a time
-         */
-        void start(std::string ioProvider = "");
-
-        /**
          * Feed the watchdog so devices don't become disabled
          */
         void feedWatchdog();
+
+        /**
+         * Start the robot. Only one robot instance my run at a time
+         */
+        static void start(BaseRobot &robot, std::string ioProvider = "");
+
+        /**
+         * Start the robot. Only one robot instance my run at a time
+         */
+        static void start(std::shared_ptr<BaseRobot> robot, std::string ioProvider = "");
 
         /**
          * Schedule a function to be run at a given rate.
@@ -87,6 +93,11 @@ namespace arpirobot{
         static void beginWhenReady(BaseDevice *device);
 
         /**
+         * Run when a device is destructed. Removes device from managed list.
+         */
+        static void deviceDestroyed(BaseDevice *device);
+
+        /**
          * Run once when the robot is started
          */
         virtual void robotStarted() = 0;
@@ -116,9 +127,9 @@ namespace arpirobot{
          */
         virtual void periodic() = 0;
 
-        static BaseRobot *currentRobot;
-        
-        RobotProfile profile;
+        // True after start, false before stop
+        // Used to determine if a BaseRobot instance is running or not
+        static bool exists;
 
     private:
         static void stopSignalHandler(int signal);
@@ -139,9 +150,6 @@ namespace arpirobot{
         /// Member variables
         ////////////////////////////////////////////////////////////////////////////
 
-        // Scheduler
-        Scheduler *scheduler;
-
         // Status
         bool isEnabled = false;
 
@@ -150,15 +158,20 @@ namespace arpirobot{
         std::chrono::steady_clock::time_point lastWatchdogFeed;
         bool watchdogDidDisable = false;
 
-        std::vector<BaseDevice*> devices;
 
         // Static variables
+
+        // Devices used on current robot
+        // Not using shared_ptr because devices add themselves to this list
+        // and remove themselves when destroyed
+        static std::vector<BaseDevice*> devices;
+        static std::mutex devicesLock;
+        static bool devicesBeginNow;
 
         // Stop flag from Ctrl+C
         static bool stop;
 
-        // Device that need to be started
-        // Static b/c this can be populated before there is an instance of BaseRobot
-        static std::vector<BaseDevice*> devicesToBegin;
+        // Scheduler
+        static Scheduler *scheduler;
     };
 }
