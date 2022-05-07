@@ -42,6 +42,8 @@ bool BaseRobot::devicesBeginNow = false;
 Scheduler *BaseRobot::scheduler = nullptr;
 std::vector<BaseDevice*> BaseRobot::devices;
 std::mutex BaseRobot::devicesLock;
+std::mutex BaseRobot::existsLock;
+
 
 void BaseRobot::feedWatchdog(){
     watchdogMutex.lock();
@@ -63,25 +65,24 @@ void BaseRobot::feedWatchdog(){
     watchdogMutex.unlock();
 }
 
-void BaseRobot::start(BaseRobot &robot, std::string ioProvider){
-    start(std::shared_ptr<BaseRobot>(std::shared_ptr<BaseRobot>{}, &robot), ioProvider);
-}
-
-void BaseRobot::start(std::shared_ptr<BaseRobot> robot, std::string ioProvider){
+void BaseRobot::start(){
 
     // Make sure conversions helper is configured properly before starting robot
     Conversions::checkBigEndian();
 
-    if(exists){
-        Logger::logError("Attempted to start a second robot. This is not allowed.");
-        return;
+    {
+        std::lock_guard<std::mutex> l(existsLock);
+        if(exists){
+            Logger::logError("Attempted to start a second robot. This is not allowed.");
+            return;
+        }
+
+        scheduler = new Scheduler(RobotProfile::mainSchedulerThreads);
+        exists = true;
     }
 
-    scheduler = new Scheduler(RobotProfile::mainSchedulerThreads);
-    exists = true;
-
     try{
-        Io::init(ioProvider);
+        Io::init(RobotProfile::ioProvider);
     }catch(std::runtime_error &e){
         Logger::logError("Failed to initialize IO library.");
         Logger::logDebug(e.what());
@@ -102,8 +103,8 @@ void BaseRobot::start(std::shared_ptr<BaseRobot> robot, std::string ioProvider){
     signal(SIGCONT, &BaseRobot::ignoreSignalHandler);
 #endif
 
-    NetworkManager::startNetworking(std::bind(&BaseRobot::onEnable, robot.get()), 
-            std::bind(&BaseRobot::onDisable, robot.get()));
+    NetworkManager::startNetworking(std::bind(&BaseRobot::onEnable, this), 
+            std::bind(&BaseRobot::onDisable, this));
 
     NetworkTable::set("robotstate", "DISABLED");
 
@@ -134,14 +135,14 @@ void BaseRobot::start(std::shared_ptr<BaseRobot> robot, std::string ioProvider){
     Logger::logInfo("Robot Started.");
 
     // Ensure this runs before periodic functions start running
-    robot->robotStarted();
-    robot->robotDisabled();
+    robotStarted();
+    robotDisabled();
 
     // Start periodic callbacks
-    scheduler->addRepeatedTask(std::bind(&BaseRobot::doPeriodic, robot), 
+    scheduler->addRepeatedTask(std::bind(&BaseRobot::doPeriodic, this), 
         std::chrono::milliseconds(0), 
         std::chrono::milliseconds(RobotProfile::periodicFunctionRate));
-    scheduler->addRepeatedTask(std::bind(&BaseRobot::modeBasedPeriodic, robot),
+    scheduler->addRepeatedTask(std::bind(&BaseRobot::modeBasedPeriodic, this),
         std::chrono::milliseconds(0),
         std::chrono::milliseconds(RobotProfile::periodicFunctionRate));
     scheduler->addRepeatedTask(&ActionManager::checkTriggers,
@@ -149,9 +150,9 @@ void BaseRobot::start(std::shared_ptr<BaseRobot> robot, std::string ioProvider){
         std::chrono::milliseconds(RobotProfile::periodicFunctionRate)); 
 
     // Just so there is no instant disable of devices when robot starts
-    robot->feedWatchdog();
+    feedWatchdog();
     // Run watchdog on main thread (don't do this on scheduler b/c it could have all threads in use)
-    robot->runWatchdog();
+    runWatchdog();
 
     // Devices may not start now
     devicesBeginNow = false;
@@ -159,7 +160,10 @@ void BaseRobot::start(std::shared_ptr<BaseRobot> robot, std::string ioProvider){
     Logger::logInfo("Robot stopping.");
     
     // Make sure this is nullptr before stopping scheduler
-    exists = false;
+    {
+        std::lock_guard<std::mutex> l(existsLock);
+        exists = false;
+    }
 
     // Make sure scheduler stops before devices are disabled
     delete scheduler;

@@ -141,18 +141,20 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
                         void (*disabledPeriodic)(void), 
                         void (*periodic)(void)){
 
-    auto robot = std::make_shared<BridgeBaseRobot>(robotStarted, robotEnabled, robotDisabled, 
+    // BaseRobot instances not kept in scope by bridge
+    // They must inherently be kept in scope because call to BaseRobot::start
+    // blocks until robot is no longer running and thus safe to destroy
+    return new BridgeBaseRobot(robotStarted, robotEnabled, robotDisabled, 
         enabledPeriodic, disabledPeriodic, periodic);
-    bridge_objs.push_back(robot);
-    return robot.get();
+
 }
 
 BRIDGE_FUNC void BaseRobot_destroy(BaseRobot *robot){
-    REMOVE_VAL_FROM_VEC(bridge_objs, std::shared_ptr<BaseRobot>(robot));
+    delete robot;
 }
 
-BRIDGE_FUNC void BaseRobot_start(BaseRobot *robot, const char *ioProvider){
-    BaseRobot::start(std::shared_ptr<BaseRobot>(robot), std::string(ioProvider));
+BRIDGE_FUNC void BaseRobot_start(BaseRobot *robot){
+    robot->start();
 }
 
 BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot){
@@ -194,6 +196,14 @@ BRIDGE_FUNC void RobotProfile_setActionFunctionPeriod(int actionFunctionPeriod){
 
 BRIDGE_FUNC int RobotProfile_getActionFunctionPeriod(){
     return RobotProfile::actionFunctionPeriod;
+}
+
+BRIDGE_FUNC void RobotProfile_setIoProvider(const char *ioProvider){
+    RobotProfile::ioProvider = std::string(ioProvider);
+}
+
+BRIDGE_FUNC char *RobotProfile_getIoProvider(){
+    return returnableString(RobotProfile::ioProvider);
 }
 
 

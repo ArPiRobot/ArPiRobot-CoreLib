@@ -54,12 +54,7 @@ namespace arpirobot{
         /**
          * Start the robot. Only one robot instance my run at a time
          */
-        static void start(BaseRobot &robot, std::string ioProvider = "");
-
-        /**
-         * Start the robot. Only one robot instance my run at a time
-         */
-        static void start(std::shared_ptr<BaseRobot> robot, std::string ioProvider = "");
+        void start();
 
         /**
          * Schedule a function to be run at a given rate.
@@ -173,5 +168,8 @@ namespace arpirobot{
 
         // Scheduler
         static Scheduler *scheduler;
+
+        // Lock to ensure access to "exists" var is exclusive
+        static std::mutex existsLock;
     };
 }

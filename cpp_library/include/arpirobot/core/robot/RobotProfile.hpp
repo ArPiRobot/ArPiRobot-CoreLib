@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <string>
+
 namespace arpirobot{
 
     /**
@@ -39,5 +41,8 @@ namespace arpirobot{
         
         /// Rate to run action periodic functions at (ms) 
         static int actionFunctionPeriod; 
+
+        /// Name of the IO provider to use (empty string for default)
+        static std::string ioProvider;
     };
 }

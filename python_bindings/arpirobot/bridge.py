@@ -46,11 +46,7 @@ arpirobot.BaseRobot_create.argtypes = [ctypes.c_void_p,
     ctypes.c_void_p, 
     ctypes.c_void_p, 
     ctypes.c_void_p, 
-    ctypes.c_void_p, 
-    ctypes.c_int, 
-    ctypes.c_int,
-    ctypes.c_int,
-    ctypes.c_int]
+    ctypes.c_void_p]
 arpirobot.BaseRobot_create.restype = ctypes.c_void_p
 
 arpirobot.BaseRobot_destroy.argtypes = [ctypes.c_void_p]
@@ -62,6 +58,34 @@ arpirobot.BaseRobot_start.restype = None
 arpirobot.BaseRobot_feedWatchdog.argtypes = [ctypes.c_void_p]
 arpirobot.BaseRobot_feedWatchdog.restype = None
 
+
+################################################################################
+# RobotProfile Bridge
+################################################################################
+
+arpirobot.RobotProfile_setMainSchedulerThreads.argtypes = [ctypes.c_int]
+arpirobot.RobotProfile_setMainSchedulerThreads.restype = None
+
+arpirobot.RobotProfile_getMainSchedulerThreads.argtypes = []
+arpirobot.RobotProfile_getMainSchedulerThreads.restype = ctypes.c_int
+
+arpirobot.RobotProfile_setPeriodicFunctionRate.argtypes = [ctypes.c_int]
+arpirobot.RobotProfile_setPeriodicFunctionRate.restype = None
+
+arpirobot.RobotProfile_getPeriodicFunctionRate.argtypes = []
+arpirobot.RobotProfile_getPeriodicFunctionRate.restype = ctypes.c_int
+
+arpirobot.RobotProfile_setMaxGamepadDataAge.argtypes = [ctypes.c_int]
+arpirobot.RobotProfile_setMaxGamepadDataAge.restype = None
+
+arpirobot.RobotProfile_getMaxGamepadDataAge.argtypes = []
+arpirobot.RobotProfile_getMaxGamepadDataAge.restype = ctypes.c_int
+
+arpirobot.RobotProfile_setActionFunctionPeriod.argtypes = [ctypes.c_int]
+arpirobot.RobotProfile_setActionFunctionPeriod.restype = None
+
+arpirobot.RobotProfile_getActionFunctionPeriod.argtypes = []
+arpirobot.RobotProfile_getActionFunctionPeriod.restype = ctypes.c_int
 
 ################################################################################
 # MainVMon Bridge

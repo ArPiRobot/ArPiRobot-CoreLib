@@ -23,26 +23,48 @@ import ctypes
 
 
 ## Settings to configure general robot behavior
-class RobotProfile:
-    def __init__(self):
-        ## Number of threads to use on the main scheduler
-        self.main_scheduler_threads = 10
+class RobotProfileSingleton:
+    @property
+    def main_scheduler_threads(self) -> int:
+        return bridge.arpirobot.RobotProfile_getMainSchedulerThreads()
+    
+    @main_scheduler_threads.setter
+    def main_scheduler_threads(self, value: int):
+        bridge.arpirobot.RobotProfile_setMainSchedulerThreads(value)
+    
+    @property
+    def periodic_function_rate(self) -> int:
+        return bridge.arpirobot.RobotProfile_getPeriodicFunctionRate()
+    
+    @periodic_function_rate.setter
+    def periodic_function_rate(self, value: int):
+        bridge.arpirobot.RobotProfile_setPeriodicFunctionRate(value)
+    
+    @property
+    def max_gamepad_data_age(self) -> int:
+        return bridge.arpirobot.RobotProfile_getMaxGamepadDataAge()
+    
+    @max_gamepad_data_age.setter
+    def max_gamepad_data_age(self, value: int):
+        bridge.arpirobot.RobotProfile_setMaxGamepadDataAge(value)
+    
+    @property
+    def action_function_period(self):
+        return bridge.arpirobot.RobotProfile_getActionFunctionPeriod()
+    
+    @action_function_period.setter
+    def action_function_period(self, value: int):
+        bridge.arpirobot.RobotProfile_setActionFunctionPeriod(value)
+    
 
-        ## Rate to run robot periodic functions at (ms)
-        self.periodic_function_rate = 50
-
-        ## Maximum age gamepad data can be before it is considered invalid (ms)
-        self.max_gamepad_data_age = 100
-
-        ## Rate to run action periodic functions at (ms) 
-        self.action_function_period = 50
+RobotProfile = RobotProfileSingleton()
 
 
 ## Base class to facilitate general robot code structure/flow
 #  Each robot program should have a single class that inherits from this class and
 #  implements the pure virtual functions.
 class BaseRobot(ABC):
-    def __init__(self, profile: RobotProfile = RobotProfile()):
+    def __init__(self):
 
         @ctypes.CFUNCTYPE(None)
         def robot_started():
@@ -78,16 +100,15 @@ class BaseRobot(ABC):
 
         self._ptr = bridge.arpirobot.BaseRobot_create(
             self.rs_internal, self.re_internal, self.rd_internal, self.ep_internal, 
-            self.dp_internal, self.p_internal, profile.main_scheduler_threads, 
-            profile.periodic_function_rate, profile.max_gamepad_data_age,
-            profile.action_function_period)
+            self.dp_internal, self.p_internal)
     
     def __del__(self):
         bridge.arpirobot.BaseRobot_destroy(self._ptr)
 
     ## Start the robot. Only one robot instance my run at a time
-    def start(self, io_provider = ""):
-        bridge.arpirobot.BaseRobot_start(self._ptr, io_provider.encode())
+    @staticmethod
+    def start(robot: 'BaseRobot', io_provider = ""):
+        bridge.arpirobot.BaseRobot_start(robot._ptr, io_provider.encode())
 
     ## Feed the watchdog so devices don't become disabled
     def feed_watchdog(self):
