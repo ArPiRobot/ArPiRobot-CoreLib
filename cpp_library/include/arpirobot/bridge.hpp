@@ -139,6 +139,25 @@ BRIDGE_FUNC void BaseRobot_start(BaseRobot *robot, const char *ioProvider);
 
 BRIDGE_FUNC void BaseRobot_feedWatchdog(BaseRobot *robot);
 
+////////////////////////////////////////////////////////////////////////////////
+/// RobotProfile Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC void RobotProfile_setMainSchedulerThreads(int mainSchedulerThreads);
+
+BRIDGE_FUNC int RobotProfile_getMainSchedulerThreads();
+
+BRIDGE_FUNC void RobotProfile_setPeriodicFunctionRate(int periodicFunctionRate);
+
+BRIDGE_FUNC int RobotProfile_getPeriodicFunctionRate();
+
+BRIDGE_FUNC void RobotProfile_setMaxGamepadDataAge(int maxGamepadDataAge);
+
+BRIDGE_FUNC int RobotProfile_getMaxGamepadDataAge();
+
+BRIDGE_FUNC void RobotProfile_setActionFunctionPeriod(int actionFunctionPeriod);
+
+BRIDGE_FUNC int RobotProfile_getActionFunctionPeriod();
 
 ////////////////////////////////////////////////////////////////////////////////
 /// MainVMon Bridge

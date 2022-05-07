@@ -57,8 +57,8 @@ udp::endpoint NetworkManager::controllerDataEndpoint;
 tcp::socket NetworkManager::commandClient(NetworkManager::io);
 tcp::socket NetworkManager::netTableClient(NetworkManager::io);
 tcp::socket NetworkManager::logClient(NetworkManager::io);
-std::function<void()> NetworkManager::enableFunc;
-std::function<void()> NetworkManager::disableFunc;
+std::function<void()> NetworkManager::enableFunc = nullptr;
+std::function<void()> NetworkManager::disableFunc = nullptr;
 std::unordered_map<std::string, std::string> NetworkManager::ntSyncData;
 std::unordered_map<int, std::shared_ptr<ControllerData>> NetworkManager::controllerData;
 MainVmon *NetworkManager::mainVmon = nullptr;
@@ -90,6 +90,9 @@ void NetworkManager::startNetworking(std::function<void()> enableFunc, std::func
 
 void NetworkManager::stopNetworking(){
     io.stop();
+    while(!io.stopped());
+    enableFunc = nullptr;
+    disableFunc = nullptr;
 }
 
 bool NetworkManager::sendNtRaw(const_buffer buffer){
@@ -292,10 +295,12 @@ void NetworkManager::handleCommand(){
         // Handle the command
         if(subset == COMMAND_ENABLE){
             Logger::logDebug("Got enable command");
-            enableFunc();
+            if(enableFunc != nullptr)
+                enableFunc();
         }else if(subset == COMMAND_DISABLE){
             Logger::logDebug("Got disable command");
-            disableFunc();
+            if(disableFunc != nullptr)
+                disableFunc();
         }else if(subset == COMMAND_NET_TABLE_SYNC){
             Logger::logDebug("Starting net table sync.");
             ntSyncData.clear();

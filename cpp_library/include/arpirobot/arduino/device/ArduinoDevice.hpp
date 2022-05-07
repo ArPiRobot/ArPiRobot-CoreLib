@@ -65,6 +65,10 @@ namespace arpirobot{
 
         bool createDevice;
         int deviceId;
+
+        // Not a shared_ptr because this is set and cleared by the managing ArduinoInterface
+        // This should not keep an ArduinoInterface in scope. The interface keeps devices
+        // in scope. When interface goes out of scope, devices can as well;
         BaseArduinoInterface *arduino = nullptr;
 
         friend class BaseArduinoInterface;

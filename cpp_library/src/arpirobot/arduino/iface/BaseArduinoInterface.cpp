@@ -44,6 +44,10 @@ BaseArduinoInterface::~BaseArduinoInterface(){
         processThread->join();
         delete processThread;
     }
+
+    for(auto &dev : devices){
+        dev->setArduino(nullptr);
+    }
 }
 
 bool BaseArduinoInterface::begin(){
