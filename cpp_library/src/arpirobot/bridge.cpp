@@ -786,6 +786,10 @@ BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int newPosition){
     enc->setPosition(newPosition);
 }
 
+BRIDGE_FUNC float SingleEncoder_getVelocity(SingleEncoder *enc){
+    return enc->getVelocity();
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// IRReflectorModule bridge
@@ -969,6 +973,35 @@ BRIDGE_FUNC void Mpu6050Imu_setGyroY(Mpu6050Imu *imu, double newGyroY){
 
 BRIDGE_FUNC void Mpu6050Imu_setGyroZ(Mpu6050Imu *imu, double newGyroZ){
     imu->setGyroZ(newGyroZ);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// QuadEncoder bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC QuadEncoder *QuadEncoder_create(const char *pinA, const char *pinB, 
+        bool useInternalPullup, bool createDevice, int deviceId){
+    auto enc = std::make_shared<QuadEncoder>(std::string(pinA), 
+            std::string(pinB), useInternalPullup, createDevice, deviceId);
+    bridge_objs[enc.get()] = enc;
+    return enc.get();
+}
+
+BRIDGE_FUNC void QuadEncoder_destroy(QuadEncoder *enc){
+    bridge_objs.erase(enc);
+}
+
+BRIDGE_FUNC int32_t QuadEncoder_getPosition(QuadEncoder *enc){
+    return enc->getPosition();
+}
+
+BRIDGE_FUNC void QuadEncoder_setPosition(QuadEncoder *enc, int32_t newPosition){
+    enc->setPosition(newPosition);
+}
+
+BRIDGE_FUNC float QuadEncoder_getVelocity(QuadEncoder *enc){
+    return enc->getVelocity();
 }
 
 

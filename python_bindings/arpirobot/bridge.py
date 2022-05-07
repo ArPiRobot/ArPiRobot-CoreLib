@@ -469,10 +469,13 @@ arpirobot.SingleEncoder_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.SingleEncoder_destroy.restype = None
 
 arpirobot.SingleEncoder_getPosition.argtypes = [ctypes.c_void_p]
-arpirobot.SingleEncoder_getPosition.restype = ctypes.c_int
+arpirobot.SingleEncoder_getPosition.restype = ctypes.c_int32
 
-arpirobot.SingleEncoder_setPosition.argtypes = [ctypes.c_void_p, ctypes.c_int]
+arpirobot.SingleEncoder_setPosition.argtypes = [ctypes.c_void_p, ctypes.c_int32]
 arpirobot.SingleEncoder_setPosition.restype = None
+
+arpirobot.SingleEncoder_getVelocity.argtypes = [ctypes.c_void_p]
+arpirobot.SingleEncoder_getVelocity.restype = ctypes.c_float
 
 
 ################################################################################
@@ -610,6 +613,26 @@ arpirobot.Mpu6050Imu_setGyroY.restype = None
 
 arpirobot.Mpu6050Imu_setGyroZ.argtypes = [ctypes.c_void_p, ctypes.c_double]
 arpirobot.Mpu6050Imu_setGyroZ.restype = None
+
+
+################################################################################
+# QuadEncoder Bridge
+################################################################################
+
+arpirobot.QuadEncoder_create.argtypes = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_bool, ctypes.c_bool, ctypes.c_int]
+arpirobot.QuadEncoder_create.restype = ctypes.c_void_p
+
+arpirobot.QuadEncoder_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.QuadEncoder_destroy.restype = None
+
+arpirobot.QuadEncoder_getPosition.argtypes = [ctypes.c_void_p]
+arpirobot.QuadEncoder_getPosition.restype = ctypes.c_int32
+
+arpirobot.QuadEncoder_setPosition.argtypes = [ctypes.c_void_p, ctypes.c_int32]
+arpirobot.QuadEncoder_setPosition.restype = None
+
+arpirobot.QuadEncoder_getVelocity.argtypes = [ctypes.c_void_p]
+arpirobot.QuadEncoder_getVelocity.restype = ctypes.c_float
 
 
 ################################################################################

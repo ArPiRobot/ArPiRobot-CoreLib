@@ -93,6 +93,11 @@ class SingleEncoder(ArduinoDevice):
     def set_position(self, new_position: int):
         bridge.arpirobot.SingleEncoder_setPosition(self._ptr, new_position)
 
+    ## Get the current velocity from the sensor
+    #  @return speed in ticks / sec
+    def get_velocity(self) -> float:
+        return bridge.arpirobot.SingleEncoder_getVelocity(self._ptr)
+
 
 ## Infrared reflection detector module
 class IRReflectorModule(ArduinoDevice):
@@ -303,3 +308,34 @@ class Mpu6050Imu(ArduinoDevice):
     #  @param newGyroZ The new Z rotation to set
     def set_gyro_z(self, new_gyro_z: float):
         bridge.arpirobot.Mpu6050Imu_setGyroZ(self._ptr, new_gyro_z)
+
+
+## Quadrature encoder
+class QuadEncoder(ArduinoDevice):
+    ## @param pinA The digital pin number this encoder's pin A is connected to
+    #  @param pinB The digital pin number this encoder's pin B is connected to
+    #  @param use_internal_pullup Set to true to use the arduino's internal pullup resistor on these pins (if supported)
+    #  @param create_device Leave this true unless the device is hard-coded in arduino firmware
+    #  @param device_id Set this to the hard-coded deviceId if createDevice is false
+    def __init__(self, pinA: Union[int, str], pinB: Union[int, str], use_internal_pullup: bool, create_device = True, device_id = -1):
+        super().__init__()
+        self._ptr = bridge.arpirobot.QuadEncoder_create(str(pinA).encode(), str(pinB).encode(), 
+                use_internal_pullup, create_device, device_id)
+    
+    def __del__(self):
+        bridge.arpirobot.QuadEncoder_destroy(self._ptr)
+    
+    ## Get the position (tick count) for this encoder
+    #  @returns The position in ticks
+    def get_position(self) -> int:
+        return bridge.arpirobot.QuadEncoder_getPosition(self._ptr)
+    
+    ## Set the current tick count to the given value
+    #  @param currentPosition The new tick value to set
+    def set_position(self, new_position: int):
+        bridge.arpirobot.QuadEncoder_setPosition(self._ptr, new_position)
+
+    ## Get the current velocity from the sensor
+    #  @return speed in ticks / sec
+    def get_velocity(self) -> float:
+        return bridge.arpirobot.QuadEncoder_getVelocity(self._ptr)

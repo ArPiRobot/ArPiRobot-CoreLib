@@ -68,6 +68,7 @@
 #include <arpirobot/arduino/sensor/SingleEncoder.hpp>
 #include <arpirobot/arduino/sensor/Ultrasonic4Pin.hpp>
 #include <arpirobot/arduino/sensor/VoltageMonitor.hpp>
+#include <arpirobot/arduino/sensor/QuadEncoder.hpp>
 
 #include <arpirobot/devices/ina260/INA260PowerSensor.hpp>
 
@@ -483,9 +484,11 @@ BRIDGE_FUNC SingleEncoder *SingleEncoder_create(const char *pin, bool useInterna
 
 BRIDGE_FUNC void SingleEncoder_destroy(SingleEncoder *enc);
 
-BRIDGE_FUNC int SingleEncoder_getPosition(SingleEncoder *enc);
+BRIDGE_FUNC int32_t SingleEncoder_getPosition(SingleEncoder *enc);
 
-BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int newPosition);
+BRIDGE_FUNC void SingleEncoder_setPosition(SingleEncoder *enc, int32_t newPosition);
+
+BRIDGE_FUNC float SingleEncoder_getVelocity(SingleEncoder *enc);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -585,6 +588,22 @@ BRIDGE_FUNC void Mpu6050Imu_setGyroX(Mpu6050Imu *imu, double newGyroX);
 BRIDGE_FUNC void Mpu6050Imu_setGyroY(Mpu6050Imu *imu, double newGyroY);
 
 BRIDGE_FUNC void Mpu6050Imu_setGyroZ(Mpu6050Imu *imu, double newGyroZ);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// QuadEncoder bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC QuadEncoder *QuadEncoder_create(const char *pinA, const char *pinB, 
+    bool useInternalPullup, bool createDevice, int deviceId);
+
+BRIDGE_FUNC void QuadEncoder_destroy(QuadEncoder *enc);
+
+BRIDGE_FUNC int32_t QuadEncoder_getPosition(QuadEncoder *enc);
+
+BRIDGE_FUNC void QuadEncoder_setPosition(QuadEncoder *enc, int32_t newPosition);
+
+BRIDGE_FUNC float QuadEncoder_getVelocity(QuadEncoder *enc);
 
 
 ////////////////////////////////////////////////////////////////////////////////
