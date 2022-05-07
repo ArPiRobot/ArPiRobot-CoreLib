@@ -134,6 +134,8 @@ namespace arpirobot{
         std::shared_ptr<Task> _schedulerTask = nullptr;
         int32_t processRateMs = -1;
 
+        std::vector<BaseDevice*> lockedDevices;
+
         std::mutex stateLock;
         bool started = false;
         bool finished = false;

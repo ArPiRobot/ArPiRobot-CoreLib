@@ -62,6 +62,10 @@ namespace arpirobot{
         void doBegin();
 
         std::mutex actionLock;
+
+        // Not shared_ptr because should not keep Action in scope
+        // Action will set when locking
+        // Action will unset on unlock or on finish
         Action *lockingAction = nullptr;
 
         friend class Action; // Needs to call lockDevice

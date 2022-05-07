@@ -28,7 +28,11 @@ Action::Action(int32_t processRateMs) : processRateMs(processRateMs) {
 }
 
 Action::~Action(){
-    
+    for(auto dev : lockedDevices){
+        // Ensures BaseDevice never tries to call 
+        // lockDevice on ptr to deallocated action
+        dev->lockDevice(nullptr);
+    }
 }
 
 void Action::lockDevices(std::vector<std::reference_wrapper<BaseDevice>> devices){
@@ -49,6 +53,7 @@ void Action::lockDevice(BaseDevice &device){
 
 void Action::lockDevice(std::shared_ptr<BaseDevice> device){
     device->lockDevice(this);
+    lockedDevices.push_back(device.get());
 }
 
 bool Action::isRunning(){
@@ -89,6 +94,10 @@ void Action::actionStop(bool interrupted){
         Logger::logWarning("Action encountered exception when running finish().");
         Logger::logDebug(e.what());
     }
+    for(auto dev : lockedDevices){
+        dev->lockDevice(nullptr);
+    }
+    lockedDevices.clear();
 }
 
 void Action::actionProcess(){
