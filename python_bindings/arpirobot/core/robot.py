@@ -56,6 +56,17 @@ class RobotProfileSingleton:
     def action_function_period(self, value: int):
         bridge.arpirobot.RobotProfile_setActionFunctionPeriod(value)
     
+    @property
+    def io_provider(self) -> str:
+        res = ctypes.c_char_p(bridge.arpirobot.RobotProfile_getIoProvider())
+        retval = res.value.decode()
+        bridge.arpirobot.freeString(res)
+        return retval
+    
+    @io_provider.setter
+    def io_provider(self, value: str):
+        bridge.arpirobot.RobotProfile_setIoProvider(ctypes.c_char_p(value.encode()))
+
 
 RobotProfile = RobotProfileSingleton()
 
@@ -106,9 +117,8 @@ class BaseRobot(ABC):
         bridge.arpirobot.BaseRobot_destroy(self._ptr)
 
     ## Start the robot. Only one robot instance my run at a time
-    @staticmethod
-    def start(robot: 'BaseRobot', io_provider = ""):
-        bridge.arpirobot.BaseRobot_start(robot._ptr, io_provider.encode())
+    def start(self):
+        bridge.arpirobot.BaseRobot_start(self._ptr)
 
     ## Feed the watchdog so devices don't become disabled
     def feed_watchdog(self):

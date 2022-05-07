@@ -159,6 +159,10 @@ BRIDGE_FUNC void RobotProfile_setActionFunctionPeriod(int actionFunctionPeriod);
 
 BRIDGE_FUNC int RobotProfile_getActionFunctionPeriod();
 
+BRIDGE_FUNC void RobotProfile_setIoProvider(const char *ioProvider);
+
+BRIDGE_FUNC char *RobotProfile_getIoProvider();
+
 ////////////////////////////////////////////////////////////////////////////////
 /// MainVMon Bridge
 ////////////////////////////////////////////////////////////////////////////////

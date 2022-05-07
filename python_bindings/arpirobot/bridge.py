@@ -52,7 +52,7 @@ arpirobot.BaseRobot_create.restype = ctypes.c_void_p
 arpirobot.BaseRobot_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.BaseRobot_destroy.restype = None
 
-arpirobot.BaseRobot_start.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+arpirobot.BaseRobot_start.argtypes = [ctypes.c_void_p]
 arpirobot.BaseRobot_start.restype = None
 
 arpirobot.BaseRobot_feedWatchdog.argtypes = [ctypes.c_void_p]
@@ -86,6 +86,12 @@ arpirobot.RobotProfile_setActionFunctionPeriod.restype = None
 
 arpirobot.RobotProfile_getActionFunctionPeriod.argtypes = []
 arpirobot.RobotProfile_getActionFunctionPeriod.restype = ctypes.c_int
+
+arpirobot.RobotProfile_setIoProvider.argtypes = [ctypes.c_char_p]
+arpirobot.RobotProfile_setIoProvider.restype = None
+
+arpirobot.RobotProfile_getIoProvider.argtypes = []
+arpirobot.RobotProfile_getIoProvider.restype = [ctypes.c_void_p]
 
 ################################################################################
 # MainVMon Bridge
