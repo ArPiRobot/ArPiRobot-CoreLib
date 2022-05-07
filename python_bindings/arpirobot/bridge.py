@@ -91,7 +91,7 @@ arpirobot.RobotProfile_setIoProvider.argtypes = [ctypes.c_char_p]
 arpirobot.RobotProfile_setIoProvider.restype = None
 
 arpirobot.RobotProfile_getIoProvider.argtypes = []
-arpirobot.RobotProfile_getIoProvider.restype = [ctypes.c_void_p]
+arpirobot.RobotProfile_getIoProvider.restype = ctypes.c_void_p
 
 ################################################################################
 # MainVMon Bridge
