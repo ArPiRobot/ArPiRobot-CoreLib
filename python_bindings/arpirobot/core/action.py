@@ -26,6 +26,8 @@ from typing import List
 
 ## Generic action class. User actions should inherit this class and implement the four pure virtual methods
 class Action(ABC):
+    __all_actions: List['Action'] = []
+
     def __init__(self):
 
         @ctypes.CFUNCTYPE(None)
@@ -51,7 +53,11 @@ class Action(ABC):
         self.sc_internal = should_continue
 
         self._ptr = bridge.arpirobot.Action_create(self.b_internal, self.p_internal, self.f_internal, self.sc_internal)
-    
+        
+        # C++ code has pointers to members of this object.
+        # Make sure it is not garbage collected even if user keeps no reference to it
+        Action.__all_actions.append(self)
+
     def __del__(self):
         bridge.arpirobot.Action_destroy(self._ptr)
     
