@@ -34,12 +34,27 @@ BaseDevice::~BaseDevice(){
 }
 
 void BaseDevice::lockDevice(Action *action){
-    // std::lock_guard<std::mutex> l(actionLock);
+    
+    // Do not use this to release the device
+    // A different action may have locked it before attempt to release
+    if(action == nullptr)
+        return;
+    
     // If the same action is locking the device, don't stop it as this will cause issues with scheduler jobs
     if(lockingAction != nullptr && lockingAction != action){
         ActionManager::stopAction(*lockingAction);
     }
-    lockingAction = action;
+    {
+        std::lock_guard<std::mutex> l(actionLock);
+        lockingAction = action;
+    }
+}
+
+void BaseDevice::releaseDevice(Action *action){
+    std::lock_guard<std::mutex> l(actionLock);
+    if(lockingAction == action){
+        lockingAction = nullptr;
+    }
 }
 
 bool BaseDevice::isLockedByAction(){

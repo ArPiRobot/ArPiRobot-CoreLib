@@ -31,7 +31,7 @@ Action::~Action(){
     for(auto dev : lockedDevices){
         // Ensures BaseDevice never tries to call 
         // lockDevice on ptr to deallocated action
-        dev->lockDevice(nullptr);
+        dev->releaseDevice(this);
     }
 }
 
@@ -57,6 +57,7 @@ void Action::lockDevice(std::shared_ptr<BaseDevice> device){
 }
 
 bool Action::isRunning(){
+    std::lock_guard<std::mutex> l(stateLock);
     return started && !finished;
 }
 
@@ -95,7 +96,7 @@ void Action::actionStop(bool interrupted){
         Logger::logDebug(e.what());
     }
     for(auto dev : lockedDevices){
-        dev->lockDevice(nullptr);
+        dev->releaseDevice(this);
     }
     lockedDevices.clear();
 }

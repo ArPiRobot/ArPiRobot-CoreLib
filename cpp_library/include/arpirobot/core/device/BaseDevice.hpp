@@ -57,6 +57,8 @@ namespace arpirobot{
 
         void lockDevice(Action *action);
 
+        void releaseDevice(Action *action);
+
         bool isLockedByAction();
 
         void doBegin();

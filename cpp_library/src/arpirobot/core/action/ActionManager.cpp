@@ -29,6 +29,7 @@ using namespace arpirobot;
 std::mutex ActionManager::triggerLock;
 std::vector<std::shared_ptr<BaseActionTrigger>> ActionManager::triggers;
 std::vector<std::shared_ptr<Action>> ActionManager::runningActions;
+std::mutex ActionManager::runningActionsLock;
 
 
 bool ActionManager::startAction(Action &action, bool doRestart){
@@ -45,7 +46,10 @@ bool ActionManager::startAction(std::shared_ptr<Action> action, bool doRestart){
     
     if(!action->isStarted() || action->isFinished()){
         action->actionStart();
-        runningActions.push_back(action);
+        {
+            std::lock_guard<std::mutex> l(runningActionsLock);
+            runningActions.push_back(action);
+        }
         action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
             std::bind(&Action::actionProcess, action),
             period
@@ -56,7 +60,10 @@ bool ActionManager::startAction(std::shared_ptr<Action> action, bool doRestart){
         ActionManager::stopAction(action);
         // Restart action
         action->actionStart();
-        runningActions.push_back(action);
+        {
+            std::lock_guard<std::mutex> l(runningActionsLock);
+            runningActions.push_back(action);
+        }
         action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
             std::bind(&Action::actionProcess, action),
             period
@@ -104,7 +111,12 @@ void ActionManager::removeTrigger(std::shared_ptr<BaseActionTrigger> trigger){
 bool ActionManager::stopActionInternal(std::shared_ptr<Action> action, bool interrupted){
     if(action->isStarted() && !action->isFinished()){
         action->actionStop(interrupted);
-        runningActions.erase(std::remove(runningActions.begin(), runningActions.end(), action), runningActions.end());
+        {
+            std::lock_guard<std::mutex> l(runningActionsLock);
+            auto it = std::find(runningActions.begin(), runningActions.end(), action);
+            if(it != runningActions.end())
+                runningActions.erase(it);
+        }
         BaseRobot::removeTaskFromScheduler(action->_schedulerTask);
         action->_schedulerTask = nullptr;
         return true;

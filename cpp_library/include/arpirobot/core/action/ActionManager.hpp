@@ -104,6 +104,7 @@ namespace arpirobot{
 
         // Keep actions started with ActionManager::startAction(std::make_shared) in scope
         static std::vector<std::shared_ptr<Action>> runningActions;
+        static std::mutex runningActionsLock;
 
         friend class BaseRobot; // BaseRobot needs to call checkTriggers on its scheduler
         friend class Action;    // Action needs to be able to call stopActionInternal
