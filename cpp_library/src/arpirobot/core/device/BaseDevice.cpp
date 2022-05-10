@@ -33,6 +33,22 @@ BaseDevice::~BaseDevice(){
     BaseRobot::deviceDestroyed(this);
 }
 
+bool BaseDevice::isLockedByAction(std::shared_ptr<Action> action){
+    std::lock_guard<std::mutex> l(actionLock);
+    if(action == nullptr){
+        // Checking if locked by any action
+        return lockingAction != nullptr;
+    }else{
+        // Checking if locked by the given action
+        return action.get() == lockingAction;
+    }
+}
+
+bool BaseDevice::isLockedByAction(Action &action){
+    return isLockedByAction(std::shared_ptr<Action>(std::shared_ptr<Action>{}, &action));
+}
+
+
 void BaseDevice::lockDevice(Action *action){
     
     // Do not use this to release the device
@@ -55,11 +71,6 @@ void BaseDevice::releaseDevice(Action *action){
     if(lockingAction == action){
         lockingAction = nullptr;
     }
-}
-
-bool BaseDevice::isLockedByAction(){
-    std::lock_guard<std::mutex> l(actionLock);
-    return lockingAction != nullptr;
 }
 
 void BaseDevice::doBegin(){

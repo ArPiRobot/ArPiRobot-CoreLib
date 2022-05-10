@@ -43,6 +43,27 @@ namespace arpirobot{
          */
         virtual std::string getDeviceName() = 0;
 
+        /**
+         * @brief Check if a given action locks the device.
+         * 
+         * @param action The action to compare to. If nullptr this function 
+         *               checks if any action locks the device
+         * 
+         * @return true If the device is locked by the action
+         * @return false If the device is not locked the action
+         */
+        bool isLockedByAction(std::shared_ptr<Action> action = nullptr);
+
+        /**
+         * @brief Check if a given action locks the device.
+         * 
+         * @param action The action to compare to.
+         * 
+         * @return true If the device is locked by the action
+         * @return false If the device is not locked the action
+         */
+        bool isLockedByAction(Action &action);
+
     protected:
         virtual void begin() = 0;
         virtual bool isEnabled() = 0;
@@ -58,8 +79,6 @@ namespace arpirobot{
         void lockDevice(Action *action);
 
         void releaseDevice(Action *action);
-
-        bool isLockedByAction();
 
         void doBegin();
 
