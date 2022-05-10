@@ -116,7 +116,6 @@ void BaseRobot::start(){
         std::lock_guard<std::mutex> l(devicesLock);
         for(BaseDevice *device : devices){
             try{
-                devices.push_back(device);
                 device->doBegin();
             }catch(const std::exception &e){
                 Logger::logError("Failed to begin device " + device->getDeviceName());
