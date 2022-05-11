@@ -29,8 +29,8 @@ CubicAxisTransform::CubicAxisTransform(double minPower, double midPower){
     minPower = std::abs(minPower);
     midPower = std::abs(midPower);
 
-    std::vector<double> x = {0, 0.5, 1};
-    std::vector<double> y = {minPower, midPower, 1};
+    std::vector<double> x = {0, 0.45, 0.5, 0.55, 1};
+    std::vector<double> y = {minPower, midPower, midPower, midPower, 1};
     auto coeffs = polyfit(x, y, 3);
     
     a = coeffs[3];

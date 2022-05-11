@@ -33,6 +33,10 @@ namespace arpirobot{
      * The cubic function is fit to the data set (0, minPower), (0.5, midPower), (1, 1)
      * This gives a wide range of inputs that will yield a value near midPower
      * Sign of the output will match the sign of the input
+     * 
+     * WARNING: Since input of 0 results in an output of minPower DO NOT use with a non-zero minPower
+     * and a non-zero deadband.
+     * 
      */
     class CubicAxisTransform : public BaseAxisTransform {
     public:
