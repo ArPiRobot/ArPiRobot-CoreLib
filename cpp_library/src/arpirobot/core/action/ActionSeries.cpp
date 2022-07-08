@@ -97,7 +97,6 @@ void ActionSeries::process(){
 }
 
 void ActionSeries::finish(bool interrupted){
-    Logger::logDebugFrom("ActionSeries", "finished()");
     if(interrupted){
         ActionManager::stopAction(actions[index]);
     }else if(finishedAction != nullptr){
