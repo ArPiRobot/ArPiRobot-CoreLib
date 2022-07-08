@@ -614,19 +614,6 @@ BRIDGE_FUNC void Action_destroy(Action *action){
     bridge_objs.erase(action);
 }
 
-BRIDGE_FUNC void Action_lockDevices(Action *action, BaseDevice **devices, size_t deviceCount){
-    std::vector<std::shared_ptr<BaseDevice>> devs;
-    devs.reserve(deviceCount);
-    for(int i = 0; i < deviceCount; ++i){
-        devs.push_back(std::static_pointer_cast<BaseDevice>(bridge_objs[devices[i]]));
-    }
-    action->lockDevices(devs);
-}
-
-BRIDGE_FUNC void Action_lockDevice(Action *action, BaseDevice *device){
-    action->lockDevice(std::static_pointer_cast<BaseDevice>(bridge_objs[device]));
-}
-
 BRIDGE_FUNC bool Action_isRunning(Action *action){
     return action->isRunning();
 }

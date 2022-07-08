@@ -21,6 +21,8 @@
 #include <arpirobot/core/action/ActionManager.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 
+#include <algorithm>
+
 using namespace arpirobot;
 
 Action::Action(int32_t processRateMs) : processRateMs(processRateMs) {
@@ -28,32 +30,11 @@ Action::Action(int32_t processRateMs) : processRateMs(processRateMs) {
 }
 
 Action::~Action(){
-    for(auto dev : lockedDevices){
+    for(auto dev : currentlyLocked){
         // Ensures BaseDevice never tries to call 
         // lockDevice on ptr to deallocated action
-        dev->releaseDevice(this);
+        dev.get().releaseDevice(this);
     }
-}
-
-void Action::lockDevices(std::vector<std::reference_wrapper<BaseDevice>> devices){
-    for(auto dev : devices){
-        lockDevice(dev.get());
-    }
-}
-
-void Action::lockDevices(std::vector<std::shared_ptr<BaseDevice>> devices){
-    for(auto dev : devices){
-        lockDevice(dev);
-    }
-}
-
-void Action::lockDevice(BaseDevice &device){
-    lockDevice(std::shared_ptr<BaseDevice>(std::shared_ptr<BaseDevice>{}, &device));
-}
-
-void Action::lockDevice(std::shared_ptr<BaseDevice> device){
-    device->lockDevice(this);
-    lockedDevices.push_back(device.get());
 }
 
 bool Action::isRunning(){
@@ -69,12 +50,44 @@ void Action::setProcessPeriodMs(int32_t processPeriodMs){
     this->processRateMs = processRateMs;
 }
 
-void Action::actionStart(){
+LockedDeviceList Action::lockedDevices(){
+    return {};
+}
+
+bool Action::predDevice(std::reference_wrapper<BaseDevice> a, std::reference_wrapper<BaseDevice> b){
+    return (&(a.get())) == (&(b.get()));
+}
+
+bool Action::compDevice(std::reference_wrapper<BaseDevice> a, std::reference_wrapper<BaseDevice> b){
+    return (&(a.get())) < (&(b.get()));
+}
+
+void Action::makeDeviceListUnique(std::vector<std::reference_wrapper<BaseDevice>> &list){
+    std::sort(list.begin(), list.end(), &Action::compDevice);
+    list.erase(std::unique(list.begin(), list.end(), &Action::predDevice), list.end());
+}
+
+void Action::actionStart(bool skipLock){
     {
         std::lock_guard<std::mutex> l(stateLock);
         started = true;
         finished = false;
     }
+
+    if(!skipLock){
+        try{
+            currentlyLocked = lockedDevices();
+            makeDeviceListUnique(currentlyLocked);
+            for(auto &dev : currentlyLocked){
+                dev.get().lockDevice(this);
+            }
+        }catch(const std::runtime_error &e){
+            Logger::logWarning("Action encountered exception when running lockedDevices().");
+            Logger::logDebug(e.what());
+            currentlyLocked = {};
+        }
+    }
+
     try{
         begin();
     }catch(const std::runtime_error &e){
@@ -95,10 +108,10 @@ void Action::actionStop(bool interrupted){
         Logger::logWarning("Action encountered exception when running finish().");
         Logger::logDebug(e.what());
     }
-    for(auto dev : lockedDevices){
-        dev->releaseDevice(this);
+    for(auto dev : currentlyLocked){
+        dev.get().releaseDevice(this);
     }
-    lockedDevices.clear();
+    currentlyLocked.clear();
 }
 
 void Action::actionProcess(){

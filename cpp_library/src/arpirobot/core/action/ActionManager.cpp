@@ -18,6 +18,7 @@
  */
 
 #include <arpirobot/core/action/ActionManager.hpp>
+#include <arpirobot/core/action/ActionSeries.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 #include <arpirobot/core/robot/BaseRobot.hpp>
 
@@ -37,42 +38,7 @@ bool ActionManager::startAction(Action &action, bool doRestart){
 }
 
 bool ActionManager::startAction(std::shared_ptr<Action> action, bool doRestart){
-    if(!BaseRobot::exists)
-        return false;
-
-    auto period = (action->processRateMs < 0) ? 
-            std::chrono::milliseconds(RobotProfile::actionFunctionPeriod) :
-            std::chrono::milliseconds(action->processRateMs);
-    
-    if(!action->isStarted() || action->isFinished()){
-        action->actionStart();
-        {
-            std::lock_guard<std::mutex> l(runningActionsLock);
-            runningActions.push_back(action);
-        }
-        action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
-            std::bind(&Action::actionProcess, action),
-            period
-        );
-        return true;
-    }else if(doRestart){
-        // Action is already running, but should be restarted
-        ActionManager::stopAction(action);
-        // Restart action
-        action->actionStart();
-        {
-            std::lock_guard<std::mutex> l(runningActionsLock);
-            runningActions.push_back(action);
-        }
-        action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
-            std::bind(&Action::actionProcess, action),
-            period
-        );
-        return true;
-    }else{
-        Logger::logDebugFrom("ActionManager", "Attempted to start already running action.");
-        return false;
-    }
+    return startActionInternal(action, doRestart, nullptr);
 }
 
 bool ActionManager::stopAction(Action &action){
@@ -105,6 +71,47 @@ void ActionManager::removeTrigger(std::shared_ptr<BaseActionTrigger> trigger){
     auto pos = std::find(triggers.begin(), triggers.end(), trigger);
     if(pos != triggers.end()){
         triggers.erase(pos);
+    }
+}
+
+bool ActionManager::startActionInternal(std::shared_ptr<Action> action, bool doRestart, ActionSeries *owningActionSeries){
+    if(!BaseRobot::exists)
+        return false;
+
+    auto period = (action->processRateMs < 0) ? 
+            std::chrono::milliseconds(RobotProfile::actionFunctionPeriod) :
+            std::chrono::milliseconds(action->processRateMs);
+    
+    if(!action->isStarted() || action->isFinished()){
+        // If an action series owns the action, action should not lock devices. Series will have already done so.
+        action->actionStart(owningActionSeries != nullptr);
+        {
+            std::lock_guard<std::mutex> l(runningActionsLock);
+            runningActions.push_back(action);
+        }
+        action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
+            std::bind(&Action::actionProcess, action),
+            period
+        );
+        return true;
+    }else if(doRestart){
+        // Action is already running, but should be restarted
+        ActionManager::stopAction(action);
+        // Restart action
+        // If an action series owns the action, action should not lock devices. Series will have already done so.
+        action->actionStart(owningActionSeries != nullptr);
+        {
+            std::lock_guard<std::mutex> l(runningActionsLock);
+            runningActions.push_back(action);
+        }
+        action->_schedulerTask = BaseRobot::scheduleRepeatedFunction(
+            std::bind(&Action::actionProcess, action),
+            period
+        );
+        return true;
+    }else{
+        Logger::logDebugFrom("ActionManager", "Attempted to start already running action.");
+        return false;
     }
 }
 

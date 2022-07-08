@@ -26,6 +26,9 @@
 #include <mutex>
 
 namespace arpirobot{
+
+    class ActionSeries;
+
     /**
      * \class ActionManager ActionManager.hpp arpirobot/core/action/ActionManager.hpp
      * 
@@ -94,6 +97,8 @@ namespace arpirobot{
 
     private:
 
+        static bool startActionInternal(std::shared_ptr<Action> action, bool doRestart, ActionSeries *owningActionSeries);
+
         static bool stopActionInternal(std::shared_ptr<Action> action, bool interrupted);
 
         static void checkTriggers();
@@ -106,8 +111,9 @@ namespace arpirobot{
         static std::vector<std::shared_ptr<Action>> runningActions;
         static std::mutex runningActionsLock;
 
-        friend class BaseRobot; // BaseRobot needs to call checkTriggers on its scheduler
-        friend class Action;    // Action needs to be able to call stopActionInternal
+        friend class BaseRobot;     // BaseRobot needs to call checkTriggers on its scheduler
+        friend class Action;        // Action needs to be able to call stopActionInternal
+        friend class ActionSeries;  // ActionSeries needs to be able to call startActionInternal
     };
 
 }

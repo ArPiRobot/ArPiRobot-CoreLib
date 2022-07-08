@@ -47,12 +47,33 @@ ActionSeries::ActionSeries(std::vector<std::shared_ptr<Action>> actions, std::sh
 
 }
 
+LockedDeviceList ActionSeries::lockedDevices(){
+    // An ActionSeries locks all actions its child actions would lock when the series starts
+    // This is used to ensure proper exclusion / interruption of series
+    // Consider two actions that lock drive motors to drive shapes. 
+    // Assume some actions are delays that lock no devices.
+    // If series1 is running then series2 starts, it should always be the case that series1 is interrupted by series2
+    // This should happen even if action instances are shared and restarted between the two or 
+    // if series1 is in an action (delay) that locks no devices.
+    // This is ensured by having series1 lock all devices that will be used during its lifetime when it starts and only
+    // releasing them when it finishes
+
+    // No need to worry about duplicates in this list here. Will be handled by Action::actionStart()
+    // after it calls this function
+    LockedDeviceList list;
+    for(auto &act : actions){
+        LockedDeviceList sublist = act->lockedDevices();
+        list.insert(list.end(), sublist.begin(), sublist.end());
+    }
+    return list;
+}
+
 void ActionSeries::begin(){
     index = 0;
 
     // Start first action
     if(actions.size() >= 1){
-        ActionManager::startAction(*actions[index]);
+        ActionManager::startActionInternal(actions[index], true, this);
     }
 }
 
@@ -65,7 +86,7 @@ void ActionSeries::process(){
         if(actions[index]->isFinished()){
             index += 1;
             if(index < actions.size()){
-                ActionManager::startAction(*actions[index]);
+                ActionManager::startActionInternal(actions[index], true, this);
             }
         }
     }catch(const std::runtime_error &e){

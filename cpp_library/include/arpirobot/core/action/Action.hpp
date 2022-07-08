@@ -29,6 +29,10 @@
 
 namespace arpirobot{
 
+
+    typedef std::vector<std::reference_wrapper<BaseDevice>> LockedDeviceList;
+
+
     /**
      * \class Action Action.hpp arpirobot/core/action/Action.hpp
      * 
@@ -46,34 +50,6 @@ namespace arpirobot{
         Action(int32_t processRateMs = -1);
 
         virtual ~Action();
-
-        /**
-         * Use this action to lock a set of devices. 
-         * This is the same as calling Action::lockDevice once for each device individually.
-         * @param devices A vector of devices to lock (references to)
-         */
-        void lockDevices(std::vector<std::reference_wrapper<BaseDevice>> devices);
-
-        /**
-         * Use this action to lock a set of devices. 
-         * This is the same as calling Action::lockDevice once for each device individually.
-         * @param devices A vector of devices to lock (shared_ptr to)
-         */
-        void lockDevices(std::vector<std::shared_ptr<BaseDevice>> devices);
-
-        /**
-         * Use this action to lock a device. When a device is locked by this action, 
-         * any action previously locking it will be stopped.
-         * @param device The device to lock (reference to)
-         */
-        void lockDevice(BaseDevice &device);
-
-        /**
-         * Use this action to lock a device. When a device is locked by this action, 
-         * any action previously locking it will be stopped.
-         * @param device The device to lock (shared_ptr to)
-         */
-        void lockDevice(std::shared_ptr<BaseDevice> device);
 
         /**
          * @return true if the action has been started, but has not finished or been stopped.
@@ -96,6 +72,11 @@ namespace arpirobot{
         void setProcessPeriodMs(int32_t processPeriodMs);
 
     protected:
+
+        /*
+         * Returns a list of devices this action should lock
+         */
+        virtual LockedDeviceList lockedDevices();
 
         /**
          * Run when the action is started.
@@ -121,7 +102,13 @@ namespace arpirobot{
 
     private:
 
-        void actionStart();
+        static bool predDevice(std::reference_wrapper<BaseDevice> a, std::reference_wrapper<BaseDevice> b);
+
+        static bool compDevice(std::reference_wrapper<BaseDevice> a, std::reference_wrapper<BaseDevice> b);
+
+        static void makeDeviceListUnique(std::vector<std::reference_wrapper<BaseDevice>> &list);
+
+        void actionStart(bool skipLock);
 
         void actionStop(bool interrupted);
 
@@ -134,7 +121,7 @@ namespace arpirobot{
         std::shared_ptr<Task> _schedulerTask = nullptr;
         int32_t processRateMs = -1;
 
-        std::vector<BaseDevice*> lockedDevices;
+        std::vector<std::reference_wrapper<BaseDevice>> currentlyLocked;
 
         std::mutex stateLock;
         bool started = false;

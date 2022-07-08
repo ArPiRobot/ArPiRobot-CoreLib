@@ -58,13 +58,16 @@ namespace arpirobot{
         ActionSeries(std::vector<std::shared_ptr<Action>> actions, std::shared_ptr<Action> finishedAction);
 
     protected:
-        void begin();
 
-        void process();
+        LockedDeviceList lockedDevices() override;
 
-        void finish(bool interrupted);
+        void begin() override;
 
-        bool shouldContinue();
+        void process() override;
+
+        void finish(bool interrupted) override;
+
+        bool shouldContinue() override;
     
     private:
         std::vector<std::shared_ptr<Action>> actions;

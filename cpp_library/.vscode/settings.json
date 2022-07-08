@@ -97,7 +97,8 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "numbers": "cpp",
-        "semaphore": "cpp"
+        "semaphore": "cpp",
+        "unordered_set": "cpp"
     },
     "cmake.configureOnOpen": true,
     "cmake.configureArgs": ["-DCMAKE_COLOR_MAKEFILE=OFF"]
