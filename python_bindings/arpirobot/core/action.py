@@ -34,8 +34,8 @@ class Action(ABC):
 
     def __init__(self, process_period_ms = -1):
 
-        @ctypes.CFUNCTYPE(ctypes.c_size_t, ctypes.c_void_p)
-        def locked_devices(dest: ctypes.c_void_p) -> int:
+        @ctypes.CFUNCTYPE(ctypes.c_size_t, ctypes.POINTER(ctypes.c_void_p))
+        def locked_devices(dest: ctypes.POINTER(ctypes.c_void_p)) -> int:
             # Get python list of python objects for locked devices
             py_list = self.locked_devices()
 
@@ -53,8 +53,11 @@ class Action(ABC):
             # Which happens when this function returns
             c_list_real = bridge.arpirobot.copyToNewPointerArray(c_list, len(ptr_list))
 
+            # Assign list containing pointers to locked devices
+            dest[0] = c_list_real
+
             # This list can be returned. It will be freed by the c bridge code
-            return c_list_real
+            return len(ptr_list)
 
 
         @ctypes.CFUNCTYPE(None)
