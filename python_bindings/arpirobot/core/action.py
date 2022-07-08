@@ -36,11 +36,25 @@ class Action(ABC):
 
         @ctypes.CFUNCTYPE(ctypes.c_size_t, ctypes.c_void_p)
         def locked_devices(dest: ctypes.c_void_p) -> int:
+            # Get python list of python objects for locked devices
             py_list = self.locked_devices()
-            c_list: ctypes.c_void_p = bridge.arpirobot.returnableArray(len(py_list))
-            for i in range(len(py_list)):
-                c_list[i] = py_list[i]._ptr
-            return c_list
+
+            # Construct a list of the pointers associated with each device
+            ptr_list = []
+            for item in py_list:
+                ptr_list.append(item._ptr)
+            
+            # Create ctypes array for the pointers
+            c_list_type = ctypes.c_void_p * len(ptr_list)
+            c_list = c_list_type(*ptr_list)
+
+            # Use bridge function to copy to an array allocated by the C bridge
+            # Must do this because the c_list allocated above will be freed when it goes out of scope
+            # Which happens when this function returns
+            c_list_real = bridge.arpirobot.copyToNewPointerArray(c_list, len(ptr_list))
+
+            # This list can be returned. It will be freed by the c bridge code
+            return c_list_real
 
 
         @ctypes.CFUNCTYPE(None)

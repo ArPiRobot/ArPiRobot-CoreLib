@@ -96,11 +96,11 @@ BRIDGE_FUNC char *returnableString(std::string str);
 // THIS MUST BE MANUALLY CALLED BY THE OTHER LANGUAGE's BRIDGE
 BRIDGE_FUNC void freeString(char *str);
 
-// Used by other language bindings to create a pointer array of size len
-// This is intended to be used by Action::lockedDevices returning an array of pointers from python to c
-// Cannot allocate in ctypes directly as it would be freed when no references held (thust can't return)
-// The c portion of the bridge must free this memory when it is done with the returned array
-BRIDGE_FUNC void **returnableArray(size_t len);
+// Used to copy an array allocated by another language (eg python's ctypes) to one allocated by 
+// this bridge layer. This ensures the array is "returnable" from a function in said other language
+// Intended for use with Action::lockedDevices
+// Once c layer is done with the returned array, it must free the memory
+BRIDGE_FUNC void **copyToNewPointerArray(void **src, size_t len);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// BaseRobot Bridge

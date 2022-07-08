@@ -37,8 +37,8 @@ else:
 arpirobot.freeString.argtypes = [ctypes.c_char_p]
 arpirobot.freeString.restype = None
 
-arpirobot.returnableArray.argtypes = [ctypes.c_size_t]
-arpirobot.returnableArray.restype = ctypes.c_void_p
+arpirobot.copyToNewPointerArray.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+arpirobot.copyToNewPointerArray.restype = ctypes.c_void_p
 
 ################################################################################
 # BaseRobot Bridge

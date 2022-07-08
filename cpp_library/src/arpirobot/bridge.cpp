@@ -88,8 +88,12 @@ BRIDGE_FUNC void freeString(char *str){
     delete[] str;
 }
 
-BRIDGE_FUNC void **returnableArray(size_t len){
-    return new void*[len];
+BRIDGE_FUNC void **copyToNewPointerArray(void **src, size_t len){
+    void **newArray = new void*[len];
+    for(size_t i = 0; i < len; ++i){
+        newArray[i] = src[i];
+    }
+    return newArray;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -587,10 +591,8 @@ BridgeAction::BridgeAction(int32_t processRateMs,
 }
 
 LockedDeviceList BridgeAction::lockedDevices(){
-    // BaseDevice pointer array (BaseDevice**) is allocated by calling language using returnableArray
-    // This ensures the size matches the number of devices in the list
-    // Calling lockedDevicesPtr will set the BaseDevice** into the given destination (BaseDevice***)
-    // and return the size of the BaseDevice pointer list
+    // The returned array must be created using copyToNewPointerArray()
+    // This ensures that the calling language is not responsible for freeing memory
     BaseDevice **cList;
     size_t count = lockedDevicesPtr(&cList);
 
@@ -600,7 +602,7 @@ LockedDeviceList BridgeAction::lockedDevices(){
         cppList.push_back(std::reference_wrapper<BaseDevice>(*cList[i]));
     }
 
-    // This memory was allocated using returnableArray. Now done with the array, so free it.
+    // This memory was allocated using copyToNewPointerArray. Now done with the array, so free it.
     delete[] cList;
 
     // Return cpp list as expected in cpp library
