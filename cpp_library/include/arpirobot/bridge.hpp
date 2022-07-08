@@ -375,7 +375,8 @@ BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform);
 
 class BridgeAction : public Action{
 public:
-    BridgeAction(size_t(*lockedDevicesPtr)(BaseDevice***),
+    BridgeAction(int32_t processRateMs,
+        size_t(*lockedDevicesPtr)(BaseDevice***),
         void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
@@ -395,7 +396,8 @@ private:
     bool (*shouldContinuePtr)(void);
 };
 
-BRIDGE_FUNC Action *Action_create(size_t (*lockedDevicesPtr)(BaseDevice***),
+BRIDGE_FUNC Action *Action_create(int32_t processRateMs,
+    size_t (*lockedDevicesPtr)(BaseDevice***),
     void (*beginPtr)(void),
     void (*processPtr)(void),
     void (*finishPtr)(bool),
@@ -406,6 +408,8 @@ BRIDGE_FUNC void Action_destroy(Action *action);
 BRIDGE_FUNC bool Action_isRunning(Action *action);
 
 BRIDGE_FUNC void Action_setProcessPeriodMs(Action *action, int32_t processPeriodMs);
+
+BRIDGE_FUNC int32_t Action_getProcessPeriodMs(Action *action);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// ActionManager Bridge

@@ -24,11 +24,24 @@ from arpirobot.core.device import BaseDevice
 from typing import List
 
 
+# For consistent naming with c++ API
+LockedDeviceList = List[BaseDevice]
+
+
 ## Generic action class. User actions should inherit this class and implement the four pure virtual methods
 class Action(ABC):
     __all_actions: List['Action'] = []
 
-    def __init__(self):
+    def __init__(self, process_period_ms = -1):
+
+        @ctypes.CFUNCTYPE(ctypes.c_size_t, ctypes.c_void_p)
+        def locked_devices(dest: ctypes.c_void_p) -> int:
+            py_list = self.locked_devices()
+            c_list: ctypes.c_void_p = bridge.arpirobot.returnableArray(len(py_list))
+            for i in range(len(py_list)):
+                c_list[i] = py_list[i]._ptr
+            return c_list
+
 
         @ctypes.CFUNCTYPE(None)
         def begin():
@@ -47,12 +60,13 @@ class Action(ABC):
             return self.should_continue()
         
         # Have to keep reference to these or will be garbage collected then seg fault
+        self.ld_internal = locked_devices
         self.b_internal = begin
         self.p_internal = process
         self.f_internal = finish
         self.sc_internal = should_continue
 
-        self._ptr = bridge.arpirobot.Action_create(self.b_internal, self.p_internal, self.f_internal, self.sc_internal)
+        self._ptr = bridge.arpirobot.Action_create(process_period_ms, self.ld_internal, self.b_internal, self.p_internal, self.f_internal, self.sc_internal)
         
         # C++ code has pointers to members of this object.
         # Make sure it is not garbage collected even if user keeps no reference to it
@@ -60,24 +74,6 @@ class Action(ABC):
 
     def __del__(self):
         bridge.arpirobot.Action_destroy(self._ptr)
-    
-
-    ## Use this action to lock a set of devices. 
-    #  This is the same as calling lock_evice once for each device individually.
-    #  @param devices A vector of devices to lock
-    def lock_devices(self, devices: List[BaseDevice]):
-        # Build list of internal pointers for each device
-        d = []
-        for dev in devices:
-            d.append(dev._ptr)
-        d_type = ctypes.c_void_p * len(d)
-        bridge.arpirobot.Action_lockDevices(self._ptr, d_type(*d), len(d))
-
-    ## Use this action to lock a device. When a device is locked by this action, 
-    #  any action previously locking it will be stopped.
-    #  @param device The device to lock
-    def lock_device(self, device: BaseDevice):
-        bridge.arpirobot.Action_lockDevice(self._ptr, device._ptr)
 
     ## @returns true if the action has been started, but has not finished or been stopped.
     def is_running(self) -> bool:
@@ -88,6 +84,14 @@ class Action(ABC):
     #  @param processPeriodMs New process period in milliseconds
     def set_process_period_ms(self, process_period_ms: int):
         bridge.arpirobot.Action_setProcessPeriodMs(self._ptr, process_period_ms)
+
+    ## Get the rate process function is configured to be called at
+    #  @return period between process function calls in milliseconds
+    def get_process_period_ms(self) -> int:
+        return bridge.arpirobot.Action_getProcessPeriodMs(self._ptr)
+
+    def locked_devices(self) -> LockedDeviceList:
+        return []
 
     @abstractmethod
     def begin(self):

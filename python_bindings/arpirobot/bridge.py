@@ -37,6 +37,9 @@ else:
 arpirobot.freeString.argtypes = [ctypes.c_char_p]
 arpirobot.freeString.restype = None
 
+arpirobot.returnableArray.argtypes = [ctypes.c_size_t]
+arpirobot.returnableArray.restype = ctypes.c_void_p
+
 ################################################################################
 # BaseRobot Bridge
 ################################################################################
@@ -347,23 +350,20 @@ arpirobot.CubicAxisTransform_destroy.restype = None
 # Action Bridge
 ################################################################################
 
-arpirobot.Action_create.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
+arpirobot.Action_create.argtypes = [ctypes.c_int32, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
 arpirobot.Action_create.restype = ctypes.c_void_p
 
 arpirobot.Action_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.Action_destroy.restype = None
-
-arpirobot.Action_lockDevices.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t]
-arpirobot.Action_lockDevices.restype = None
-
-arpirobot.Action_lockDevice.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-arpirobot.Action_lockDevice.restype = None
 
 arpirobot.Action_isRunning.argtypes = [ctypes.c_void_p]
 arpirobot.Action_isRunning.restype = ctypes.c_bool
 
 arpirobot.Action_setProcessPeriodMs.argtypes = [ctypes.c_void_p, ctypes.c_int32]
 arpirobot.Action_setProcessPeriodMs.restype = None
+
+arpirobot.Action_getProcessPeriodMs.argtypes = [ctypes.c_void_p]
+arpirobot.Action_getProcessPeriodMs.restype = ctypes.c_int32
 
 ################################################################################
 # ActionManager Bridge

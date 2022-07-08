@@ -574,11 +574,13 @@ BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform){
 /// Action Bridge
 ////////////////////////////////////////////////////////////////////////////////
 
-BridgeAction::BridgeAction(size_t(*lockedDevicesPtr)(BaseDevice***),
+BridgeAction::BridgeAction(int32_t processRateMs,
+        size_t(*lockedDevicesPtr)(BaseDevice***),
         void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
-        bool (*shouldContinuePtr)(void)) : lockedDevicesPtr(lockedDevicesPtr), 
+        bool (*shouldContinuePtr)(void)) : Action(processRateMs),
+        lockedDevicesPtr(lockedDevicesPtr), 
         beginPtr(beginPtr), processPtr(processPtr), 
         finishPtr(finishPtr), shouldContinuePtr(shouldContinuePtr){
     
@@ -628,12 +630,13 @@ bool BridgeAction::shouldContinue(){
     return res;
 }
 
-BRIDGE_FUNC Action *Action_create(size_t (*lockedDevicesPtr)(BaseDevice***),
+BRIDGE_FUNC Action *Action_create(int32_t processRateMs,
+        size_t (*lockedDevicesPtr)(BaseDevice***),
         void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
         bool (*shouldContinuePtr)(void)){
-    auto action = std::make_shared<BridgeAction>(lockedDevicesPtr, beginPtr, processPtr, finishPtr, shouldContinuePtr);
+    auto action = std::make_shared<BridgeAction>(processRateMs, lockedDevicesPtr, beginPtr, processPtr, finishPtr, shouldContinuePtr);
     bridge_objs[action.get()] = action;
     return action.get();
 }
@@ -650,6 +653,9 @@ BRIDGE_FUNC void Action_setProcessPeriodMs(Action *action, int32_t processPeriod
     action->setProcessPeriodMs(processPeriodMs);
 }
 
+BRIDGE_FUNC int32_t Action_getProcessPeriodMs(Action *action){
+    return action->getProcessPeriodMs();
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// ActionManager Bridge
