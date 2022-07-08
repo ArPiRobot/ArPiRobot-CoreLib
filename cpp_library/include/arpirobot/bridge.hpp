@@ -96,6 +96,11 @@ BRIDGE_FUNC char *returnableString(std::string str);
 // THIS MUST BE MANUALLY CALLED BY THE OTHER LANGUAGE's BRIDGE
 BRIDGE_FUNC void freeString(char *str);
 
+// Used by other language bindings to create a pointer array of size len
+// This is intended to be used by Action::lockedDevices returning an array of pointers from python to c
+// Cannot allocate in ctypes directly as it would be freed when no references held (thust can't return)
+// The c portion of the bridge must free this memory when it is done with the returned array
+BRIDGE_FUNC void **returnableArray(size_t len);
 
 ////////////////////////////////////////////////////////////////////////////////
 /// BaseRobot Bridge
@@ -370,24 +375,28 @@ BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform);
 
 class BridgeAction : public Action{
 public:
-    BridgeAction(void (*beginPtr)(void),
+    BridgeAction(size_t(*lockedDevicesPtr)(BaseDevice***),
+        void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
         bool (*shouldContinuePtr)(void));
 
-    void begin();
-    void process();
-    void finish(bool interrupted);
-    bool shouldContinue();
+    LockedDeviceList lockedDevices() override;
+    void begin() override;
+    void process() override;
+    void finish(bool interrupted) override;
+    bool shouldContinue() override;
 
 private:
+    size_t(*lockedDevicesPtr)(BaseDevice***);
     void (*beginPtr)(void);
     void (*processPtr)(void);
     void (*finishPtr)(bool);
     bool (*shouldContinuePtr)(void);
 };
 
-BRIDGE_FUNC Action *Action_create(void (*beginPtr)(void),
+BRIDGE_FUNC Action *Action_create(size_t (*lockedDevicesPtr)(BaseDevice***),
+    void (*beginPtr)(void),
     void (*processPtr)(void),
     void (*finishPtr)(bool),
     bool (*shouldContinuePtr)(void));

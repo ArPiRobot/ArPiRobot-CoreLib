@@ -88,6 +88,10 @@ BRIDGE_FUNC void freeString(char *str){
     delete[] str;
 }
 
+BRIDGE_FUNC void **returnableArray(size_t len){
+    return new void*[len];
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /// BaseRobot Bridge
 ////////////////////////////////////////////////////////////////////////////////
@@ -570,12 +574,35 @@ BRIDGE_FUNC void CubicAxisTransform_destroy(CubicAxisTransform *transform){
 /// Action Bridge
 ////////////////////////////////////////////////////////////////////////////////
 
-BridgeAction::BridgeAction(void (*beginPtr)(void),
+BridgeAction::BridgeAction(size_t(*lockedDevicesPtr)(BaseDevice***),
+        void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
-        bool (*shouldContinuePtr)(void)) : beginPtr(beginPtr), processPtr(processPtr), 
+        bool (*shouldContinuePtr)(void)) : lockedDevicesPtr(lockedDevicesPtr), 
+        beginPtr(beginPtr), processPtr(processPtr), 
         finishPtr(finishPtr), shouldContinuePtr(shouldContinuePtr){
     
+}
+
+LockedDeviceList BridgeAction::lockedDevices(){
+    // BaseDevice pointer array (BaseDevice**) is allocated by calling language using returnableArray
+    // This ensures the size matches the number of devices in the list
+    // Calling lockedDevicesPtr will set the BaseDevice** into the given destination (BaseDevice***)
+    // and return the size of the BaseDevice pointer list
+    BaseDevice **cList;
+    size_t count = lockedDevicesPtr(&cList);
+
+    // Copy into the type of list used by C++ code
+    LockedDeviceList cppList;
+    for(size_t i = 0; i < count; ++i){
+        cppList.push_back(std::reference_wrapper<BaseDevice>(*cList[i]));
+    }
+
+    // This memory was allocated using returnableArray. Now done with the array, so free it.
+    delete[] cList;
+
+    // Return cpp list as expected in cpp library
+    return cppList;
 }
 
 void BridgeAction::begin(){
@@ -601,11 +628,12 @@ bool BridgeAction::shouldContinue(){
     return res;
 }
 
-BRIDGE_FUNC Action *Action_create(void (*beginPtr)(void),
+BRIDGE_FUNC Action *Action_create(size_t (*lockedDevicesPtr)(BaseDevice***),
+        void (*beginPtr)(void),
         void (*processPtr)(void),
         void (*finishPtr)(bool),
         bool (*shouldContinuePtr)(void)){
-    auto action = std::make_shared<BridgeAction>(beginPtr, processPtr, finishPtr, shouldContinuePtr);
+    auto action = std::make_shared<BridgeAction>(lockedDevicesPtr, beginPtr, processPtr, finishPtr, shouldContinuePtr);
     bridge_objs[action.get()] = action;
     return action.get();
 }
