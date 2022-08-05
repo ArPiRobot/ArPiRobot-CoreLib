@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Build pigpio as shared library on supported platforms
-if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") AND ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm"))
+if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") AND (("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm") OR ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")))
      set(BUILDING_PIGPIO TRUE)
      add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pigpio-71 EXCLUDE_FROM_ALL)
      target_compile_options(pigpio PRIVATE -fPIC)     

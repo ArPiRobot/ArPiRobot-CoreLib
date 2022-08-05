@@ -40,13 +40,27 @@ const char *Io::PROVIDER_SERIAL = "serial";
 
 void Io::init(std::string provider){
     // Choose a default provider based on the current platform if none is specified
+
     if(provider == ""){
-#if defined(HAS_PIGPIO)
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+    // Windows OS
+    provider = "serial";
+#elif defined(__APPLE__)
+    // macOS
+    provider = "serial";
+#elif defined(__linux__) or defined(linux) or defined(__linux)
+    // Linux
+    if(system("which raspi-config > /dev/null 2>&1")){
+        // Raspberry pi
         provider = "pigpio";
-#elif defined(HAS_SERIAL)
+    }else{
+        // Not a raspberry pi
+        // TODO: libsoc
         provider = "serial";
+    }
 #else
-        provider = "dummy";
+    // Unknown OS
+    provider = "dummy";
 #endif
     }
 
@@ -66,6 +80,7 @@ void Io::init(std::string provider){
 #else
         throw std::runtime_error("The IO provider '" + provider + "' is not supported on this platform.");
 #endif
+    // TODO: libsoc once implemented
     }else if(provider == PROVIDER_DUMMY){
         instance = new DummyIoProvider();
     }else{
