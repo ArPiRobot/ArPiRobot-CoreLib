@@ -6,8 +6,8 @@ else()
     set(EXTENSION "")
 endif()
 
-set(target_host "aarch64-unknown-linux-gnueabihf")
-set(standalone_toolchain "${HOMEDIR}/.arpirobot/toolchain/armv6")
+set(target_host "aarch64-unknown-linux-gnu")
+set(standalone_toolchain "${HOMEDIR}/.arpirobot/toolchain/aarch64")
 set(cc_compiler gcc)
 set(cxx_compiler g++)
 

@@ -30,6 +30,8 @@ if os.path.exists(os.path.join(script_path, "package")):
 os.mkdir(os.path.join(script_path, "package"))
 os.mkdir(os.path.join(script_path, "package", "python_bindings"))
 os.mkdir(os.path.join(script_path, "package", "lib"))
+os.mkdir(os.path.join(script_path, "package", "lib", "armv6"))
+os.mkdir(os.path.join(script_path, "package", "lib", "aarch64"))
 
 # Copy common files
 shutil.copy(os.path.join(script_path, "version.txt"), os.path.join(script_path, "package"))
@@ -38,7 +40,7 @@ shutil.copy(os.path.join(script_path, "COPYING"), os.path.join(script_path, "pac
 
 
 print("")
-print("Building C++ Library")
+print("Building C++ Library (armv6)")
 
 original_dir = os.getcwd()
 
@@ -48,19 +50,45 @@ if os.path.exists("build"):
     shutil.rmtree("build")
 os.mkdir("build")
 os.chdir("build")
-os.system("cmake -DCMAKE_TOOLCHAIN_FILE=../arpirobot-cross.cmake -DCMAKE_BUILD_TYPE=Release -G \"Unix Makefiles\" ..")
+os.system("cmake -DCMAKE_TOOLCHAIN_FILE=../arpirobot-armv6-toolchain.cmake -DCMAKE_BUILD_TYPE=Release -G \"Unix Makefiles\" ..")
 os.system("cmake --build . -j")
 
-# Copy files
+# Copy library files
 for file in glob.glob("*.so"):
-    shutil.copy(file, os.path.join("..", "..", "package", "lib"))
-shutil.copytree(os.path.join("..", "include"), os.path.join("..", "..", "package", "include"))
-for file in glob.glob(os.path.join("..", "deps", "asio-*")):
-    copytree(os.path.join(file, "include"), os.path.join("..", "..", "package", "include"))
-for file in glob.glob(os.path.join("..", "deps", "pigpio-*", "*.h")):
-    shutil.copy(file, os.path.join("..", "..", "package", "include"))
-shutil.copy(os.path.join("..", "deps", "ctpl_stl.h"), os.path.join("..", "..", "package", "include"))
+    shutil.copy(file, os.path.join("..", "..", "package", "lib", "armv6"))
 
+os.chdir(original_dir)
+
+print("")
+print("Building C++ Library (aarch64)")
+
+original_dir = os.getcwd()
+
+# Perform build
+os.chdir(os.path.join(script_path, "cpp_library"))
+if os.path.exists("build"):
+    shutil.rmtree("build")
+os.mkdir("build")
+os.chdir("build")
+os.system("cmake -DCMAKE_TOOLCHAIN_FILE=../arpirobot-aarch64-toolchain.cmake -DCMAKE_BUILD_TYPE=Release -G \"Unix Makefiles\" ..")
+os.system("cmake --build . -j")
+
+# Copy library files
+for file in glob.glob("*.so"):
+    shutil.copy(file, os.path.join("..", "..", "package", "lib", "aarch64"))
+
+os.chdir(original_dir)
+
+print("")
+print("Adding includes")
+original_dir = os.getcwd()
+os.chdir(os.path.join(script_path, "cpp_library"))
+shutil.copytree(os.path.join("include"), os.path.join("..", "package", "include"))
+for file in glob.glob(os.path.join("deps", "asio-*")):
+    copytree(os.path.join(file, "include"), os.path.join("..", "package", "include"))
+for file in glob.glob(os.path.join("deps", "pigpio-*", "*.h")):
+    shutil.copy(file, os.path.join("..", "package", "include"))
+shutil.copy(os.path.join("deps", "ctpl_stl.h"), os.path.join("..", "package", "include"))
 os.chdir(original_dir)
 
 print("")
