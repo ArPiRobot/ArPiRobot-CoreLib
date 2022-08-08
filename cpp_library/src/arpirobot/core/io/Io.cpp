@@ -24,6 +24,8 @@
 #include <arpirobot/core/io/SerialIoProvider.hpp>
 
 #include <algorithm>
+#include <fstream>
+#include <cstdio>
 
 using namespace arpirobot;
 
@@ -50,7 +52,22 @@ void Io::init(std::string provider){
     provider = "serial";
 #elif defined(__linux__) or defined(linux) or defined(__linux)
     // Linux
-    if(system("which raspi-config > /dev/null 2>&1")){
+
+    // Determine if this is a raspberry pi board
+    bool isrpi = false;
+    FILE *pipe = popen("cat /proc/cpuinfo | grep Model", "r");
+    if(pipe){
+        char buf[64];
+        std::string cmdOutput;
+        while(!feof(pipe)){
+            if(fgets(buf, 64, pipe) != NULL)
+                cmdOutput += buf;
+        }
+        pclose(pipe);
+        isrpi = (cmdOutput.find("Raspberry Pi") != std::string::npos);
+    }
+
+    if(isrpi){
         // Raspberry pi
         provider = "pigpio";
     }else{
