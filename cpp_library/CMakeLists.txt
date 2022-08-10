@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # Build pigpio as shared library on supported platforms
 if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") AND (("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm") OR ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")))
      set(BUILDING_PIGPIO TRUE)
-     add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pigpio-71 EXCLUDE_FROM_ALL)
+     add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pigpio-79 EXCLUDE_FROM_ALL)
      target_compile_options(pigpio PRIVATE -fPIC)     
 endif()
 
@@ -37,7 +37,7 @@ target_compile_options(arpirobot-core PRIVATE -Wno-psabi)
 if(${BUILDING_PIGPIO})
      add_dependencies(arpirobot-core pigpio)
      target_compile_definitions(arpirobot-core PUBLIC HAS_PIGPIO)
-     target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/pigpio-71)
+     target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/pigpio-79)
      target_link_libraries(arpirobot-core pigpio)
 
      # Copy pigpio library to build directory so it is included in update packages
