@@ -118,8 +118,8 @@ uint16_t DummyIoProvider::i2cReadReg16(unsigned int handle, uint8_t reg){
 /// SPI
 ////////////////////////////////////////////////////////////////////////
 
-unsigned int DummyIoProvider::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud){
-    Logger::logDebugFrom("DummyIoProvider", "spiOpen(" + std::to_string(bus) + ", " + std::to_string(channel) + ", " + std::to_string(baud) + ")");
+unsigned int DummyIoProvider::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud, unsigned int mode){
+    Logger::logDebugFrom("DummyIoProvider", "spiOpen(" + std::to_string(bus) + ", " + std::to_string(channel) + ", " + std::to_string(baud) + ", " + std::to_string(mode) + ")");
     return 0;
 }
 

@@ -89,8 +89,8 @@ namespace arpirobot {
         
         // Bus = spi bus 
         // Channel = which builtin CS pin
-        // TODO: need a way to support SPI modes
-        virtual unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud) = 0;
+        // Mode = SPI Mode (0, 1, 2, 3) 
+        virtual unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud, unsigned int mode) = 0;
 
         virtual void spiClose(unsigned int handle) = 0;
 

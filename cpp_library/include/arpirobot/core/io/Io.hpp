@@ -107,7 +107,8 @@ namespace arpirobot{
         
         // Bus = spi bus 
         // Channel = which builtin CS pin
-        static unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud);
+        // Mode = SPI mode (0, 1, 2, 3)
+        static unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud, unsigned int mode);
 
         static void spiClose(unsigned int handle);
 

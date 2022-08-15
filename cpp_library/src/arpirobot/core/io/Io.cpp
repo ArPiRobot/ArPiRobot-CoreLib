@@ -246,9 +246,9 @@ uint16_t Io::i2cReadReg16(unsigned int handle, uint8_t reg){
 }
 
 
-unsigned int Io::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud){
+unsigned int Io::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud, unsigned int mode){
     if(instance != nullptr){
-        return instance->spiOpen(bus, channel, baud);
+        return instance->spiOpen(bus, channel, baud, mode);
     }
     return -1; // -1 interpreted as max unsigned int
 }

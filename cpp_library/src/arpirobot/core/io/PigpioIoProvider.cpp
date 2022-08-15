@@ -156,11 +156,12 @@ uint16_t PigpioIoProvider::i2cReadReg16(unsigned int handle, uint8_t reg){
 
 // Bus = spi bus 
 // Channel = which builtin CS pin
-unsigned int PigpioIoProvider::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud){
+unsigned int PigpioIoProvider::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud, unsigned int mode){
     if(bus > 1 || bus < 0){
         throw InvalidParameterException();
     }
-    int flags = 0 | (bus << 8);
+    int flags = 0 | ((bus & 0x01) << 8);
+    flags |= (mode & 0x03);
     int res = ::spiOpen(channel, baud, flags);
     handlePigpioError(res, false);
     return res;

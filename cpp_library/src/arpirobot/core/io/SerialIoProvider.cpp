@@ -117,7 +117,7 @@ uint16_t SerialIoProvider::i2cReadReg16(unsigned int handle, uint8_t reg){
 /// SPI
 ////////////////////////////////////////////////////////////////////////
 
-unsigned int SerialIoProvider::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud){
+unsigned int SerialIoProvider::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud, unsigned int mode){
     return 0;
 }
 
