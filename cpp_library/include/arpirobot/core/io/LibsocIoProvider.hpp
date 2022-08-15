@@ -19,31 +19,21 @@
 
 #pragma once
 
+#ifdef HAS_LIBSOC
+
 #include <arpirobot/core/io/IoProvider.hpp>
-
-#include <unordered_map>
-
-#ifdef HAS_SERIAL
-
-#include <serial/serial.h>
+#include <memory>
 
 namespace arpirobot{
 
-    /**
-     * \class SerialIoProvider SerialIoProvider.hpp arpirobot/core/io/SerialIoProvider.hpp
-     * 
-     * Io provider that is capable only of uart (serial) operations. 
-     * Available on any Windows, Linux, or macOS platform.
-     * 
-     * Most IO operations will not be performed. Only UART is supported.
-     * 
-     */
-    class SerialIoProvider : public IoProvider{
+    // Uses libsoc for GPIO, PWM, I2C, SPI
+    // libsoc does not support uart, so serial IO provider is wrapped for uart operations
+    class LibsocIoProvider : public IoProvider{
     protected:
 
-        SerialIoProvider(bool disableWarn = false);
+        LibsocIoProvider();
 
-        ~SerialIoProvider();
+        ~LibsocIoProvider();
 
         ////////////////////////////////////////////////////////////////////////
         /// GPIO & PWM
@@ -89,7 +79,7 @@ namespace arpirobot{
         /// SPI
         ////////////////////////////////////////////////////////////////////////
         
-        // Bus = spi bus 
+        // Bus = spi bus
         // Channel = which builtin CS pin
         // Mode = SPI Mode (0, 1, 2, 3) 
         unsigned int spiOpen(unsigned int bus, unsigned int channel, unsigned int baud, unsigned int mode) override;
@@ -118,15 +108,11 @@ namespace arpirobot{
         void uartWriteByte(unsigned int handle, uint8_t b) override;
 
         uint8_t uartReadByte(unsigned int handle) override;
-
+    
     private:
-        // Map handles to serial instances
-        std::unordered_map<int, serial::Serial*> handleMap;
-        int currentHandle = 0;
-
+        IoProvider *uartProvider = nullptr;
         friend class Io;
-        friend class LibsocIoProvider;
     };
 }
 
-#endif // HAS_SERIAL
+#endif // HAS_LIBSOC

@@ -36,7 +36,7 @@ PigpioIoProvider::PigpioIoProvider() : IoProvider(){
     // This prevents use of pigpio from breaking audio playback through the I2S interface
     gpioCfgClock(5, 0, 0);
 
-    // Disable the socket interfae. No need for it and it uses port 8888 by default
+    // Disable the socket interface. No need for it and it uses port 8888 by default
     // which prevents launching the robot program if rtsp-simple-server is in use
     // with its default configuration.
     // Pipe interface is also disabled. No need for it either

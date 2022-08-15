@@ -26,9 +26,11 @@ using namespace arpirobot;
 
 #ifdef HAS_SERIAL
 
-SerialIoProvider::SerialIoProvider() : IoProvider(){
-    Logger::logWarning("The serial IO provider has been started. This provider CANNOT be used to" 
-            "interact with MOST devices. It only supports UART operations.");
+SerialIoProvider::SerialIoProvider(bool disableWarn) : IoProvider(){
+    if(!disableWarn){
+        Logger::logWarning("The serial IO provider has been started. This provider CANNOT be used to" 
+                "interact with MOST devices. It only supports UART operations.");
+    }
     Logger::logInfoFrom("SerialIoProvider", "IO Provider initialized.");
 }
         
