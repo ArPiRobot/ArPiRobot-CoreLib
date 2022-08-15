@@ -23,9 +23,13 @@
 #include <arpirobot/core/io/LibsocIoProvider.hpp>
 #include <arpirobot/core/io/SerialIoProvider.hpp>
 #include <arpirobot/core/log/Logger.hpp>
+#include <arpirobot/core/io/exceptions.hpp>
 
 using namespace arpirobot;
 
+
+// TODO: Maybe implement hardware PWM use with software fallback
+// This may require device-specific knowledge (ie what gpio number maps to which pwm channel)
 
 LibsocIoProvider::LibsocIoProvider(){
 #ifdef HAS_SERIAL
@@ -34,9 +38,7 @@ LibsocIoProvider::LibsocIoProvider(){
 #else
     Logger::logWarning("Using libsoc without serial. UART will not function.");
 #endif
-
-    // TODO: Actually initialize libsoc GPIO, PWM, SPI, and I2C
-
+    // No actual initialization to be done for libsoc itself
     Logger::logInfoFrom("LibsocIoProvider", "IO Provider initialized.");
 
 }
@@ -45,8 +47,13 @@ LibsocIoProvider::~LibsocIoProvider(){
     if(uartProvider != nullptr){
         delete uartProvider;
     }
+    
+    // Free all gpios
+    for(auto &it : gpioMap){
+        libsoc_gpio_free(it.second);
+    }
 
-    // TODO: Actually terminate libsoc GPIO, PWM, SPI, and I2C
+    // TODO: Close I2C, PWM, SPI, etc
 
     Logger::logInfoFrom("LibsocIoProvider", "IO Provider terminated.");
 }
@@ -55,27 +62,40 @@ LibsocIoProvider::~LibsocIoProvider(){
 /// GPIO & PWM
 ////////////////////////////////////////////////////////////////////////
 void LibsocIoProvider::gpioMode(unsigned int pin, unsigned int mode){
-
+    int res = libsoc_gpio_set_direction(getGpio(pin), toLibsocMode(mode));
+    if(res == EXIT_FAILURE){
+        throw AccessException();
+    }
 }
 
 void LibsocIoProvider::gpioWrite(unsigned int pin, unsigned int state){
-
+    int res = libsoc_gpio_set_level(getGpio(pin), toLibsocState(state));
+    if (res == EXIT_FAILURE){
+        throw AccessException();
+    }
 }
 
 unsigned int LibsocIoProvider::gpioRead(unsigned int pin){
-    return 0;
+    gpio_level res = libsoc_gpio_get_level(getGpio(pin));
+    if(res == LEVEL_ERROR){
+        throw AccessException();
+    }
+    return fromLibsocState(res);
 }
 
 void LibsocIoProvider::gpioSetPwmFrequency(unsigned int pin, unsigned int frequency){
-
+    // TODO: Implement software pwm
+    throw std::runtime_error("Software pwm not yet implemented in libsoc IO provider.");
 }
 
 unsigned int LibsocIoProvider::gpioGetPwmFrequency(unsigned int pin){
-    return 0;
+    // TODO: Implement software pwm
+    throw std::runtime_error("Software pwm not yet implemented in libsoc IO provider.");
 }
 
 void LibsocIoProvider::gpioPwm(unsigned int pin, unsigned int value){
-
+    // TODO: Implement software pwm
+    throw std::runtime_error("Software pwm not yet implemented in libsoc IO provider.");
 }
 
 
@@ -174,6 +194,49 @@ void LibsocIoProvider::uartWriteByte(unsigned int handle, uint8_t b){
 
 uint8_t LibsocIoProvider::uartReadByte(unsigned int handle){
     return 0;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// libsoc helper functions
+////////////////////////////////////////////////////////////////////////////////
+
+gpio *LibsocIoProvider::getGpio(unsigned int pin){
+    auto it = gpioMap.find(pin);
+    if(it == gpioMap.end()){
+        gpioMap[pin] = libsoc_gpio_request(pin, gpio_mode::LS_GPIO_SHARED);
+        if(gpioMap[pin] == NULL){
+            throw InvalidPinException();
+        }
+        return gpioMap[pin];
+    }else{
+        return it->second;
+    }
+}
+
+gpio_direction LibsocIoProvider::toLibsocMode(int mode){
+    if(mode == GPIO_OUT) return gpio_direction::OUTPUT;
+    if(mode == GPIO_IN) return gpio_direction::INPUT;
+    throw InvalidParameterException();
+}
+        
+int LibsocIoProvider::fromLibsocMode(gpio_direction mode){
+    if(mode == gpio_direction::INPUT) return GPIO_IN;
+    if(mode == gpio_direction::OUTPUT) return GPIO_OUT;
+    throw InvalidParameterException();
+}
+
+gpio_level LibsocIoProvider::toLibsocState(int state){
+    if(state == GPIO_HIGH) return gpio_level::HIGH;
+    if(state == GPIO_LOW) return gpio_level::LOW;
+    throw InvalidParameterException();
+}
+
+int LibsocIoProvider::fromLibsocState(gpio_level state){
+    if(state == gpio_level::HIGH) return GPIO_HIGH;
+    if(state == gpio_level::LOW) return GPIO_LOW;
+    throw InvalidParameterException();
 }
 
 #endif // HAS_LIBSOC

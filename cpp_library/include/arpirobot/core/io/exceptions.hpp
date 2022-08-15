@@ -59,4 +59,9 @@ namespace arpirobot{
         const char *what() const noexcept override;
     };
 
+    class AccessException : public std::exception{
+    public:
+        const char *what() const noexcept override;
+    };
+
 }

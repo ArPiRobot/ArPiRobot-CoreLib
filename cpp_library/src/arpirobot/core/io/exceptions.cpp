@@ -70,3 +70,11 @@ const char *WriteFailedException::what() const noexcept {
 const char *ReadFailedException::what() const noexcept {
     return "Read operation failed.";
 }
+
+////////////////////////////////////////////////////////////////////////////////
+/// AccessException
+////////////////////////////////////////////////////////////////////////////////
+const char *AccessException::what() const noexcept {
+    return "Unable to access requested resource.";
+}
+

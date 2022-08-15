@@ -23,6 +23,9 @@
 
 #include <arpirobot/core/io/IoProvider.hpp>
 #include <memory>
+#include <unordered_map>
+
+#include <libsoc_gpio.h>
 
 namespace arpirobot{
 
@@ -110,6 +113,13 @@ namespace arpirobot{
         uint8_t uartReadByte(unsigned int handle) override;
     
     private:
+        gpio *getGpio(unsigned int pin);
+        gpio_direction toLibsocMode(int mode);
+        int fromLibsocMode(gpio_direction  mode);
+        gpio_level toLibsocState(int state);
+        int fromLibsocState(gpio_level state);
+
+        std::unordered_map<unsigned int, gpio*> gpioMap;
         IoProvider *uartProvider = nullptr;
         friend class Io;
     };
