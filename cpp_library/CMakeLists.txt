@@ -10,11 +10,20 @@ if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") AND (("${CMAKE_SYSTEM_PROCESSOR}" S
      target_compile_options(pigpio PRIVATE -fPIC)     
 endif()
 
+# Build serial as shared library on windows, linux, or macos
 if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows") OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"))
      set(BUILDING_SERIAL TRUE)
      add_subdirectory(${PROJECT_SOURCE_DIR}/deps/serial-1.2.1/ EXCLUDE_FROM_ALL)
      target_compile_options(serial PRIVATE -fPIC)
 endif()
+
+# Build libsoc as shared library on linux systems
+if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+     set(BUILDING_LIBSOC TRUE)
+     add_subdirectory(${PROJECT_SOURCE_DIR}/deps/libsoc EXCLUDE_FROM_ALL)
+     target_compile_options(soc PRIVATE -fPIC)
+endif()
+
 
 # ArPiRobot core library
 
@@ -55,6 +64,19 @@ if(${BUILDING_SERIAL})
      # Copy serial library to build directory so it is included in update packages
      add_custom_command(TARGET arpirobot-core POST_BUILD
           COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:serial> ${CMAKE_CURRENT_BINARY_DIR}
+     )
+endif()
+
+if(${BUILDING_LIBSOC})
+     add_dependencies(arpirobot-core soc)
+     target_compile_definitions(arpirobot-core PUBLIC HAS_LIBSOC)
+     target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/libsoc/include)
+
+     target_link_libraries(arpirobot-core soc)
+
+     # Copy libsoc library to build directory so it is included in update packages
+     add_custom_command(TARGET arpirobot-core POST_BUILD
+          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:soc> ${CMAKE_CURRENT_BINARY_DIR}
      )
 endif()
 
