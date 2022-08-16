@@ -23,15 +23,22 @@
 
 #include <arpirobot/core/io/IoProvider.hpp>
 #include <memory>
+#include <thread>
 #include <unordered_map>
 
 #include <libsoc_gpio.h>
 
 namespace arpirobot{
-
     // Uses libsoc for GPIO, PWM, I2C, SPI
     // libsoc does not support uart, so serial IO provider is wrapped for uart operations
     class LibsocIoProvider : public IoProvider{
+    private:
+        struct pwmconfig{
+            gpio *g;
+            uint8_t dutyCycle = 0;
+            unsigned int frequency = 100;
+        };
+        
     protected:
 
         LibsocIoProvider();
@@ -113,6 +120,8 @@ namespace arpirobot{
         uint8_t uartReadByte(unsigned int handle) override;
     
     private:
+        void pwmThread(pwmconfig *pwm);
+
         gpio *getGpio(unsigned int pin);
         gpio_direction toLibsocMode(int mode);
         int fromLibsocMode(gpio_direction  mode);
@@ -120,6 +129,9 @@ namespace arpirobot{
         int fromLibsocState(gpio_level state);
 
         std::unordered_map<unsigned int, gpio*> gpioMap;
+        std::unordered_map<unsigned int, pwmconfig*> pwmConfigs;
+        std::unordered_map<unsigned int, std::thread*> pwmThreads;
+
         IoProvider *uartProvider = nullptr;
         friend class Io;
     };

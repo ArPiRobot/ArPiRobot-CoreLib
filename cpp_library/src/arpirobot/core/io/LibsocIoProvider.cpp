@@ -62,6 +62,7 @@ LibsocIoProvider::~LibsocIoProvider(){
 /// GPIO & PWM
 ////////////////////////////////////////////////////////////////////////
 void LibsocIoProvider::gpioMode(unsigned int pin, unsigned int mode){
+    // TODO: Disable SW PWM as needed
     int res = libsoc_gpio_set_direction(getGpio(pin), toLibsocMode(mode));
     if(res == EXIT_FAILURE){
         throw AccessException();
@@ -69,6 +70,7 @@ void LibsocIoProvider::gpioMode(unsigned int pin, unsigned int mode){
 }
 
 void LibsocIoProvider::gpioWrite(unsigned int pin, unsigned int state){
+    // TODO: Disable SW PWM as needed
     int res = libsoc_gpio_set_level(getGpio(pin), toLibsocState(state));
     if (res == EXIT_FAILURE){
         throw AccessException();
