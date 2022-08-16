@@ -35,10 +35,14 @@ namespace arpirobot{
     private:
         struct pwmconfig{
             gpio *g;
-            uint8_t dutyCycle = 0;
-            unsigned int frequency = 100;
+            std::thread *thread;
+            unsigned long onTime;
+            unsigned long offTime;
+            unsigned int dutyCycle;
+            unsigned int frequency;
+            bool alive;
         };
-        
+
     protected:
 
         LibsocIoProvider();
@@ -128,9 +132,10 @@ namespace arpirobot{
         gpio_level toLibsocState(int state);
         int fromLibsocState(gpio_level state);
 
+        pwmconfig *getPwm(unsigned int pin);
+
         std::unordered_map<unsigned int, gpio*> gpioMap;
-        std::unordered_map<unsigned int, pwmconfig*> pwmConfigs;
-        std::unordered_map<unsigned int, std::thread*> pwmThreads;
+        std::unordered_map<unsigned int, pwmconfig*> pwmMap;
 
         IoProvider *uartProvider = nullptr;
         friend class Io;

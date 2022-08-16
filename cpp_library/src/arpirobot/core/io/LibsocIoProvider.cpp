@@ -24,6 +24,8 @@
 #include <arpirobot/core/io/SerialIoProvider.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 #include <arpirobot/core/io/exceptions.hpp>
+#include <chrono>
+#include <functional>
 
 using namespace arpirobot;
 
@@ -48,10 +50,21 @@ LibsocIoProvider::~LibsocIoProvider(){
         delete uartProvider;
     }
     
+    // Stop all pwm threads & free resources
+    for(auto &it : pwmMap){
+        if(it.second->alive){
+            it.second->alive = false;
+            it.second->thread->join();
+        }
+        delete it.second;
+    }
+    pwmMap.clear();
+
     // Free all gpios
     for(auto &it : gpioMap){
         libsoc_gpio_free(it.second);
     }
+    gpioMap.clear();
 
     // TODO: Close I2C, PWM, SPI, etc
 
@@ -62,7 +75,17 @@ LibsocIoProvider::~LibsocIoProvider(){
 /// GPIO & PWM
 ////////////////////////////////////////////////////////////////////////
 void LibsocIoProvider::gpioMode(unsigned int pin, unsigned int mode){
-    // TODO: Disable SW PWM as needed
+    // Disable software PWM for this pin if it was previously in use
+    auto it = pwmMap.find(pin);
+    if(it != pwmMap.end()){
+        if(it->second->alive){
+            it->second->alive = false;
+            it->second->thread->join();
+            delete it->second->thread;
+            it->second->thread = nullptr;
+        }
+    }
+
     int res = libsoc_gpio_set_direction(getGpio(pin), toLibsocMode(mode));
     if(res == EXIT_FAILURE){
         throw AccessException();
@@ -70,7 +93,17 @@ void LibsocIoProvider::gpioMode(unsigned int pin, unsigned int mode){
 }
 
 void LibsocIoProvider::gpioWrite(unsigned int pin, unsigned int state){
-    // TODO: Disable SW PWM as needed
+    // Disable software PWM for this pin if it was previously in use
+    auto it = pwmMap.find(pin);
+    if(it != pwmMap.end()){
+        if(it->second->alive){
+            it->second->alive = false;
+            it->second->thread->join();
+            delete it->second->thread;
+            it->second->thread = nullptr;
+        }
+    }
+
     int res = libsoc_gpio_set_level(getGpio(pin), toLibsocState(state));
     if (res == EXIT_FAILURE){
         throw AccessException();
@@ -86,18 +119,37 @@ unsigned int LibsocIoProvider::gpioRead(unsigned int pin){
 }
 
 void LibsocIoProvider::gpioSetPwmFrequency(unsigned int pin, unsigned int frequency){
-    // TODO: Implement software pwm
-    throw std::runtime_error("Software pwm not yet implemented in libsoc IO provider.");
+    // Write new frequency
+    pwmconfig *pwm = getPwm(pin);
+    pwm->frequency = frequency;
+
+    // Recalculate on and off times
+    unsigned long totalTime = (unsigned long)((1.0 / pwm->frequency) * 1e9);    // in ns
+    pwm->onTime = (pwm->dutyCycle / 255.0) * totalTime;
+    pwm->offTime = totalTime - pwm->onTime;
 }
 
 unsigned int LibsocIoProvider::gpioGetPwmFrequency(unsigned int pin){
-    // TODO: Implement software pwm
-    throw std::runtime_error("Software pwm not yet implemented in libsoc IO provider.");
+    return getPwm(pin)->frequency;    
 }
 
 void LibsocIoProvider::gpioPwm(unsigned int pin, unsigned int value){
-    // TODO: Implement software pwm
-    throw std::runtime_error("Software pwm not yet implemented in libsoc IO provider.");
+    // Write new duty cycle
+    pwmconfig *pwm = getPwm(pin);
+    if(value > 255)
+        value = 255;
+    pwm->dutyCycle = value;
+
+    // Recalculate on and off times
+    unsigned long totalTime = (unsigned long)((1.0 / pwm->frequency) * 1e9);    // in ns
+    pwm->onTime = (pwm->dutyCycle / 255.0) * totalTime;
+    pwm->offTime = totalTime - pwm->onTime;
+
+    // Start pwm thread for this pin if not already running
+    if(!pwm->alive){
+        pwm->alive = true;
+        pwm->thread = new std::thread(std::bind(&LibsocIoProvider::pwmThread, this, pwm));
+    } 
 }
 
 
@@ -204,6 +256,21 @@ uint8_t LibsocIoProvider::uartReadByte(unsigned int handle){
 /// libsoc helper functions
 ////////////////////////////////////////////////////////////////////////////////
 
+void LibsocIoProvider::pwmThread(pwmconfig *pwm){
+    libsoc_gpio_set_direction(pwm->g, gpio_direction::OUTPUT);
+    while(pwm->alive){
+        if(pwm->onTime > 0){
+            libsoc_gpio_set_level(pwm->g, gpio_level::HIGH);
+            std::this_thread::sleep_for(std::chrono::nanoseconds(pwm->onTime));
+        }
+        if(pwm->offTime > 0){
+            libsoc_gpio_set_level(pwm->g, gpio_level::LOW);
+            std::this_thread::sleep_for(std::chrono::nanoseconds(pwm->offTime));
+        }
+    }
+    libsoc_gpio_set_level(pwm->g, gpio_level::LOW);
+}
+
 gpio *LibsocIoProvider::getGpio(unsigned int pin){
     auto it = gpioMap.find(pin);
     if(it == gpioMap.end()){
@@ -239,6 +306,23 @@ int LibsocIoProvider::fromLibsocState(gpio_level state){
     if(state == gpio_level::HIGH) return GPIO_HIGH;
     if(state == gpio_level::LOW) return GPIO_LOW;
     throw InvalidParameterException();
+}
+
+LibsocIoProvider::pwmconfig *LibsocIoProvider::getPwm(unsigned int pin){
+    auto it = pwmMap.find(pin);
+    if(it == pwmMap.end()){
+        pwmMap[pin] = new pwmconfig();
+        pwmMap[pin]->alive = false;
+        pwmMap[pin]->dutyCycle = 0;
+        pwmMap[pin]->frequency = 100;
+        pwmMap[pin]->g = getGpio(pin);
+        pwmMap[pin]->offTime = 10000000;
+        pwmMap[pin]->onTime = 0;
+        pwmMap[pin]->thread = nullptr;
+        return pwmMap[pin];
+    }else{
+        return it->second;
+    }
 }
 
 #endif // HAS_LIBSOC
