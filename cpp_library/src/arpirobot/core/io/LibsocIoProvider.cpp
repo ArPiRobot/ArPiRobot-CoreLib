@@ -31,6 +31,7 @@ using namespace arpirobot;
 
 
 unsigned int LibsocIoProvider::nextI2cHandle = 0;
+unsigned int LibsocIoProvider::nextSpiHandle = 0;
 
 
 LibsocIoProvider::LibsocIoProvider(){
@@ -74,7 +75,11 @@ LibsocIoProvider::~LibsocIoProvider(){
     }
     i2cMap.clear();
 
-    // TODO: Close SPI
+    // Free any active SPI
+    for(auto &it : spiMap){
+        libsoc_spi_free(it.second);
+    }
+    spiMap.clear();
 
     Logger::logInfoFrom("LibsocIoProvider", "IO Provider terminated.");
 }
@@ -171,6 +176,7 @@ unsigned int LibsocIoProvider::i2cOpen(unsigned int bus, unsigned int address){
     }
     i2cMap[nextI2cHandle] = i;
     nextI2cHandle++;
+    return nextI2cHandle - 1;
 }
 
 void LibsocIoProvider::i2cClose(unsigned int handle){
@@ -207,8 +213,10 @@ void LibsocIoProvider::i2cWriteBytes(unsigned int handle, char *buf, unsigned in
     for(size_t i = 0; i < count; ++i){
         byteBuf[i] = buf[i];
     }
-    if(libsoc_i2c_write(it->second, byteBuf, count) == EXIT_FAILURE)
+    if(libsoc_i2c_write(it->second, byteBuf, count) == EXIT_FAILURE){
+        delete[] byteBuf;
         throw WriteFailedException();
+    }
     delete[] byteBuf;
 }
 
@@ -254,19 +262,71 @@ uint16_t LibsocIoProvider::i2cReadReg16(unsigned int handle, uint8_t reg){
 ////////////////////////////////////////////////////////////////////////
 
 unsigned int LibsocIoProvider::spiOpen(unsigned int bus, unsigned int channel, unsigned int baud, unsigned int mode){
-    return 0;
+    spi *s = libsoc_spi_init(bus, channel);
+    if(s == NULL){
+        throw InvalidParameterException();
+    }
+    spi_mode m = spi_mode::MODE_ERROR;
+    switch(mode){
+    case 0:
+        m = spi_mode::MODE_0;
+        break;
+    case 1:
+        m = spi_mode::MODE_1;
+        break;
+    case 2:
+        m = spi_mode::MODE_2;
+        break;
+    case 3:
+        m = spi_mode::MODE_3;
+        break;
+    }
+    if(libsoc_spi_set_speed(s, baud) == EXIT_FAILURE)
+        throw InvalidParameterException();
+    if(libsoc_spi_set_mode(s, m) == EXIT_FAILURE)
+        throw InvalidParameterException();
+    spiMap[nextSpiHandle] = s;
+    nextSpiHandle++;
+    return nextSpiHandle - 1;
 }
 
 void LibsocIoProvider::spiClose(unsigned int handle){
-
+    auto it = spiMap.find(handle);
+    if(it == spiMap.end())
+        throw BadHandleException();
+    libsoc_spi_free(it->second);
+    spiMap.erase(handle);
 }
 
 void LibsocIoProvider::spiWrite(unsigned int handle, char *buf, unsigned int count){
-
+    auto it = spiMap.find(handle);
+    if(it == spiMap.end())
+        throw BadHandleException();
+    uint8_t *byteBuf = new uint8_t[count];
+    for(size_t i = 0; i < count; ++i){
+        byteBuf[i] = buf[i];
+    }
+    if(libsoc_spi_write(it->second, byteBuf, count) == EXIT_FAILURE){
+        delete[] byteBuf;
+        throw WriteFailedException();
+    }
+    delete[] byteBuf;
 }
 
 unsigned int LibsocIoProvider::spiRead(unsigned int handle, char *buf, unsigned int count){
-    return 0;
+    auto it = spiMap.find(handle);
+    if(it == spiMap.end())
+        throw BadHandleException();
+    uint8_t *byteBuf = new uint8_t[count];
+    if(libsoc_spi_read(it->second, byteBuf, count) == EXIT_FAILURE){
+        delete[] byteBuf;
+        throw ReadFailedException();
+    }
+    for(size_t i = 0; i < count; ++i){
+        buf[i] = byteBuf[i];
+    }
+    delete[] byteBuf;
+    return count;
 }
 
 

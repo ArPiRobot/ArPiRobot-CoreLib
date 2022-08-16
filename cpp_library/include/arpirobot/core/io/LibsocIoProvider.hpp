@@ -28,6 +28,7 @@
 
 #include <libsoc_gpio.h>
 #include <libsoc_i2c.h>
+#include <libsoc_spi.h>
 
 namespace arpirobot{
 
@@ -142,8 +143,10 @@ namespace arpirobot{
         std::unordered_map<unsigned int, gpio*> gpioMap;
         std::unordered_map<unsigned int, pwmconfig*> pwmMap;
         std::unordered_map<unsigned int, i2c*> i2cMap;
+        std::unordered_map<unsigned int, spi*> spiMap;
 
         static unsigned int nextI2cHandle;
+        static unsigned int nextSpiHandle;
 
 #ifdef HAS_SERIAL
         SerialIoProvider *uartProvider = nullptr;
