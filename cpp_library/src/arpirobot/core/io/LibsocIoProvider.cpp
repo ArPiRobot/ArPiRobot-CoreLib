@@ -35,7 +35,7 @@ using namespace arpirobot;
 
 LibsocIoProvider::LibsocIoProvider(){
 #ifdef HAS_SERIAL
-    Logger::logInfoFrom("LibsocIoProvider", "Wrapping LibsocIoProvider for UART support.");
+    Logger::logInfoFrom("LibsocIoProvider", "Wrapping SerialIoProvider for UART support.");
     uartProvider = new SerialIoProvider(true);
 #else
     Logger::logWarning("Using libsoc without serial. UART will not function.");

@@ -22,6 +22,7 @@
 #include <arpirobot/core/io/DummyIoProvider.hpp>
 #include <arpirobot/core/io/PigpioIoProvider.hpp>
 #include <arpirobot/core/io/SerialIoProvider.hpp>
+#include <arpirobot/core/io/LibsocIoProvider.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -35,6 +36,7 @@ std::vector<IoDevice*> Io::ioDevices;
 std::mutex Io::ioDevicesLock;
 
 const char *Io::PROVIDER_PIGPIO = "pigpio";
+const char *Io::PROVIDER_LIBSOC = "libsoc";
 const char *Io::PROVIDER_DUMMY = "dummy";
 const char *Io::PROVIDER_SERIAL = "serial";
 
@@ -46,10 +48,10 @@ void Io::init(std::string provider){
     if(provider == ""){
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
     // Windows OS
-    provider = "serial";
+    provider = PROVIDER_SERIAL;
 #elif defined(__APPLE__)
     // macOS
-    provider = "serial";
+    provider = PROVIDER_SERIAL;
 #elif defined(__linux__) or defined(linux) or defined(__linux)
     // Linux
 
@@ -69,15 +71,14 @@ void Io::init(std::string provider){
 
     if(isrpi){
         // Raspberry pi
-        provider = "pigpio";
+        provider = PROVIDER_PIGPIO;
     }else{
         // Not a raspberry pi
-        // TODO: libsoc
-        provider = "serial";
+        provider = PROVIDER_LIBSOC;
     }
 #else
     // Unknown OS
-    provider = "dummy";
+    provider = PROVIDER_DUMMY;
 #endif
     }
 
@@ -91,13 +92,18 @@ void Io::init(std::string provider){
 #else
         throw std::runtime_error("The IO provider '" + provider + "' is not supported on this platform.");
 #endif
+    }else if(provider == PROVIDER_LIBSOC){
+#ifdef HAS_LIBSOC
+        instance = new LibsocIoProvider();
+#else
+        throw std::runtime_error("The IO provider '" + provider + "' is not supported on this platform.");
+#endif
     }else if(provider == PROVIDER_SERIAL){
 #ifdef HAS_SERIAL
         instance = new SerialIoProvider();
 #else
         throw std::runtime_error("The IO provider '" + provider + "' is not supported on this platform.");
 #endif
-    // TODO: libsoc once implemented
     }else if(provider == PROVIDER_DUMMY){
         instance = new DummyIoProvider();
     }else{

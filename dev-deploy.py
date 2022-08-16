@@ -31,10 +31,10 @@ except:
 
 # Default values. Can be overridden using CLI flags
 robot_address = "192.168.10.1"
-robot_user = "pi"
+robot_user = "arpirobot"
 robot_pass = "arpirobot"
 robot_port = 22
-deploy_dir = "/home/pi/CoreLib-Test"
+deploy_dir = "/home/arpirobot/CoreLib-Test"
 
 # Globals used for connection
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -146,7 +146,7 @@ def sftp_copy_file(sftp, local_path: str, remote_dest: str):
                     data = local_file.read(buffer_size)
     except Exception as e:
         logging.error("Copying file failed!")
-        logging.debug(type(e).__name__)
+        logging.debug(str(e))
         exit(EC_FILE_ERROR)
 
 def sftp_create_dir_recursive(sftp, directory: str):
