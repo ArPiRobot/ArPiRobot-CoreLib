@@ -40,6 +40,9 @@ std::string DRV8833Motor::getDeviceName(){
 
 void DRV8833Motor::begin(){
     try{
+        Io::gpioMode(in1, Io::GPIO_OUT);
+        Io::gpioMode(in2, Io::GPIO_OUT);
+        Io::gpioMode(slp, Io::GPIO_OUT);
         Io::gpioPwm(in1, 0);
         Io::gpioPwm(in2, 0);
         Io::gpioWrite(slp, Io::GPIO_HIGH);

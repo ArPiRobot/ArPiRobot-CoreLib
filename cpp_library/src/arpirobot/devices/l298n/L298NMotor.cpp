@@ -43,6 +43,9 @@ void L298NMotor::begin(){
     try{
         Io::gpioMode(in1, Io::GPIO_OUT);
         Io::gpioMode(in2, Io::GPIO_OUT);
+        Io::gpioMode(pwm, Io::GPIO_OUT);
+        Io::gpioMode(in1, Io::GPIO_OUT);
+        Io::gpioMode(in2, Io::GPIO_OUT);
         Io::gpioPwm(pwm, 0);
     }catch(const std::exception &e){
         Logger::logErrorFrom(getDeviceName(), "Failed to initialize device. GPIO error.");
