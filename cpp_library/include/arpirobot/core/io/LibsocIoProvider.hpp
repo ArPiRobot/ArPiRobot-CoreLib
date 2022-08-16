@@ -29,6 +29,10 @@
 #include <libsoc_gpio.h>
 
 namespace arpirobot{
+
+    // Forward declare
+    class SerialIoProvider;
+
     // Uses libsoc for GPIO, PWM, I2C, SPI
     // libsoc does not support uart, so serial IO provider is wrapped for uart operations
     class LibsocIoProvider : public IoProvider{
@@ -137,7 +141,10 @@ namespace arpirobot{
         std::unordered_map<unsigned int, gpio*> gpioMap;
         std::unordered_map<unsigned int, pwmconfig*> pwmMap;
 
-        IoProvider *uartProvider = nullptr;
+#ifdef HAS_SERIAL
+        SerialIoProvider *uartProvider = nullptr;
+#endif
+
         friend class Io;
     };
 }

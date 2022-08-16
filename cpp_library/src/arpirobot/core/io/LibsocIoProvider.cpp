@@ -46,9 +46,11 @@ LibsocIoProvider::LibsocIoProvider(){
 }
 
 LibsocIoProvider::~LibsocIoProvider(){
+#ifdef HAS_SERIAL
     if(uartProvider != nullptr){
         delete uartProvider;
     }
+#endif
     
     // Stop all pwm threads & free resources
     for(auto &it : pwmMap){
@@ -223,31 +225,59 @@ unsigned int LibsocIoProvider::spiRead(unsigned int handle, char *buf, unsigned 
 ////////////////////////////////////////////////////////////////////////
 
 unsigned int LibsocIoProvider::uartOpen(char *port, unsigned int baud){
+#ifdef HAS_SERIAL
+    return uartProvider->uartOpen(port, baud);
+#else
     return 0;
+#endif
 }
 
 void LibsocIoProvider::uartClose(unsigned int handle){
-    
+#ifdef HAS_SERIAL
+    uartProvider->uartClose(handle);
+#else
+
+#endif
 }
 
 unsigned int LibsocIoProvider::uartAvailable(unsigned int handle){
+#ifdef HAS_SERIAL
+    return uartProvider->uartAvailable(handle);
+#else
     return 0;
+#endif
 }
 
 void LibsocIoProvider::uartWrite(unsigned int handle, char* buf, unsigned int count){
-    
+#ifdef HAS_SERIAL
+    return uartProvider->uartWrite(handle, buf, count);
+#else
+
+#endif
 }
 
 unsigned int LibsocIoProvider::uartRead(unsigned int handle, char *buf, unsigned int count){
+#ifdef HAS_SERIAL
+    return uartProvider->uartRead(handle, buf, count);
+#else
     return 0;
+#endif
 }
 
 void LibsocIoProvider::uartWriteByte(unsigned int handle, uint8_t b){
-    
+#ifdef HAS_SERIAL
+    uartProvider->uartWriteByte(handle, b);
+#else
+
+#endif
 }
 
 uint8_t LibsocIoProvider::uartReadByte(unsigned int handle){
+#ifdef HAS_SERIAL
+    return uartProvider->uartReadByte(handle);
+#else
     return 0;
+#endif
 }
 
 
