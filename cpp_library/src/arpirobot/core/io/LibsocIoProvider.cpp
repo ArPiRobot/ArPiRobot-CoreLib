@@ -30,8 +30,8 @@
 using namespace arpirobot;
 
 
-// TODO: Maybe implement hardware PWM use with software fallback
-// This may require device-specific knowledge (ie what gpio number maps to which pwm channel)
+unsigned int LibsocIoProvider::nextI2cHandle = 0;
+
 
 LibsocIoProvider::LibsocIoProvider(){
 #ifdef HAS_SERIAL
@@ -68,7 +68,13 @@ LibsocIoProvider::~LibsocIoProvider(){
     }
     gpioMap.clear();
 
-    // TODO: Close I2C, PWM, SPI, etc
+    // Free any active I2C
+    for(auto &it : i2cMap){
+        libsoc_i2c_free(it.second);
+    }
+    i2cMap.clear();
+
+    // TODO: Close SPI
 
     Logger::logInfoFrom("LibsocIoProvider", "IO Provider terminated.");
 }
@@ -159,27 +165,67 @@ void LibsocIoProvider::gpioPwm(unsigned int pin, unsigned int value){
 /// I2C
 ////////////////////////////////////////////////////////////////////////
 unsigned int LibsocIoProvider::i2cOpen(unsigned int bus, unsigned int address){
-    return 0;
+    i2c *i = libsoc_i2c_init(bus, address);
+    if(i == NULL){
+        throw InvalidParameterException();
+    }
+    i2cMap[nextI2cHandle] = i;
+    nextI2cHandle++;
 }
 
 void LibsocIoProvider::i2cClose(unsigned int handle){
-
+    auto it = i2cMap.find(handle);
+    if(it == i2cMap.end())
+        throw BadHandleException();
+    libsoc_i2c_free(it->second);
+    i2cMap.erase(handle);
 }
 
 void LibsocIoProvider::i2cWriteByte(unsigned int handle, uint8_t data){
-
+    auto it = i2cMap.find(handle);
+    if(it == i2cMap.end())
+        throw BadHandleException();
+    if(libsoc_i2c_write(it->second, &data, 1) == EXIT_FAILURE)
+        throw WriteFailedException();
 }
 
 uint8_t LibsocIoProvider::i2cReadByte(unsigned int handle){
-    return 0;
+    auto it = i2cMap.find(handle);
+    if(it == i2cMap.end())
+        throw BadHandleException();
+    uint8_t buf;
+    if(libsoc_i2c_read(it->second, &buf, 1) == EXIT_FAILURE)
+        throw ReadFailedException();
+    return buf;
 }
 
 void LibsocIoProvider::i2cWriteBytes(unsigned int handle, char *buf, unsigned int count){
-
+    auto it = i2cMap.find(handle);
+    if(it == i2cMap.end())
+        throw BadHandleException();
+    uint8_t *byteBuf = new uint8_t[count];
+    for(size_t i = 0; i < count; ++i){
+        byteBuf[i] = buf[i];
+    }
+    if(libsoc_i2c_write(it->second, byteBuf, count) == EXIT_FAILURE)
+        throw WriteFailedException();
+    delete[] byteBuf;
 }
 
 unsigned int LibsocIoProvider::i2cReadBytes(unsigned int handle, char *buf, unsigned int count){
-    return 0;
+    auto it = i2cMap.find(handle);
+    if(it == i2cMap.end())
+        throw BadHandleException();
+    uint8_t *byteBuf = new uint8_t[count];
+    if(libsoc_i2c_read(it->second, byteBuf, count) == EXIT_FAILURE){
+        delete[] byteBuf;
+        throw ReadFailedException();
+    }
+    for(size_t i = 0; i < count; ++i){
+        buf[i] = byteBuf[i];
+    }
+    delete[] byteBuf;
+    return count;
 }
 
 void LibsocIoProvider::i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value){
@@ -228,7 +274,7 @@ unsigned int LibsocIoProvider::uartOpen(char *port, unsigned int baud){
 #ifdef HAS_SERIAL
     return uartProvider->uartOpen(port, baud);
 #else
-    return 0;
+    throw NotImplementedByProviderException();
 #endif
 }
 
@@ -244,7 +290,7 @@ unsigned int LibsocIoProvider::uartAvailable(unsigned int handle){
 #ifdef HAS_SERIAL
     return uartProvider->uartAvailable(handle);
 #else
-    return 0;
+    throw NotImplementedByProviderException();
 #endif
 }
 
@@ -252,7 +298,7 @@ void LibsocIoProvider::uartWrite(unsigned int handle, char* buf, unsigned int co
 #ifdef HAS_SERIAL
     return uartProvider->uartWrite(handle, buf, count);
 #else
-
+    throw NotImplementedByProviderException();
 #endif
 }
 
@@ -260,7 +306,7 @@ unsigned int LibsocIoProvider::uartRead(unsigned int handle, char *buf, unsigned
 #ifdef HAS_SERIAL
     return uartProvider->uartRead(handle, buf, count);
 #else
-    return 0;
+    throw NotImplementedByProviderException();
 #endif
 }
 
@@ -268,7 +314,7 @@ void LibsocIoProvider::uartWriteByte(unsigned int handle, uint8_t b){
 #ifdef HAS_SERIAL
     uartProvider->uartWriteByte(handle, b);
 #else
-
+    throw NotImplementedByProviderException();
 #endif
 }
 
@@ -276,7 +322,7 @@ uint8_t LibsocIoProvider::uartReadByte(unsigned int handle){
 #ifdef HAS_SERIAL
     return uartProvider->uartReadByte(handle);
 #else
-    return 0;
+    throw NotImplementedByProviderException();
 #endif
 }
 
