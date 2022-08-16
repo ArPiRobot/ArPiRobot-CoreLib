@@ -229,19 +229,23 @@ unsigned int LibsocIoProvider::i2cReadBytes(unsigned int handle, char *buf, unsi
 }
 
 void LibsocIoProvider::i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value){
-
+    i2cWriteByte(handle, reg);
+    i2cWriteByte(handle, value);
 }
 
 uint8_t LibsocIoProvider::i2cReadReg8(unsigned int handle, uint8_t reg){
-    return 0;
+    i2cWriteByte(handle, reg);
+    return i2cReadByte(handle);
 }
 
 void LibsocIoProvider::i2cWriteReg16(unsigned int handle, uint8_t reg, uint16_t value){
-
+    // Byte order determined by I2C device, thus this can't really be implemented sw level
+    throw NotImplementedByProviderException();
 }
 
 uint16_t LibsocIoProvider::i2cReadReg16(unsigned int handle, uint8_t reg){
-    return 0;
+    // Byte order determined by I2C device, thus this can't really be implemented sw level
+    throw NotImplementedByProviderException();
 }
 
 
