@@ -86,7 +86,7 @@ bool BaseArduinoInterface::begin(){
                 return false;
             }
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }catch(const std::exception &e){
         Logger::logWarningFrom(getDeviceName(), "Error while configuring devices.");
         Logger::logDebugFrom(getDeviceName(), e.what());
