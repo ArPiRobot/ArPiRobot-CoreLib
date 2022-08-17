@@ -45,7 +45,8 @@ void ArduinoUartInterface::open() {
 }
 
 void ArduinoUartInterface::close() {
-    Io::uartClose(handle);
+    if(isOpen())
+        Io::uartClose(handle);
 }
 
 bool ArduinoUartInterface::isOpen() {
@@ -53,24 +54,32 @@ bool ArduinoUartInterface::isOpen() {
 }
 
 int ArduinoUartInterface::available() {
-    if(handle < 0)
-        return 0;
+    if(handle < 0){
+        auto msg = "Invalid UART handle in ArduinoUART interface.";
+        Logger::logErrorFrom(getDeviceName(), msg);
+        throw std::runtime_error(msg);
+    }
     return Io::uartAvailable(handle);
 }
 
 uint8_t ArduinoUartInterface::readOne() {
-    // Note: Would be MUCH better to do this with blocking io...
+    if(handle < 0){
+        auto msg = "Invalid UART handle in ArduinoUART interface.";
+        Logger::logErrorFrom(getDeviceName(), msg);
+        throw std::runtime_error(msg);
+    }
     while(!available()){
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
-    int b = Io::uartReadByte(handle);
-    if(b < 0){
-        throw std::runtime_error("Failed to read from serial port.");
-    }
-    return (uint8_t) b;
+    return Io::uartReadByte(handle);
 }
 
 std::vector<uint8_t> ArduinoUartInterface::readAll() {
+    if(handle < 0){
+        auto msg = "Invalid UART handle in ArduinoUART interface.";
+        Logger::logErrorFrom(getDeviceName(), msg);
+        throw std::runtime_error(msg);
+    }
     int a = available();
 	std::vector<uint8_t> data;
     data.reserve(a);
@@ -81,6 +90,12 @@ std::vector<uint8_t> ArduinoUartInterface::readAll() {
 }
 
 void ArduinoUartInterface::write(const uint8_t &b) {
+    if(handle < 0){
+        auto msg = "Invalid UART handle in ArduinoUART interface.";
+        Logger::logErrorFrom(getDeviceName(), msg);
+        throw std::runtime_error(msg);
+    }
+
     // Some boards, cables, power supplies, etc may cause scenarios where writes fail.
     // Allow three retries
     for(uint8_t i = 0; i < 3; ++i){

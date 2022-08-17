@@ -28,7 +28,7 @@ using namespace arpirobot;
 
 SerialIoProvider::SerialIoProvider(bool disableWarn) : IoProvider(){
     if(!disableWarn){
-        Logger::logWarning("The serial IO provider has been started. This provider CANNOT be used to" 
+        Logger::logWarning("The serial IO provider has been started. This provider CANNOT be used to " 
                 "interact with MOST devices. It only supports UART operations.");
     }
     Logger::logInfoFrom("SerialIoProvider", "IO Provider initialized.");
@@ -170,17 +170,30 @@ unsigned int SerialIoProvider::uartAvailable(unsigned int handle){
 }
 
 void SerialIoProvider::uartWrite(unsigned int handle, char* buf, unsigned int count){
+    uint8_t *byteBuf = new uint8_t[count];
     if(handleMap.find(handle) != handleMap.end()){
-        handleMap[handle]->write((uint8_t*)buf, count);
+        for(size_t i = 0; i < count; ++i){
+            byteBuf[i] = buf[i];
+        }
+        handleMap[handle]->write(byteBuf, count);
+        delete[] byteBuf;
     }else{
+        delete[] byteBuf;
         throw BadHandleException();
     }
 }
 
 unsigned int SerialIoProvider::uartRead(unsigned int handle, char *buf, unsigned int count){
+    uint8_t *byteBuf = new uint8_t[count];
     if(handleMap.find(handle) != handleMap.end()){
-        return handleMap[handle]->read((uint8_t*)buf, count);
+        unsigned int ret = handleMap[handle]->read(byteBuf, count);
+        for(size_t i = 0; i < count; ++i){
+            buf[i] = byteBuf[i];
+        }
+        delete[] byteBuf;
+        return ret;
     }else{
+        delete[] byteBuf;
         throw BadHandleException();
     }
 }

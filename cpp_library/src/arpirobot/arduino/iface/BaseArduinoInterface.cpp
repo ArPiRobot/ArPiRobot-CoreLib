@@ -74,18 +74,19 @@ bool BaseArduinoInterface::begin(){
     try{
         // Clear any start message from the buffer
         // This will be there from when the arduino reset on opening UART
-        waitForMessage(MSG_START, 3000);
-
-        // Begin by sending reset command (just in case it did not reset on opening UART)
-        // Some devices don't reset on UART (Teensy for example)
-        writeData(CMD_RESET);
-
-        // Wait for START message
-        auto msg = waitForMessage(MSG_START, 5000);
-        if(msg.size() == 0){
-            Logger::logWarningFrom(getDeviceName(), "Timed out while waiting for the Arduino to become ready.");
-            return false;
+        auto msg = waitForMessage(MSG_START, 3000);
+        if(msg.size() > 0){
+            // Got START so the arduino is known to have reset
+        }else{
+            // Assume arduino did not reset when opening UART (eg teensy)
+            writeData(CMD_RESET);
+            msg = waitForMessage(MSG_START, 5000);
+            if(msg.size() == 0){
+                Logger::logWarningFrom(getDeviceName(), "Timed out while waiting for the Arduino to become ready.");
+                return false;
+            }
         }
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }catch(const std::exception &e){
         Logger::logWarningFrom(getDeviceName(), "Error while configuring devices.");
         Logger::logDebugFrom(getDeviceName(), e.what());
@@ -299,6 +300,9 @@ bool BaseArduinoInterface::checkData(){
     uint16_t readCrc = readDataset[readDataset.size() - 2] << 8 | readDataset[readDataset.size() - 1];
     uint16_t calcCrc = calcCCittFalse(readDataset, readDataset.size() - 2);
 
+    if(readCrc != calcCrc){
+        Logger::logDebugFrom(getDeviceName(), "CRC check failed for a message.");
+    }
     return readCrc == calcCrc;
 }
 
