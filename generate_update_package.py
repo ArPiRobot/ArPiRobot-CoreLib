@@ -88,6 +88,7 @@ for file in glob.glob(os.path.join("deps", "asio-*")):
     copytree(os.path.join(file, "include"), os.path.join("..", "package", "include"))
 for file in glob.glob(os.path.join("deps", "pigpio-*", "*.h")):
     shutil.copy(file, os.path.join("..", "package", "include"))
+# TODO: Add libsoc and serial includes
 shutil.copy(os.path.join("deps", "ctpl_stl.h"), os.path.join("..", "package", "include"))
 os.chdir(original_dir)
 

@@ -13,7 +13,7 @@ endif()
 # Build serial as shared library on windows, linux, or macos
 if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows") OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"))
      set(BUILDING_SERIAL TRUE)
-     add_subdirectory(${PROJECT_SOURCE_DIR}/deps/serial-1.2.1/ EXCLUDE_FROM_ALL)
+     add_subdirectory(${PROJECT_SOURCE_DIR}/deps/serial/ EXCLUDE_FROM_ALL)
      target_compile_options(serial PRIVATE -fPIC)
 endif()
 
@@ -58,7 +58,7 @@ endif()
 if(${BUILDING_SERIAL})
      add_dependencies(arpirobot-core serial)
      target_compile_definitions(arpirobot-core PUBLIC HAS_SERIAL)
-     target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/serial-1.2.1/include)
+     target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/serial/include)
      target_link_libraries(arpirobot-core serial)
 
      # Copy serial library to build directory so it is included in update packages
