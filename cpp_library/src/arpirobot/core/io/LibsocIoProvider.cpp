@@ -191,8 +191,9 @@ void LibsocIoProvider::i2cWriteByte(unsigned int handle, uint8_t data){
     auto it = i2cMap.find(handle);
     if(it == i2cMap.end())
         throw BadHandleException();
-    if(libsoc_i2c_write(it->second, &data, 1) == EXIT_FAILURE)
+    if(libsoc_i2c_write(it->second, &data, 1) == EXIT_FAILURE){
         throw WriteFailedException();
+    }
 }
 
 uint8_t LibsocIoProvider::i2cReadByte(unsigned int handle){
@@ -237,13 +238,25 @@ unsigned int LibsocIoProvider::i2cReadBytes(unsigned int handle, char *buf, unsi
 }
 
 void LibsocIoProvider::i2cWriteReg8(unsigned int handle, uint8_t reg, uint8_t value){
-    i2cWriteByte(handle, reg);
-    i2cWriteByte(handle, value);
+    auto it = i2cMap.find(handle);
+    if(it == i2cMap.end())
+        throw BadHandleException();
+    uint8_t buf[2];
+    buf[0] = reg;
+    buf[1] = value;
+    if(libsoc_i2c_write(it->second, buf, 2) == EXIT_FAILURE)
+        throw WriteFailedException();
 }
 
 uint8_t LibsocIoProvider::i2cReadReg8(unsigned int handle, uint8_t reg){
-    i2cWriteByte(handle, reg);
-    return i2cReadByte(handle);
+    auto it = i2cMap.find(handle);
+    if(it == i2cMap.end())
+        throw BadHandleException();
+    uint8_t buf;
+    if(libsoc_i2c_write(it->second, &reg, 1) == EXIT_FAILURE)
+        throw WriteFailedException();
+    if(libsoc_i2c_read(it->second, &buf, 1) == EXIT_FAILURE)
+        throw ReadFailedException();
 }
 
 void LibsocIoProvider::i2cWriteReg16(unsigned int handle, uint8_t reg, uint16_t value){
