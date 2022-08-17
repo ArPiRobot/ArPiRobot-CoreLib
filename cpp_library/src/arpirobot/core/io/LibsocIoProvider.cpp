@@ -257,6 +257,7 @@ uint8_t LibsocIoProvider::i2cReadReg8(unsigned int handle, uint8_t reg){
         throw WriteFailedException();
     if(libsoc_i2c_read(it->second, &buf, 1) == EXIT_FAILURE)
         throw ReadFailedException();
+    return buf;
 }
 
 void LibsocIoProvider::i2cWriteReg16(unsigned int handle, uint8_t reg, uint16_t value){
