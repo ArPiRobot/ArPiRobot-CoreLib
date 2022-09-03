@@ -204,13 +204,13 @@ void AdafruitMotorHat::setAllPWM(int on, int off){
 const int AdafruitMotorHatMotor::ADAFRUIT_ADDR = 0x60;
 const int AdafruitMotorHatMotor::GEEKWORM_ADDR = 0x6F;
 const int AdafruitMotorHatMotor::DETECT_ADDR = -1;
+const int AdafruitMotorHatMotor::DETECT_BUS = -1;
 
-int AdafruitMotorHatMotor::detectedAddress = -1;
-std::unordered_map<int, std::shared_ptr<AdafruitMotorHat>> AdafruitMotorHatMotor::hatMap;
+std::unordered_map<unsigned long int, std::shared_ptr<AdafruitMotorHat>> AdafruitMotorHatMotor::hatMap;
 
 
-AdafruitMotorHatMotor::AdafruitMotorHatMotor(int motorNum, int address, bool remapNumbers) : 
-        motorNum(motorNum), hatAddress(address), remapNumbers(remapNumbers){
+AdafruitMotorHatMotor::AdafruitMotorHatMotor(int motorNum, int address, int bus, bool remapNumbers) : 
+        motorNum(motorNum), hatAddress(address), hatBus(bus), remapNumbers(remapNumbers){
 
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
@@ -223,33 +223,30 @@ void AdafruitMotorHatMotor::begin(){
         throw std::runtime_error(msg);
     }
 
-    // Handle auto detect hat address (will check adafruit first then fallback on geekworm address)
-    // If both fail will log exception
-    if(hatAddress == DETECT_ADDR){
-        if(detectedAddress != -1){
-            hatAddress = detectedAddress;
-        }else{
-            doDetectAddress();
-            if(detectedAddress == -1){
-                std::string message = "Unable to detect motor hat address.";
-                Logger::logErrorFrom(getDeviceName(), message);
-                throw std::runtime_error(message);
-            }
-            hatAddress = detectedAddress;
+    // Handle auto detect hat address and bus
+    if(hatAddress == DETECT_ADDR || hatBus == DETECT_BUS){
+        auto res = doDetectHat(hatAddress, hatBus);
+        if(res.first == -1 || res.second == -1){
+            std::string message = "Unable to detect motor hat.";
+            Logger::logErrorFrom(getDeviceName(), message);
+            throw std::runtime_error(message);
         }
+        hatBus = res.second;
+        hatAddress = res.first;
     }
 
     std::shared_ptr<AdafruitMotorHat> hat;
-    if(hatMap.find(hatAddress) != hatMap.end()){
-        hat = hatMap[hatAddress];
+    int hatId = (hatBus << 8) | hatAddress;
+    if(hatMap.find(hatId) != hatMap.end()){
+        hat = hatMap[hatId];
     }else{
         try{
-            hat = std::make_shared<AdafruitMotorHat>(hatAddress);
+            hat = std::make_shared<AdafruitMotorHat>(hatAddress, hatBus);
         }catch(const std::exception &e){
             Logger::logWarningFrom(getDeviceName(), "Failed to initialize motor hat.");
             Logger::logDebugFrom(getDeviceName(), e.what());
         }
-        hatMap[hatAddress] = hat;
+        hatMap[hatId] = hat;
     }
 
     // Remap motor number if necessary
@@ -277,20 +274,39 @@ int AdafruitMotorHatMotor::remapMotorNumber(int hatAddress, int motorNum){
     return motorNum;
 }
 
-void AdafruitMotorHatMotor::doDetectAddress(){
-    try{
-        AdafruitMotorHat *testHat = new AdafruitMotorHat(ADAFRUIT_ADDR);
-        detectedAddress = ADAFRUIT_ADDR;
-        delete testHat;
-    }catch(const std::exception &e){
-        try{
-            AdafruitMotorHat *testHat = new AdafruitMotorHat(GEEKWORM_ADDR);
-            detectedAddress = GEEKWORM_ADDR;
-            delete testHat;
-        }catch(const std::exception &e){
-            detectedAddress = DETECT_ADDR; // Failed to detect motor hat address
+std::pair<int, int> AdafruitMotorHatMotor::doDetectHat(int hatAddress, int hatBus){
+    std::vector<int> possibleBusses;
+    std::vector<int> possibleAddresses;
+
+    if(hatBus == DETECT_BUS){
+        possibleBusses.push_back(0);
+        possibleBusses.push_back(1);
+        possibleBusses.push_back(2);
+        possibleBusses.push_back(3);
+    }else{
+        possibleBusses.push_back(hatBus);
+    }
+
+    if(hatAddress == DETECT_ADDR){
+        possibleAddresses.push_back(ADAFRUIT_ADDR);
+        possibleAddresses.push_back(GEEKWORM_ADDR);
+    }else{
+        possibleAddresses.push_back(hatAddress);
+    }
+
+    for(int bus : possibleBusses){
+        for(int addr : possibleAddresses){
+            try{
+                AdafruitMotorHat *testHat = new AdafruitMotorHat(addr, bus);
+                delete testHat;
+                return std::pair<int, int>(addr, bus);
+            }catch(const std::exception &e){
+                // Check next pair
+            }
         }
     }
+
+    return std::pair<int, int>(-1, -1);
 }
 
 void AdafruitMotorHatMotor::run(){
