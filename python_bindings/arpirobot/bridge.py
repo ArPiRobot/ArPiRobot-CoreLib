@@ -236,7 +236,7 @@ arpirobot.MotorController_getSpeed.restype = ctypes.c_double
 # AdafruitMotorHatMotor Bridge
 ################################################################################
 
-arpirobot.AdafruitMotorHatMotor_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_bool]
+arpirobot.AdafruitMotorHatMotor_create.argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_bool]
 arpirobot.AdafruitMotorHatMotor_create.restype = ctypes.c_void_p
 
 arpirobot.AdafruitMotorHatMotor_destroy.argtypes = [ctypes.c_void_p]
@@ -639,7 +639,7 @@ arpirobot.QuadEncoder_getVelocity.restype = ctypes.c_float
 # INA260PowerSensor Bridge
 ################################################################################
 
-arpirobot.INA260PowerSensor_create.argtypes = []
+arpirobot.INA260PowerSensor_create.argtypes = [ctypes.c_int]
 arpirobot.INA260PowerSensor_create.restype = ctypes.c_void_p
 
 arpirobot.INA260PowerSensor_destroy.argtypes = [ctypes.c_void_p]

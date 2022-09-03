@@ -32,9 +32,9 @@ class AdafruitMotorHatMotor(MotorController):
     #  @param address The address of the hat for the motor
     #  @param remap_nums If true the motor numbers will be remapped (if needed) to match the 
     #                      physical order of the Adafruit motor hat
-    def __init__(self, motor_num: int, hat_address: int = DETECT_ADDR, remap_nums: bool = True):
+    def __init__(self, motor_num: int, hat_address: int = DETECT_ADDR, bus = -1, remap_nums: bool = True):
         super().__init__()
-        self._ptr = bridge.arpirobot.AdafruitMotorHatMotor_create(motor_num, hat_address, remap_nums)
+        self._ptr = bridge.arpirobot.AdafruitMotorHatMotor_create(motor_num, hat_address, bus, remap_nums)
     
     def __del__(self):
         bridge.arpirobot.AdafruitMotorHatMotor_destroy(self._ptr)

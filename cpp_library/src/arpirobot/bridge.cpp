@@ -403,8 +403,8 @@ BRIDGE_FUNC double MotorController_getSpeed(MotorController *motor){
 /// AdafruitMotorHatMotor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
-BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, int address, bool remapNumbers){
-    auto motor = std::make_shared<AdafruitMotorHatMotor>(motorNum, address, remapNumbers);
+BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, int address, int bus, bool remapNumbers){
+    auto motor = std::make_shared<AdafruitMotorHatMotor>(motorNum, address, bus, remapNumbers);
     bridge_objs[motor.get()] = motor;
     return motor.get();
 }
@@ -1032,8 +1032,8 @@ BRIDGE_FUNC float QuadEncoder_getVelocity(QuadEncoder *enc){
 /// INA260PowerSensor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
-BRIDGE_FUNC INA260PowerSensor *INA260PowerSensor_create(){
-    auto vmon = std::make_shared<INA260PowerSensor>();
+BRIDGE_FUNC INA260PowerSensor *INA260PowerSensor_create(int bus){
+    auto vmon = std::make_shared<INA260PowerSensor>(bus);
     bridge_objs[vmon.get()] = vmon;
     return vmon.get();
 }

@@ -279,7 +279,7 @@ BRIDGE_FUNC double MotorController_getSpeed(MotorController *motor);
 /// AdafruitMotorHatMotor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
-BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, int address, bool remapNumbers);
+BRIDGE_FUNC AdafruitMotorHatMotor *AdafruitMotorHatMotor_create(int motorNum, int address, int bus, bool remapNumbers);
 
 BRIDGE_FUNC void AdafruitMotorHatMotor_destroy(AdafruitMotorHatMotor *motor);
 
@@ -619,7 +619,7 @@ BRIDGE_FUNC float QuadEncoder_getVelocity(QuadEncoder *enc);
 /// INA260PowerSensor bridge
 ////////////////////////////////////////////////////////////////////////////////
 
-BRIDGE_FUNC INA260PowerSensor *INA260PowerSensor_create();
+BRIDGE_FUNC INA260PowerSensor *INA260PowerSensor_create(int bus);
 
 BRIDGE_FUNC void INA260PowerSensor_destroy(INA260PowerSensor *vmon);
 

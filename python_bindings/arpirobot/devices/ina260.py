@@ -25,9 +25,9 @@ from arpirobot.core.device import BaseDevice
 
 ## INA260 Power sensor
 class INA260PowerSensor(BaseDevice, MainVmon):
-    def __init__(self):
+    def __init__(self, bus = -1):
         super().__init__()
-        self._ptr = bridge.arpirobot.INA260PowerSensor_create()
+        self._ptr = bridge.arpirobot.INA260PowerSensor_create(bus)
     
     def __del__(self):
         bridge.arpirobot.INA260PowerSensor_destroy(self._ptr)
