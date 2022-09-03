@@ -131,16 +131,14 @@ namespace arpirobot{
         static const int ADAFRUIT_ADDR;
         static const int GEEKWORM_ADDR;
         static const int DETECT_ADDR;
-        static const int DETECT_BUS;
 
         /**
          * @param motorNum The number for the motor
          * @param address The address of the hat for the motor
-         * @param bus The i2c bus number of the hat for the motor
          * @param remapNumbers If true the motor numbers will be remapped (if needed) to match the 
          *                     physical order of the Adafruit motor hat
          */
-        AdafruitMotorHatMotor(int motorNum, int address = DETECT_ADDR, int bus = DETECT_BUS, bool remapNumbers = true);
+        AdafruitMotorHatMotor(int motorNum, int address = DETECT_ADDR, bool remapNumbers = true);
 
         AdafruitMotorHatMotor(const AdafruitMotorHatMotor &other) = delete;
         AdafruitMotorHatMotor &operator=(const AdafruitMotorHatMotor &other) = delete;
@@ -158,13 +156,13 @@ namespace arpirobot{
 
     private:
         static int remapMotorNumber(int hatAddress, int motorNum);
-        static std::pair<int, int> doDetectHat(int hatAddress, int hatBus);
+        static void doDetectAddress();
 
-        static std::unordered_map<unsigned long int, std::shared_ptr<internal::AdafruitMotorHat>> hatMap;
+        static int detectedAddress;
+        static std::unordered_map<int, std::shared_ptr<internal::AdafruitMotorHat>> hatMap;
 
         int motorNum;
         int hatAddress;
-        int hatBus;
         bool remapNumbers;
         std::shared_ptr<internal::AdafruitMotorHat::LowLevelDCMotor> motor;
     };
