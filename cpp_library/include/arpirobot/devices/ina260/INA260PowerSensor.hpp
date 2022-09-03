@@ -131,7 +131,7 @@ namespace arpirobot{
      */
     class INA260PowerSensor : public BaseDevice, public MainVmon{
     public:
-        INA260PowerSensor();
+        INA260PowerSensor(int bus = -1);
 
         INA260PowerSensor(const INA260PowerSensor &other) = delete;
 
@@ -181,6 +181,8 @@ namespace arpirobot{
         double current = 0, voltage = 0, power = 0;
 
         bool stop = false;
+
+        int bus;
     };
 
 }

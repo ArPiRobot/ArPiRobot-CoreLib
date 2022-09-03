@@ -226,7 +226,7 @@ void AdafruitINA260::i2cWriteWordHelper(int reg, int data){
 /// INA260PowerSensor
 ////////////////////////////////////////////////////////////////////////////////
 
-INA260PowerSensor::INA260PowerSensor(){
+INA260PowerSensor::INA260PowerSensor(int bus) : bus(bus){
     BaseRobot::beginWhenReady(this);
 }
 
@@ -252,7 +252,9 @@ double INA260PowerSensor::getPower(){
 
 void INA260PowerSensor::begin(){
     try{
-        sensor = std::make_shared<AdafruitINA260>(0x40);
+        if(bus == -1)
+            bus = Io::getDefaultI2cBus();
+        sensor = std::make_shared<AdafruitINA260>(0x40, bus);
     }catch(const std::exception &e){
         Logger::logErrorFrom(getDeviceName(), "Failed to initialize sensor.");
         Logger::logDebugFrom(getDeviceName(), e.what());

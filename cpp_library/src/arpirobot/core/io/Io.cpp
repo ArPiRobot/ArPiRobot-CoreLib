@@ -41,7 +41,6 @@ const char *Io::PROVIDER_DUMMY = "dummy";
 const char *Io::PROVIDER_SERIAL = "serial";
 
 
-
 void Io::init(std::string provider){
     // Choose a default provider based on the current platform if none is specified
 
@@ -128,6 +127,30 @@ void Io::terminate(){
         delete instance;
         instance = nullptr;
     }
+}
+
+int Io::getDefaultI2cBus(){
+    // Default to zero except for boards where it is known this is wrong
+#if defined(__linux__) or defined(linux) or defined(__linux)
+    // Determine if this is a raspberry pi board
+    bool isrpi = false;
+    FILE *pipe = popen("cat /proc/cpuinfo | grep Model", "r");
+    if(pipe){
+        char buf[64];
+        std::string cmdOutput;
+        while(!feof(pipe)){
+            if(fgets(buf, 64, pipe) != NULL)
+                cmdOutput += buf;
+        }
+        pclose(pipe);
+        isrpi = (cmdOutput.find("Raspberry Pi") != std::string::npos);
+    }
+    if(isrpi){
+        // Raspberry pi default bus should be 1
+        return 1;
+    }
+#endif
+    return 0;
 }
 
 void Io::addDevice(IoDevice *device){
