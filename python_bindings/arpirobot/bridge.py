@@ -90,6 +90,12 @@ arpirobot.RobotProfile_setActionFunctionPeriod.restype = None
 arpirobot.RobotProfile_getActionFunctionPeriod.argtypes = []
 arpirobot.RobotProfile_getActionFunctionPeriod.restype = ctypes.c_int
 
+arpirobot.RobotProfile_setDeviceWatchdogDur.argtypes = [ctypes.c_int]
+arpirobot.RobotProfile_setDeviceWatchdogDur.restype = None
+
+arpirobot.RobotProfile_getDeviceWatchdogDur.argtypes = []
+arpirobot.RobotProfile_getDeviceWatchdogDur.restype = ctypes.c_int
+
 arpirobot.RobotProfile_setIoProvider.argtypes = [ctypes.c_char_p]
 arpirobot.RobotProfile_setIoProvider.restype = None
 

@@ -57,6 +57,15 @@ class RobotProfileSingleton:
         bridge.arpirobot.RobotProfile_setActionFunctionPeriod(value)
     
     @property
+    def device_watchdog_dur(self):
+        return bridge.arpirobot.RobotProfile_getDeviceWatchdogDur()
+    
+    @device_watchdog_dur.setter
+    def device_watchdog_dur(self, value: int):
+        bridge.arpirobot.RobotProfile_setDeviceWatchdogDur(value)
+    
+
+    @property
     def io_provider(self) -> str:
         res = ctypes.c_char_p(bridge.arpirobot.RobotProfile_getIoProvider())
         retval = res.value.decode()

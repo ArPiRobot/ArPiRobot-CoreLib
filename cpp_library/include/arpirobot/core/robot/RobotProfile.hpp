@@ -42,6 +42,9 @@ namespace arpirobot{
         /// Rate to run action periodic functions at (ms) 
         static int actionFunctionPeriod; 
 
+        /// Period at which devices are disabled by BaseRobot watchdog if not fed (ms)
+        static int deviceWatchdogDur;
+
         /// Name of the IO provider to use (empty string for default)
         static std::string ioProvider;
     };

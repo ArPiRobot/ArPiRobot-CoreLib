@@ -203,6 +203,14 @@ BRIDGE_FUNC int RobotProfile_getActionFunctionPeriod(){
     return RobotProfile::actionFunctionPeriod;
 }
 
+BRIDGE_FUNC void RobotProfile_setDeviceWatchdogDur(int deviceWatchdogDur){
+    RobotProfile::deviceWatchdogDur = deviceWatchdogDur;
+}
+
+BRIDGE_FUNC int RobotProfile_getDeviceWatchdogDur(){
+    return RobotProfile::deviceWatchdogDur;
+}
+
 BRIDGE_FUNC void RobotProfile_setIoProvider(const char *ioProvider){
     RobotProfile::ioProvider = std::string(ioProvider);
 }

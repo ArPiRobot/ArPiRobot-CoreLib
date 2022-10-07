@@ -27,4 +27,5 @@ int RobotProfile::mainSchedulerThreads = 10;
 int RobotProfile::periodicFunctionRate = 50;
 int RobotProfile::maxGamepadDataAge = 100;
 int RobotProfile::actionFunctionPeriod = 50;
+int RobotProfile::deviceWatchdogDur = 500;
 std::string RobotProfile::ioProvider = "";
