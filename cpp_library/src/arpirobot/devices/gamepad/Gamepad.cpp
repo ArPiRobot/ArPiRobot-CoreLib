@@ -25,6 +25,7 @@
 using namespace arpirobot;
 
 Gamepad::Gamepad(int controllerNum) : controllerNum(controllerNum){
+    deviceName = "Gamepad(" + std::to_string(controllerNum) + ")";
     BaseRobot::beginWhenReady(this);
 }
 
@@ -137,10 +138,6 @@ void Gamepad::setAxisTransform(int axisNum, std::shared_ptr<BaseAxisTransform> t
 void Gamepad::clearAxisTransform(int axisNum){
     if(axisTransforms.find(axisNum) != axisTransforms.end())
         axisTransforms.erase(axisNum);
-}
-
-std::string Gamepad::getDeviceName(){
-    return "Gamepad(" + std::to_string(controllerNum) + ")";
 }
 
 void Gamepad::begin(){

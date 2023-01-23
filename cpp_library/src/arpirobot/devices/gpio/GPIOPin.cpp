@@ -30,15 +30,12 @@ using namespace arpirobot;
 ////////////////////////////////////////////////////////////////////////////////
 
 GPIOPin::GPIOPin(unsigned int pin) : pin(pin), lastPwmValue(0){
+    deviceName = "GPIOPin(" + std::to_string(pin) + ")";
     BaseRobot::beginWhenReady(this);
 }
 
 GPIOPin::~GPIOPin(){
     close();
-}
-
-std::string GPIOPin::getDeviceName(){
-    return "GPIOPin(" + std::to_string(pin) + ")";
 }
 
 // Pin configuration

@@ -43,8 +43,6 @@ namespace arpirobot{
 
         StatusLED &operator=(const StatusLED &other) = delete;
 
-        std::string getDeviceName() override;
-
     protected:
         void close() override;
 

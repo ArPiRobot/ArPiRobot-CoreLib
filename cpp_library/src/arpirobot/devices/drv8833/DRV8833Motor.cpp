@@ -26,16 +26,13 @@ using namespace arpirobot;
 
 DRV8833Motor::DRV8833Motor(int in1Pin, int in2Pin, int slpPin) : 
         IoDevice(), in1(in1Pin), in2(in2Pin), slp(slpPin){
+    deviceName = "DRV8833Motor(" + std::to_string(in1) + ", " + std::to_string(in2) + ", " + std::to_string(slp) + ")";
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }
 
 DRV8833Motor::~DRV8833Motor(){
     close();
-}
-
-std::string DRV8833Motor::getDeviceName(){
-    return "DRV8833Motor(" + std::to_string(in1) + ", " + std::to_string(in2) + ", " + std::to_string(slp) + ")";
 }
 
 void DRV8833Motor::begin(){

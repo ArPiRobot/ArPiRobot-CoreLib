@@ -29,6 +29,10 @@ using namespace arpirobot;
 /// BaseDevice
 ////////////////////////////////////////////////////////////////////////////////
 
+std::string BaseDevice::getDeviceName(){
+    return deviceName;
+}
+
 BaseDevice::~BaseDevice(){
     BaseRobot::deviceDestroyed(this);
 }

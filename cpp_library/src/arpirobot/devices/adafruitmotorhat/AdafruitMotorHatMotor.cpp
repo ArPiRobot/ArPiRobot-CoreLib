@@ -211,6 +211,8 @@ std::unordered_map<int, std::shared_ptr<AdafruitMotorHat>> AdafruitMotorHatMotor
 AdafruitMotorHatMotor::AdafruitMotorHatMotor(int motorNum, int address, int bus, bool remapNumbers) : 
         motorNum(motorNum), hatAddress(address), hatBus(bus), remapNumbers(remapNumbers){
 
+    deviceName = "AdafruitMotorHatMotor(" + std::to_string(motorNum) + ", " + std::to_string(hatAddress) + ", " + std::to_string(hatBus) + ")";
+
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }
@@ -312,8 +314,4 @@ void AdafruitMotorHatMotor::run(){
         Logger::logWarningFrom(getDeviceName(), "Failed to set motor speed.");
         Logger::logDebugFrom(getDeviceName(), e.what());
     }
-}
-
-std::string AdafruitMotorHatMotor::getDeviceName(){
-    return "AdafruitMotorHatMotor(" + std::to_string(motorNum) + ", " + std::to_string(hatAddress) + ", " + std::to_string(hatBus) + ")";
 }

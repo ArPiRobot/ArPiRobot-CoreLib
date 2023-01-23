@@ -227,15 +227,12 @@ void AdafruitINA260::i2cWriteWordHelper(int reg, int data){
 ////////////////////////////////////////////////////////////////////////////////
 
 INA260PowerSensor::INA260PowerSensor(int bus) : bus(bus){
+    deviceName = "INA260PowerSensor";
     BaseRobot::beginWhenReady(this);
 }
 
 INA260PowerSensor::~INA260PowerSensor(){
     stop = true;
-}
-
-std::string INA260PowerSensor::getDeviceName(){
-    return "INA260PowerSensor";
 }
 
 double INA260PowerSensor::getCurrent(){

@@ -27,6 +27,7 @@ using namespace arpirobot;
 
 L298NMotor::L298NMotor(int in1Pin, int in2Pin, int pwmPin) : 
         IoDevice(), in1(in1Pin), in2(in2Pin), pwm(pwmPin){
+    deviceName = "L298NMotor(" + std::to_string(in1) + ", " + std::to_string(in2) + ", " + std::to_string(pwm) + ")";
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }
@@ -35,9 +36,6 @@ L298NMotor::~L298NMotor(){
     close();
 }
 
-std::string L298NMotor::getDeviceName(){
-    return "L298NMotor(" + std::to_string(in1) + ", " + std::to_string(in2) + ", " + std::to_string(pwm) + ")";
-}
 
 void L298NMotor::begin(){
     try{

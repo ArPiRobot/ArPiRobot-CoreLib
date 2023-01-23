@@ -139,8 +139,6 @@ namespace arpirobot{
 
         INA260PowerSensor &operator=(const INA260PowerSensor &other) = delete;
 
-        std::string getDeviceName() override;
-
         /**
          * Get current measurement
          * @return Current in mA

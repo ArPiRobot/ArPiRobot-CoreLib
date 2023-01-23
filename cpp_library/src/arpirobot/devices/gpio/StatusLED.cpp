@@ -30,6 +30,7 @@ using namespace arpirobot;
 ////////////////////////////////////////////////////////////////////////////////
 
 StatusLED::StatusLED(unsigned int pin) : pin(pin){
+    deviceName = "StatusLED(" + std::to_string(pin) + ")";
     BaseRobot::beginWhenReady(this);
 }
 
@@ -38,10 +39,6 @@ StatusLED::~StatusLED(){
         BaseRobot::removeTaskFromScheduler(schedulerTask);
     }
     close();
-}
-
-std::string StatusLED::getDeviceName(){
-    return "StatusLED(" + std::to_string(pin) + ")";
 }
 
 void StatusLED::close(){

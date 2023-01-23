@@ -45,12 +45,6 @@ namespace arpirobot{
 
         DRV8833Motor &operator=(const DRV8833Motor &other) = delete;
 
-        /**
-         * Get the human-readable name of the device
-         * @return the devices human readable name
-         */
-        std::string getDeviceName() override;
-
     protected:
         void begin() override;
         

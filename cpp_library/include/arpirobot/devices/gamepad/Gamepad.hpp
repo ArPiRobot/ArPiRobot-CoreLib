@@ -88,12 +88,6 @@ namespace arpirobot{
          * @param axisNum The axis number to clear a transform from
          */
         void clearAxisTransform(int axisNum);
-
-        /**
-         * Get the human-readable name of the device
-         * @return the devices human readable name
-         */
-        std::string getDeviceName() override;
     
     protected:
         void begin() override;

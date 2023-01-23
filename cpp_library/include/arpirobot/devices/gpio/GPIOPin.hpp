@@ -48,8 +48,6 @@ namespace arpirobot{
 
         GPIOPin &operator=(const GPIOPin &other) = delete;
 
-        std::string getDeviceName() override;
-
         // Pin configuration
         void setMode(Mode mode);
 

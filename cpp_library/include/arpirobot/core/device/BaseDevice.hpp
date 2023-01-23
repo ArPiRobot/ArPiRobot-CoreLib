@@ -41,7 +41,7 @@ namespace arpirobot{
          * Get the human-readable name of the device
          * @return the devices human readable name
          */
-        virtual std::string getDeviceName() = 0;
+        virtual std::string getDeviceName();
 
         /**
          * @brief Check if a given action locks the device.
@@ -73,6 +73,7 @@ namespace arpirobot{
         virtual void disable() = 0;
     
         bool initialized = false;
+        std::string deviceName;
 
     private:
 

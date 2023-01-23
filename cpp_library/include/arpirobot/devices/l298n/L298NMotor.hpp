@@ -46,12 +46,6 @@ namespace arpirobot{
 
         L298NMotor &operator=(const L298NMotor &other) = delete;
 
-        /**
-         * Get the human-readable name of the device
-         * @return the devices human readable name
-         */
-        std::string getDeviceName() override;
-
     protected:
         void begin() override;
         

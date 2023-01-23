@@ -27,16 +27,13 @@ using namespace arpirobot;
 
 TB6612Motor::TB6612Motor(int in1Pin, int in2Pin, int pwmPin) : 
         IoDevice(), in1(in1Pin), in2(in2Pin), pwm(pwmPin){
+    deviceName = "TB6612Motor(" + std::to_string(in1) + ", " + std::to_string(in2) + ", " + std::to_string(pwm) + ")";
     // Always call this at the end of the device's constructor
     BaseRobot::beginWhenReady(this);
 }
 
 TB6612Motor::~TB6612Motor(){
     close();
-}
-
-std::string TB6612Motor::getDeviceName(){
-    return "TB6612Motor(" + std::to_string(in1) + ", " + std::to_string(in2) + ", " + std::to_string(pwm) + ")";
 }
 
 void TB6612Motor::begin(){
