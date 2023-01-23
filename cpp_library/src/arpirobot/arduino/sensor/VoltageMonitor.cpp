@@ -26,20 +26,16 @@ using namespace arpirobot;
 
 VoltageMonitor::VoltageMonitor(std::string pin, double vboard, int r1, int r2, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), pin(pin), vboard(vboard), r1(r1), r2(r2){
-
+    deviceName = "VoltageMonitor(" + this->pin + ")";
 }
 
 VoltageMonitor::VoltageMonitor(int pin, double vboard, int r1, int r2, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), pin(std::to_string(pin)), vboard(vboard), r1(r1), r2(r2){
-
+    deviceName = "VoltageMonitor(" + this->pin + ")";
 }
 
 double VoltageMonitor::getVoltage(){
     return voltage;
-}
-
-std::string VoltageMonitor::getDeviceName(){
-    return "VoltageMonitor(" + pin + ")";
 }
 
 void VoltageMonitor::applyDefaultState(){

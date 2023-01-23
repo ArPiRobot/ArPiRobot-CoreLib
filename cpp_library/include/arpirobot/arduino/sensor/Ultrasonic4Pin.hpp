@@ -67,12 +67,6 @@ namespace arpirobot{
          * @return The distance in cm
          */
         int getDistance();
-
-        /**
-         * Get the human-readable name for this device
-         * @return The device name
-         */
-        std::string getDeviceName() override;
     
     protected:
         void applyDefaultState() override;

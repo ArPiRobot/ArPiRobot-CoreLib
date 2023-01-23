@@ -27,24 +27,24 @@ using namespace arpirobot;
 QuadEncoder::QuadEncoder(int pinA, int pinB, bool useInternalPullup, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), pinA(std::to_string(pinA)), pinB(std::to_string(pinB)), 
         useInternalPullup(useInternalPullup){
-
+    deviceName = "QuadEncoder(" + this->pinA + ", " + this->pinB + ")";
 }
 
 QuadEncoder::QuadEncoder(std::string pinA, int pinB, bool useInternalPullup, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), pinA(pinA), pinB(std::to_string(pinB)), 
         useInternalPullup(useInternalPullup){
-
+    deviceName = "QuadEncoder(" + this->pinA + ", " + this->pinB + ")";
 }
 
 QuadEncoder::QuadEncoder(int pinA, std::string pinB, bool useInternalPullup, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), pinA(std::to_string(pinA)), pinB(pinB), 
         useInternalPullup(useInternalPullup){
-    
+    deviceName = "QuadEncoder(" + this->pinA + ", " + this->pinB + ")";
 }
 
 QuadEncoder::QuadEncoder(std::string pinA, std::string pinB, bool useInternalPullup, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), pinA(pinA), pinB(pinB), useInternalPullup(useInternalPullup){
-
+    deviceName = "QuadEncoder(" + this->pinA + ", " + this->pinB + ")";
 }
 
 int32_t QuadEncoder::getPosition(){
@@ -57,10 +57,6 @@ void QuadEncoder::setPosition(int32_t newPosition){
 
 float QuadEncoder::getVelocity(){
     return velocity;
-}
-
-std::string QuadEncoder::getDeviceName(){
-    return "QuadEncoder(" + pinA + ", " + pinB + ")";
 }
 
 void QuadEncoder::applyDefaultState(){

@@ -27,6 +27,10 @@ ArduinoDevice::ArduinoDevice(bool createDevice, int deviceId) : createDevice(cre
 
 }
 
+std::string ArduinoDevice::getDeviceName(){
+    return deviceName;
+}
+
 std::vector<uint8_t> ArduinoDevice::stringToData(const std::string &str){
     std::vector<uint8_t> data;
     data.reserve(str.length());

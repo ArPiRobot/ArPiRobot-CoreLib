@@ -25,31 +25,28 @@ using namespace arpirobot;
 
 Ultrasonic4Pin::Ultrasonic4Pin(int triggerPin, int echoPin, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), triggerPin(std::to_string(triggerPin)), echoPin(std::to_string(echoPin)){
-
+    deviceName = "Ultrasonic4Pin(" + this->triggerPin + ", " + this->echoPin + ")";
 }
 
 Ultrasonic4Pin::Ultrasonic4Pin(int triggerPin, std::string echoPin, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), triggerPin(std::to_string(triggerPin)), echoPin(echoPin){
-
+    deviceName = "Ultrasonic4Pin(" + this->triggerPin + ", " + this->echoPin + ")";
 }
 
 Ultrasonic4Pin::Ultrasonic4Pin(std::string triggerPin, int echoPin, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), triggerPin(triggerPin), echoPin(std::to_string(echoPin)){
-
+    deviceName = "Ultrasonic4Pin(" + this->triggerPin + ", " + this->echoPin + ")";
 }
 
 Ultrasonic4Pin::Ultrasonic4Pin(std::string triggerPin, std::string echoPin, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), triggerPin(triggerPin), echoPin(echoPin){
-
+    deviceName = "Ultrasonic4Pin(" + this->triggerPin + ", " + this->echoPin + ")";
 }
 
 int Ultrasonic4Pin::getDistance(){
     return distance;
 }
 
-std::string Ultrasonic4Pin::getDeviceName(){
-    return "Ultrasonic4Pin(" + triggerPin + ", " + echoPin + ")";
-}
 
 void Ultrasonic4Pin::applyDefaultState(){
     distance = 0;

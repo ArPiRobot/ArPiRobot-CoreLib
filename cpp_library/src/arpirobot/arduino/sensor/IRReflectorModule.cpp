@@ -26,22 +26,38 @@ using namespace arpirobot;
 
 IRReflectorModule::IRReflectorModule(int digitalPin, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), digitalPin(std::to_string(digitalPin)), analogPin(""){
-
+    if(analogPin.length() == 0){
+        deviceName = "IRReflectorModule(" + this->digitalPin + ")";
+    }else{
+        deviceName = "IRReflectorModule(" + this->digitalPin + ", " + this->analogPin + ")";
+    }
 }
 
 IRReflectorModule::IRReflectorModule(std::string digitalPin, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), digitalPin(digitalPin), analogPin(""){
-
+    if(analogPin.length() == 0){
+        deviceName = "IRReflectorModule(" + this->digitalPin + ")";
+    }else{
+        deviceName = "IRReflectorModule(" + this->digitalPin + ", " + this->analogPin + ")";
+    }
 }
 
 IRReflectorModule::IRReflectorModule(int digitalPin, std::string analogPin, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), digitalPin(std::to_string(digitalPin)), analogPin(analogPin){
-
+    if(analogPin.length() == 0){
+        deviceName = "IRReflectorModule(" + this->digitalPin + ")";
+    }else{
+        deviceName = "IRReflectorModule(" + this->digitalPin + ", " + this->analogPin + ")";
+    }     
 }
 
 IRReflectorModule::IRReflectorModule(std::string digitalPin, std::string analogPin, bool createDevice, int deviceId)  : 
         ArduinoDevice(createDevice, deviceId), digitalPin(digitalPin), analogPin(analogPin){
-
+    if(analogPin.length() == 0){
+        deviceName = "IRReflectorModule(" + this->digitalPin + ")";
+    }else{
+        deviceName = "IRReflectorModule(" + this->digitalPin + ", " + this->analogPin + ")";
+    }
 }
 
 bool IRReflectorModule::getDigitalValue(){
@@ -50,14 +66,6 @@ bool IRReflectorModule::getDigitalValue(){
 
 int IRReflectorModule::getAnalogValue(){
     return analogValue;
-}
-
-std::string IRReflectorModule::getDeviceName(){
-    if(analogPin.length() == 0){
-        return "IRReflectorModule(" + digitalPin + ")";
-    }else{
-        return "IRReflectorModule(" + digitalPin + ", " + analogPin + ")";
-    }
 }
 
 void IRReflectorModule::applyDefaultState(){

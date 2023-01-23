@@ -25,7 +25,7 @@ using namespace arpirobot;
 
 
 Mpu6050Imu::Mpu6050Imu(bool createDevice, int deviceId) : ArduinoDevice(createDevice, deviceId){
-
+    deviceName = "Mpu6050Imu";
 }
 
 void Mpu6050Imu::calibrate(uint16_t samples){
@@ -75,10 +75,6 @@ void Mpu6050Imu::setGyroY(double newGyroY){
 
 void Mpu6050Imu::setGyroZ(double newGyroZ){
     gyroZOffset = newGyroZ - gyroZ;
-}
-
-std::string Mpu6050Imu::getDeviceName(){
-    return "Mpu6050Imu";
 }
 
 void Mpu6050Imu::applyDefaultState(){

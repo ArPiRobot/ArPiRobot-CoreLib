@@ -25,7 +25,7 @@ using namespace arpirobot;
 
 
 NxpAdafruit9Dof::NxpAdafruit9Dof(bool createDevice, int deviceId) : ArduinoDevice(createDevice, deviceId){
-
+    deviceName = "NxpAdafruit9Dof";
 }
 
 void NxpAdafruit9Dof::calibrate(uint16_t samples){
@@ -75,10 +75,6 @@ void NxpAdafruit9Dof::setGyroY(double newGyroY){
 
 void NxpAdafruit9Dof::setGyroZ(double newGyroZ){
     gyroZOffset = newGyroZ - gyroZ;
-}
-
-std::string NxpAdafruit9Dof::getDeviceName(){
-    return "NxpAdafruit9Dof";
 }
 
 void NxpAdafruit9Dof::applyDefaultState(){

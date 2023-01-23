@@ -25,7 +25,7 @@ using namespace arpirobot;
 
 
 OldAdafruit9Dof::OldAdafruit9Dof(bool createDevice, int deviceId) : ArduinoDevice(createDevice, deviceId){
-
+    deviceName = "OldAdafruit9Dof";
 }
 
 void OldAdafruit9Dof::calibrate(uint16_t samples){
@@ -75,10 +75,6 @@ void OldAdafruit9Dof::setGyroY(double newGyroY){
 
 void OldAdafruit9Dof::setGyroZ(double newGyroZ){
     gyroZOffset = newGyroZ - gyroZ;
-}
-
-std::string OldAdafruit9Dof::getDeviceName(){
-    return "OldAdafruit9Dof";
 }
 
 void OldAdafruit9Dof::applyDefaultState(){

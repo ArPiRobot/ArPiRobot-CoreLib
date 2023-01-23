@@ -26,12 +26,12 @@ using namespace arpirobot;
 
 SingleEncoder::SingleEncoder(int pin, bool useInternalPullup, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), pin(std::to_string(pin)), useInternalPullup(useInternalPullup){
-
+    deviceName = "SingleEncoder(" + this->pin + ")";
 }
 
 SingleEncoder::SingleEncoder(std::string pin, bool useInternalPullup, bool createDevice, int deviceId) : 
         ArduinoDevice(createDevice, deviceId), pin(pin), useInternalPullup(useInternalPullup){
-
+    deviceName = "SingleEncoder(" + this->pin + ")";
 }
 
 int32_t SingleEncoder::getPosition(){
@@ -44,10 +44,6 @@ void SingleEncoder::setPosition(int32_t newPosition){
 
 float SingleEncoder::getVelocity(){
     return velocity;
-}
-
-std::string SingleEncoder::getDeviceName(){
-    return "SingleEncoder(" + pin + ")";
 }
 
 void SingleEncoder::applyDefaultState(){

@@ -47,7 +47,7 @@ namespace arpirobot{
         /**
          * Get the human-readable name for this device
          */
-        virtual std::string getDeviceName() = 0;
+        virtual std::string getDeviceName();
 
     protected:
         static std::vector<uint8_t> stringToData(const std::string &str);
@@ -65,6 +65,8 @@ namespace arpirobot{
 
         bool createDevice;
         int deviceId;
+
+        std::string deviceName;
 
         // Not a shared_ptr because this is set and cleared by the managing ArduinoInterface
         // This should not keep an ArduinoInterface in scope. The interface keeps devices

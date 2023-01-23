@@ -72,12 +72,6 @@ namespace arpirobot{
          */
         int getAnalogValue();
 
-        /**
-         * Get the human-readable name for this device
-         * @return The device name
-         */
-        std::string getDeviceName() override;
-
     protected:
         void applyDefaultState() override;
         std::vector<uint8_t> getCreateData() override;

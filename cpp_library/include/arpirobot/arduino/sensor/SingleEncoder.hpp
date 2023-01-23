@@ -64,12 +64,6 @@ namespace arpirobot{
          * @return The speed in ticks / sec
          */
         float getVelocity();
-
-        /**
-         * Get the human-readable name for this device
-         * @return The device name
-         */
-        std::string getDeviceName() override;
     
     protected:
         void applyDefaultState() override;
