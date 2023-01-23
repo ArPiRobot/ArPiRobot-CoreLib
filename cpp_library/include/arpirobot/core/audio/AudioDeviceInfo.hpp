@@ -23,6 +23,11 @@
 #include <cstdint>
 
 namespace arpirobot{
+    /**
+     * \class AudioDeviceInfo AudioDeviceInfo.hpp arpirobot/core/audio/AudioDeviceInfo.hpp
+     * 
+     * Class containing information about a specific audio device
+     */
     class AudioDeviceInfo{
     public:
         static const uint8_t TYPE_PLAYBACK = 0;

@@ -28,13 +28,40 @@
 #include <arpirobot/core/audio/AudioDeviceInfo.hpp>
 
 namespace arpirobot{
+    /**
+     * \class AudioManager AudioManager.hpp arpirobot/core/audio/AudioManager.hpp
+     * 
+     * Helper class to play audio files via audio devices on the robot
+     */
     class AudioManager{
     public:
+
+        /**
+         * Get all available playback devices on this system
+         * @return vector of AudioDeviceInfo objects with information about each available device
+         */
         static std::vector<AudioDeviceInfo> getPlaybackDevices();
 
+        /**
+         * Play a sound file on the default audio device
+         * @param file Full path to the audio file to play
+         * @return A job ID for the sound being played
+         */
         static int playSound(std::string file);
+
+        /**
+         * Play a sound file on a specific audio device
+         * @param file Full path to the audio file to play
+         * @param info AudioDeviceInfo object for the device to play the file on (as obtained from getPlaybackDevices())
+         * @return A job ID for the sound being played
+         */
         static int playSound(std::string file, AudioDeviceInfo info);
 
+        /**
+         * Stop playing a certain sound using it's job ID (as obtained from playSound())
+         * If the job has already finished, this function will do nothing
+         * @param jobId job ID for the sound to stop as obtained from playSound()
+         */
         static void stopJob(int jobId);
     
     private:
