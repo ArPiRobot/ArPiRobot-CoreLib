@@ -37,6 +37,7 @@ os.mkdir(os.path.join(script_path, "package", "lib", "aarch64"))
 shutil.copy(os.path.join(script_path, "version.txt"), os.path.join(script_path, "package"))
 shutil.copy(os.path.join(script_path, "what.txt"), os.path.join(script_path, "package"))
 shutil.copy(os.path.join(script_path, "COPYING"), os.path.join(script_path, "package"))
+shutil.copy(os.path.join(script_path, "COPYING.LESSER"), os.path.join(script_path, "package"))
 
 
 print("")
