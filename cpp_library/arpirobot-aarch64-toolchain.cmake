@@ -13,6 +13,10 @@ set(CMAKE_SYSTEM_PROCESSOR aarch64)
 SET(TARGET aarch64-linux-gnu)
 set(CMAKE_SYSROOT "${HOMEDIR}/.arpirobot/sysroot/aarch64")
 
+if(NOT EXISTS "${CMAKE_SYSROOT}")
+    message(FATAL_ERROR "Sysroot directory is missing.")
+endif()
+
 SET(CMAKE_C_COMPILER clang)
 SET(CMAKE_C_COMPILER_TARGET aarch64-linux-gnu)
 

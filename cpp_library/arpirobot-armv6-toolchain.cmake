@@ -13,6 +13,10 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 SET(TARGET arm-linux-gnueabihf)
 set(CMAKE_SYSROOT "${HOMEDIR}/.arpirobot/sysroot/armv6")
 
+if(NOT EXISTS "${CMAKE_SYSROOT}")
+    message(FATAL_ERROR "Sysroot directory is missing.")
+endif()
+
 SET(CMAKE_C_COMPILER clang)
 SET(CMAKE_C_COMPILER_TARGET arm-linux-gnueabihf)
 
