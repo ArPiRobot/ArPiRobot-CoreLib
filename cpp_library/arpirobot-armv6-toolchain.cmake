@@ -6,19 +6,27 @@ else()
     set(EXTENSION "")
 endif()
 
-set(target_host "armv6-unknown-linux-gnueabihf")
-set(standalone_toolchain "${HOMEDIR}/.arpirobot/toolchain/armv6")
-set(cc_compiler gcc)
-set(cxx_compiler g++)
-
-set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_CROSSCOMPILING TRUE)
+SET(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 
-set(CMAKE_SYSROOT "${standalone_toolchain}/${target_host}/sysroot")
-set(CMAKE_C_COMPILER "${standalone_toolchain}/bin/${target_host}-${cc_compiler}${EXTENSION}" CACHE PATH "C Compiler")
-set(CMAKE_CXX_COMPILER "${standalone_toolchain}/bin/${target_host}-${cxx_compiler}${EXTENSION}" CACHE PATH "C++ Compiler")
+SET(TARGET arm-linux-gnueabihf)
+set(CMAKE_SYSROOT "${HOMEDIR}/.arpirobot/sysroot/armv6")
 
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+SET(CMAKE_C_COMPILER clang)
+SET(CMAKE_C_COMPILER_TARGET arm-linux-gnueabihf)
+
+SET(CMAKE_CXX_COMPILER clang++)
+SET(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabihf)
+
+SET(CMAKE_ASM_COMPILER clang)
+SET(CMAKE_ASM_COMPILER_TARGET arm-linux-gnueabihf)
+
+# Note: --sysroot automatically passed if CMAKE_SYSROOT is set
+# Note: -target is automatically passed by cmake as set above
+# Note: Linking with lld since it is cross linker natively
+#       Avoids needing gcc for target system just to link
+#       Thus, using clang and lld, no cross GNU toolchain is needed. Only sysroot.
+SET(SHARED_FLAGS "-fuse-ld=lld -march=armv6z -mtune=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard")
+SET(CMAKE_C_FLAGS "" CACHE STRING "C compiler flags")
+SET(CMAKE_CXX_FLAGS "" CACHE STRING "C++ compiler flags")
