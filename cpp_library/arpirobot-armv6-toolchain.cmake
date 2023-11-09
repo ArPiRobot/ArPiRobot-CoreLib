@@ -27,6 +27,7 @@ SET(CMAKE_ASM_COMPILER_TARGET arm-linux-gnueabihf)
 # Note: Linking with lld since it is cross linker natively
 #       Avoids needing gcc for target system just to link
 #       Thus, using clang and lld, no cross GNU toolchain is needed. Only sysroot.
-SET(SHARED_FLAGS "-fuse-ld=lld -march=armv6z -mtune=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard")
-SET(CMAKE_C_FLAGS "" CACHE STRING "C compiler flags")
-SET(CMAKE_CXX_FLAGS "" CACHE STRING "C++ compiler flags")
+SET(SHARED_FLAGS "-fuse-ld=lld -Qunused-arguments -march=armv6z -mtune=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard")
+SET(CMAKE_C_FLAGS "${SHARED_FLAGS}" CACHE STRING "C compiler flags")
+SET(CMAKE_CXX_FLAGS "${SHARED_FLAGS}" CACHE STRING "C++ compiler flags")
+set(LINK_FLAGS "${SHARED_FLAGS} -fuse-ld=lld" CACHE STRING "Linker flags")
