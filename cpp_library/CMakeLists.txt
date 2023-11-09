@@ -67,7 +67,7 @@ if(${BUILDING_PIGPIO})
 
      # Copy pigpio library to build directory so it is included in update packages
      add_custom_command(TARGET arpirobot-core POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pigpio> ${CMAKE_CURRENT_BINARY_DIR}
+          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pigpio> $<OUTPUT_CONFIG:$<CONFIG>>
      )
 endif()
 
@@ -79,7 +79,7 @@ if(${BUILDING_SERIAL})
 
      # Copy serial library to build directory so it is included in update packages
      add_custom_command(TARGET arpirobot-core POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:serial> ${CMAKE_CURRENT_BINARY_DIR}
+          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:serial> $<OUTPUT_CONFIG:$<CONFIG>>
      )
 endif()
 
@@ -92,7 +92,7 @@ if(${BUILDING_LIBSOC})
 
      # Copy libsoc library to build directory so it is included in update packages
      add_custom_command(TARGET arpirobot-core POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:soc> ${CMAKE_CURRENT_BINARY_DIR}
+          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:soc> $<OUTPUT_CONFIG:$<CONFIG>>
      )
 endif()
 
