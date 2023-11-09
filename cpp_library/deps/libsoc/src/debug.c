@@ -74,6 +74,7 @@ libsoc_get_debug ()
 #else
 
   printf ("libsoc-debug: warning debug support missing!\n");
+  return -1;
 
 #endif
 }
