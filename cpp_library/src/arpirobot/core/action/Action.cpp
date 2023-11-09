@@ -47,7 +47,7 @@ int32_t Action::getProcessPeriodMs(){
 }
 
 void Action::setProcessPeriodMs(int32_t processPeriodMs){
-    this->processRateMs = processRateMs;
+    this->processRateMs = processPeriodMs;
 }
 
 LockedDeviceList Action::lockedDevices(){
