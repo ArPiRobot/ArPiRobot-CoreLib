@@ -9,14 +9,13 @@
         {
             "name": "native",
             "displayName": "native",
-            "description": "Target native system",
+            "description": "Target native Linux/Unix system",
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build/native",
-            "cacheVariables": {},
-            "environment": {
-                "CC": "clang",
-                "CXX": "clang++"
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/native-toolchain.cmake"
             },
+            "environment": {},
             "vendor": {}
         },
         {
