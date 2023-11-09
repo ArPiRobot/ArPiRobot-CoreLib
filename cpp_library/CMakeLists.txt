@@ -3,6 +3,12 @@ project (ArPiRobot-CoreLib C CXX)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
+if (WIN32)
+     set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+     set (BUILD_SHARED_LIBS TRUE)
+     add_compile_definitions(_CRT_SECURE_NO_WARNINGS=1)
+endif()
+
 # Build pigpio as shared library on supported platforms
 if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") AND (("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm") OR ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")))
      set(BUILDING_PIGPIO TRUE)
@@ -48,6 +54,8 @@ target_include_directories(arpirobot-core PUBLIC
      ${PROJECT_SOURCE_DIR}/deps/miniaudio/)
 if(NOT WIN32)
      target_link_libraries(arpirobot-core pthread)
+     include(GenerateExportHeader)
+     generate_export_header(arpirobot-core)
 endif()
 target_compile_options(arpirobot-core PRIVATE)
 
