@@ -6,6 +6,28 @@ else()
     set(EXTENSION "")
 endif()
 
+if(CMAKE_HOST_APPLE)
+    execute_process(COMMAND clang --version OUTPUT_VARIABLE CLANGOUT)
+    string(TOLOWER ${CLANGOUT} CLANGOUT)
+    string(FIND ${CLANGOUT} "apple clang" APPLECLANGPOS)
+    if(${APPLECLANGPOS} STREQUAL "-1")
+        # Clang in path is not apple clang. Assume user modified the path
+        set(CLANG clang)
+        set(CLANGPP clang++)
+    else()
+        # MacOS includes Apple Clang, which doesn't support lld
+        # Which is needed for cross compiling
+        # Need to use llvm clang instead, which is assumed to be installed by
+        # brew at /usr/local/opt/llvm/
+        set(CLANG /usr/local/opt/llvm/bin/clang)
+        set(CLANGPP /usr/local/opt/llvm/bin/clang++)
+    endif()
+else()
+    # Just use whatever is in the path elsewhere
+    set(CLANG clang)
+    set(CLANG clang++)
+endif()
+
 set(CMAKE_CROSSCOMPILING TRUE)
 SET(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR aarch64)
@@ -17,13 +39,13 @@ if(NOT EXISTS "${CMAKE_SYSROOT}")
     message(FATAL_ERROR "Sysroot directory is missing.")
 endif()
 
-SET(CMAKE_C_COMPILER clang)
+SET(CMAKE_C_COMPILER ${CLANG})
 SET(CMAKE_C_COMPILER_TARGET aarch64-linux-gnu)
 
-SET(CMAKE_CXX_COMPILER clang++)
+SET(CMAKE_CXX_COMPILER ${CLANGPP})
 SET(CMAKE_CXX_COMPILER_TARGET aarch64-linux-gnu)
 
-SET(CMAKE_ASM_COMPILER clang)
+SET(CMAKE_ASM_COMPILER ${CLANG})
 SET(CMAKE_ASM_COMPILER_TARGET aarch64-linux-gnu)
 
 # Note: --sysroot automatically passed if CMAKE_SYSROOT is set
