@@ -25,7 +25,7 @@ if(CMAKE_HOST_APPLE)
 else()
     # Just use whatever is in the path elsewhere
     set(CLANG clang)
-    set(CLANG clang++)
+    set(CLANGPP clang++)
 endif()
 
 set(CMAKE_CROSSCOMPILING TRUE)
