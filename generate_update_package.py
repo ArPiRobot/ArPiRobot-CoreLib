@@ -47,16 +47,12 @@ original_dir = os.getcwd()
 
 # Perform build
 os.chdir(os.path.join(script_path, "cpp_library"))
-if os.path.exists("build"):
-    shutil.rmtree("build")
-os.mkdir("build")
-os.chdir("build")
-os.system("cmake -DCMAKE_TOOLCHAIN_FILE=../arpirobot-armv6-toolchain.cmake -DCMAKE_BUILD_TYPE=Release -G \"Unix Makefiles\" ..")
-os.system("cmake --build . -j")
+os.system("cmake --preset armv6")
+os.system("cmake --build --preset armv6-release")
 
 # Copy library files
-for file in glob.glob("*.so"):
-    shutil.copy(file, os.path.join("..", "..", "package", "lib", "armv6"))
+for file in glob.glob("build/armv6/Release/*.so"):
+    shutil.copy(file, os.path.join("..", "package", "lib", "armv6"))
 
 os.chdir(original_dir)
 
@@ -67,16 +63,12 @@ original_dir = os.getcwd()
 
 # Perform build
 os.chdir(os.path.join(script_path, "cpp_library"))
-if os.path.exists("build"):
-    shutil.rmtree("build")
-os.mkdir("build")
-os.chdir("build")
-os.system("cmake -DCMAKE_TOOLCHAIN_FILE=../arpirobot-aarch64-toolchain.cmake -DCMAKE_BUILD_TYPE=Release -G \"Unix Makefiles\" ..")
-os.system("cmake --build . -j")
+os.system("cmake --preset aarch64")
+os.system("cmake --build --preset aarch64-release")
 
 # Copy library files
-for file in glob.glob("*.so"):
-    shutil.copy(file, os.path.join("..", "..", "package", "lib", "aarch64"))
+for file in glob.glob("build/aarch64/Release/*.so"):
+    shutil.copy(file, os.path.join("..", "package", "lib", "aarch64"))
 
 os.chdir(original_dir)
 
