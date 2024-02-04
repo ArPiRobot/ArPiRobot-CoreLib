@@ -9,6 +9,7 @@
 #include <linux/v4l2-common.h>
 #include <linux/videodev2.h>
 
+#include <iostream>
 
 using namespace arpirobot;
 
@@ -32,27 +33,47 @@ bool CameraManager::gstCapToVideoMode(CameraVideoMode &mode, GstStructure *cap){
             return false;
         }
     }
-    if(!gst_structure_has_field(cap, "width") || 
-            !gst_structure_has_field(cap, "height") || 
-            !gst_structure_has_field(cap, "framerate")){
+    if(!gst_structure_has_field_typed(cap, "width", G_TYPE_INT) || 
+            !gst_structure_has_field_typed(cap, "height", G_TYPE_INT)){
         // Missing required info
         return false;
     }
     gint w, h;
-    bool res = gst_structure_get_int(cap, "width", &w);
-    res = res && gst_structure_get_int(cap, "height", &h);
-    gint frn, frd;
-    res = res && gst_structure_get_fraction(cap, "framerate", &frn, &frd);
-    if(res){
-        mode.width = w;
-        mode.height = h;
-        mode.framerateNumerator = frn;
-        mode.framerateDenominator = frd;
-        return true;
+    gst_structure_get_int(cap, "width", &w);
+    gst_structure_get_int(cap, "height", &h);
+
+    std::vector<CameraVideoMode::Framerate> framerates;
+    if(gst_structure_has_field_typed(cap, "framerate", GST_TYPE_FRACTION)){
+        gint frn, frd;
+        CameraVideoMode::Framerate rate;
+        gst_structure_get_fraction(cap, "framerate", &frn, &frd);
+        rate.numerator = frn;
+        rate.denominator = frd;
+        framerates.push_back(rate);
+    }else if(gst_structure_has_field_typed(cap, "framerate", GST_TYPE_LIST)){
+        Logger::logDebugFrom("CameraManager", "Multiple Framerate");
+        const GValue *frlist = gst_structure_get_value(cap, "framerate");
+        unsigned int count = gst_value_list_get_size(frlist);
+        for(unsigned int i = 0; i < count; ++i){
+            auto fr = gst_value_list_get_value(frlist, i);
+            if(g_type_check_value_holds(fr, GST_TYPE_FRACTION)){
+                gint frn, frd;
+                frn = gst_value_get_fraction_numerator(fr);
+                frd = gst_value_get_fraction_denominator(fr);
+                CameraVideoMode::Framerate rate;
+                rate.numerator = frn;
+                rate.denominator = frd;
+                framerates.push_back(rate);
+            }
+        }
     }else{
-        // Required info is unexpected type?
         return false;
     }
+    
+    mode.width = w;
+    mode.height = h;
+    mode.framerates = framerates;
+    return true;
 }
 
 void CameraManager::initV4l2(){
@@ -86,13 +107,13 @@ void CameraManager::initV4l2(){
                             unsigned int count = gst_caps_get_size(caps);
                             for(unsigned int i = 0; i < count; ++i){
                                 auto cap = gst_caps_get_structure(caps, i);
-                                gst_structure_fixate(cap);
                                 CameraVideoMode mode;
                                 if(gstCapToVideoMode(mode, cap)){
                                     modes.push_back(mode);
                                 }
                             }
                         }
+                        gst_caps_unref(caps);
                         modesList.push_back(modes);
                     }
                 }
