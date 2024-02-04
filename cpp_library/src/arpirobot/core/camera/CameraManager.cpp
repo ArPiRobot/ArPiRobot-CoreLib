@@ -140,7 +140,7 @@ void CameraManager::initV4l2(){
             v4l2_close(fd);
 
             // Add device to list
-            devices.emplace_back(CameraAPI::V4L2, id, name, modes);
+            devices.emplace_back(CameraDevice::CameraAPI::V4L2, id, name, modes);
         }
     }
 }
@@ -217,7 +217,7 @@ void CameraManager::initLibcamera(){
             // TODO: Controls
 
             // Add device to list
-            devices.emplace_back(CameraAPI::LIBCAMERA, id, name, modes);
+            devices.emplace_back(CameraDevice::CameraAPI::LIBCAMERA, id, name, modes);
         }
 
     }

@@ -16,7 +16,10 @@ namespace arpirobot{
 
         unsigned int width;
         unsigned int height;
+
+        // Note: Will be empty if libcamera b/c libcamera via gstreamer doesn't support framerate
         std::vector<Framerate> framerates;
+        
         Format format;
     };
 }

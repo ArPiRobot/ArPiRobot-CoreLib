@@ -11,7 +11,7 @@ namespace arpirobot{
     // TODO: Doc comments
 
     class CameraManager{
-    public:
+    public:    
         static void init();
 
         static std::vector<CameraDevice> getDevices();

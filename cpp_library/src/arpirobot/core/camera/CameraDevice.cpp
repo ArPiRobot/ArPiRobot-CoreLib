@@ -9,7 +9,7 @@ CameraDevice::CameraDevice(CameraAPI api,
 
 }
 
-CameraAPI CameraDevice::getApi(){
+CameraDevice::CameraAPI CameraDevice::getApi(){
     return api;
 }
 
