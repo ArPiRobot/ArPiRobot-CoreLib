@@ -1,40 +1,26 @@
 cmake_minimum_required (VERSION 3.20)
 project (ArPiRobot-CoreLib C CXX)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-if (WIN32)
-     set (CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-     set (BUILD_SHARED_LIBS TRUE)
-     add_compile_definitions(_CRT_SECURE_NO_WARNINGS=1)
-endif()
 
-# Build pigpio as shared library on supported platforms
-if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") AND (("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "arm") OR ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")))
-     set(BUILDING_PIGPIO TRUE)
-     add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pigpio-79 EXCLUDE_FROM_ALL)
-     if(NOT WIN32)
-          target_compile_options(pigpio PRIVATE -fPIC)
-     endif()
-endif()
+# System dependencies
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBCAMERA REQUIRED IMPORTED_TARGET libcamera)
+pkg_check_modules(GSTREAMER REQUIRED IMPORTED_TARGET gstreamer-1.0)
+pkg_check_modules(V4L2 REQUIRED IMPORTED_TARGET libv4l2)
+pkg_check_modules(OPENCV REQUIRED IMPORTED_TARGET opencv4)
 
-# Build serial as shared library on windows, linux, or macos
-if(("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux") OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows") OR ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin"))
-     set(BUILDING_SERIAL TRUE)
-     add_subdirectory(${PROJECT_SOURCE_DIR}/deps/serial/ EXCLUDE_FROM_ALL)
-     if(NOT WIN32)
-          target_compile_options(serial PRIVATE -fPIC)
-     endif()
-endif()
+# Dependencies built from source
 
-# Build libsoc as shared library on linux systems
-if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-     set(BUILDING_LIBSOC TRUE)
-     add_subdirectory(${PROJECT_SOURCE_DIR}/deps/libsoc EXCLUDE_FROM_ALL)
-     if(NOT WIN32)
-          target_compile_options(soc PRIVATE -fPIC)
-     endif()
-endif()
+add_subdirectory(${PROJECT_SOURCE_DIR}/deps/pigpio-79 EXCLUDE_FROM_ALL)
+target_compile_options(pigpio PRIVATE -fPIC)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/deps/serial/ EXCLUDE_FROM_ALL)
+target_compile_options(serial PRIVATE -fPIC)
+
+add_subdirectory(${PROJECT_SOURCE_DIR}/deps/libsoc EXCLUDE_FROM_ALL)
+target_compile_options(soc PRIVATE -fPIC)
 
 
 # ArPiRobot core library
@@ -52,60 +38,44 @@ target_include_directories(arpirobot-core PUBLIC
      ${PROJECT_SOURCE_DIR}/deps 
      ${PROJECT_SOURCE_DIR}/deps/asio-1.18.1/include
      ${PROJECT_SOURCE_DIR}/deps/miniaudio/)
-if(NOT WIN32)
-     target_link_libraries(arpirobot-core pthread)
-     include(GenerateExportHeader)
-     generate_export_header(arpirobot-core)
-endif()
-target_compile_options(arpirobot-core PRIVATE)
+target_link_libraries(arpirobot-core pthread)
+target_link_libraries(arpirobot-core PkgConfig::LIBCAMERA PkgConfig::GSTREAMER PkgConfig::V4L2 PkgConfig::OPENCV)
+include(GenerateExportHeader)
+generate_export_header(arpirobot-core)
 
-if(${BUILDING_PIGPIO})
-     add_dependencies(arpirobot-core pigpio)
-     target_compile_definitions(arpirobot-core PUBLIC HAS_PIGPIO)
-     target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/pigpio-79)
-     target_link_libraries(arpirobot-core pigpio)
+add_dependencies(arpirobot-core pigpio)
+target_compile_definitions(arpirobot-core PUBLIC HAS_PIGPIO)
+target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/pigpio-79)
+target_link_libraries(arpirobot-core pigpio)
 
-     # Copy pigpio library to build directory so it is included in update packages
-     add_custom_command(TARGET arpirobot-core POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pigpio> $<OUTPUT_CONFIG:$<CONFIG>>
-     )
-endif()
+# Copy pigpio library to build directory so it is included in update packages
+add_custom_command(TARGET arpirobot-core POST_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:pigpio> $<OUTPUT_CONFIG:$<CONFIG>>
+)
 
-if(${BUILDING_SERIAL})
-     add_dependencies(arpirobot-core serial)
-     target_compile_definitions(arpirobot-core PUBLIC HAS_SERIAL)
-     target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/serial/include)
-     target_link_libraries(arpirobot-core serial)
+add_dependencies(arpirobot-core serial)
+target_compile_definitions(arpirobot-core PUBLIC HAS_SERIAL)
+target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/serial/include)
+target_link_libraries(arpirobot-core serial)
 
-     # Copy serial library to build directory so it is included in update packages
-     add_custom_command(TARGET arpirobot-core POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:serial> $<OUTPUT_CONFIG:$<CONFIG>>
-     )
-endif()
+# Copy serial library to build directory so it is included in update packages
+add_custom_command(TARGET arpirobot-core POST_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:serial> $<OUTPUT_CONFIG:$<CONFIG>>
+)
 
-if(${BUILDING_LIBSOC})
-     add_dependencies(arpirobot-core soc)
-     target_compile_definitions(arpirobot-core PUBLIC HAS_LIBSOC)
-     target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/libsoc/include)
+add_dependencies(arpirobot-core soc)
+target_compile_definitions(arpirobot-core PUBLIC HAS_LIBSOC)
+target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/libsoc/include)
 
-     target_link_libraries(arpirobot-core soc)
+target_link_libraries(arpirobot-core soc)
 
-     # Copy libsoc library to build directory so it is included in update packages
-     add_custom_command(TARGET arpirobot-core POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:soc> $<OUTPUT_CONFIG:$<CONFIG>>
-     )
-endif()
+# Copy libsoc library to build directory so it is included in update packages
+add_custom_command(TARGET arpirobot-core POST_BUILD
+     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:soc> $<OUTPUT_CONFIG:$<CONFIG>>
+)
 
-if(NOT WIN32)
-     # miniaudio requires dl (dlfcn) library on Linux
-     target_link_libraries(arpirobot-core dl)
-endif()
-
-# Enable building on windows for testing purposes
-if(WIN32)
-     target_compile_definitions(arpirobot-core PUBLIC _WIN32_WINNT=0x0501)
-     target_link_libraries(arpirobot-core ws2_32 wsock32)
-endif()
+# miniaudio requires dl (dlfcn) library on Linux
+target_link_libraries(arpirobot-core dl)
 
 
 file (GLOB_RECURSE SOURCES_TESTROBOT
