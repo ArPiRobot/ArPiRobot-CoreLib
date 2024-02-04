@@ -9,14 +9,13 @@
 
 class CameraManager{
 public:
-    static void discoverCameras();
+    static void init();
 
-    static std::vector<std::shared_ptr<BaseCameraDevice>> getLibcameraDevices();
+    static std::vector<std::shared_ptr<LibcameraCameraDevice>> getLibcameraDevices();
 
-    static std::vector<std::shared_ptr<BaseCameraDevice>> getV4l2Devices();
+    static std::vector<std::shared_ptr<V4L2CameraDevice>> getV4l2Devices();
 
 private:
     static std::vector<std::shared_ptr<LibcameraCameraDevice>> libcameraDevices;
     static std::vector<std::shared_ptr<V4L2CameraDevice>> v4l2Devices;
-    static std::unique_ptr<libcamera::CameraManager> libcameraMgr;
 };

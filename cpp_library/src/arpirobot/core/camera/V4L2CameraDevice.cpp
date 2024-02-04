@@ -1,6 +1,10 @@
 
 #include <arpirobot/core/camera/V4L2CameraDevice.hpp>
 #include <algorithm>
+#include <libv4l2.h>
+#include <linux/v4l2-common.h>
+#include <linux/videodev2.h>
+#include <fcntl.h>
 
 
 V4L2CameraDevice::V4L2CameraDevice(std::string id) : id(id){
@@ -8,11 +12,20 @@ V4L2CameraDevice::V4L2CameraDevice(std::string id) : id(id){
 }
 
 std::string V4L2CameraDevice::getId(){
-    // TODO
+    return id;
 }
 
 std::string V4L2CameraDevice::getName(){
-    // TODO
+    int fd = v4l2_open(id.c_str(), O_RDWR);
+    if(fd < 0)
+        return "Unknown Camera";
+
+    struct  v4l2_capability caps;
+    int err = v4l2_ioctl(fd, VIDIOC_QUERYCAP, &caps);
+    if(err < 0){
+        return "Unknown Camera";
+    }
+    return std::string(reinterpret_cast<char*>(caps.card));
 }
 
 bool V4L2CameraDevice::supportsInputFormat(InputFormat format){

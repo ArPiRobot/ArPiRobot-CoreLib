@@ -10,7 +10,7 @@
  */
 class LibcameraCameraDevice : public BaseCameraDevice{
 public:
-    LibcameraCameraDevice(std::shared_ptr<libcamera::Camera> cam);
+    LibcameraCameraDevice(std::string id);
 
     std::string getId() override;
 
@@ -29,5 +29,5 @@ public:
     std::vector<std::string> supportedControls() override;
 
 private:
-    std::shared_ptr<libcamera::Camera> cam;
+    std::string id;
 };
