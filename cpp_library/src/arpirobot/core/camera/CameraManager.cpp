@@ -4,20 +4,61 @@
 
 #include <gst/gst.h>
 #include <glib.h>
+#include <libv4l2.h>
+#include <fcntl.h>
+#include <linux/v4l2-common.h>
+#include <linux/videodev2.h>
 
-// TODO: Remove
-#include <iostream>
 
 using namespace arpirobot;
 
 CameraManager::State CameraManager::state = CameraManager::State::UNINITIALIZED;
 std::vector<CameraDevice> CameraManager::devices;
 
+bool CameraManager::gstCapToVideoMode(CameraVideoMode &mode, GstStructure *cap){
+    auto type = std::string(gst_structure_get_name(cap));
+    if(type == "image/jpeg"){
+        mode.format = CameraVideoMode::Format::MJPEG;
+    }else if(type == "video/x-raw"){
+        if(!gst_structure_has_field(cap, "format")){
+            // Unknown input format
+            return false;
+        }
+        auto format = std::string(gst_structure_get_string(cap, "format"));
+        if(format == "YUY2"){
+            mode.format = CameraVideoMode::Format::YUY2;
+        }else{
+            // Unsupported raw format
+            return false;
+        }
+    }
+    if(!gst_structure_has_field(cap, "width") || 
+            !gst_structure_has_field(cap, "height") || 
+            !gst_structure_has_field(cap, "framerate")){
+        // Missing required info
+        return false;
+    }
+    gint w, h;
+    bool res = gst_structure_get_int(cap, "width", &w);
+    res = res && gst_structure_get_int(cap, "height", &h);
+    gint frn, frd;
+    res = res && gst_structure_get_fraction(cap, "framerate", &frn, &frd);
+    if(res){
+        mode.width = w;
+        mode.height = h;
+        mode.framerateNumerator = frn;
+        mode.framerateDenominator = frd;
+        return true;
+    }else{
+        // Required info is unexpected type?
+        return false;
+    }
+}
 
 void CameraManager::initV4l2(){
     // Phase 1: Enumerate ids and modes using gstreamer
     std::vector<std::string> ids;
-    std::vector<std::vector<CameraVideoMode>> modes;
+    std::vector<std::vector<CameraVideoMode>> modesList;
     gst_init(NULL, NULL);
     Logger::logDebugFrom("CameraManager", "Enumerating v4l2 devices.");
     auto factory = gst_device_provider_factory_get_by_name("v4l2deviceprovider");
@@ -40,24 +81,19 @@ void CameraManager::initV4l2(){
 
                         // Use caps to construct video modes
                         auto caps = gst_device_get_caps(dev);
+                        std::vector<CameraVideoMode> modes = {};
                         if(caps){
                             unsigned int count = gst_caps_get_size(caps);
                             for(unsigned int i = 0; i < count; ++i){
                                 auto cap = gst_caps_get_structure(caps, i);
-                                std::cout << "[" << gst_structure_get_name(cap) << "]" << std::endl;
-                                unsigned int countInner = gst_structure_n_fields(cap);
-                                for(unsigned int j = 0; j < countInner; j++){
-                                    auto field = std::string(gst_structure_nth_field_name(cap, j));
-                                    std::cout << "Field: " << field << std::endl;
-                                    if(field == "format"){
-                                        std::cout << gst_structure_get_string(cap, "format") << std::endl;
-                                    }
+                                gst_structure_fixate(cap);
+                                CameraVideoMode mode;
+                                if(gstCapToVideoMode(mode, cap)){
+                                    modes.push_back(mode);
                                 }
-                                std::cout << std::endl;
                             }
-                        }else{
-                            modes.push_back({});
                         }
+                        modesList.push_back(modes);
                     }
                 }
                 gst_structure_free(props);
@@ -65,9 +101,28 @@ void CameraManager::initV4l2(){
         }
         g_list_free(devices);
     }
+    gst_deinit();
     
-    // Phase 2: Extra info using libv4l2
-    // TODO
+    // Phase 2: Extra info using libv4l2 (must be done using gstreamer first)
+    for(unsigned int i = 0; i < ids.size(); ++i){
+        std::string id = ids[i];
+        std::vector<CameraVideoMode> modes = modesList[i];
+        std::string name = "Unknown Camera";
+
+        int fd = v4l2_open(id.c_str(), O_RDWR);
+        if(fd >= 0){
+            struct  v4l2_capability v4l2caps;
+            int err = v4l2_ioctl(fd, VIDIOC_QUERYCAP, &v4l2caps);
+            if(err >= 0){
+                name = std::string(reinterpret_cast<char*>(v4l2caps.card));
+            }
+            // TODO: Controls
+            v4l2_close(fd);
+        }
+
+        // Add device to list
+        devices.emplace_back(CameraAPI::V4L2, id, name, modes);
+    }
 }
 
 void CameraManager::initLibcamera(){
@@ -113,4 +168,8 @@ void CameraManager::init(){
     initLibcamera();
     state = State::IDLE;    
     Logger::logInfoFrom("CameraManager", "Discovered " + std::to_string(devices.size()) + " devices.");
+}
+
+std::vector<CameraDevice> CameraManager::getDevices(){
+    return devices;
 }

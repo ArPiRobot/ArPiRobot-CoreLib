@@ -3,6 +3,8 @@
 #include <vector>
 #include <memory>
 #include <arpirobot/core/camera/CameraDevice.hpp>
+#include <arpirobot/core/camera/CameraVideoMode.hpp>
+#include <gst/gst.h>
 
 namespace arpirobot{
 
@@ -12,7 +14,11 @@ namespace arpirobot{
     public:
         static void init();
 
+        static std::vector<CameraDevice> getDevices();
+
     private:
+
+        static bool gstCapToVideoMode(CameraVideoMode &mode, GstStructure *cap);
 
         static void initV4l2();
 

@@ -7,7 +7,8 @@ namespace arpirobot{
 
         unsigned int width;
         unsigned int height;
-        unsigned int framerate;
+        unsigned int framerateNumerator;
+        unsigned int framerateDenominator;
         Format format;
     };
 }
