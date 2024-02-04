@@ -4,6 +4,7 @@
 #include <memory>
 #include <arpirobot/core/camera/CameraDevice.hpp>
 #include <arpirobot/core/camera/CameraVideoMode.hpp>
+#include <arpirobot/core/camera/CameraStreamSettings.hpp>
 #include <gst/gst.h>
 
 namespace arpirobot{
@@ -11,10 +12,17 @@ namespace arpirobot{
     // TODO: Doc comments
 
     class CameraManager{
-    public:    
+    public:
         static void init();
 
         static std::vector<CameraDevice> getDevices();
+
+        // TODO: Configuration with controls
+
+        // TODO: Implement in native language using OpenCV
+        // Eg: Python bindings would implement this function in python not call C++ code
+        //     and would return cv2.VideoCapture in python
+        static void startStream(CameraStreamSettings settings);
 
     private:
 
