@@ -1,34 +1,33 @@
 
-#include <arpirobot/core/camera/LibcameraCameraDevice.hpp>
+/*#include <arpirobot/core/camera/LibcameraCameraDevice.hpp>
 #include <algorithm>
 
 
-LibcameraCameraDevice::LibcameraCameraDevice(std::string id) : id(id){
+LibcameraCameraDevice::LibcameraCameraDevice(std::shared_ptr<libcamera::Camera> cam) : cam(cam){
     
 }
 
 std::string LibcameraCameraDevice::getId(){
-    return id;
+    return cam->id();
 }
 
 std::string LibcameraCameraDevice::getName(){
-    // TODO
-    // auto &props = cam->properties();
-    // const auto &location = props.get(libcamera::properties::Location);
-    // const auto &model = props.get(libcamera::properties::Model);
-    // if(!location)
-    //     return "Unknown Camera";
-    // switch(*location){
-    // case libcamera::properties::CameraLocationBack:
-    //     return "Back Camera";
-    // case libcamera::properties::CameraLocationFront:
-    //     return "Front Camera";
-    // case libcamera::properties::CameraLocationExternal:
-    // default:
-    //     if(!model)
-    //         return "External Camera";
-    //     return "External Camera (" + *model + ")";
-    // }
+    auto &props = cam->properties();
+    const auto &location = props.get(libcamera::properties::Location);
+    const auto &model = props.get(libcamera::properties::Model);
+    if(!location)
+        return "Unknown Camera";
+    switch(*location){
+    case libcamera::properties::CameraLocationBack:
+        return "Back Camera";
+    case libcamera::properties::CameraLocationFront:
+        return "Front Camera";
+    case libcamera::properties::CameraLocationExternal:
+    default:
+        if(!model)
+            return "External Camera";
+        return "External Camera (" + *model + ")";
+    }
 }
 
 bool LibcameraCameraDevice::supportsInputFormat(InputFormat format){
@@ -54,4 +53,4 @@ bool LibcameraCameraDevice::hasControl(std::string control){
 
 std::vector<std::string> LibcameraCameraDevice::supportedControls(){
     // TODO
-}
+}*/

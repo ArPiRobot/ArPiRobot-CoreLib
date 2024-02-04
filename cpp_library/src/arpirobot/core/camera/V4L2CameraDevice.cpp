@@ -1,4 +1,4 @@
-
+/*
 #include <arpirobot/core/camera/V4L2CameraDevice.hpp>
 #include <algorithm>
 #include <libv4l2.h>
@@ -52,3 +52,4 @@ bool V4L2CameraDevice::hasControl(std::string control){
 std::vector<std::string> V4L2CameraDevice::supportedControls(){
     // TODO
 }
+*/
