@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <linux/v4l2-common.h>
 #include <linux/videodev2.h>
+#include <libcamera/libcamera.h>
 
 #include <iostream>
 
@@ -51,7 +52,6 @@ bool CameraManager::gstCapToVideoMode(CameraVideoMode &mode, GstStructure *cap){
         rate.denominator = frd;
         framerates.push_back(rate);
     }else if(gst_structure_has_field_typed(cap, "framerate", GST_TYPE_LIST)){
-        Logger::logDebugFrom("CameraManager", "Multiple Framerate");
         const GValue *frlist = gst_structure_get_value(cap, "framerate");
         unsigned int count = gst_value_list_get_size(frlist);
         for(unsigned int i = 0; i < count; ++i){
@@ -66,9 +66,9 @@ bool CameraManager::gstCapToVideoMode(CameraVideoMode &mode, GstStructure *cap){
                 framerates.push_back(rate);
             }
         }
-    }else{
-        return false;
     }
+    // Note: Don't error if no framerates specified
+    // libcamera through gstreamer doesn't support framerates yet...
     
     mode.width = w;
     mode.height = h;
@@ -80,13 +80,12 @@ void CameraManager::initV4l2(){
     // Phase 1: Enumerate ids and modes using gstreamer
     std::vector<std::string> ids;
     std::vector<std::vector<CameraVideoMode>> modesList;
-    gst_init(NULL, NULL);
     Logger::logDebugFrom("CameraManager", "Enumerating v4l2 devices.");
     auto factory = gst_device_provider_factory_get_by_name("v4l2deviceprovider");
     if(factory == NULL){
         Logger::logWarningFrom("CameraManager", "Unable to find v4l2 provider! v4l2 devices will be unavailable.");
     }else{
-        Logger::logDebugFrom("CameraManager", "Found libcamera provider. Searching for devices.");
+        Logger::logDebugFrom("CameraManager", "Found v4l2 provider. Searching for devices.");
         auto devices = gst_device_provider_get_devices(factory);
         for(auto element = devices; element; element = element->next){
             auto dev = (GstDevice*)element->data;
@@ -122,7 +121,7 @@ void CameraManager::initV4l2(){
         }
         g_list_free(devices);
     }
-    gst_deinit();
+    // gst_device_provider_stop(factory);
     
     // Phase 2: Extra info using libv4l2 (must be done using gstreamer first)
     for(unsigned int i = 0; i < ids.size(); ++i){
@@ -139,27 +138,22 @@ void CameraManager::initV4l2(){
             }
             // TODO: Controls
             v4l2_close(fd);
-        }
 
-        // Add device to list
-        devices.emplace_back(CameraAPI::V4L2, id, name, modes);
+            // Add device to list
+            devices.emplace_back(CameraAPI::V4L2, id, name, modes);
+        }
     }
 }
 
 void CameraManager::initLibcamera(){
-    // Phase 1: Enumerate using gstreamer
-    // TODO
-    
-    // Phase 2: Extra info using libv4l2
-    // TODO
+    // Suppress INFO messages from libcamera
+    setenv("LIBCAMERA_LOG_LEVELS", "*:WARNING", true);
 
-    /*
-     auto cm = std::make_unique<libcamera::CameraManager>();
-    cm->start();
-
-    // Find libcamera devices (requires libcamera gstreamer plugin)
-    std::vector<std::string> libcameraPaths;
-    factory = gst_device_provider_factory_get_by_name("libcameraprovider");
+    // Phase 1: Enumerate ids and modes using gstreamer
+    std::vector<std::string> ids;
+    std::vector<std::vector<CameraVideoMode>> modesList;
+    Logger::logDebugFrom("CameraManager", "Enumerating libcamera devices.");
+    auto factory = gst_device_provider_factory_get_by_name("libcameraprovider");
     if(factory == NULL){
         Logger::logWarningFrom("CameraManager", "Unable to find libcamera provider! libcamera devices will be unavailable.");
     }else{
@@ -168,16 +162,66 @@ void CameraManager::initLibcamera(){
         for(auto element = devices; element; element = element->next){
             auto dev = (GstDevice*)element->data;
             if(gst_device_has_classes(dev, "Video/Source")){
-                auto name = gst_device_get_display_name(dev);
-                
-                auto cam = cm->get(std::string(name));
-                std::cout << cam->id() << std::endl;
-                libcameraPaths.push_back(std::string(name));
+                // This device is a camera
+                auto idchars = gst_device_get_display_name(dev);
+                if(idchars){
+                    ids.push_back(std::string(idchars));
+
+                    // Use caps to construct video modes
+                    auto caps = gst_device_get_caps(dev);
+                    std::vector<CameraVideoMode> modes = {};
+                    if(caps){
+                        unsigned int count = gst_caps_get_size(caps);
+                        for(unsigned int i = 0; i < count; ++i){
+                            auto cap = gst_caps_get_structure(caps, i);
+                            CameraVideoMode mode;
+                            if(gstCapToVideoMode(mode, cap)){
+                                modes.push_back(mode);
+                            }
+                        }
+                    }
+                    gst_caps_unref(caps);
+                    modesList.push_back(modes);
+                }
             }
         }
         g_list_free(devices);
     }
-    */
+    // gst_device_provider_stop(factory);
+    
+    // Phase 2: Extra info using libcamera (must be done using gstreamer first)
+    auto cm = std::make_unique<libcamera::CameraManager>();
+    cm->start();
+    for(unsigned int i = 0; i < ids.size(); ++i){
+        std::string id = ids[i];
+        std::vector<CameraVideoMode> modes = modesList[i];
+        std::string name = "Unknown Camera";
+        auto cam = cm->get(id);
+        if(cam != nullptr){
+            auto &props = cam->properties();
+            const auto &location = props.get(libcamera::properties::Location);
+            const auto &model = props.get(libcamera::properties::Model);
+            if(location){
+                switch(*location){
+                case libcamera::properties::CameraLocationBack:
+                    name = "Back Camera";
+                case libcamera::properties::CameraLocationFront:
+                    name = "Front Camera";
+                case libcamera::properties::CameraLocationExternal:
+                default:
+                    if(!model)
+                        name = "External Camera";
+                    name = "External Camera (" + *model + ")";
+                }
+            }
+            // TODO: Controls
+
+            // Add device to list
+            devices.emplace_back(CameraAPI::LIBCAMERA, id, name, modes);
+        }
+
+    }
+    cm->stop();
 }
 
 void CameraManager::init(){
@@ -185,6 +229,7 @@ void CameraManager::init(){
         Logger::logWarningFrom("CameraManager", "Camera manager was already initialized.");
         return;
     }
+    gst_init(NULL, NULL);
     initV4l2();
     initLibcamera();
     state = State::IDLE;    
