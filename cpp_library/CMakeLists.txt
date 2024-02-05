@@ -6,10 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # System dependencies
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(LIBCAMERA REQUIRED IMPORTED_TARGET libcamera)
 pkg_check_modules(GSTREAMER REQUIRED IMPORTED_TARGET gstreamer-1.0)
-pkg_check_modules(V4L2 REQUIRED IMPORTED_TARGET libv4l2)
-pkg_check_modules(OPENCV REQUIRED IMPORTED_TARGET opencv4)
 
 # Dependencies built from source
 
@@ -39,7 +36,7 @@ target_include_directories(arpirobot-core PUBLIC
      ${PROJECT_SOURCE_DIR}/deps/asio-1.18.1/include
      ${PROJECT_SOURCE_DIR}/deps/miniaudio/)
 target_link_libraries(arpirobot-core pthread)
-target_link_libraries(arpirobot-core PkgConfig::LIBCAMERA PkgConfig::GSTREAMER PkgConfig::V4L2 PkgConfig::OPENCV)
+target_link_libraries(arpirobot-core PkgConfig::GSTREAMER)
 include(GenerateExportHeader)
 generate_export_header(arpirobot-core)
 
