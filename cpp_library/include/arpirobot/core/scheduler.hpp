@@ -26,6 +26,8 @@
 #include <mutex>
 #include <future>
 #include <map>
+#include <list>
+#include <thread>
 #include <ctpl_stl.h>
 
 /**

@@ -1,9 +1,11 @@
 
 #include <arpirobot/core/camera/CameraManager.hpp>
 #include <arpirobot/core/log/Logger.hpp>
+#include <arpirobot/core/robot/BaseRobot.hpp>
 
 #include <gst/gst.h>
 #include <glib.h>
+
 
 #include <iostream>
 
@@ -12,6 +14,9 @@ using namespace arpirobot;
 bool CameraManager::initialized = false;
 bool CameraManager::canConfigure = false;
 std::vector<Camera> CameraManager::cameras;
+std::unordered_map<std::string, std::unique_ptr<cv::VideoCapture>> CameraManager::streamCaptures;
+std::unordered_map<std::string, std::thread> CameraManager::streamThreads;
+std::unordered_map<std::string, bool> CameraManager::streamRunFlags;
 
 std::vector<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
     std::string format, width, height;
@@ -189,4 +194,46 @@ void CameraManager::init(){
 
 std::vector<Camera> CameraManager::getCameras(){
     return cameras;
+}
+
+
+bool CameraManager::startStreamH264(std::string streamName, Camera cam, std::string mode, bool hwaccel){
+    // TODO: Build pipeline
+    std::string pipeline;
+    return startStreamGemeric(streamName, pipeline);
+}
+
+bool CameraManager::startStreamMjpeg(std::string streamName, Camera cam, std::string mode, bool hwaccel){
+    // TODO: Build pipeline
+    std::string pipeline;
+    return startStreamGemeric(streamName, pipeline);
+}
+
+bool CameraManager::stopStream(std::string streamName){
+    // TODO: Build pipeline
+    std::string pipeline;
+    return startStreamGemeric(streamName, pipeline);
+}
+
+bool CameraManager::startStreamGemeric(std::string streamName, std::string pipeline){
+    if(streamCaptures.find(streamName) != streamCaptures.end()){
+        // Already a stream by this name
+        Logger::logDebugFrom("CameraManager", "A stream with the name '" + streamName + "' already exists.");
+        return false;
+    }
+    streamCaptures[streamName] = std::make_unique<cv::VideoCapture>(pipeline, cv::CAP_GSTREAMER);
+    streamRunFlags[streamName] = true;
+
+    // Use dedicated thread instead of a scheduler "Task" b/c tasks yield control
+    // by returning. This thread is IO bound. Thus, it would permanently take up 
+    // thread from the scheduler's thread pool
+    streamThreads[streamName] = std::thread([streamName](){
+        cv::Mat frame;
+        auto &cap = streamCaptures[streamName];
+        while(streamRunFlags[streamName]){
+            // Have to call read to keep pipeline running
+            cap->read(frame);
+        }
+    });
+    return true;
 }

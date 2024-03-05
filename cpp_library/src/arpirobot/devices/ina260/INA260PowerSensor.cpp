@@ -261,7 +261,7 @@ void INA260PowerSensor::begin(){
         Logger::logDebugFrom(getDeviceName(), "Incorrect device at given adddress.");
         return;
     }
-    BaseRobot::runOnceSoon(std::bind(&INA260PowerSensor::feed, this));
+    BaseRobot::scheduleOneshotFunction(std::bind(&INA260PowerSensor::feed, this));
 }
 
 bool INA260PowerSensor::isEnabled(){

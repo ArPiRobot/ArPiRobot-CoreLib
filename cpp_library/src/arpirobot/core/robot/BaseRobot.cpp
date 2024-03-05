@@ -187,7 +187,7 @@ std::shared_ptr<Task> BaseRobot::scheduleRepeatedFunction(const std::function<vo
     return scheduler->addRepeatedTask(std::move(func), std::chrono::milliseconds(0), rate);
 }
 
-void BaseRobot::runOnceSoon(const std::function<void()> &&func){
+void BaseRobot::scheduleOneshotFunction(const std::function<void()> &&func){
     if(scheduler == nullptr)
         return;
     scheduler->addTask(std::move(func), std::chrono::milliseconds(0));

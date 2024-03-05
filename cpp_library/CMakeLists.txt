@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 # System dependencies
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GSTREAMER REQUIRED IMPORTED_TARGET gstreamer-1.0)
+pkg_check_modules(OPENCV REQUIRED IMPORTED_TARGET opencv4)
 
 # Dependencies built from source
 
@@ -35,8 +36,7 @@ target_include_directories(arpirobot-core PUBLIC
      ${PROJECT_SOURCE_DIR}/deps 
      ${PROJECT_SOURCE_DIR}/deps/asio-1.18.1/include
      ${PROJECT_SOURCE_DIR}/deps/miniaudio/)
-target_link_libraries(arpirobot-core pthread)
-target_link_libraries(arpirobot-core PkgConfig::GSTREAMER)
+target_link_libraries(arpirobot-core pthread PkgConfig::GSTREAMER PkgConfig::OPENCV)
 include(GenerateExportHeader)
 generate_export_header(arpirobot-core)
 

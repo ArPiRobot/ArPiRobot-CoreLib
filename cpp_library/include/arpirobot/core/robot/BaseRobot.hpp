@@ -70,7 +70,7 @@ namespace arpirobot{
          * This method will return immediately (will not wait for the target function to run)
          * @param func The function to run
          */
-        static void runOnceSoon(const std::function<void()> &&func);
+        static void scheduleOneshotFunction(const std::function<void()> &&func);
 
         /**
          * Remove the given task (repeated task) from the scheduler

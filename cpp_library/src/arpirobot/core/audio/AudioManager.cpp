@@ -161,7 +161,7 @@ void AudioManager::playbackDataCallback(ma_device *device, void *output, const v
         // Can't call stopJob directly. This would cause a deadlock (miniaudio internal mutex)
         // Instead run this "soon" on a different thread in the robot's scheduler
         int jobId = playbackSetups[device]->jobId;
-        BaseRobot::runOnceSoon([jobId](){
+        BaseRobot::scheduleOneshotFunction([jobId](){
             stopJob(jobId);
         });
     }

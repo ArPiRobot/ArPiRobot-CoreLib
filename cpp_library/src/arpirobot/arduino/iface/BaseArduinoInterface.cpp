@@ -217,7 +217,7 @@ void BaseArduinoInterface::run(){
 
     // The above loop exits when communication is lost
     // Have begin run asynchronously
-    BaseRobot::runOnceSoon(std::bind(&BaseArduinoInterface::begin, this));
+    BaseRobot::scheduleOneshotFunction(std::bind(&BaseArduinoInterface::begin, this));
 }
 
 uint16_t BaseArduinoInterface::calcCCittFalse(const std::vector<uint8_t> &data, size_t len){
