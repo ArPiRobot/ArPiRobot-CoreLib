@@ -24,13 +24,6 @@ namespace arpirobot{
         // TODO: Some way to set controls??? Maybe just call v4l2-ctl or cam?
         // TODO: Is listing controls necessary? Or is that on the user as an advanced feature?
 
-
-        // TODO: Implement these
-        // if hwaccel == true it will attempt to use a hw encoder/decoder if available
-        // Eg: If v4l2h264enc exists, use it. Else use libx264enc
-        // Eg: If v4l2jpegenc exists, use it. Else use jpegenc
-        // Eg: If v4l2jpegdec exists, use it. Else use jpegdec
-
         /**
          * Start a stream encoded using H.264
          * @param streamName Unique name for the stream
@@ -55,12 +48,12 @@ namespace arpirobot{
                 std::string pipeline,
                 std::function<void(cv::Mat)> *frameCallback = nullptr);
 
-        // TODO: MJPEG start
 
         static void stopStream(std::string streamName);
         
 
     private:
+        static bool gstHasElement(std::string elementName);
         static std::vector<std::string> gstCapToVideoModes(GstStructure *cap);
 
         static void initV4l2();

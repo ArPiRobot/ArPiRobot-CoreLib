@@ -39,8 +39,81 @@ bool CameraManager::startStreamH264(std::string streamName,
                 std::string mode, 
                 std::function<void(cv::Mat)> *frameCallback, 
                 bool hwaccel){    
-    std::string pipeline = ""; // TODO: Construct actual pipeline
-    return startStreamFromPipeline(streamName, pipeline, frameCallback);
+    
+    // Open camera
+    std::string pipeline;
+    if(cam.api == "libcamera"){
+        pipeline = "libcamerasrc camera-name=\"" + cam.id + "\"";
+    }else{
+        pipeline = "v4l2src device=\"" + cam.id + "\"";
+    }
+
+    // Caps for grabbing frames from camera
+    // mode = format:widthxheight@framerate (@framerate is optional)
+    int colonPos = mode.find(":", 0);
+    int xPos = mode.find("x", colonPos);
+    int atPos = mode.find("@", xPos);
+    if(atPos == std::string::npos)
+        atPos = mode.length();
+    std::string width = mode.substr(colonPos + 1, xPos - colonPos - 1);
+    std::string height = mode.substr(xPos + 1, atPos - xPos - 1);
+    std::string framerate = "";
+    if(atPos != mode.length())
+        framerate = mode.substr(atPos + 1, mode.length() - atPos - 1);
+    if(mode.find("mjpeg", 0) == 0){
+        pipeline += " ! 'image/jpeg";
+    }else if(mode.find("yuy2", 0) == 0){
+        pipeline += " ! 'video/x-raw,format=YUY2";
+    }else{
+        Logger::logDebugFrom("CameraManager", "Failed to start stream. Unknown input format in mode.");
+        return false;
+    }
+    pipeline += ",width=" + width;
+    pipeline += ",height=" + height;
+    if(framerate != "")
+        pipeline += ",framerate=" + framerate;
+    pipeline += "'";
+
+    // Decode input as needed
+    if(mode.find("mjpeg", 0) == 0){
+        if(hwaccel && gstHasElement("v4l2jpegdec")){
+            // Use hardware decoder
+            pipeline += " ! v4l2jpegdec";
+        }else{
+            // Use software decoder
+            pipeline += " ! jpegdec";
+        }
+    }
+
+    // Convert input format as needed
+    if(hwaccel && gstHasElement("v4l2convert")){
+        pipeline += " ! v4l2convert";
+    }else{
+        pipeline += " ! videoconvert";
+    }
+    
+    // Mux to multiple locations
+    pipeline += " ! tee name=raw";
+
+    // One location is appsink
+    pipeline += " raw. ! queue ! appsink";
+
+    // Other location is encode and publish part of pipeline
+    // TODO: profile and bitrate arguments?
+    if(hwaccel && gstHasElement("v4l2h264enc")){
+        // Use hardware encoder
+        // Note: See output of v4l2-ctl --list-ctrls-menu -d 11
+        pipeline += " raw. ! queue ! v4l2h264enc extra-controls=\"encode,h264_profile=0,video_bitrate=2048000;\"";
+    }else{
+        // Use software encoder
+        pipeline += " raw. ! queue ! openh264enc bitrate=2048000 ! video/x-h264,profile=baseline";
+    }
+    pipeline += " ! h264parse config_interval=-1 ! video/x-h264,stream-format=byte-stream,alignment=au ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
+
+    Logger::logDebugFrom("CameraManager", "Pipeline = " + pipeline);
+
+    // return startStreamFromPipeline(streamName, pipeline, frameCallback);
+    return false;
 }
 
 bool CameraManager::startStreamFromPipeline(std::string streamName,
@@ -82,6 +155,14 @@ void CameraManager::stopStream(std::string streamName){
     streamCaptures.erase(streamName);
     streamRunFlags.erase(streamName);
     streamThreads.erase(streamName);
+}
+
+bool CameraManager::gstHasElement(std::string elementName){
+    bool ret;
+    auto factory = gst_element_factory_find("v4l2jpegdec");
+    ret = (factory != NULL);
+    g_free(factory);
+    return ret;
 }
 
 std::vector<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
