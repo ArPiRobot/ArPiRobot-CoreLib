@@ -12,11 +12,77 @@
 using namespace arpirobot;
 
 bool CameraManager::initialized = false;
-bool CameraManager::canConfigure = false;
 std::vector<Camera> CameraManager::cameras;
-std::unordered_map<std::string, std::unique_ptr<cv::VideoCapture>> CameraManager::streamCaptures;
-std::unordered_map<std::string, std::thread> CameraManager::streamThreads;
+
 std::unordered_map<std::string, bool> CameraManager::streamRunFlags;
+std::unordered_map<std::string, cv::VideoCapture> CameraManager::streamCaptures;
+std::unordered_map<std::string, std::thread> CameraManager::streamThreads;
+
+void CameraManager::init(){
+    if(initialized){
+        Logger::logWarningFrom("CameraManager", "Camera manager was already initialized.");
+        return;
+    }
+    gst_init(NULL, NULL);
+    initV4l2();
+    initLibcamera();
+    initialized = true; 
+    Logger::logInfoFrom("CameraManager", "Discovered " + std::to_string(cameras.size()) + " cameras.");
+}
+
+std::vector<Camera> CameraManager::getCameras(){
+    return cameras;
+}
+
+bool CameraManager::startStreamH264(std::string streamName, 
+                Camera cam, 
+                std::string mode, 
+                std::function<void(cv::Mat)> *frameCallback, 
+                bool hwaccel){    
+    std::string pipeline = ""; // TODO: Construct actual pipeline
+    return startStreamFromPipeline(streamName, pipeline, frameCallback);
+}
+
+bool CameraManager::startStreamFromPipeline(std::string streamName,
+                std::string pipeline,
+                std::function<void(cv::Mat)> *frameCallback){
+    if(streamCaptures.find(streamName) != streamCaptures.end()){
+        Logger::logDebugFrom("CameraManager", "Failed to start stream. Duplicate stream name.");
+        return false;
+    }
+    
+    streamCaptures[streamName] = cv::VideoCapture(pipeline, cv::CAP_GSTREAMER);
+    if(!streamCaptures[streamName].isOpened()){
+        streamCaptures.erase(streamName);
+        Logger::logDebugFrom("CameraManager", "Failed to start stream. Failed to open pipeline.");
+        return false;
+    }
+    streamRunFlags[streamName] = true;
+    streamThreads[streamName] = std::thread([streamName, frameCallback](){
+        cv::Mat frame;
+        while(streamRunFlags[streamName]){
+            streamCaptures[streamName].read(frame);
+            if(frame.empty())
+                continue; // Stream is probably shutting down. If so, run flag will be false
+            if(frameCallback != nullptr)
+                (*frameCallback)(frame);
+        }
+    });
+    return true;
+}
+
+void CameraManager::stopStream(std::string streamName){
+    if(streamCaptures.find(streamName) == streamCaptures.end())
+        return; // No such stream
+    
+    streamRunFlags[streamName] = false;
+    streamCaptures[streamName].release();
+    streamThreads[streamName].join();
+
+    streamCaptures.erase(streamName);
+    streamRunFlags.erase(streamName);
+    streamThreads.erase(streamName);
+}
 
 std::vector<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
     std::string format, width, height;
@@ -177,63 +243,4 @@ void CameraManager::initLibcamera(){
         }
         g_list_free(devices);
     }
-}
-
-void CameraManager::init(){
-    if(initialized){
-        Logger::logWarningFrom("CameraManager", "Camera manager was already initialized.");
-        return;
-    }
-    gst_init(NULL, NULL);
-    initV4l2();
-    initLibcamera();
-    initialized = true; 
-    canConfigure = true;    // Allowed to set controls after init, but before starting streams 
-    Logger::logInfoFrom("CameraManager", "Discovered " + std::to_string(cameras.size()) + " cameras.");
-}
-
-std::vector<Camera> CameraManager::getCameras(){
-    return cameras;
-}
-
-
-bool CameraManager::startStreamH264(std::string streamName, Camera cam, std::string mode, bool hwaccel){
-    // TODO: Build pipeline
-    std::string pipeline;
-    return startStreamGemeric(streamName, pipeline);
-}
-
-bool CameraManager::startStreamMjpeg(std::string streamName, Camera cam, std::string mode, bool hwaccel){
-    // TODO: Build pipeline
-    std::string pipeline;
-    return startStreamGemeric(streamName, pipeline);
-}
-
-bool CameraManager::stopStream(std::string streamName){
-    // TODO: Build pipeline
-    std::string pipeline;
-    return startStreamGemeric(streamName, pipeline);
-}
-
-bool CameraManager::startStreamGemeric(std::string streamName, std::string pipeline){
-    if(streamCaptures.find(streamName) != streamCaptures.end()){
-        // Already a stream by this name
-        Logger::logDebugFrom("CameraManager", "A stream with the name '" + streamName + "' already exists.");
-        return false;
-    }
-    streamCaptures[streamName] = std::make_unique<cv::VideoCapture>(pipeline, cv::CAP_GSTREAMER);
-    streamRunFlags[streamName] = true;
-
-    // Use dedicated thread instead of a scheduler "Task" b/c tasks yield control
-    // by returning. This thread is IO bound. Thus, it would permanently take up 
-    // thread from the scheduler's thread pool
-    streamThreads[streamName] = std::thread([streamName](){
-        cv::Mat frame;
-        auto &cap = streamCaptures[streamName];
-        while(streamRunFlags[streamName]){
-            // Have to call read to keep pipeline running
-            cap->read(frame);
-        }
-    });
-    return true;
 }

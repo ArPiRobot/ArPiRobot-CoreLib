@@ -30,29 +30,50 @@ namespace arpirobot{
         // Eg: If v4l2h264enc exists, use it. Else use libx264enc
         // Eg: If v4l2jpegenc exists, use it. Else use jpegenc
         // Eg: If v4l2jpegdec exists, use it. Else use jpegdec
-        bool startStreamH264(std::string streamName, Camera cam, std::string mode, bool hwaccel = true);
-        bool startStreamMjpeg(std::string streamName, Camera cam, std::string mode, bool hwaccel = true);
-        bool stopStream(std::string streamName);
 
-        // TODO: Support for a callback function when frames read from a certain camera (for use with OpenCV)
-        // TODO: Anything using OpenCV would need to be language-native allowing access to OpenCV in all langs
+        /**
+         * Start a stream encoded using H.264
+         * @param streamName Unique name for the stream
+         * @param cam Camera to stream from
+         * @param mode Frame input mode for the camera
+         * @param frameCallback Function to call when frames are read from the camera
+         * @param hwaccel If true, will use hardware acceleration when available
+         */
+        static bool startStreamH264(std::string streamName, 
+                Camera cam, 
+                std::string mode, 
+                std::function<void(cv::Mat)> *frameCallback = nullptr, 
+                bool hwaccel = true);
+        
+        /**
+         * Start a stream using the provided pipeline
+         * @param streamName Unique name for the stream
+         * @param pipeline Gstreamer pipeline string
+         * @param frameCallback Function to call when frames are read from the camera
+         */
+        static bool startStreamFromPipeline(std::string streamName,
+                std::string pipeline,
+                std::function<void(cv::Mat)> *frameCallback = nullptr);
+
+        // TODO: MJPEG start
+
+        static void stopStream(std::string streamName);
+        
 
     private:
         static std::vector<std::string> gstCapToVideoModes(GstStructure *cap);
-
-        static bool startStreamGemeric(std::string streamName, std::string pipeline);
 
         static void initV4l2();
 
         static void initLibcamera();
 
-
         static bool initialized;
         static bool canConfigure;
         static std::vector<Camera> cameras;
-        static std::unordered_map<std::string, std::unique_ptr<cv::VideoCapture>> streamCaptures;
-        static std::unordered_map<std::string, std::thread> streamThreads;
+
         static std::unordered_map<std::string, bool> streamRunFlags;
+        static std::unordered_map<std::string, cv::VideoCapture> streamCaptures;
+        static std::unordered_map<std::string, std::thread> streamThreads;
     };
 
 }
