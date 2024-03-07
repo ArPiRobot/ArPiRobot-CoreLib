@@ -279,11 +279,8 @@ std::string CameraManager::getCapturePipeline(Camera cam, std::string mode, bool
 }
 
 std::string CameraManager::getVideoConvertElement(bool hwaccel){
-    if(hwaccel){
-        // OMX (eg on RPi)
-        if(gstHasElement("v4l2convert"))
-            return "v4l2convert";
-    }
+    // HW accelerated converters don't usually support all use cases
+    // So just always use SW convert element
 
     // Fallback to software
     return "videoconvert";
@@ -293,15 +290,11 @@ std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profil
     if(hwaccel){
         // OMX (eg on RPi)
         if(gstHasElement("v4l2h264enc")){
-            std::string profileNum = "0"; // Baseline
-            if(profile == "main")
-                profileNum = "2";
-            else if(profile == "high")
-                profileNum = "4";
-            return "v4l2h264enc extra-controls=encode,h264_profile=" + profileNum + ",video_bitrate=" + bitrate + ";";
+            // Note: Must be explicit with both level and profile or v4l2h264enc fails
+            return "v4l2h264enc extra-controls=encode,video_bitrate=" + bitrate + ";" + " ! video/x-h264,level=(string)4,profile=" + profile;
         }
         // VA-API
-        else if(gstHasElement("vaapih264enc")){
+        if(gstHasElement("vaapih264enc")){
             return "vaapih264enc bitrate=" + bitrate + " ! video/x-h264,profile=" + profile;
         }
     }
@@ -313,8 +306,8 @@ std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profil
 std::string CameraManager::getJpegEncodeElement(bool hwaccel, std::string quality){
     if(hwaccel){
         // OMX (eg on RPi)
-        if(gstHasElement("v4l2jpegenc"))
-            return "v4l2jpegenc extra-controls=compression_quality=" + quality + ";";
+        // if(gstHasElement("v4l2jpegenc"))
+        //     return "v4l2jpegenc extra-controls=compression_quality=" + quality + ";";
 
         // VA-API
         if(gstHasElement("vaapijpegenc"))
@@ -328,11 +321,11 @@ std::string CameraManager::getJpegEncodeElement(bool hwaccel, std::string qualit
 std::string CameraManager::getJpegDecodeElement(bool hwaccel){
     if(hwaccel){
         // OMX (eg on RPi)
-        if(gstHasElement("v4l2jpegdec"))
-            return "v4l2jpegdec";
+        // if(gstHasElement("v4l2jpegdec"))
+        //     return "v4l2jpegdec";
         
         // VA-API
-        else if(gstHasElement("vaapijpegdec"))
+        if(gstHasElement("vaapijpegdec"))
             return "vaapijpegdec";
     }
 

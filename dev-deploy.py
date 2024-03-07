@@ -44,7 +44,7 @@ session = None
 
 
 def parse_arguments():
-    global robot_address, robot_user, robot_pass, robot_port, deploy_dir
+    global robot_address, robot_user, robot_pass, robot_port, deploy_dir, arch, config
     parser = argparse.ArgumentParser(description="Development Deploy of ArPiRobot-CoreLib and test programs")
     parser.add_argument("arch", metavar="arch", help="Architecture", type=str, choices=["armv6", "aarch64"])
     parser.add_argument("config", metavar="config", help="Build configuration", type=str, choices=["Debug", "Release", "RelWithDebInfo", "MinSizeRel"])
