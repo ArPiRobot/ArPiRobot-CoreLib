@@ -85,8 +85,9 @@ bool CameraManager::startStreamMjpeg(std::string streamName,
     std::string publishPipeline = "appsrc";
 
     // Convert as needed (OpenCV typically uses RGB type space but encoders typically expect YUV type space)
+    // Note: Must add caps filter because jpeg encoder requires extra info. See https://bugzilla.gnome.org/show_bug.cgi?id=763331
     if(hwaccel && gstHasElement("v4l2convert")){
-        publishPipeline += " ! v4l2convert";
+        publishPipeline += " ! v4l2convert ! video/x-raw,format=YUY2";
     }else{
         publishPipeline += " ! videoconvert ! video/x-raw,format=YUY2";
     }
