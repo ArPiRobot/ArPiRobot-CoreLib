@@ -31,12 +31,16 @@ namespace arpirobot{
          * @param mode Frame input mode for the camera
          * @param frameCallback Function to call when frames are read from the camera
          * @param hwaccel If true, will use hardware acceleration when available
+         * @param h264profile Profile for h264 encoding (baseline, main, or high, default baseline)
+         * @param h264bitrate Bitrate for h264 stream encoding (in bits/sec, default 2048000)
          */
         static bool startStreamH264(std::string streamName, 
                 Camera cam, 
                 std::string mode, 
                 std::function<void(cv::Mat)> *frameCallback = nullptr, 
-                bool hwaccel = true);
+                bool hwaccel = true,
+                std::string h264profile = "baseline",
+                unsigned int h264bitrate = 2048000);
         
         /**
          * Start a stream encoded using MJPEG
@@ -45,12 +49,14 @@ namespace arpirobot{
          * @param mode Frame input mode for the camera
          * @param frameCallback Function to call when frames are read from the camera
          * @param hwaccel If true, will use hardware acceleration when available
+         * @param quality JPEG image quality 0-100 (default 80)
          */
         static bool startStreamMjpeg(std::string streamName,
                 Camera cam,
                 std::string mode,
                 std::function<void(cv::Mat)> *frameCallback = nullptr,
-                bool hwaccel = true);
+                bool hwaccel = true,
+                unsigned int quality = 80);
 
         /**
          * Start a stream using the provided pipeline
@@ -73,6 +79,11 @@ namespace arpirobot{
         static bool gstHasElement(std::string elementName);
         static std::vector<std::string> gstCapToVideoModes(GstStructure *cap);
         static std::string getCapturePipeline(Camera cam, std::string mode, bool hwaccel);
+
+        static std::string getVideoConvertElement(bool hwaccel);
+        static std::string getH264EncodeElement(bool hwaccel, std::string profile, std::string bitrate);
+        static std::string getJpegEncodeElement(bool hwaccel, std::string quality);
+        static std::string getJpegDecodeElement(bool hwaccel);
 
         static void initV4l2();
 

@@ -36,7 +36,9 @@ bool CameraManager::startStreamH264(std::string streamName,
                 Camera cam, 
                 std::string mode, 
                 std::function<void(cv::Mat)> *frameCallback, 
-                bool hwaccel){    
+                bool hwaccel,
+                std::string h264profile,
+                unsigned int h264bitrate){    
 
     std::string capturePipeline = getCapturePipeline(cam, mode, hwaccel);
     if(capturePipeline == "")
@@ -46,20 +48,10 @@ bool CameraManager::startStreamH264(std::string streamName,
     std::string publishPipeline = "appsrc";
 
     // Convert as needed (OpenCV typically uses RGB type space but encoders typically expect YUV type space)
-    if(hwaccel && gstHasElement("v4l2convert")){
-        publishPipeline += " ! v4l2convert";
-    }else{
-        publishPipeline += " ! videoconvert";
-    }
+    publishPipeline += " ! " + getVideoConvertElement(hwaccel);
 
     // Encode frames
-    if(hwaccel && gstHasElement("v4l2h264enc")){
-        // Use hardware encoder
-        publishPipeline += " ! v4l2h264enc extra-controls=encode,h264_profile=0,video_bitrate=2048000;";
-    }else{
-        // Use software encoder
-        publishPipeline += " ! openh264enc bitrate=2048000 ! video/x-h264,profile=baseline";
-    }
+    publishPipeline += " ! " + getH264EncodeElement(hwaccel, h264profile, std::to_string(h264bitrate));
 
     // Publish to RTSP server
     publishPipeline += " ! h264parse config_interval=-1 ! video/x-h264,stream-format=byte-stream,alignment=au ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
@@ -71,7 +63,8 @@ bool CameraManager::startStreamMjpeg(std::string streamName,
                 Camera cam,
                 std::string mode,
                 std::function<void(cv::Mat)> *frameCallback,
-                bool hwaccel){
+                bool hwaccel,
+                unsigned int quality){
     // Note: Even if input is jpeg, decode then re-encode
     // This is necessary becuase opencv needs raw (decoded) frames
     // Could do some stuff with gstreamer tee to get around this
@@ -86,20 +79,10 @@ bool CameraManager::startStreamMjpeg(std::string streamName,
 
     // Convert as needed (OpenCV typically uses RGB type space but encoders typically expect YUV type space)
     // Note: Must add caps filter because jpeg encoder requires extra info. See https://bugzilla.gnome.org/show_bug.cgi?id=763331
-    if(hwaccel && gstHasElement("v4l2convert")){
-        publishPipeline += " ! v4l2convert ! video/x-raw,format=YUY2";
-    }else{
-        publishPipeline += " ! videoconvert ! video/x-raw,format=YUY2";
-    }
+    publishPipeline += " ! " + getVideoConvertElement(hwaccel) + " ! video/x-raw,format=YUY2";
 
-    // Encode framesf
-    if(hwaccel && gstHasElement("v4l2jpegenc")){
-        // Use hardware encoder
-        publishPipeline += " ! v4l2jpegenc extra-controls=compression_quality=80;";
-    }else{
-        // Use software encoder
-        publishPipeline += " ! jpegenc quality=80";
-    }
+    // Encode frames
+    publishPipeline += " ! " + getJpegEncodeElement(hwaccel, std::to_string(quality));
 
     // Publish to RTSP server
     publishPipeline += " ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
@@ -279,26 +262,66 @@ std::string CameraManager::getCapturePipeline(Camera cam, std::string mode, bool
 
     // Decode input as needed
     if(mode.find("mjpeg", 0) == 0){
-        if(hwaccel && gstHasElement("v4l2jpegdec")){
-            // Use hardware decoder
-            pipeline += " ! v4l2jpegdec";
-        }else{
-            // Use software decoder
-            pipeline += " ! jpegdec";
-        }
+        pipeline += " ! " + getJpegDecodeElement(hwaccel);
     }
 
     // Convert input format as needed
-    if(hwaccel && gstHasElement("v4l2convert")){
-        pipeline += " ! v4l2convert";
-    }else{
-        pipeline += " ! videoconvert";
-    }
+    pipeline += " ! " + getVideoConvertElement(hwaccel);
     
     // Output to app sink
     pipeline += " ! appsink";
 
     return pipeline;
+}
+
+std::string CameraManager::getVideoConvertElement(bool hwaccel){
+    if(hwaccel){
+        // OMX (eg on RPi)
+        if(gstHasElement("v4l2convert"))
+            return "v4l2convert";
+    }
+
+    // Fallback to software
+    return "videoconvert";
+}
+
+std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profile, std::string bitrate){
+    if(hwaccel){
+        // OMX (eg on RPi)
+        if(gstHasElement("v4l2h264enc")){
+            std::string profileNum = "0"; // Baseline
+            if(profile == "main")
+                profileNum = "2";
+            else if(profile == "high")
+                profileNum = "4";
+            return "v4l2h264enc extra-controls=encode,h264_profile=" + profileNum + ",video_bitrate=" + bitrate + ";";
+        }
+    }
+
+    // Fallback to software
+    return "openh264enc bitrate=" + bitrate + " ! video/x-h264,profile=" + profile;
+}
+
+std::string CameraManager::getJpegEncodeElement(bool hwaccel, std::string quality){
+    if(hwaccel){
+        // OMX (eg on RPi)
+        if(gstHasElement("v4l2jpegenc"))
+            return "v4l2jpegenc extra-controls=compression_quality=" + quality;
+    }
+
+    // Fallback to software
+    return "jpegenc quality=" + quality;
+}
+
+std::string CameraManager::getJpegDecodeElement(bool hwaccel){
+    if(hwaccel){
+        // OMX (eg on RPi)
+        if(gstHasElement("v4l2jpegdec"))
+            return "v4l2jpegdec";
+    }
+
+    // Fallback to software
+    return "jpegdec";
 }
 
 void CameraManager::initV4l2(){
