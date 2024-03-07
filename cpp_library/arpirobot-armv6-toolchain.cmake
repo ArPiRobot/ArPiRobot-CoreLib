@@ -35,6 +35,11 @@ set(CMAKE_SYSTEM_PROCESSOR arm)
 SET(TARGET arm-linux-gnueabihf)
 set(CMAKE_SYSROOT "${HOMEDIR}/.arpirobot/sysroot/armv6")
 
+# Make pkg-config work properly with sysroot
+set(ENV{PKG_CONFIG_DIR} "")
+set(ENV{PKG_CONFIG_LIBDIR} "${CMAKE_SYSROOT}/usr/lib/pkgconfig:${CMAKE_SYSROOT}/usr/share/pkgconfig")
+set(ENV{PKG_CONFIG_SYSROOT_DIR} ${CMAKE_SYSROOT})
+
 if(NOT EXISTS "${CMAKE_SYSROOT}")
     message(FATAL_ERROR "Sysroot directory is missing.")
 endif()

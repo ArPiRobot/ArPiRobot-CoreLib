@@ -35,6 +35,11 @@ set(CMAKE_SYSTEM_PROCESSOR aarch64)
 SET(TARGET aarch64-linux-gnu)
 set(CMAKE_SYSROOT "${HOMEDIR}/.arpirobot/sysroot/aarch64")
 
+# Make pkg-config work properly with sysroot
+set(ENV{PKG_CONFIG_DIR} "")
+set(ENV{PKG_CONFIG_LIBDIR} "${CMAKE_SYSROOT}/usr/lib/pkgconfig:${CMAKE_SYSROOT}/usr/share/pkgconfig")
+set(ENV{PKG_CONFIG_SYSROOT_DIR} ${CMAKE_SYSROOT})
+
 if(NOT EXISTS "${CMAKE_SYSROOT}")
     message(FATAL_ERROR "Sysroot directory is missing.")
 endif()
@@ -55,5 +60,5 @@ SET(CMAKE_ASM_COMPILER_TARGET aarch64-linux-gnu)
 #       Thus, using clang and lld, no cross GNU toolchain is needed. Only sysroot.
 SET(SHARED_FLAGS "-fuse-ld=lld -Qunused-arguments")
 SET(CMAKE_C_FLAGS "${SHARED_FLAGS}" CACHE STRING "C compiler flags")
-SET(CMAKE_CXX_FLAGS "${SHARED_FLAGS}" CACHE STRING "C++ compiler flags")
+SET(CMAKE_CXX_FLAGS "${SHARED_FLAGS} -v" CACHE STRING "C++ compiler flags")
 set(LINK_FLAGS "${SHARED_FLAGS} -fuse-ld=lld" CACHE STRING "Linker flags")
