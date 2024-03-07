@@ -100,6 +100,8 @@ bool CameraManager::startStreamFromPipelines(std::string streamName,
     }
 
     Logger::logInfoFrom("CameraManager", "Starting stream " + streamName);
+    Logger::logDebugFrom("CameraManager", "Capture pipeline: " + capturePipeline);
+    Logger::logDebugFrom("CameraManager", "Publish pipeline: " + publishPipeline);
     
     streams[streamName] = Stream();
     streams[streamName].cap = cv::VideoCapture();
@@ -154,11 +156,13 @@ void CameraManager::stopAllStreams(){
 }
 
 bool CameraManager::gstHasElement(std::string elementName){
-    bool ret;
-    auto factory = gst_element_factory_find("v4l2jpegdec");
-    ret = (factory != NULL);
-    g_free(factory);
-    return ret;
+    auto factory = gst_element_factory_find(elementName.c_str());
+    if(factory == NULL){
+        return false;
+    }else{
+        gst_object_unref(factory);
+        return true;
+    }
 }
 
 std::vector<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
@@ -296,6 +300,10 @@ std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profil
                 profileNum = "4";
             return "v4l2h264enc extra-controls=encode,h264_profile=" + profileNum + ",video_bitrate=" + bitrate + ";";
         }
+        // VA-API
+        else if(gstHasElement("vaapih264enc")){
+            return "vaapih264enc bitrate=" + bitrate + " ! video/x-h264,profile=" + profile;
+        }
     }
 
     // Fallback to software
@@ -306,7 +314,11 @@ std::string CameraManager::getJpegEncodeElement(bool hwaccel, std::string qualit
     if(hwaccel){
         // OMX (eg on RPi)
         if(gstHasElement("v4l2jpegenc"))
-            return "v4l2jpegenc extra-controls=compression_quality=" + quality;
+            return "v4l2jpegenc extra-controls=compression_quality=" + quality + ";";
+
+        // VA-API
+        if(gstHasElement("vaapijpegenc"))
+            return "vaapijpegenc quality=" + quality;
     }
 
     // Fallback to software
@@ -318,6 +330,10 @@ std::string CameraManager::getJpegDecodeElement(bool hwaccel){
         // OMX (eg on RPi)
         if(gstHasElement("v4l2jpegdec"))
             return "v4l2jpegdec";
+        
+        // VA-API
+        else if(gstHasElement("vaapijpegdec"))
+            return "vaapijpegdec";
     }
 
     // Fallback to software
