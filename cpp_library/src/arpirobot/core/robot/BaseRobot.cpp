@@ -159,6 +159,8 @@ void BaseRobot::start(){
 
     Logger::logInfo("Robot stopping.");
 
+    robotStopped();
+
     // Stop any camera stream threads
     CameraManager::stopAllStreams();
     

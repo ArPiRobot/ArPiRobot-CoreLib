@@ -98,6 +98,11 @@ namespace arpirobot{
         virtual void robotStarted() = 0;
 
         /**
+         * Run once when the robot is stopped
+         */
+        virtual void robotStopped() = 0;
+
+        /**
          * Run each time the robot is enabled
          */
         virtual void robotEnabled() = 0;

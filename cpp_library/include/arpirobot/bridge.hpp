@@ -110,6 +110,7 @@ BRIDGE_FUNC void **copyToNewPointerArray(void **src, size_t len);
 class BridgeBaseRobot : public BaseRobot{
 public:
     BridgeBaseRobot(void (*robotStartedPtr)(void), 
+                        void (*robotStoppedPtr)(void),
                         void (*robotEnabledPtr)(void), 
                         void (*robotDisabledPtr)(void), 
                         void (*enabledPeriodicPtr)(void), 
@@ -117,6 +118,7 @@ public:
                         void (*periodicPtr)(void));
     
     void robotStarted();
+    void robotStopped();
     void robotEnabled();
     void robotDisabled();
     void enabledPeriodic();
@@ -125,6 +127,7 @@ public:
 
 private:
     void (*robotStartedPtr)(void);
+    void (*robotStoppedPtr)(void);
     void (*robotEnabledPtr)(void); 
     void (*robotDisabledPtr)(void); 
     void (*enabledPeriodicPtr)(void); 
@@ -133,6 +136,7 @@ private:
 };
 
 BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void), 
+                        void (*robotStopped)(void),
                         void (*robotEnabled)(void), 
                         void (*robotDisabled)(void), 
                         void (*enabledPeriodic)(void), 

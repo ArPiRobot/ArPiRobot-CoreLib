@@ -101,12 +101,14 @@ BRIDGE_FUNC void **copyToNewPointerArray(void **src, size_t len){
 ////////////////////////////////////////////////////////////////////////////////
 
 BridgeBaseRobot::BridgeBaseRobot(void (*robotStartedPtr)(void), 
+                        void (*robotStoppedPtr)(void),
                         void (*robotEnabledPtr)(void), 
                         void (*robotDisabledPtr)(void), 
                         void (*enabledPeriodicPtr)(void), 
                         void (*disabledPeriodicPtr)(void), 
                         void (*periodicPtr)(void)) : BaseRobot(),
                         robotStartedPtr(robotStartedPtr),
+                        robotStoppedPtr(robotStoppedPtr),
                         robotEnabledPtr(robotEnabledPtr),
                         robotDisabledPtr(robotDisabledPtr),
                         enabledPeriodicPtr(enabledPeriodicPtr),
@@ -117,6 +119,10 @@ BridgeBaseRobot::BridgeBaseRobot(void (*robotStartedPtr)(void),
 
 void BridgeBaseRobot::robotStarted(){
     robotStartedPtr();
+}
+
+void BridgeBaseRobot::robotStopped(){
+    robotStoppedPtr();
 }
 
 void BridgeBaseRobot::robotEnabled(){
@@ -140,6 +146,7 @@ void BridgeBaseRobot::periodic(){
 }
 
 BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void), 
+                        void (*robotStopped)(void),
                         void (*robotEnabled)(void), 
                         void (*robotDisabled)(void), 
                         void (*enabledPeriodic)(void), 
@@ -149,7 +156,7 @@ BRIDGE_FUNC BaseRobot* BaseRobot_create(void (*robotStarted)(void),
     // BaseRobot instances not kept in scope by bridge
     // They must inherently be kept in scope because call to BaseRobot::start
     // blocks until robot is no longer running and thus safe to destroy
-    return new BridgeBaseRobot(robotStarted, robotEnabled, robotDisabled, 
+    return new BridgeBaseRobot(robotStarted, robotStopped, robotEnabled, robotDisabled, 
         enabledPeriodic, disabledPeriodic, periodic);
 
 }
