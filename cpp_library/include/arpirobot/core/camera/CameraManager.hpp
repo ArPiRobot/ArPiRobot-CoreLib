@@ -41,20 +41,24 @@ namespace arpirobot{
         /**
          * Start a stream using the provided pipeline
          * @param streamName Unique name for the stream
-         * @param pipeline Gstreamer pipeline string
+         * @param capturePipeline Gstreamer pipeline string for capture
+         * @param publishPipeline Gstreamer pipeline string for publish
          * @param frameCallback Function to call when frames are read from the camera
          */
-        static bool startStreamFromPipeline(std::string streamName,
-                std::string pipeline,
+        static bool startStreamFromPipelines(std::string streamName,
+                std::string capturePipeline,
+                std::string publishPipeline,
                 std::function<void(cv::Mat)> *frameCallback = nullptr);
 
 
         static void stopStream(std::string streamName);
         
+        static void stopAllStreams();
 
     private:
         static bool gstHasElement(std::string elementName);
         static std::vector<std::string> gstCapToVideoModes(GstStructure *cap);
+        static std::string getCapturePipeline(Camera cam, std::string mode, bool hwaccel);
 
         static void initV4l2();
 
@@ -64,9 +68,17 @@ namespace arpirobot{
         static bool canConfigure;
         static std::vector<Camera> cameras;
 
-        static std::unordered_map<std::string, bool> streamRunFlags;
-        static std::unordered_map<std::string, cv::VideoCapture> streamCaptures;
-        static std::unordered_map<std::string, std::thread> streamThreads;
+        class Stream;
+
+        static std::unordered_map<std::string, Stream> streams;
+
+        class Stream{
+        public:
+            bool run;
+            cv::VideoCapture cap;
+            cv::VideoWriter pub;
+            std::thread thread;
+        };
     };
 
 }

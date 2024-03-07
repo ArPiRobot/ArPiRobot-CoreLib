@@ -14,9 +14,7 @@ using namespace arpirobot;
 bool CameraManager::initialized = false;
 std::vector<Camera> CameraManager::cameras;
 
-std::unordered_map<std::string, bool> CameraManager::streamRunFlags;
-std::unordered_map<std::string, cv::VideoCapture> CameraManager::streamCaptures;
-std::unordered_map<std::string, std::thread> CameraManager::streamThreads;
+std::unordered_map<std::string, CameraManager::Stream> CameraManager::streams;
 
 void CameraManager::init(){
     if(initialized){
@@ -39,104 +37,74 @@ bool CameraManager::startStreamH264(std::string streamName,
                 std::string mode, 
                 std::function<void(cv::Mat)> *frameCallback, 
                 bool hwaccel){    
-    
-    // Open camera
-    std::string pipeline;
-    if(cam.api == "libcamera"){
-        pipeline = "libcamerasrc camera-name=\"" + cam.id + "\"";
-    }else{
-        pipeline = "v4l2src device=\"" + cam.id + "\"";
-    }
 
-    // Caps for grabbing frames from camera
-    // mode = format:widthxheight@framerate (@framerate is optional)
-    int colonPos = mode.find(":", 0);
-    int xPos = mode.find("x", colonPos);
-    int atPos = mode.find("@", xPos);
-    if(atPos == std::string::npos)
-        atPos = mode.length();
-    std::string width = mode.substr(colonPos + 1, xPos - colonPos - 1);
-    std::string height = mode.substr(xPos + 1, atPos - xPos - 1);
-    std::string framerate = "";
-    if(atPos != mode.length())
-        framerate = mode.substr(atPos + 1, mode.length() - atPos - 1);
-    if(mode.find("mjpeg", 0) == 0){
-        pipeline += " ! 'image/jpeg";
-    }else if(mode.find("yuy2", 0) == 0){
-        pipeline += " ! 'video/x-raw,format=YUY2";
-    }else{
-        Logger::logDebugFrom("CameraManager", "Failed to start stream. Unknown input format in mode.");
+    std::string capturePipeline = getCapturePipeline(cam, mode, hwaccel);
+    if(capturePipeline == "")
+        // Error message logged in getCapturePipeline function, so no need to log here
         return false;
-    }
-    pipeline += ",width=" + width;
-    pipeline += ",height=" + height;
-    if(framerate != "")
-        pipeline += ",framerate=" + framerate;
-    pipeline += "'";
 
-    // Decode input as needed
-    if(mode.find("mjpeg", 0) == 0){
-        if(hwaccel && gstHasElement("v4l2jpegdec")){
-            // Use hardware decoder
-            pipeline += " ! v4l2jpegdec";
-        }else{
-            // Use software decoder
-            pipeline += " ! jpegdec";
-        }
-    }
+    std::string publishPipeline = "appsrc";
 
-    // Convert input format as needed
+    // Convert as needed (OpenCV typically uses RGB type space but encoders typically expect YUV type space)
     if(hwaccel && gstHasElement("v4l2convert")){
-        pipeline += " ! v4l2convert";
+        publishPipeline += " ! v4l2convert";
     }else{
-        pipeline += " ! videoconvert";
+        publishPipeline += " ! videoconvert";
     }
-    
-    // Mux to multiple locations
-    pipeline += " ! tee name=raw";
 
-    // One location is appsink
-    pipeline += " raw. ! queue ! appsink";
-
-    // Other location is encode and publish part of pipeline
-    // TODO: profile and bitrate arguments?
+    // Encode frames
     if(hwaccel && gstHasElement("v4l2h264enc")){
         // Use hardware encoder
         // Note: See output of v4l2-ctl --list-ctrls-menu -d 11
-        pipeline += " raw. ! queue ! v4l2h264enc extra-controls=\"encode,h264_profile=0,video_bitrate=2048000;\"";
+        publishPipeline += " ! v4l2h264enc extra-controls=encode,h264_profile=0,video_bitrate=2048000;";
     }else{
         // Use software encoder
-        pipeline += " raw. ! queue ! openh264enc bitrate=2048000 ! video/x-h264,profile=baseline";
+        publishPipeline += " ! openh264enc bitrate=2048000 ! video/x-h264,profile=baseline";
     }
-    pipeline += " ! h264parse config_interval=-1 ! video/x-h264,stream-format=byte-stream,alignment=au ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
 
-    Logger::logDebugFrom("CameraManager", "Pipeline = " + pipeline);
+    // Publish to RTSP server
+    publishPipeline += " ! h264parse config_interval=-1 ! video/x-h264,stream-format=byte-stream,alignment=au ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
 
-    // return startStreamFromPipeline(streamName, pipeline, frameCallback);
-    return false;
+    return startStreamFromPipelines(streamName, capturePipeline, publishPipeline, frameCallback);
 }
 
-bool CameraManager::startStreamFromPipeline(std::string streamName,
-                std::string pipeline,
+bool CameraManager::startStreamFromPipelines(std::string streamName,
+                std::string capturePipeline,
+                std::string publishPipeline,
                 std::function<void(cv::Mat)> *frameCallback){
-    if(streamCaptures.find(streamName) != streamCaptures.end()){
-        Logger::logDebugFrom("CameraManager", "Failed to start stream. Duplicate stream name.");
+    if(streams.find(streamName) != streams.end()){
+        Logger::logErrorFrom("CameraManager", "Failed to start stream. Duplicate stream name.");
         return false;
     }
+
+    Logger::logInfoFrom("CameraManager", "Starting stream " + streamName);
     
-    streamCaptures[streamName] = cv::VideoCapture(pipeline, cv::CAP_GSTREAMER);
-    if(!streamCaptures[streamName].isOpened()){
-        streamCaptures.erase(streamName);
-        Logger::logDebugFrom("CameraManager", "Failed to start stream. Failed to open pipeline.");
+    streams[streamName] = Stream();
+    streams[streamName].cap = cv::VideoCapture();
+    streams[streamName].pub = cv::VideoWriter();
+    if(!streams[streamName].cap.open(capturePipeline, cv::CAP_GSTREAMER)){
+        streams.erase(streamName);
+        Logger::logErrorFrom("CameraManager", "Failed to start stream. Failed to open capture pipeline.");
         return false;
     }
-    streamRunFlags[streamName] = true;
-    streamThreads[streamName] = std::thread([streamName, frameCallback](){
+    int fourcc = (int)streams[streamName].cap.get(cv::CAP_PROP_FOURCC);
+    double width = (double)streams[streamName].cap.get(cv::CAP_PROP_FRAME_WIDTH);
+    double height = (double)streams[streamName].cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+    double fps = (double)streams[streamName].cap.get(cv::CAP_PROP_FPS);
+    cv::Size frameSize(width, height);
+    if(!streams[streamName].pub.open(publishPipeline, cv::CAP_GSTREAMER, fourcc, fps, frameSize)){
+        streams.erase(streamName);
+        Logger::logErrorFrom("CameraManager", "Failed to start stream. Failed to open publish pipeline.");
+        return false;
+    }
+    streams[streamName].run = true;
+    streams[streamName].thread = std::thread([streamName, frameCallback](){
         cv::Mat frame;
-        while(streamRunFlags[streamName]){
-            streamCaptures[streamName].read(frame);
+        while(streams[streamName].run){
+            streams[streamName].cap.read(frame);
             if(frame.empty())
                 continue; // Stream is probably shutting down. If so, run flag will be false
+            streams[streamName].pub.write(frame);
             if(frameCallback != nullptr)
                 (*frameCallback)(frame);
         }
@@ -145,16 +113,23 @@ bool CameraManager::startStreamFromPipeline(std::string streamName,
 }
 
 void CameraManager::stopStream(std::string streamName){
-    if(streamCaptures.find(streamName) == streamCaptures.end())
+    if(streams.find(streamName) == streams.end())
         return; // No such stream
     
-    streamRunFlags[streamName] = false;
-    streamCaptures[streamName].release();
-    streamThreads[streamName].join();
+    Logger::logInfoFrom("CameraManager", "Stopping stream " + streamName);
+    
+    streams[streamName].run = false;
+    streams[streamName].cap.release();
+    streams[streamName].pub.release();
+    streams[streamName].thread.join();
 
-    streamCaptures.erase(streamName);
-    streamRunFlags.erase(streamName);
-    streamThreads.erase(streamName);
+    streams.erase(streamName);
+}
+
+void CameraManager::stopAllStreams(){
+    while(streams.size() > 0){
+        stopStream((*streams.begin()).first);
+    }
 }
 
 bool CameraManager::gstHasElement(std::string elementName){
@@ -228,6 +203,64 @@ std::vector<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
         }
         return modes;
     }
+}
+
+std::string CameraManager::getCapturePipeline(Camera cam, std::string mode, bool hwaccel){
+    // Open camera
+    std::string pipeline;
+    if(cam.api == "libcamera"){
+        pipeline = "libcamerasrc camera-name=" + cam.id;
+    }else{
+        pipeline = "v4l2src device=" + cam.id;
+    }
+
+    // Caps for grabbing frames from camera
+    // mode = format:widthxheight@framerate (@framerate is optional)
+    int colonPos = mode.find(":", 0);
+    int xPos = mode.find("x", colonPos);
+    int atPos = mode.find("@", xPos);
+    if(atPos == std::string::npos)
+        atPos = mode.length();
+    std::string width = mode.substr(colonPos + 1, xPos - colonPos - 1);
+    std::string height = mode.substr(xPos + 1, atPos - xPos - 1);
+    std::string framerate = "";
+    if(atPos != mode.length())
+        framerate = mode.substr(atPos + 1, mode.length() - atPos - 1);
+    if(mode.find("mjpeg", 0) == 0){
+        pipeline += " ! image/jpeg";
+    }else if(mode.find("yuy2", 0) == 0){
+        pipeline += " ! video/x-raw,format=YUY2";
+    }else{
+        Logger::logErrorFrom("CameraManager", "Failed to start stream. Unknown input format in mode.");
+        return "";
+    }
+    pipeline += ",width=" + width;
+    pipeline += ",height=" + height;
+    if(framerate != "")
+        pipeline += ",framerate=" + framerate;
+
+    // Decode input as needed
+    if(mode.find("mjpeg", 0) == 0){
+        if(hwaccel && gstHasElement("v4l2jpegdec")){
+            // Use hardware decoder
+            pipeline += " ! v4l2jpegdec";
+        }else{
+            // Use software decoder
+            pipeline += " ! jpegdec";
+        }
+    }
+
+    // Convert input format as needed
+    if(hwaccel && gstHasElement("v4l2convert")){
+        pipeline += " ! v4l2convert";
+    }else{
+        pipeline += " ! videoconvert";
+    }
+    
+    // Output to app sink
+    pipeline += " ! appsink";
+
+    return pipeline;
 }
 
 void CameraManager::initV4l2(){
