@@ -55,7 +55,6 @@ bool CameraManager::startStreamH264(std::string streamName,
     // Encode frames
     if(hwaccel && gstHasElement("v4l2h264enc")){
         // Use hardware encoder
-        // Note: See output of v4l2-ctl --list-ctrls-menu -d 11
         publishPipeline += " ! v4l2h264enc extra-controls=encode,h264_profile=0,video_bitrate=2048000;";
     }else{
         // Use software encoder
@@ -64,6 +63,45 @@ bool CameraManager::startStreamH264(std::string streamName,
 
     // Publish to RTSP server
     publishPipeline += " ! h264parse config_interval=-1 ! video/x-h264,stream-format=byte-stream,alignment=au ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
+
+    return startStreamFromPipelines(streamName, capturePipeline, publishPipeline, frameCallback);
+}
+
+bool CameraManager::startStreamMjpeg(std::string streamName,
+                Camera cam,
+                std::string mode,
+                std::function<void(cv::Mat)> *frameCallback,
+                bool hwaccel){
+    // Note: Even if input is jpeg, decode then re-encode
+    // This is necessary becuase opencv needs raw (decoded) frames
+    // Could do some stuff with gstreamer tee to get around this
+    // but that requires more complex logic (and jpeg encoding is easy enough)
+
+    std::string capturePipeline = getCapturePipeline(cam, mode, hwaccel);
+    if(capturePipeline == "")
+        // Error message logged in getCapturePipeline function, so no need to log here
+        return false;
+
+    std::string publishPipeline = "appsrc";
+
+    // Convert as needed (OpenCV typically uses RGB type space but encoders typically expect YUV type space)
+    if(hwaccel && gstHasElement("v4l2convert")){
+        publishPipeline += " ! v4l2convert";
+    }else{
+        publishPipeline += " ! videoconvert";
+    }
+
+    // Encode frames
+    if(hwaccel && gstHasElement("v4l2jpegenc")){
+        // Use hardware encoder
+        publishPipeline += " ! v4l2jpegenc extra-controls=compression_quality=80;";
+    }else{
+        // Use software encoder
+        publishPipeline += " ! jpegenc quality=80";
+    }
+
+    // Publish to RTSP server
+    publishPipeline += " ! jpegparse ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
 
     return startStreamFromPipelines(streamName, capturePipeline, publishPipeline, frameCallback);
 }

@@ -39,6 +39,20 @@ namespace arpirobot{
                 bool hwaccel = true);
         
         /**
+         * Start a stream encoded using MJPEG
+         * @param streamName Unique name for the stream
+         * @param cam Camera to stream from
+         * @param mode Frame input mode for the camera
+         * @param frameCallback Function to call when frames are read from the camera
+         * @param hwaccel If true, will use hardware acceleration when available
+         */
+        static bool startStreamMjpeg(std::string streamName,
+                Camera cam,
+                std::string mode,
+                std::function<void(cv::Mat)> *frameCallback = nullptr,
+                bool hwaccel = true);
+
+        /**
          * Start a stream using the provided pipeline
          * @param streamName Unique name for the stream
          * @param capturePipeline Gstreamer pipeline string for capture
