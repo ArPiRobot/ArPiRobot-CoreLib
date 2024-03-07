@@ -88,10 +88,10 @@ bool CameraManager::startStreamMjpeg(std::string streamName,
     if(hwaccel && gstHasElement("v4l2convert")){
         publishPipeline += " ! v4l2convert";
     }else{
-        publishPipeline += " ! videoconvert";
+        publishPipeline += " ! videoconvert ! video/x-raw,format=YUY2";
     }
 
-    // Encode frames
+    // Encode framesf
     if(hwaccel && gstHasElement("v4l2jpegenc")){
         // Use hardware encoder
         publishPipeline += " ! v4l2jpegenc extra-controls=compression_quality=80;";
@@ -101,7 +101,7 @@ bool CameraManager::startStreamMjpeg(std::string streamName,
     }
 
     // Publish to RTSP server
-    publishPipeline += " ! jpegparse ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
+    publishPipeline += " ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
 
     return startStreamFromPipelines(streamName, capturePipeline, publishPipeline, frameCallback);
 }
@@ -125,12 +125,11 @@ bool CameraManager::startStreamFromPipelines(std::string streamName,
         Logger::logErrorFrom("CameraManager", "Failed to start stream. Failed to open capture pipeline.");
         return false;
     }
-    int fourcc = (int)streams[streamName].cap.get(cv::CAP_PROP_FOURCC);
     double width = (double)streams[streamName].cap.get(cv::CAP_PROP_FRAME_WIDTH);
     double height = (double)streams[streamName].cap.get(cv::CAP_PROP_FRAME_HEIGHT);
     double fps = (double)streams[streamName].cap.get(cv::CAP_PROP_FPS);
     cv::Size frameSize(width, height);
-    if(!streams[streamName].pub.open(publishPipeline, cv::CAP_GSTREAMER, fourcc, fps, frameSize)){
+    if(!streams[streamName].pub.open(publishPipeline, cv::CAP_GSTREAMER, 0, fps, frameSize)){
         streams.erase(streamName);
         Logger::logErrorFrom("CameraManager", "Failed to start stream. Failed to open publish pipeline.");
         return false;
