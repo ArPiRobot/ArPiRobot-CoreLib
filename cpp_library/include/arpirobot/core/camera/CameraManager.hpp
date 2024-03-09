@@ -32,7 +32,7 @@ namespace arpirobot{
          * @param frameCallback Function to call when frames are read from the camera
          * @param hwaccel If true, will use hardware acceleration when available
          * @param h264profile Profile for h264 encoding (baseline, main, or high, default baseline)
-         * @param h264bitrate Bitrate for h264 stream encoding (in bits/sec, default 2048000)
+         * @param h264bitrate Bitrate for h264 stream encoding (in kbits/sec, default 2048)
          */
         static bool startStreamH264(std::string streamName, 
                 Camera cam, 
@@ -40,7 +40,7 @@ namespace arpirobot{
                 std::function<void(cv::Mat)> *frameCallback = nullptr, 
                 bool hwaccel = true,
                 std::string h264profile = "baseline",
-                unsigned int h264bitrate = 2048000);
+                unsigned int h264bitrate = 2048);
         
         /**
          * Start a stream encoded using MJPEG
@@ -61,13 +61,11 @@ namespace arpirobot{
         /**
          * Start a stream using the provided pipeline
          * @param streamName Unique name for the stream
-         * @param capturePipeline Gstreamer pipeline string for capture
-         * @param publishPipeline Gstreamer pipeline string for publish
+         * @param pipeline Gstreamer pipeline
          * @param frameCallback Function to call when frames are read from the camera
          */
-        static bool startStreamFromPipelines(std::string streamName,
-                std::string capturePipeline,
-                std::string publishPipeline,
+        static bool startStreamFromPipeline(std::string streamName,
+                std::string pipeline,
                 std::function<void(cv::Mat)> *frameCallback = nullptr);
 
 
@@ -77,16 +75,17 @@ namespace arpirobot{
 
     private:
         static bool gstHasElement(std::string elementName);
-        static std::vector<std::string> gstCapToVideoModes(GstStructure *cap);
+        
         static std::string getCapturePipeline(Camera cam, std::string mode, bool hwaccel);
 
         static std::string getVideoConvertElement(bool hwaccel);
         static std::string getH264EncodeElement(bool hwaccel, std::string profile, std::string bitrate);
+        static std::string getH264DecodeElement(bool hwaccel);
         static std::string getJpegEncodeElement(bool hwaccel, std::string quality);
         static std::string getJpegDecodeElement(bool hwaccel);
 
+        static std::vector<std::string> gstCapToVideoModes(GstStructure *cap);
         static void initV4l2();
-
         static void initLibcamera();
 
         static bool initialized;
@@ -101,7 +100,6 @@ namespace arpirobot{
         public:
             bool run;
             cv::VideoCapture cap;
-            cv::VideoWriter pub;
             std::thread thread;
         };
     };

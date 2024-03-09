@@ -40,24 +40,105 @@ bool CameraManager::startStreamH264(std::string streamName,
                 std::string h264profile,
                 unsigned int h264bitrate){    
 
-    std::string capturePipeline = getCapturePipeline(cam, mode, hwaccel);
-    if(capturePipeline == "")
-        // Error message logged in getCapturePipeline function, so no need to log here
+    // Split mode string into components
+    int colonPos = mode.find(":", 0);
+    int xPos = mode.find("x", colonPos);
+    int atPos = mode.find("@", xPos);
+    if(colonPos == std::string::npos || xPos == std::string::npos || atPos == std::string::npos){
+        Logger::logErrorFrom("CameraManager", "Failed to start stream. Invalid mode string.");
         return false;
+    }
+    if(atPos == std::string::npos)
+        atPos = mode.length();
+    std::string format = mode.substr(0, colonPos);
+    std::string width = mode.substr(colonPos + 1, xPos - colonPos - 1);
+    std::string height = mode.substr(xPos + 1, atPos - xPos - 1);
+    std::string framerate = "";
+    if(atPos != mode.length())
+        framerate = mode.substr(atPos + 1, mode.length() - atPos - 1);
 
-    std::string publishPipeline = "appsrc is-live=true block=true";
+    // Element to open camera
+    std::string input;
+    if(cam.api == "libcamera"){
+        input = "libcamerasrc camera-name=" + cam.id;
+    }else{
+        input = "v4l2src device=" + cam.id;
+    }
 
-    // Convert as needed (OpenCV typically uses RGB type space but encoders typically expect YUV type space)
-    publishPipeline += " ! " + getVideoConvertElement(hwaccel);
+    // Caps for input
+    std::string inputCaps;
+    if(format == "raw"){
+        inputCaps += "video/x-raw";
+    }else if(format == "jpeg"){
+        inputCaps += "image/jpeg";
+    }else if(format == "h264"){
+        inputCaps += "video/x-h264";
+    }else{
+        Logger::logErrorFrom("CameraManager", "Failed to start stream. Unknown input format in mode.");
+        return false;
+    }
+    inputCaps += ",width=" + width + ",height=" + height;
+    if(framerate != "")
+        inputCaps += ",framerate=" + framerate;
+    
 
-    // Encode frames
-    publishPipeline += " ! " + getH264EncodeElement(hwaccel, h264profile, std::to_string(h264bitrate));
+    // Decoder (as needed)
+    std::string decoder;
+    if(format == "jpeg"){
+        decoder = getJpegDecodeElement(hwaccel);
+    }else if(format == "h264"){
+        decoder = getH264DecodeElement(hwaccel);
+    }
 
-    // Publish to RTSP server
-    // Note: stream-format=avc is NEEDED for v4l2h264enc to work properly with rstpclientsink
-    publishPipeline += " ! h264parse config_interval=-1 ! video/x-h264,stream-format=avc,alignment=au ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
+    // Encoder (as needed)
+    std::string encoder;
+    if(format != "h264"){
+        encoder = getH264EncodeElement(hwaccel, h264profile, std::to_string(h264bitrate));
+    }
 
-    return startStreamFromPipelines(streamName, capturePipeline, publishPipeline, frameCallback);
+    // Convert element
+    std::string convert = getVideoConvertElement(hwaccel);
+
+    // Stream output
+    // Note: stream-format=avc is NECESSARY for v4l2h264enc to work with rtspclientsink on Raspberry Pi
+    // For some reason, that's what makes it work (that and ensuring v4l2convert is right before it in pipeline)
+    std::string streamOut = "h264parse ! video/x-h264,stream-format=avc,alignment=au ! rtspclientsink latency=0 location=rtsp://localhost:8554/" + streamName;
+
+    // Construct pipeline
+    // Note: drop=true max-buffers=1 properties on appsink ensure it doesn't queue frames if application reading
+    // the frames is too slow. Queueing frames could stall pipeline or use lots of memory as well as adding latency
+    // for the application to receive the frames
+    std::string pipeline = "";
+    if(format == "raw"){
+        // Scenario 1: Raw input
+        // Pipeline: 
+        // {input} ! {input_caps} ! tee name=raw 
+        // raw. ! queue ! {convert} ! appsink 
+        // raw. ! queue ! {convert} ! {encoder} ! {stream_out}
+        pipeline += input + " ! " + inputCaps + " ! tee name=raw ";
+        pipeline += "raw. ! queue ! " + convert + " ! appsink drop=true max-buffers=1 ";
+        pipeline += "raw. ! queue ! " + convert + " ! " + encoder + " ! " + streamOut;
+    }else if(format == "h264"){
+        // Scenario 2: Input format matches stream format
+        // Pipeline:
+        // {input} ! {input_caps} ! tee name=in
+        // in. ! queue ! {decoder} ! {convert} ! appsink
+        // in. ! queue ! {stream_out}
+        pipeline += input + " ! " + inputCaps + " ! tee name=in ";
+        pipeline += "in. ! queue ! " + decoder + " ! " + convert + " ! appsink drop=true max-buffers=1 ";
+        pipeline += "in. ! queue ! " + streamOut;
+    }else{
+        // Scenario 3: Input format not raw, and does not match stream format
+        // Pipeline:
+        // {input} ! {input_caps} ! {decoder} ! tee name=raw
+        // raw. ! queue ! {convert} ! appsink
+        // raw. ! queue ! {convert} ! {encoder} ! {stream_out}
+        pipeline += input + " ! " + inputCaps + " ! " + decoder + " ! tee name=raw ";
+        pipeline += "raw. ! queue ! " + convert + " ! appsink drop=true max-buffers=1 ";
+        pipeline += "raw. ! queue ! " + convert + " ! " + encoder + " ! " + streamOut;
+    }
+
+    return startStreamFromPipeline(streamName, pipeline, frameCallback);
 }
 
 bool CameraManager::startStreamMjpeg(std::string streamName,
@@ -66,34 +147,13 @@ bool CameraManager::startStreamMjpeg(std::string streamName,
                 std::function<void(cv::Mat)> *frameCallback,
                 bool hwaccel,
                 unsigned int quality){
-    // Note: Even if input is jpeg, decode then re-encode
-    // This is necessary becuase opencv needs raw (decoded) frames
-    // Could do some stuff with gstreamer tee to get around this
-    // but that requires more complex logic (and jpeg encoding is easy enough)
-
-    std::string capturePipeline = getCapturePipeline(cam, mode, hwaccel);
-    if(capturePipeline == "")
-        // Error message logged in getCapturePipeline function, so no need to log here
-        return false;
-
-    std::string publishPipeline = "appsrc is-live=true block=true";
-
-    // Convert as needed (OpenCV typically uses RGB type space but encoders typically expect YUV type space)
-    // Note: Must add caps filter because jpeg encoder requires extra info. See https://bugzilla.gnome.org/show_bug.cgi?id=763331
-    publishPipeline += " ! " + getVideoConvertElement(hwaccel) + " ! video/x-raw,format=YUY2";
-
-    // Encode frames
-    publishPipeline += " ! " + getJpegEncodeElement(hwaccel, std::to_string(quality));
-
-    // Publish to RTSP server
-    publishPipeline += " ! rtspclientsink location=rtsp://127.0.0.1:8554/" + streamName;
-
-    return startStreamFromPipelines(streamName, capturePipeline, publishPipeline, frameCallback);
+    
+    // TODO
+    return false;
 }
 
-bool CameraManager::startStreamFromPipelines(std::string streamName,
-                std::string capturePipeline,
-                std::string publishPipeline,
+bool CameraManager::startStreamFromPipeline(std::string streamName,
+                std::string pipeline,
                 std::function<void(cv::Mat)> *frameCallback){
     if(streams.find(streamName) != streams.end()){
         Logger::logErrorFrom("CameraManager", "Failed to start stream. Duplicate stream name.");
@@ -101,24 +161,13 @@ bool CameraManager::startStreamFromPipelines(std::string streamName,
     }
 
     Logger::logInfoFrom("CameraManager", "Starting stream " + streamName);
-    Logger::logDebugFrom("CameraManager", "Capture pipeline: " + capturePipeline);
-    Logger::logDebugFrom("CameraManager", "Publish pipeline: " + publishPipeline);
-    
+    Logger::logDebugFrom("CameraManager", "Stream " + streamName + " pipeline: " + pipeline);
+
     streams[streamName] = Stream();
     streams[streamName].cap = cv::VideoCapture();
-    streams[streamName].pub = cv::VideoWriter();
-    if(!streams[streamName].cap.open(capturePipeline, cv::CAP_GSTREAMER)){
+    if(!streams[streamName].cap.open(pipeline, cv::CAP_GSTREAMER)){
         streams.erase(streamName);
         Logger::logErrorFrom("CameraManager", "Failed to start stream. Failed to open capture pipeline.");
-        return false;
-    }
-    double width = (double)streams[streamName].cap.get(cv::CAP_PROP_FRAME_WIDTH);
-    double height = (double)streams[streamName].cap.get(cv::CAP_PROP_FRAME_HEIGHT);
-    double fps = (double)streams[streamName].cap.get(cv::CAP_PROP_FPS);
-    cv::Size frameSize(width, height);
-    if(!streams[streamName].pub.open(publishPipeline, cv::CAP_GSTREAMER, 0, fps, frameSize)){
-        streams.erase(streamName);
-        Logger::logErrorFrom("CameraManager", "Failed to start stream. Failed to open publish pipeline.");
         return false;
     }
     streams[streamName].run = true;
@@ -128,9 +177,6 @@ bool CameraManager::startStreamFromPipelines(std::string streamName,
             streams[streamName].cap.read(frame);
             if(frame.empty())
                 continue; // Stream is probably shutting down. If so, run flag will be false
-            if(!streams[streamName].run)
-                break; // Shutting down, don't try to write or it could cause an issue when writer is released
-            streams[streamName].pub.write(frame);
             if(frameCallback != nullptr)
                 (*frameCallback)(frame);
         }
@@ -146,7 +192,6 @@ void CameraManager::stopStream(std::string streamName){
     
     streams[streamName].run = false;
     streams[streamName].cap.release();
-    streams[streamName].pub.release();
     streams[streamName].thread.join();
 
     streams.erase(streamName);
@@ -168,25 +213,102 @@ bool CameraManager::gstHasElement(std::string elementName){
     }
 }
 
+std::string CameraManager::getVideoConvertElement(bool hwaccel){
+    if(hwaccel){
+        // OMX (eg RPi)
+        if(gstHasElement("v4l2convert")){
+            return "v4l2convert";
+        }
+    }
+
+    // Fallback to software
+    return "videoconvert";
+}
+
+std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profile, std::string bitrate){
+    if(hwaccel){
+        // OMX (eg on RPi)
+        if(gstHasElement("v4l2h264enc")){
+            // Note: Must be explicit with both level and profile or v4l2h264enc fails
+            // Note: MUST use v4l2convert before this NOT videoconvert
+            // otherwise it sometimes freezes when writing to rtspclientsink
+            // no idea why...
+            // This is on top of having to make sure stream-format=avc or it also freezes
+            // There seems to be some bad interaction between v4l2h264enc (on RPi) and rtspclientsink
+            // Note: Adding zeros to bitrate b/c video_bitrate is in bits/sec but argument is kbits/sec
+            return "v4l2h264enc extra-controls=encode,video_bitrate=" + bitrate + "000;" + " ! video/x-h264,level=(string)4,profile=" + profile;
+        }
+        // VA-API
+        if(gstHasElement("vaapih264enc")){
+            return "vaapih264enc bitrate=" + bitrate + " ! video/x-h264,profile=" + profile;
+        }
+    }
+
+    // Fallback to software
+    return "x264enc tune=zerolatency speed-preset=ultrafast bitrate=" + bitrate + " ! video/x-h264,profile=" + profile;
+}
+
+std::string CameraManager::getH264DecodeElement(bool hwaccel){
+    if(hwaccel){
+        // OMX (eg on RPi)
+        // if(gstHasElement("v4l2h264dec"))
+        //     return "v4l2h264dec";
+        
+        // VA-API
+        if(gstHasElement("vaapih264dec"))
+            return "vaapih264dec";
+    }
+
+    // Fallback to software
+    return "openh264dec";
+}
+
+std::string CameraManager::getJpegEncodeElement(bool hwaccel, std::string quality){
+    if(hwaccel){
+        // OMX (eg on RPi)
+        // Note: Disabled because it seems like v4l2jpegenc and v4l2jpegdec don't actually work on rpi?
+        // if(gstHasElement("v4l2jpegenc"))
+        //     return "v4l2jpegenc extra-controls=compression_quality=" + quality + ";";
+
+        // VA-API
+        if(gstHasElement("vaapijpegenc"))
+            return "vaapijpegenc quality=" + quality;
+    }
+
+    // Fallback to software
+    return "jpegenc quality=" + quality;
+}
+
+std::string CameraManager::getJpegDecodeElement(bool hwaccel){
+    if(hwaccel){
+        // OMX (eg on RPi)
+        // Note: Disabled because it seems like v4l2jpegenc and v4l2jpegdec don't actually work on rpi?
+        // if(gstHasElement("v4l2jpegdec"))
+        //     return "v4l2jpegdec";
+        
+        // VA-API
+        if(gstHasElement("vaapijpegdec"))
+            return "vaapijpegdec";
+    }
+
+    // Fallback to software
+    return "jpegdec";
+}
+
 std::vector<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
     std::string format, width, height;
     std::vector<std::string> framerates;
 
     auto type = std::string(gst_structure_get_name(cap));
     if(type == "image/jpeg"){
-        format = "mjpeg";
+        format = "jpeg";
     }else if(type == "video/x-raw"){
-        if(!gst_structure_has_field(cap, "format")){
-            // Unknown input format
-            return {};
-        }
-        auto fmtField = std::string(gst_structure_get_string(cap, "format"));
-        if(fmtField == "YUY2"){
-            format = "yuy2";
-        }else{
-            // Unsupported raw format
-            return {};
-        }
+        format = "raw";
+    }else if(type == "video/x-h264"){
+        format = "h264";
+    }else{
+        // Unknown video type
+        return {};
     }
     if(!gst_structure_has_field_typed(cap, "width", G_TYPE_INT) || 
             !gst_structure_has_field_typed(cap, "height", G_TYPE_INT)){
@@ -231,115 +353,6 @@ std::vector<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
         }
         return modes;
     }
-}
-
-std::string CameraManager::getCapturePipeline(Camera cam, std::string mode, bool hwaccel){
-    // Open camera
-    std::string pipeline;
-    if(cam.api == "libcamera"){
-        pipeline = "libcamerasrc camera-name=" + cam.id;
-    }else{
-        pipeline = "v4l2src device=" + cam.id;
-    }
-
-    // Caps for grabbing frames from camera
-    // mode = format:widthxheight@framerate (@framerate is optional)
-    int colonPos = mode.find(":", 0);
-    int xPos = mode.find("x", colonPos);
-    int atPos = mode.find("@", xPos);
-    if(atPos == std::string::npos)
-        atPos = mode.length();
-    std::string width = mode.substr(colonPos + 1, xPos - colonPos - 1);
-    std::string height = mode.substr(xPos + 1, atPos - xPos - 1);
-    std::string framerate = "";
-    if(atPos != mode.length())
-        framerate = mode.substr(atPos + 1, mode.length() - atPos - 1);
-    if(mode.find("mjpeg", 0) == 0){
-        pipeline += " ! image/jpeg";
-    }else if(mode.find("yuy2", 0) == 0){
-        pipeline += " ! video/x-raw,format=YUY2";
-    }else{
-        Logger::logErrorFrom("CameraManager", "Failed to start stream. Unknown input format in mode.");
-        return "";
-    }
-    pipeline += ",width=" + width;
-    pipeline += ",height=" + height;
-    if(framerate != "")
-        pipeline += ",framerate=" + framerate;
-
-    // Decode input as needed
-    if(mode.find("mjpeg", 0) == 0){
-        pipeline += " ! " + getJpegDecodeElement(hwaccel);
-    }
-
-    // Convert input format as needed
-    pipeline += " ! " + getVideoConvertElement(hwaccel);
-    
-    // Output to app sink
-    pipeline += " ! appsink";
-
-    return pipeline;
-}
-
-std::string CameraManager::getVideoConvertElement(bool hwaccel){
-    if(hwaccel){
-        // OMX (eg RPi)
-        if(gstHasElement("v4l2convert")){
-            return "v4l2convert";
-        }
-
-        // TODO: VA-API?
-    }
-
-    // Fallback to software
-    return "videoconvert";
-}
-
-std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profile, std::string bitrate){
-    if(hwaccel){
-        // OMX (eg on RPi)
-        if(gstHasElement("v4l2h264enc")){
-            // Note: Must be explicit with both level and profile or v4l2h264enc fails
-            return "v4l2h264enc extra-controls=encode,video_bitrate=" + bitrate + ";" + " ! video/x-h264,level=(string)4,profile=" + profile;
-        }
-        // VA-API
-        if(gstHasElement("vaapih264enc")){
-            return "vaapih264enc bitrate=" + bitrate + " ! video/x-h264,profile=" + profile;
-        }
-    }
-
-    // Fallback to software
-    return "x264enc tune=zerolatency speed-preset=ultrafast bitrate=" + bitrate + " ! video/x-h264,profile=" + profile;
-}
-
-std::string CameraManager::getJpegEncodeElement(bool hwaccel, std::string quality){
-    if(hwaccel){
-        // OMX (eg on RPi)
-        // if(gstHasElement("v4l2jpegenc"))
-        //     return "v4l2jpegenc extra-controls=compression_quality=" + quality + ";";
-
-        // VA-API
-        if(gstHasElement("vaapijpegenc"))
-            return "vaapijpegenc quality=" + quality;
-    }
-
-    // Fallback to software
-    return "jpegenc quality=" + quality;
-}
-
-std::string CameraManager::getJpegDecodeElement(bool hwaccel){
-    if(hwaccel){
-        // OMX (eg on RPi)
-        // if(gstHasElement("v4l2jpegdec"))
-        //     return "v4l2jpegdec";
-        
-        // VA-API
-        if(gstHasElement("vaapijpegdec"))
-            return "vaapijpegdec";
-    }
-
-    // Fallback to software
-    return "jpegdec";
 }
 
 void CameraManager::initV4l2(){
