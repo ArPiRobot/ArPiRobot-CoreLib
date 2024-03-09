@@ -44,7 +44,7 @@ bool CameraManager::startStreamH264(std::string streamName,
     int colonPos = mode.find(":", 0);
     int xPos = mode.find("x", colonPos);
     int atPos = mode.find("@", xPos);
-    if(colonPos == std::string::npos || xPos == std::string::npos || atPos == std::string::npos){
+    if(colonPos == std::string::npos || xPos == std::string::npos){
         Logger::logErrorFrom("CameraManager", "Failed to start stream. Invalid mode string.");
         return false;
     }
@@ -112,10 +112,12 @@ bool CameraManager::startStreamH264(std::string streamName,
     if(format == "raw"){
         // Scenario 1: Raw input
         // Pipeline: 
-        // {input} ! {input_caps} ! tee name=raw 
+        // {input} ! {input_caps} ! videoconvert ! tee name=raw 
         // raw. ! queue ! {convert} ! appsink 
         // raw. ! queue ! {convert} ! {encoder} ! {stream_out}
-        pipeline += input + " ! " + inputCaps + " ! tee name=raw ";
+        // Note: need videoconvert on input side because converters down the line may be hw accelerated
+        // and hw accelerated converters usually have colorometry limitations that videoconvert does not
+        pipeline += input + " ! " + inputCaps + " ! videoconvert ! tee name=raw ";
         pipeline += "raw. ! queue ! " + convert + " ! appsink drop=true max-buffers=1 ";
         pipeline += "raw. ! queue ! " + convert + " ! " + encoder + " ! " + streamOut;
     }else if(format == "h264"){
@@ -215,7 +217,7 @@ bool CameraManager::gstHasElement(std::string elementName){
 
 std::string CameraManager::getVideoConvertElement(bool hwaccel){
     if(hwaccel){
-        // OMX (eg RPi)
+        // V4L2M2M (eg RPi)
         if(gstHasElement("v4l2convert")){
             return "v4l2convert";
         }
@@ -227,7 +229,7 @@ std::string CameraManager::getVideoConvertElement(bool hwaccel){
 
 std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profile, std::string bitrate){
     if(hwaccel){
-        // OMX (eg on RPi)
+        // V4L2M2M (eg on RPi)
         if(gstHasElement("v4l2h264enc")){
             // Note: Must be explicit with both level and profile or v4l2h264enc fails
             // Note: MUST use v4l2convert before this NOT videoconvert
@@ -250,7 +252,8 @@ std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profil
 
 std::string CameraManager::getH264DecodeElement(bool hwaccel){
     if(hwaccel){
-        // OMX (eg on RPi)
+        // V4L2M2M (eg on RPi)
+        // Disabled, because untested as of now and v4l2m2m has been nothing but trouble on the rpis
         // if(gstHasElement("v4l2h264dec"))
         //     return "v4l2h264dec";
         
@@ -265,7 +268,7 @@ std::string CameraManager::getH264DecodeElement(bool hwaccel){
 
 std::string CameraManager::getJpegEncodeElement(bool hwaccel, std::string quality){
     if(hwaccel){
-        // OMX (eg on RPi)
+        // V4L2M2M (eg on RPi)
         // Note: Disabled because it seems like v4l2jpegenc and v4l2jpegdec don't actually work on rpi?
         // if(gstHasElement("v4l2jpegenc"))
         //     return "v4l2jpegenc extra-controls=compression_quality=" + quality + ";";
@@ -281,7 +284,7 @@ std::string CameraManager::getJpegEncodeElement(bool hwaccel, std::string qualit
 
 std::string CameraManager::getJpegDecodeElement(bool hwaccel){
     if(hwaccel){
-        // OMX (eg on RPi)
+        // V4L2M2M (eg on RPi)
         // Note: Disabled because it seems like v4l2jpegenc and v4l2jpegdec don't actually work on rpi?
         // if(gstHasElement("v4l2jpegdec"))
         //     return "v4l2jpegdec";
