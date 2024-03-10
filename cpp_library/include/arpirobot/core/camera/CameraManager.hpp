@@ -41,22 +41,6 @@ namespace arpirobot{
                 bool hwaccel = true,
                 std::string h264profile = "baseline",
                 unsigned int h264bitrate = 2048);
-        
-        /**
-         * Start a stream encoded using MJPEG
-         * @param streamName Unique name for the stream
-         * @param cam Camera to stream from
-         * @param mode Frame input mode for the camera
-         * @param frameCallback Function to call when frames are read from the camera
-         * @param hwaccel If true, will use hardware acceleration when available
-         * @param quality JPEG image quality 0-100 (default 80)
-         */
-        static bool startStreamMjpeg(std::string streamName,
-                Camera cam,
-                std::string mode,
-                std::function<void(cv::Mat)> *frameCallback = nullptr,
-                bool hwaccel = true,
-                unsigned int quality = 80);
 
         /**
          * Start a stream using the provided pipeline
@@ -81,7 +65,6 @@ namespace arpirobot{
         static std::string getVideoConvertElement(bool hwaccel);
         static std::string getH264EncodeElement(bool hwaccel, std::string profile, std::string bitrate);
         static std::string getH264DecodeElement(bool hwaccel);
-        static std::string getJpegEncodeElement(bool hwaccel, std::string quality);
         static std::string getJpegDecodeElement(bool hwaccel);
 
         static std::vector<std::string> gstCapToVideoModes(GstStructure *cap);

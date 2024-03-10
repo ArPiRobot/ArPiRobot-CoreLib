@@ -99,10 +99,14 @@ bool CameraManager::startStreamH264(std::string streamName,
     // Convert element
     std::string convert = getVideoConvertElement(hwaccel);
 
-    // Stream output
-    // Note: stream-format=avc is NECESSARY for v4l2h264enc to work with rtspclientsink on Raspberry Pi
-    // For some reason, that's what makes it work (that and ensuring v4l2convert is right before it in pipeline)
-    std::string streamOut = "h264parse ! video/x-h264,stream-format=avc,alignment=au ! rtspclientsink latency=0 location=rtsp://localhost:8554/" + streamName;
+    // Stream output. 
+    // Note: using mpegtsmux because this seems to be the only reliable way of getting v4l2h264enc and 
+    // rtspclientsink to work together reliably on the raspberry pi.
+    // For some reason, using v4l2[ANYTHING]enc ! parser ! rtspclientsink causes the pipeline to stall
+    // At 00.00:00.02 or some small number (1-2 frames?). Directing to other sinks works fine.
+    // Using other encoders works fine. No idea why, but something about raspberry pi v4l2m2m encoders
+    // with rtspclientsink seem to not get along
+    std::string streamOut = "h264parse config-interval=-1 ! mpegtsmux ! rtspclientsink latency=0 location=rtsp://localhost:8554/" + streamName;
 
     // Construct pipeline
     // Note: drop=true max-buffers=1 properties on appsink ensure it doesn't queue frames if application reading
@@ -110,48 +114,25 @@ bool CameraManager::startStreamH264(std::string streamName,
     // for the application to receive the frames
     std::string pipeline = "";
     if(format == "raw"){
-        // Scenario 1: Raw input
-        // Pipeline: 
-        // {input} ! {input_caps} ! videoconvert ! tee name=raw 
-        // raw. ! queue ! {convert} ! appsink 
-        // raw. ! queue ! {convert} ! {encoder} ! {stream_out}
+        // Scenario 1: Raw input (only need encode)
         // Note: need videoconvert on input side because converters down the line may be hw accelerated
-        // and hw accelerated converters usually have colorometry limitations that videoconvert does not
+        // and hw accelerated converters usually have colorometry limitations that SW videoconvert does not
         pipeline += input + " ! " + inputCaps + " ! videoconvert ! tee name=raw ";
         pipeline += "raw. ! queue ! " + convert + " ! appsink drop=true max-buffers=1 ";
         pipeline += "raw. ! queue ! " + convert + " ! " + encoder + " ! " + streamOut;
     }else if(format == "h264"){
-        // Scenario 2: Input format matches stream format
-        // Pipeline:
-        // {input} ! {input_caps} ! tee name=in
-        // in. ! queue ! {decoder} ! {convert} ! appsink
-        // in. ! queue ! {stream_out}
+        // Scenario 2: Input format matches stream format (only need decode)
         pipeline += input + " ! " + inputCaps + " ! tee name=in ";
         pipeline += "in. ! queue ! " + decoder + " ! " + convert + " ! appsink drop=true max-buffers=1 ";
         pipeline += "in. ! queue ! " + streamOut;
     }else{
-        // Scenario 3: Input format not raw, and does not match stream format
-        // Pipeline:
-        // {input} ! {input_caps} ! {decoder} ! tee name=raw
-        // raw. ! queue ! {convert} ! appsink
-        // raw. ! queue ! {convert} ! {encoder} ! {stream_out}
+        // Scenario 3: Input format not raw, and does not match stream format (need decode then encode)
         pipeline += input + " ! " + inputCaps + " ! " + decoder + " ! tee name=raw ";
         pipeline += "raw. ! queue ! " + convert + " ! appsink drop=true max-buffers=1 ";
         pipeline += "raw. ! queue ! " + convert + " ! " + encoder + " ! " + streamOut;
     }
 
     return startStreamFromPipeline(streamName, pipeline, frameCallback);
-}
-
-bool CameraManager::startStreamMjpeg(std::string streamName,
-                Camera cam,
-                std::string mode,
-                std::function<void(cv::Mat)> *frameCallback,
-                bool hwaccel,
-                unsigned int quality){
-    
-    // TODO
-    return false;
 }
 
 bool CameraManager::startStreamFromPipeline(std::string streamName,
@@ -232,11 +213,6 @@ std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profil
         // V4L2M2M (eg on RPi)
         if(gstHasElement("v4l2h264enc")){
             // Note: Must be explicit with both level and profile or v4l2h264enc fails
-            // Note: MUST use v4l2convert before this NOT videoconvert
-            // otherwise it sometimes freezes when writing to rtspclientsink
-            // no idea why...
-            // This is on top of having to make sure stream-format=avc or it also freezes
-            // There seems to be some bad interaction between v4l2h264enc (on RPi) and rtspclientsink
             // Note: Adding zeros to bitrate b/c video_bitrate is in bits/sec but argument is kbits/sec
             return "v4l2h264enc extra-controls=encode,video_bitrate=" + bitrate + "000;" + " ! video/x-h264,level=(string)4,profile=" + profile;
         }
@@ -253,9 +229,8 @@ std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profil
 std::string CameraManager::getH264DecodeElement(bool hwaccel){
     if(hwaccel){
         // V4L2M2M (eg on RPi)
-        // Disabled, because untested as of now and v4l2m2m has been nothing but trouble on the rpis
-        // if(gstHasElement("v4l2h264dec"))
-        //     return "v4l2h264dec";
+        if(gstHasElement("v4l2h264dec"))
+            return "v4l2h264dec";
         
         // VA-API
         if(gstHasElement("vaapih264dec"))
@@ -266,28 +241,11 @@ std::string CameraManager::getH264DecodeElement(bool hwaccel){
     return "openh264dec";
 }
 
-std::string CameraManager::getJpegEncodeElement(bool hwaccel, std::string quality){
-    if(hwaccel){
-        // V4L2M2M (eg on RPi)
-        // Note: Disabled because it seems like v4l2jpegenc and v4l2jpegdec don't actually work on rpi?
-        // if(gstHasElement("v4l2jpegenc"))
-        //     return "v4l2jpegenc extra-controls=compression_quality=" + quality + ";";
-
-        // VA-API
-        if(gstHasElement("vaapijpegenc"))
-            return "vaapijpegenc quality=" + quality;
-    }
-
-    // Fallback to software
-    return "jpegenc quality=" + quality;
-}
-
 std::string CameraManager::getJpegDecodeElement(bool hwaccel){
     if(hwaccel){
         // V4L2M2M (eg on RPi)
-        // Note: Disabled because it seems like v4l2jpegenc and v4l2jpegdec don't actually work on rpi?
-        // if(gstHasElement("v4l2jpegdec"))
-        //     return "v4l2jpegdec";
+        if(gstHasElement("v4l2jpegdec"))
+            return "v4l2jpegdec";
         
         // VA-API
         if(gstHasElement("vaapijpegdec"))
