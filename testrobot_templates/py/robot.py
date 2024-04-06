@@ -11,6 +11,9 @@ class Robot(BaseRobot):
     def robot_started(self):
         pass
 
+    def robot_stopped(self):
+        pass
+
     def robot_enabled(self):
         pass
 
