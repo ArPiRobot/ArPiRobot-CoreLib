@@ -35,10 +35,10 @@ std::vector<Camera> CameraManager::getCameras(){
 bool CameraManager::startStreamH264(std::string streamName, 
                 Camera cam, 
                 std::string mode, 
-                std::function<void(cv::Mat)> *frameCallback, 
-                bool hwaccel,
                 std::string h264profile,
-                unsigned int h264bitrate){    
+                unsigned int h264bitrate,
+                std::function<void(cv::Mat)> *frameCallback, 
+                bool hwencode, bool hwdecode, bool hwconv){    
 
     // Split mode string into components
     int colonPos = mode.find(":", 0);
@@ -85,19 +85,19 @@ bool CameraManager::startStreamH264(std::string streamName,
     // Decoder (as needed)
     std::string decoder;
     if(format == "jpeg"){
-        decoder = getJpegDecodeElement(hwaccel);
+        decoder = getJpegDecodeElement(hwdecode);
     }else if(format == "h264"){
-        decoder = getH264DecodeElement(hwaccel);
+        decoder = getH264DecodeElement(hwdecode);
     }
 
     // Encoder (as needed)
     std::string encoder;
     if(format != "h264"){
-        encoder = getH264EncodeElement(hwaccel, h264profile, std::to_string(h264bitrate));
+        encoder = getH264EncodeElement(hwencode, h264profile, std::to_string(h264bitrate));
     }
 
     // Convert element
-    std::string convert = getVideoConvertElement(hwaccel);
+    std::string convert = getVideoConvertElement(hwconv);
 
     // Stream output. 
     // Note: using mpegtsmux because this seems to be the only reliable way of getting v4l2h264enc and 
