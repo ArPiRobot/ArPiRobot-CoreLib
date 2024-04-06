@@ -27,40 +27,39 @@ namespace arpirobot{
 
         /**
          * Start a stream encoded using H.264
-         * HW encoding is enabled by default
-         * However, HW decode and convert are disabled by default as they seem to be unreliable
-         * on rpi platform (which it is assumed most users are on)
-         * 
-         * @param streamName Unique name for the stream
+         * @param streamPort Port number for the stream
          * @param cam Camera to stream from
          * @param mode Frame input mode for the camera
+         * @param frameCallback Function to call when frames are read from the camera
          * @param h264profile Profile for h264 encoding (baseline, main, or high, default baseline)
          * @param h264bitrate Bitrate for h264 stream encoding (in kbits/sec, default 2048)
-         * @param frameCallback Function to call when frames are read from the camera
          * @param hwencode If true, will use hardware accelerated encoder when available
          * @param hwdecode If true, will use hardware accelerated decoder when available
          * @param hwconv If true, will use hardware accelerated convert element when available
          */
-        static bool startStreamH264(std::string streamName, 
+        static bool startStreamH264(unsigned int streamPort, 
                 Camera cam, 
                 std::string mode, 
+                std::function<void(cv::Mat)> *frameCallback = nullptr,
                 std::string h264profile = "baseline",
+                std::string h264level = "4",
                 unsigned int h264bitrate = 2048,
-                std::function<void(cv::Mat)> *frameCallback = nullptr, 
-                bool hwencode = true, bool hwdecode = false, bool hwconv = false);
+                bool hwencode = true, bool hwdecode = true, bool hwconv = true);
+
+        // TODO: Start Stream MJPEG
 
         /**
          * Start a stream using the provided pipeline
-         * @param streamName Unique name for the stream
+         * @param streamPort Port number for the stream
          * @param pipeline Gstreamer pipeline
          * @param frameCallback Function to call when frames are read from the camera
          */
-        static bool startStreamFromPipeline(std::string streamName,
+        static bool startStreamFromPipeline(unsigned int streamPort,
                 std::string pipeline,
                 std::function<void(cv::Mat)> *frameCallback = nullptr);
 
 
-        static void stopStream(std::string streamName);
+        static void stopStream(unsigned int streamPort);
         
         static void stopAllStreams();
 
@@ -70,7 +69,7 @@ namespace arpirobot{
         static std::string getCapturePipeline(Camera cam, std::string mode, bool hwaccel);
 
         static std::string getVideoConvertElement(bool hwaccel);
-        static std::string getH264EncodeElement(bool hwaccel, std::string profile, std::string bitrate);
+        static std::string getH264EncodeElement(bool hwaccel, std::string profile, std::string level, std::string bitrate);
         static std::string getH264DecodeElement(bool hwaccel);
         static std::string getJpegDecodeElement(bool hwaccel);
 
@@ -84,7 +83,7 @@ namespace arpirobot{
 
         class Stream;
 
-        static std::unordered_map<std::string, Stream> streams;
+        static std::unordered_map<unsigned int, Stream> streams;
 
         class Stream{
         public:

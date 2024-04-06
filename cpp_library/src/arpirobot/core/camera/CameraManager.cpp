@@ -14,7 +14,7 @@ using namespace arpirobot;
 bool CameraManager::initialized = false;
 std::vector<Camera> CameraManager::cameras;
 
-std::unordered_map<std::string, CameraManager::Stream> CameraManager::streams;
+std::unordered_map<unsigned int, CameraManager::Stream> CameraManager::streams;
 
 void CameraManager::init(){
     if(initialized){
@@ -32,12 +32,13 @@ std::vector<Camera> CameraManager::getCameras(){
     return cameras;
 }
 
-bool CameraManager::startStreamH264(std::string streamName, 
+bool CameraManager::startStreamH264(unsigned int streamPort, 
                 Camera cam, 
                 std::string mode, 
+                std::function<void(cv::Mat)> *frameCallback,
                 std::string h264profile,
-                unsigned int h264bitrate,
-                std::function<void(cv::Mat)> *frameCallback, 
+                std::string h264level,
+                unsigned int h264bitrate, 
                 bool hwencode, bool hwdecode, bool hwconv){    
 
     // Split mode string into components
@@ -93,20 +94,17 @@ bool CameraManager::startStreamH264(std::string streamName,
     // Encoder (as needed)
     std::string encoder;
     if(format != "h264"){
-        encoder = getH264EncodeElement(hwencode, h264profile, std::to_string(h264bitrate));
+        encoder = getH264EncodeElement(hwencode, h264profile, h264level, std::to_string(h264bitrate));
     }
 
     // Convert element
     std::string convert = getVideoConvertElement(hwconv);
 
-    // Stream output. 
-    // Note: using mpegtsmux because this seems to be the only reliable way of getting v4l2h264enc and 
-    // rtspclientsink to work together reliably on the raspberry pi.
-    // For some reason, using v4l2[ANYTHING]enc ! parser ! rtspclientsink causes the pipeline to stall
-    // At 00.00:00.02 or some small number (1-2 frames?). Directing to other sinks works fine.
-    // Using other encoders works fine. No idea why, but something about raspberry pi v4l2m2m encoders
-    // with rtspclientsink seem to not get along
-    std::string streamOut = "h264parse config-interval=-1 ! mpegtsmux ! rtspclientsink latency=0 location=rtsp://localhost:8554/" + streamName;
+    // Stream output
+    // buffers-soft-max=2 recover-policy=latest on tcpserversink do two things to help with network drops / latency
+    //   1. If a client looses frames, they are not re-sent. Instead the latest frame is sent
+    //   2. If packets are dropped, the number of buffers used is limited to avoid excessive memory usage
+    std::string streamOut = "h264parse config-interval=-1 ! tcpserversink buffers-soft-max=2 recover-policy=latest host=0.0.0.0 port=" + std::to_string(streamPort);
 
     // Construct pipeline
     // Note: drop=true max-buffers=1 properties on appsink ensure it doesn't queue frames if application reading
@@ -132,32 +130,32 @@ bool CameraManager::startStreamH264(std::string streamName,
         pipeline += "raw. ! queue ! " + convert + " ! " + encoder + " ! " + streamOut;
     }
 
-    return startStreamFromPipeline(streamName, pipeline, frameCallback);
+    return startStreamFromPipeline(streamPort, pipeline, frameCallback);
 }
 
-bool CameraManager::startStreamFromPipeline(std::string streamName,
+bool CameraManager::startStreamFromPipeline(unsigned int streamPort,
                 std::string pipeline,
                 std::function<void(cv::Mat)> *frameCallback){
-    if(streams.find(streamName) != streams.end()){
+    if(streams.find(streamPort) != streams.end()){
         Logger::logErrorFrom("CameraManager", "Failed to start stream. Duplicate stream name.");
         return false;
     }
 
-    Logger::logInfoFrom("CameraManager", "Starting stream " + streamName);
-    Logger::logDebugFrom("CameraManager", "Stream " + streamName + " pipeline: " + pipeline);
+    Logger::logInfoFrom("CameraManager", "Starting stream " + std::to_string(streamPort));
+    Logger::logDebugFrom("CameraManager", "Stream " + std::to_string(streamPort) + " pipeline: " + pipeline);
 
-    streams[streamName] = Stream();
-    streams[streamName].cap = cv::VideoCapture();
-    if(!streams[streamName].cap.open(pipeline, cv::CAP_GSTREAMER)){
-        streams.erase(streamName);
+    streams[streamPort] = Stream();
+    streams[streamPort].cap = cv::VideoCapture();
+    if(!streams[streamPort].cap.open(pipeline, cv::CAP_GSTREAMER)){
+        streams.erase(streamPort);
         Logger::logErrorFrom("CameraManager", "Failed to start stream. Failed to open capture pipeline.");
         return false;
     }
-    streams[streamName].run = true;
-    streams[streamName].thread = std::thread([streamName, frameCallback](){
+    streams[streamPort].run = true;
+    streams[streamPort].thread = std::thread([streamPort, frameCallback](){
         cv::Mat frame;
-        while(streams[streamName].run){
-            streams[streamName].cap.read(frame);
+        while(streams[streamPort].run){
+            streams[streamPort].cap.read(frame);
             if(frame.empty())
                 continue; // Stream is probably shutting down. If so, run flag will be false
             if(frameCallback != nullptr)
@@ -167,17 +165,17 @@ bool CameraManager::startStreamFromPipeline(std::string streamName,
     return true;
 }
 
-void CameraManager::stopStream(std::string streamName){
-    if(streams.find(streamName) == streams.end())
+void CameraManager::stopStream(unsigned int streamPort){
+    if(streams.find(streamPort) == streams.end())
         return; // No such stream
     
-    Logger::logInfoFrom("CameraManager", "Stopping stream " + streamName);
+    Logger::logInfoFrom("CameraManager", "Stopping stream " + std::to_string(streamPort));
     
-    streams[streamName].run = false;
-    streams[streamName].cap.release();
-    streams[streamName].thread.join();
+    streams[streamPort].run = false;
+    streams[streamPort].cap.release();
+    streams[streamPort].thread.join();
 
-    streams.erase(streamName);
+    streams.erase(streamPort);
 }
 
 void CameraManager::stopAllStreams(){
@@ -208,22 +206,22 @@ std::string CameraManager::getVideoConvertElement(bool hwaccel){
     return "videoconvert";
 }
 
-std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profile, std::string bitrate){
+std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profile, std::string level, std::string bitrate){
     if(hwaccel){
         // V4L2M2M (eg on RPi)
         if(gstHasElement("v4l2h264enc")){
             // Note: Must be explicit with both level and profile or v4l2h264enc fails
             // Note: Adding zeros to bitrate b/c video_bitrate is in bits/sec but argument is kbits/sec
-            return "v4l2h264enc extra-controls=encode,video_bitrate=" + bitrate + "000;" + " ! video/x-h264,level=(string)4,profile=" + profile;
+            return "v4l2h264enc extra-controls=controls,repeat_sequence_header=1,video_bitrate=" + bitrate + "000;" + " ! video/x-h264,level=(string)" + level + ",profile=" + profile;
         }
         // VA-API
         if(gstHasElement("vaapih264enc")){
-            return "vaapih264enc bitrate=" + bitrate + " ! video/x-h264,profile=" + profile;
+            return "vaapih264enc bitrate=" + bitrate + " ! video/x-h264,level=(string)" + level + ",profile=" + profile;
         }
     }
 
     // Fallback to software
-    return "x264enc tune=zerolatency speed-preset=ultrafast bitrate=" + bitrate + " ! video/x-h264,profile=" + profile;
+    return "x264enc tune=zerolatency speed-preset=ultrafast bitrate=" + bitrate + " ! video/x-h264,level=(string)" + level + ",profile=" + profile;
 }
 
 std::string CameraManager::getH264DecodeElement(bool hwaccel){
