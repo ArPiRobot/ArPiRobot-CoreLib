@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <list>
+#include <set>
 #include <gst/gst.h>
 #include <opencv2/opencv.hpp>
 #include <arpirobot/core/camera/Camera.hpp>
@@ -67,7 +68,7 @@ namespace arpirobot{
         static std::string getH264DecodeElement(bool hwaccel);
         static std::string getJpegDecodeElement(bool hwaccel);
 
-        static std::vector<std::string> gstCapToVideoModes(GstStructure *cap);
+        static std::set<std::string> gstCapToVideoModes(GstStructure *cap);
         static void initV4l2();
         static void initLibcamera();
 

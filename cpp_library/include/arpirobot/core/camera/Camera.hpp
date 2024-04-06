@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <set>
 #include <string>
 
 namespace arpirobot{
@@ -8,6 +8,6 @@ namespace arpirobot{
     public:
         std::string api;
         std::string id;
-        std::vector<std::string> modes; // [format]:[width]x[height]@[framerate]   framerate is optional
+        std::set<std::string> modes; // [format]:[width]x[height]@[framerate]   framerate is optional
     };
 }

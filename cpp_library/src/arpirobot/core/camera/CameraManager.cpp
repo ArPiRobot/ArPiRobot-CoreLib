@@ -256,7 +256,7 @@ std::string CameraManager::getJpegDecodeElement(bool hwaccel){
     return "jpegdec";
 }
 
-std::vector<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
+std::set<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
     std::string format, width, height;
     std::vector<std::string> framerates;
 
@@ -308,9 +308,9 @@ std::vector<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
     }else if(framerates.size() == 1){
         return {format + ":" + width + "x" + height + "@" + framerates[0]};
     }else{
-        std::vector<std::string> modes;
+        std::set<std::string> modes;
         for(auto &framerate : framerates){
-            modes.push_back(format + ":" + width + "x" + height + "@" + framerate);
+            modes.insert(format + ":" + width + "x" + height + "@" + framerate);
         }
         return modes;
     }
@@ -337,18 +337,16 @@ void CameraManager::initV4l2(){
 
                         // Use caps to construct video modes
                         auto caps = gst_device_get_caps(dev);
-                        std::vector<std::string> modes;
+                        std::set<std::string> modes;
                         if(caps){
                             unsigned int count = gst_caps_get_size(caps);
                             for(unsigned int i = 0; i < count; ++i){
                                 auto cap = gst_caps_get_structure(caps, i);
-                                std::vector<std::string> modesSubset = gstCapToVideoModes(cap);
-                                modes.insert(modes.end(), modesSubset.begin(), modesSubset.end());
+                                std::set<std::string> modesSubset = gstCapToVideoModes(cap);
+                                modes.insert(modesSubset.begin(), modesSubset.end());
                             }
                         }
                         gst_caps_unref(caps);
-
-                        // TODO: Remove duplicate modes
 
                         // Have all required info. Add this device
                         cameras.push_back(Camera{
@@ -387,18 +385,16 @@ void CameraManager::initLibcamera(){
 
                     // Use caps to construct video modes
                     auto caps = gst_device_get_caps(dev);
-                    std::vector<std::string> modes;
+                    std::set<std::string> modes;
                     if(caps){
                         unsigned int count = gst_caps_get_size(caps);
                         for(unsigned int i = 0; i < count; ++i){
                             auto cap = gst_caps_get_structure(caps, i);
-                            std::vector<std::string> modesSubset = gstCapToVideoModes(cap);
-                            modes.insert(modes.end(), modesSubset.begin(), modesSubset.end());
+                            std::set<std::string> modesSubset = gstCapToVideoModes(cap);
+                            modes.insert(modesSubset.begin(), modesSubset.end());
                         }
                     }
                     gst_caps_unref(caps);
-
-                    // TODO: Remove duplicate modes
 
                     // Have all required info. Add this device
                     cameras.push_back(Camera{
