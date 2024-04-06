@@ -1,5 +1,6 @@
 if(CMAKE_HOST_WIN32)
     set(HOMEDIR "$ENV{UserProfile}")
+    string(REPLACE "\\" "/" HOMEDIR "${HOMEDIR}")
     set(EXTENSION ".exe")
 else()
     set(HOMEDIR "$ENV{HOME}")
