@@ -11,6 +11,10 @@ void Robot::robotStarted(){
     
 }
 
+void Robot::robotStopped(){
+    
+}
+
 void Robot::robotEnabled(){
 
 }

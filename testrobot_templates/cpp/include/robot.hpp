@@ -11,6 +11,7 @@ using namespace arpirobot;
 class Robot : public BaseRobot{
 public:
     void robotStarted();
+    void robotStopped();
     void robotEnabled();
     void robotDisabled();
     void enabledPeriodic();
