@@ -91,6 +91,10 @@ class BaseRobot(ABC):
             self.robot_started()
         
         @ctypes.CFUNCTYPE(None)
+        def robot_stopped():
+            self.robot_stopped()
+        
+        @ctypes.CFUNCTYPE(None)
         def robot_enabled():
             self.robot_enabled()
         
@@ -112,6 +116,7 @@ class BaseRobot(ABC):
         
         # Have to keep reference to these or will be garbage collected then seg fault
         self.rs_internal = robot_started
+        self.rsp_insternal = robot_stopped
         self.re_internal = robot_enabled
         self.rd_internal = robot_disabled
         self.ep_internal = enabled_periodic
@@ -119,8 +124,8 @@ class BaseRobot(ABC):
         self.p_internal = periodic
 
         self._ptr = bridge.arpirobot.BaseRobot_create(
-            self.rs_internal, self.re_internal, self.rd_internal, self.ep_internal, 
-            self.dp_internal, self.p_internal)
+            self.rs_internal, self.rsp_insternal, self.re_internal, self.rd_internal, 
+             self.ep_internal, self.dp_internal, self.p_internal)
     
     def __del__(self):
         bridge.arpirobot.BaseRobot_destroy(self._ptr)
@@ -136,6 +141,11 @@ class BaseRobot(ABC):
     ## Run once when the robot is started
     @abstractmethod
     def robot_started(self):
+        pass
+
+    ## Run once when the robot is stopping
+    @abstractmethod
+    def robot_stopped(self):
         pass
 
     ## Run each time the robot is enabled

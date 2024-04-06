@@ -45,6 +45,7 @@ arpirobot.copyToNewPointerArray.restype = ctypes.c_void_p
 ################################################################################
 
 arpirobot.BaseRobot_create.argtypes = [ctypes.c_void_p, 
+    ctypes.c_void_p,
     ctypes.c_void_p, 
     ctypes.c_void_p, 
     ctypes.c_void_p, 
