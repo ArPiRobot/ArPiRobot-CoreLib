@@ -383,6 +383,7 @@ void CameraManager::initLibcamera(){
                 auto idchars = gst_device_get_display_name(dev);
                 if(idchars){
                     std::string id = std::string(idchars);
+                    Logger::logDebugFrom("CameraManager", "Discovered libcamera device '" + id + "'");
 
                     // Use caps to construct video modes
                     auto caps = gst_device_get_caps(dev);
