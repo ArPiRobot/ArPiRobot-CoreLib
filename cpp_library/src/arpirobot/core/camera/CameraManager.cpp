@@ -104,7 +104,8 @@ bool CameraManager::startStreamH264(unsigned int streamPort,
     // buffers-soft-max=2 recover-policy=latest on tcpserversink do two things to help with network drops / latency
     //   1. If a client looses frames, they are not re-sent. Instead the latest frame is sent
     //   2. If packets are dropped, the number of buffers used is limited to avoid excessive memory usage
-    std::string streamOut = "h264parse config-interval=-1 ! tcpserversink buffers-soft-max=2 recover-policy=latest host=0.0.0.0 port=" + std::to_string(streamPort);
+    std::string streamOut = std::string("h264parse config-interval=-1 ! video/x-h264,stream-format=byte-stream,alignment=au ! ") +
+            "tcpserversink buffers-soft-max=2 recover-policy=latest host=0.0.0.0 port=" + std::to_string(streamPort);
 
     // Construct pipeline
     // Note: drop=true max-buffers=1 properties on appsink ensure it doesn't queue frames if application reading
@@ -221,7 +222,7 @@ std::string CameraManager::getH264EncodeElement(bool hwaccel, std::string profil
     }
 
     // Fallback to software
-    return "x264enc tune=zerolatency speed-preset=ultrafast bitrate=" + bitrate + " ! video/x-h264,level=(string)" + level + ",profile=" + profile;
+    return "x264enc key-int-max=120 tune=zerolatency speed-preset=ultrafast bitrate=" + bitrate + " ! video/x-h264,level=(string)" + level + ",profile=" + profile;
 }
 
 std::string CameraManager::getH264DecodeElement(bool hwaccel){
