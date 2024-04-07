@@ -18,6 +18,22 @@ namespace arpirobot{
 
     class CameraManager{
     public:
+        class H264Settings{
+        public:
+            std::string profile;
+            std::string level;
+            unsigned int bitrate;
+
+            static H264Settings Default;
+        };
+
+        class JpegSettings{
+        public:
+            unsigned int quality;
+
+            static JpegSettings Default;
+        };
+
         static void init();
 
         static std::vector<Camera> getCameras();
@@ -31,8 +47,7 @@ namespace arpirobot{
          * @param cam Camera to stream from
          * @param mode Frame input mode for the camera
          * @param frameCallback Function to call when frames are read from the camera
-         * @param h264profile Profile for h264 encoding (baseline, main, or high, default baseline)
-         * @param h264bitrate Bitrate for h264 stream encoding (in kbits/sec, default 2048)
+         * @param h264settings Settings for h264 encoding
          * @param hwencode If true, will use hardware accelerated encoder when available
          * @param hwdecode If true, will use hardware accelerated decoder when available
          * @param hwconv If true, will use hardware accelerated convert element when available
@@ -41,12 +56,26 @@ namespace arpirobot{
                 Camera cam, 
                 std::string mode, 
                 std::function<void(cv::Mat)> *frameCallback = nullptr,
-                std::string h264profile = "baseline",
-                std::string h264level = "4",
-                unsigned int h264bitrate = 2048,
+                H264Settings h264settings = H264Settings::Default,
                 bool hwencode = true, bool hwdecode = true, bool hwconv = true);
 
-        // TODO: Start Stream MJPEG
+        /**
+         * Start a stream encoded using JPEG
+         * @param streamPort Port number for the stream
+         * @param cam Camera to stream from
+         * @param mode Frame input mode for the camera
+         * @param frameCallback Function to call when frames are read from the camera
+         * @param jpegSettings Settings for jpeg encoding
+         * @param hwencode If true, will use hardware accelerated encoder when available
+         * @param hwdecode If true, will use hardware accelerated decoder when available
+         * @param hwconv If true, will use hardware accelerated convert element when available
+         */
+        static bool startStreamJpeg(unsigned int streamPort, 
+                Camera cam, 
+                std::string mode, 
+                std::function<void(cv::Mat)> *frameCallback = nullptr,
+                JpegSettings jpegSettings = JpegSettings::Default,
+                bool hwencode = true, bool hwdecode = true, bool hwconv = true);
 
         /**
          * Start a stream using the provided pipeline
@@ -69,7 +98,8 @@ namespace arpirobot{
         static std::string getCapturePipeline(Camera cam, std::string mode, bool hwaccel);
 
         static std::string getVideoConvertElement(bool hwaccel);
-        static std::string getH264EncodeElement(bool hwaccel, std::string profile, std::string level, std::string bitrate);
+        static std::string getH264EncodeElement(bool hwaccel, H264Settings h264settings);
+        static std::string getJpegEncodeElement(bool hwaccel, JpegSettings jpegSettings);
         static std::string getH264DecodeElement(bool hwaccel);
         static std::string getJpegDecodeElement(bool hwaccel);
 
