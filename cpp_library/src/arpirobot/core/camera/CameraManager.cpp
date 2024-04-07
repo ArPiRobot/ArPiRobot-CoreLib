@@ -16,16 +16,6 @@ std::vector<Camera> CameraManager::cameras;
 
 std::unordered_map<unsigned int, CameraManager::Stream> CameraManager::streams;
 
-CameraManager::H264Settings CameraManager::H264Settings::Default = {
-    .profile = "baseline",
-    .level = "4",
-    .bitrate = 2048
-};
-
-CameraManager::JpegSettings CameraManager::JpegSettings::Default = {
-    .quality = 80
-};
-
 void CameraManager::init(){
     if(initialized){
         Logger::logWarningFrom("CameraManager", "Camera manager was already initialized.");

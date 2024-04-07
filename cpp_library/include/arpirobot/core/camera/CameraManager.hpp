@@ -10,6 +10,8 @@
 #include <gst/gst.h>
 #include <opencv2/opencv.hpp>
 #include <arpirobot/core/camera/Camera.hpp>
+#include <arpirobot/core/camera/H264Settings.hpp>
+#include <arpirobot/core/camera/JpegSettings.hpp>
 #include <arpirobot/core/scheduler.hpp>
 
 namespace arpirobot{
@@ -18,28 +20,11 @@ namespace arpirobot{
 
     class CameraManager{
     public:
-        class H264Settings{
-        public:
-            std::string profile;
-            std::string level;
-            unsigned int bitrate;
-
-            static H264Settings Default;
-        };
-
-        class JpegSettings{
-        public:
-            unsigned int quality;
-
-            static JpegSettings Default;
-        };
-
         static void init();
 
         static std::vector<Camera> getCameras();
 
-        // TODO: Some way to set controls??? Maybe just call v4l2-ctl or cam?
-        // TODO: Is listing controls necessary? Or is that on the user as an advanced feature?
+       
 
         /**
          * Start a stream encoded using H.264
