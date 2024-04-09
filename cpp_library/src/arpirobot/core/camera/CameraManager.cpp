@@ -6,8 +6,13 @@
 #include <gst/gst.h>
 #include <glib.h>
 
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include <iostream>
+#include <algorithm>
 
 using namespace arpirobot;
 
@@ -53,21 +58,24 @@ bool CameraManager::startStreamH264(unsigned int streamPort,
     std::string width = mode.substr(colonPos + 1, xPos - colonPos - 1);
     std::string height = mode.substr(xPos + 1, atPos - xPos - 1);
     std::string framerate = "";
-    if(atPos != mode.length())
+    if(atPos != mode.length()){
         framerate = mode.substr(atPos + 1, mode.length() - atPos - 1);
+        int slashPos = framerate.find("/");
+        if(slashPos == std::string::npos){
+            framerate += "/1";
+        }
+    }
 
     // Element to open camera
-    std::string input;
-    if(cam.api == "libcamera"){
-        input = "libcamerasrc camera-name=" + cam.id;
-    }else{
-        input = "v4l2src device=" + cam.id;
-    }
+    std::string input = getSource(cam);
 
     // Caps for input
     std::string inputCaps;
     if(format == "raw"){
         inputCaps += "video/x-raw";
+        if(cam.api == "rpicam"){}
+            // Must specify all caps if using rpicam-vid with raw frames
+            inputCaps += ",format=I420";
     }else if(format == "jpeg"){
         inputCaps += "image/jpeg";
     }else if(format == "h264"){
@@ -77,9 +85,13 @@ bool CameraManager::startStreamH264(unsigned int streamPort,
         return false;
     }
     inputCaps += ",width=" + width + ",height=" + height;
-    if(framerate != "")
+    if(framerate != ""){
         inputCaps += ",framerate=" + framerate;
-    
+    }else if(cam.api == "rpicam"){
+        // Must specify all caps if using rpicam-vid with raw frames
+        Logger::logErrorFrom("CameraManager", "Failed to start stream. Framerate must be specified if using rpicam with raw frames");
+        return false;
+    }
 
     // Decoder (as needed)
     std::string decoder;
@@ -129,7 +141,9 @@ bool CameraManager::startStreamH264(unsigned int streamPort,
         pipeline += "raw. ! queue ! " + convert + " ! " + encoder + " ! " + streamOut;
     }
 
-    return startStreamFromPipeline(streamPort, pipeline, frameCallback);
+    std::string fifo = getFifo(cam);
+    std::string procCmd = getProcCmd(fifo, cam, format, width, height, framerate);
+    return startStreamFromPipeline(streamPort, pipeline, frameCallback, fifo, procCmd);
 }
 
 bool CameraManager::startStreamJpeg(unsigned int streamPort, 
@@ -153,21 +167,24 @@ bool CameraManager::startStreamJpeg(unsigned int streamPort,
     std::string width = mode.substr(colonPos + 1, xPos - colonPos - 1);
     std::string height = mode.substr(xPos + 1, atPos - xPos - 1);
     std::string framerate = "";
-    if(atPos != mode.length())
+    if(atPos != mode.length()){
         framerate = mode.substr(atPos + 1, mode.length() - atPos - 1);
+        int slashPos = framerate.find("/");
+        if(slashPos == std::string::npos){
+            framerate += "/1";
+        }
+    }
 
     // Element to open camera
-    std::string input;
-    if(cam.api == "libcamera"){
-        input = "libcamerasrc camera-name=" + cam.id;
-    }else{
-        input = "v4l2src device=" + cam.id;
-    }
+    std::string input = getSource(cam);
 
     // Caps for input
     std::string inputCaps;
     if(format == "raw"){
         inputCaps += "video/x-raw";
+        if(cam.api == "rpicam"){}
+            // Must specify all caps if using rpicam-vid with raw frames
+            inputCaps += ",format=I420";
     }else if(format == "jpeg"){
         inputCaps += "image/jpeg";
     }else if(format == "h264"){
@@ -177,9 +194,13 @@ bool CameraManager::startStreamJpeg(unsigned int streamPort,
         return false;
     }
     inputCaps += ",width=" + width + ",height=" + height;
-    if(framerate != "")
+    if(framerate != ""){
         inputCaps += ",framerate=" + framerate;
-    
+    }else if(cam.api == "rpicam"){
+        // Must specify all caps if using rpicam-vid with raw frames
+        Logger::logErrorFrom("CameraManager", "Failed to start stream. Framerate must be specified if using rpicam with raw frames");
+        return false;
+    }
 
     // Decoder (as needed)
     std::string decoder;
@@ -229,12 +250,16 @@ bool CameraManager::startStreamJpeg(unsigned int streamPort,
         pipeline += "raw. ! queue ! " + convert + " ! " + encoder + " ! " + streamOut;
     }
 
-    return startStreamFromPipeline(streamPort, pipeline, frameCallback);
+    std::string fifo = getFifo(cam);
+    std::string procCmd = getProcCmd(fifo, cam, format, width, height, framerate);
+    return startStreamFromPipeline(streamPort, pipeline, frameCallback, fifo, procCmd);
 }
 
 bool CameraManager::startStreamFromPipeline(unsigned int streamPort,
                 std::string pipeline,
-                std::function<void(cv::Mat)> *frameCallback){
+                std::function<void(cv::Mat)> *frameCallback,
+                std::string fifo,
+                std::string procCmd){
     if(streams.find(streamPort) != streams.end()){
         Logger::logErrorFrom("CameraManager", "Failed to start stream. Duplicate stream name.");
         return false;
@@ -244,6 +269,25 @@ bool CameraManager::startStreamFromPipeline(unsigned int streamPort,
     Logger::logDebugFrom("CameraManager", "Stream " + std::to_string(streamPort) + " pipeline: " + pipeline);
 
     streams[streamPort] = Stream();
+    if(fifo != "" && procCmd != ""){
+        Logger::logDebugFrom("CameraManager", "Fifo path: " + fifo);
+        if(access(fifo.c_str(), F_OK) == 0){
+            remove(fifo.c_str());
+        }
+        if(mkfifo(fifo.c_str(), 0666) != 0){
+            streams.erase(streamPort);
+            Logger::logErrorFrom("CameraManager", "Failed to create fifo for stream.");
+            return false;
+        }
+        chmod(fifo.c_str(), 0666);
+        Logger::logInfoFrom("CameraManager", "Starting process for stream " + procCmd);
+        streams[streamPort].proc = popen(procCmd.c_str(), "r");
+        if(streams[streamPort].proc == NULL){
+            streams.erase(streamPort);
+            Logger::logErrorFrom("CameraManager", "Failed to start stream. Failed to spawn process.");
+            return false;
+        }
+    }
     streams[streamPort].cap = cv::VideoCapture();
     if(!streams[streamPort].cap.open(pipeline, cv::CAP_GSTREAMER)){
         streams.erase(streamPort);
@@ -269,7 +313,12 @@ void CameraManager::stopStream(unsigned int streamPort){
         return; // No such stream
     
     Logger::logInfoFrom("CameraManager", "Stopping stream " + std::to_string(streamPort));
-    
+
+    if(streams[streamPort].proc != NULL){
+        pclose(streams[streamPort].proc);
+        remove(streams[streamPort].fifo.c_str());
+    }
+
     streams[streamPort].run = false;
     streams[streamPort].cap.release();
     streams[streamPort].thread.join();
@@ -291,6 +340,90 @@ bool CameraManager::gstHasElement(std::string elementName){
         gst_object_unref(factory);
         return true;
     }
+}
+
+std::string CameraManager::getSource(Camera cam){
+    if(cam.api == "libcamera"){
+        // Note: libcamerasrc doesn't support setting controls (yet)
+        // If controls are needed use v4l2 or rpicam
+        return "libcamerasrc camera-name=" + cam.id;
+    }else if(cam.api == "v4l2"){
+        // TODO: Controls
+        return "v4l2src device=" + cam.id;
+    }else if(cam.api == "rpicam"){
+        return "filesrc location=" + getFifo(cam);
+    }else{
+        return "";
+    }
+}
+
+std::string CameraManager::getFifo(Camera cam){
+    if(cam.api == "rpicam"){
+        std::string pipeName = "stream" + cam.id;
+        std::replace(pipeName.begin(), pipeName.end(), '/', '_');
+        pipeName.erase(std::remove(pipeName.begin(), pipeName.end(), '@'));
+        return "/tmp/" + pipeName;
+    }
+    return "";
+}
+
+// TODO: Log errors in this function
+std::string CameraManager::getProcCmd(std::string fifo, Camera cam, 
+        std::string format, std::string width, std::string height, std::string framerate){
+
+    if(cam.api == "rpicam"){
+        // Convert camera id (path) into index for rpicam-vid
+        int camIndex = -1;
+        std::string getIdCmd = "/usr/bin/env bash -c \"rpicam-vid --list-cameras | grep '" + cam.id + "' | cut -d: -f1\"";
+        FILE *p = popen(getIdCmd.c_str(), "r");
+        if(p == NULL)
+            return "";
+        char buf[32];
+        if(fgets(buf, sizeof(buf), p) != NULL){
+            camIndex = atoi(buf);
+        }
+        pclose(p);
+        if(camIndex < 0)
+            return "";
+
+        if(framerate != ""){
+            int slashPos = framerate.find("/");
+            std::string numstr = framerate.substr(0, slashPos);
+            std::string denstr = framerate.substr(slashPos + 1, framerate.length() - slashPos);
+            if(denstr == "1"){
+                framerate = numstr;
+            }else{
+                try{
+                    double frdouble = std::stod(numstr) / std::stod(denstr);
+                    framerate = std::to_string(frdouble);
+                }catch(const std::exception &e){
+                    return "";
+                }
+            }
+        }
+
+        // TODO: Controls
+        std::string codec;
+        if(format == "jpeg")
+            codec = "mjpeg";
+        else if(format == "raw")
+            codec = "yuv420";
+        else if(format == "h264")
+            codec = "h264";
+        else
+            return "";
+        std::string cmd = std::string("/usr/bin/rpicam-vid -t 0 -v 0 --flush=1") + 
+                " --camera=" + std::to_string(camIndex) + 
+                " --codec=" + codec +
+                " --width=" + width + 
+                " --height=" + height;
+        if(framerate != "")
+            cmd += " --framerate=" + framerate;
+        cmd += " -o " + fifo;
+        return cmd;
+    }
+
+    return "";
 }
 
 std::string CameraManager::getVideoConvertElement(bool hwaccel){
@@ -373,66 +506,6 @@ std::string CameraManager::getJpegDecodeElement(bool hwaccel){
     return "jpegdec";
 }
 
-std::set<std::string> CameraManager::gstCapToVideoModes(GstStructure *cap){
-    std::string format, width, height;
-    std::vector<std::string> framerates;
-
-    auto type = std::string(gst_structure_get_name(cap));
-    if(type == "image/jpeg"){
-        format = "jpeg";
-    }else if(type == "video/x-raw"){
-        format = "raw";
-    }else if(type == "video/x-h264"){
-        format = "h264";
-    }else{
-        // Unknown video type
-        return {};
-    }
-    if(!gst_structure_has_field_typed(cap, "width", G_TYPE_INT) || 
-            !gst_structure_has_field_typed(cap, "height", G_TYPE_INT)){
-        // Missing required info
-        return {};
-    }
-    gint w, h;
-    gst_structure_get_int(cap, "width", &w);
-    gst_structure_get_int(cap, "height", &h);
-    width = std::to_string(w);
-    height = std::to_string(h);
-
-    if(gst_structure_has_field_typed(cap, "framerate", GST_TYPE_FRACTION)){
-        gint frn, frd;
-        gst_structure_get_fraction(cap, "framerate", &frn, &frd);
-        framerates.push_back(std::to_string(frn) + "/" + std::to_string(frd));
-    }else if(gst_structure_has_field_typed(cap, "framerate", GST_TYPE_LIST)){
-        const GValue *frlist = gst_structure_get_value(cap, "framerate");
-        unsigned int count = gst_value_list_get_size(frlist);
-        for(unsigned int i = 0; i < count; ++i){
-            auto fr = gst_value_list_get_value(frlist, i);
-            if(g_type_check_value_holds(fr, GST_TYPE_FRACTION)){
-                gint frn, frd;
-                frn = gst_value_get_fraction_numerator(fr);
-                frd = gst_value_get_fraction_denominator(fr);
-                framerates.push_back(std::to_string(frn) + "/" + std::to_string(frd));
-            }
-        }
-    }
-    
-    // Return list of strings in following form
-    // [format]:[width]x[height]@[framerate]
-    // Framerate is optional (libcamera via gstreamer does not support)
-    if(framerates.size() == 0){
-        return {format + ":" + width + "x" + height};
-    }else if(framerates.size() == 1){
-        return {format + ":" + width + "x" + height + "@" + framerates[0]};
-    }else{
-        std::set<std::string> modes;
-        for(auto &framerate : framerates){
-            modes.insert(format + ":" + width + "x" + height + "@" + framerate);
-        }
-        return modes;
-    }
-}
-
 void CameraManager::initV4l2(){
     Logger::logDebugFrom("CameraManager", "Enumerating v4l2 devices.");
     auto provider = gst_device_provider_factory_get_by_name("v4l2deviceprovider");
@@ -452,24 +525,10 @@ void CameraManager::initV4l2(){
                         std::string id = std::string(gst_structure_get_string(props, "device.path"));
                         Logger::logDebugFrom("CameraManager", "Discovered v4l2 device '" + id + "'");
 
-                        // Use caps to construct video modes
-                        auto caps = gst_device_get_caps(dev);
-                        std::set<std::string> modes;
-                        if(caps){
-                            unsigned int count = gst_caps_get_size(caps);
-                            for(unsigned int i = 0; i < count; ++i){
-                                auto cap = gst_caps_get_structure(caps, i);
-                                std::set<std::string> modesSubset = gstCapToVideoModes(cap);
-                                modes.insert(modesSubset.begin(), modesSubset.end());
-                            }
-                        }
-                        gst_caps_unref(caps);
-
                         // Have all required info. Add this device
                         cameras.push_back(Camera{
                             .api = "v4l2",
-                            .id = id,
-                            .modes = modes
+                            .id = id
                         });
                     }
                 }
@@ -500,25 +559,20 @@ void CameraManager::initLibcamera(){
                     std::string id = std::string(idchars);
                     Logger::logDebugFrom("CameraManager", "Discovered libcamera device '" + id + "'");
 
-                    // Use caps to construct video modes
-                    auto caps = gst_device_get_caps(dev);
-                    std::set<std::string> modes;
-                    if(caps){
-                        unsigned int count = gst_caps_get_size(caps);
-                        for(unsigned int i = 0; i < count; ++i){
-                            auto cap = gst_caps_get_structure(caps, i);
-                            std::set<std::string> modesSubset = gstCapToVideoModes(cap);
-                            modes.insert(modesSubset.begin(), modesSubset.end());
-                        }
-                    }
-                    gst_caps_unref(caps);
-
                     // Have all required info. Add this device
                     cameras.push_back(Camera{
                         .api = "libcamera",
                         .id = id,
-                        .modes = modes
                     });
+
+                    // rpicam-apps supports non-usb cameras
+                    // This is the method used in rpicam-apps source code to identify devices
+                    if(id.find("/usb") == std::string::npos){
+                        cameras.push_back(Camera{
+                            .api = "rpicam",
+                            .id = id,
+                        });
+                    }
                 }
             }
         }

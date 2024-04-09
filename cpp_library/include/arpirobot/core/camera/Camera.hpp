@@ -2,12 +2,12 @@
 
 #include <set>
 #include <string>
+#include <unordered_map>
 
 namespace arpirobot{
     class Camera{
     public:
         std::string api;
         std::string id;
-        std::set<std::string> modes; // [format]:[width]x[height]@[framerate]   framerate is optional
     };
 }

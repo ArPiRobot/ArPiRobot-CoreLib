@@ -24,8 +24,6 @@ namespace arpirobot{
 
         static std::vector<Camera> getCameras();
 
-       
-
         /**
          * Start a stream encoded using H.264
          * @param streamPort Port number for the stream
@@ -48,7 +46,7 @@ namespace arpirobot{
          * Start a stream encoded using JPEG
          * @param streamPort Port number for the stream
          * @param cam Camera to stream from
-         * @param mode Frame input mode for the camera
+         * @param mode Frame input mode for the camera ([format]:[width]x[height]@[framerate])
          * @param frameCallback Function to call when frames are read from the camera
          * @param jpegSettings Settings for jpeg encoding
          * @param hwencode If true, will use hardware accelerated encoder when available
@@ -64,13 +62,19 @@ namespace arpirobot{
 
         /**
          * Start a stream using the provided pipeline
+         * Note: Users will rarely use fifo or procCmd arguments
+         * 
          * @param streamPort Port number for the stream
          * @param pipeline Gstreamer pipeline
          * @param frameCallback Function to call when frames are read from the camera
+         * @param fifo Name of fifo to create
+         * @param procCmd Command to run before pipeline (as forked process)
          */
         static bool startStreamFromPipeline(unsigned int streamPort,
                 std::string pipeline,
-                std::function<void(cv::Mat)> *frameCallback = nullptr);
+                std::function<void(cv::Mat)> *frameCallback = nullptr,
+                std::string fifo = "",
+                std::string procCmd = "");
 
 
         static void stopStream(unsigned int streamPort);
@@ -80,7 +84,10 @@ namespace arpirobot{
     private:
         static bool gstHasElement(std::string elementName);
         
-        static std::string getCapturePipeline(Camera cam, std::string mode, bool hwaccel);
+        static std::string getSource(Camera cam);
+        static std::string getFifo(Camera cam);
+        static std::string getProcCmd(std::string fifo, Camera cam,std::string format, 
+                std::string width, std::string height, std::string framerate);
 
         static std::string getVideoConvertElement(bool hwaccel);
         static std::string getH264EncodeElement(bool hwaccel, H264Settings h264settings);
@@ -88,7 +95,6 @@ namespace arpirobot{
         static std::string getH264DecodeElement(bool hwaccel);
         static std::string getJpegDecodeElement(bool hwaccel);
 
-        static std::set<std::string> gstCapToVideoModes(GstStructure *cap);
         static void initV4l2();
         static void initLibcamera();
 
@@ -105,6 +111,9 @@ namespace arpirobot{
             bool run;
             cv::VideoCapture cap;
             std::thread thread;
+
+            FILE *proc = NULL;
+            std::string fifo;
         };
     };
 
