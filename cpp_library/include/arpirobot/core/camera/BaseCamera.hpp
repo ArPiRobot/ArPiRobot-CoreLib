@@ -2,6 +2,7 @@
 
 #include <string>
 #include <thread>
+#include <mutex>
 #include <opencv2/opencv.hpp>
 
 // IoDevice is really just a way to make sure close() is called
@@ -21,7 +22,7 @@
 // Note: make sure implementations check if gst is initialized before gst init call
 
 namespace arpirobot{
-
+    // TOOD: Doc comments
     // TODO: Inherit from IoDevice & implement close() function
     class BaseCamera{
     public:
@@ -41,21 +42,21 @@ namespace arpirobot{
          *             raw and 30 respectively if they are omitted.
          *             Framerate can be specified as either a floating point value
          *             (eg 30 or 7.5) or as a fraction (eg 30/1 or 15/2)
-         * @return true if the provided mode string is successfully parsed. Else false
+         * @return true if the provided mode string is successfully applied.
+         *         false otherwise. This may mean the mode is invalid
+         *         or it may mean that a stream is currently running. The capture
+         *         mode cannot be changed while a stream is running
          */
         bool setCaptureMode(std::string mode);
-
-        // TODO: Make sure HWaccel and capture mode can't change once isStreaming
-        // is set to true. May actually need to mutex config and stream management
-        // because if config settings change during stream start process
 
         /**
          * Configure hardware acceleration for streaming with this camera
          * @param hwencode Use hardware encoders if available
          * @param hwdecode Use hardware decoders if available
          * @param hwconvert Use hardware converters if available
+         * @return true on success. Only returns false if a stream is running
          */
-        void configHWAccel(bool hwencode, bool hwdecode, bool hwconvert);
+        bool configHWAccel(bool hwencode, bool hwdecode, bool hwconvert);
 
         /**
          * Function to be called when a frame is read from this camera
@@ -64,18 +65,12 @@ namespace arpirobot{
          */
         void setFrameCallback(std::function<void(cv::Mat)> *frameCallback);
 
-        ////////////////////////////////////////////////////////////////////////
-        // Backend can modify, but usually won't need to
-        ////////////////////////////////////////////////////////////////////////
-
-        virtual bool startStreamH264(unsigned int port, unsigned int bitrate, 
+        bool startStreamH264(unsigned int port, unsigned int bitrate, 
                 std::string profile, std::string level);
 
-        virtual bool startStreamJPEG(unsigned int port, unsigned int quality);
+        bool startStreamJPEG(unsigned int port, unsigned int quality);
 
-        virtual void stopStream();
-
-        ////////////////////////////////////////////////////////////////////////
+        void stopStream();
     
         ////////////////////////////////////////////////////////////////////////
         // Backend specific
@@ -97,14 +92,14 @@ namespace arpirobot{
     protected:
 
         // TODO: This function will actually start the stream
-        // Capture and encode pipeline are passed in
         // If capture mode matches stream mode, the encode pipeline will be empty
         // (that check is handled by startH264 and startJpeg functions)
         // If capture mode is raw, this function won't setup a decode pipeline stage
         // Thus, most of the pipeline construction code is shared among all image formats
-        virtual void startStream(unsigned int port, std::string capturePipeline, std::string encodePipeline);
+        virtual bool doStartStream(unsigned int port, std::string encodePipeline);
 
-        // TODO: Make sure to init gst if needed in gstHasElement
+        virtual void doStopStream();
+
         static bool gstHasElement(std::string elementName);
         static std::string getVideoConvertElement(bool hwaccel);
         static std::string getH264EncodeElement(bool hwaccel, unsigned int bitrate, std::string profile, std::string level);
@@ -116,11 +111,11 @@ namespace arpirobot{
         std::string id;
 
         // These settings are default as they should work for most cameras
-        std::string format = "raw";
-        std::string width = "640";
-        std::string height = "480";
-        std::string framerateFrac = "30/1";
-        std::string framerateDec = "30";
+        std::string capFormat = "raw";
+        std::string capWidth = "640";
+        std::string capHeight = "480";
+        std::string capFramerateFrac = "30/1";
+        std::string capFramerateDec = "30";
 
         // Called when frame read from this camera
         std::function<void(cv::Mat)> *frameCallback = nullptr;
@@ -131,7 +126,7 @@ namespace arpirobot{
         bool hwconvert = true;
 
         // Stream management
-        std::mutex streamMutex;     // Used to ensure thread safe config and stream management
+        std::mutex mutex;
         bool isStreaming = false;
         bool runStream;
         cv::VideoCapture cap;
