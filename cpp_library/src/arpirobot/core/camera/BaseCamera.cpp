@@ -171,8 +171,8 @@ void BaseCamera::doStopStream(){
     cap->release();
     thread->join();
     isStreaming = false;
-    cap = nullptr;
     thread = nullptr;
+    cap = nullptr;
 }
 
 std::string BaseCamera::getOutputPipeline(unsigned int port){
@@ -268,7 +268,7 @@ std::string BaseCamera::getJpegEncodeElement(unsigned int quality){
     if(hwencode){
         // V4L2M2M (eg on RPi)
         if(gstHasElement("v4l2jpegenc"))
-            return "v4l2jpegenc extra-controls=controls,compression_quality=" + std::to_string(quality);
+            return "v4l2jpegenc extra-controls=controls,compression_quality=" + std::to_string(quality) + ";";
         
         // VA-API
         if(gstHasElement("vaapijpegenc"))
