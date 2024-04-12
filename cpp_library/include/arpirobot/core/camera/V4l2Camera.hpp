@@ -24,6 +24,7 @@
 namespace arpirobot{
     class V4l2Camera : public BaseCamera{
     public:
+        // ID is /dev path (v4l2-ctl --list-devices)
         V4l2Camera(std::string id);
 
         std::string getBackend() override;

@@ -24,6 +24,7 @@
 namespace arpirobot{
     class LibcameraCamera : public BaseCamera{
     public:
+        // ID is path as shown by cam -l
         LibcameraCamera(std::string id);
 
         std::string getBackend() override;

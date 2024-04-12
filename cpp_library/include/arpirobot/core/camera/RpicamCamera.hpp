@@ -16,3 +16,46 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
  */
+
+#include <arpirobot/core/camera/BaseCamera.hpp>
+
+namespace arpirobot{
+    /**
+     * Uses rpicam-vid instead of gstreamer to capture video
+     * Allows control over rpicam-vid options using extra parameters (TODO: When implemented)
+     * Somewhat more stable than libcamerasrc (used by libcamera camera)
+     * 
+     * Important notes about rpicam camera
+     * - input format is not supported. When setting capture mode, format will be ignored
+     * HW acceleration config is not supported for encode. Only decode / convert does something
+     */
+    class RpicamCamera : public BaseCamera{
+    public:
+
+        // ID is camera number as shown by rpicam-vid --list-cameras
+        RpicamCamera(std::string id);
+
+        std::string getBackend() override;
+
+    protected:
+        std::string getDeviceName() override;
+        std::string getCapturePipeline() override;
+
+        bool doStartStreamH264(unsigned int port, unsigned int bitrate, 
+                std::string profile, std::string level) override;
+        bool doStartStreamJpeg(unsigned int port, unsigned int quality) override;
+        void doStopStream() override;
+    
+    private:
+
+        bool setupFifo(unsigned int port);
+        bool setupProc(std::string cmd);
+        void teardownProcAndFifo();
+
+        std::string framerateToDec();
+
+        // Process and pipe name vars
+        std::string fifoPath = "";
+        FILE *proc = NULL;
+    };
+}
