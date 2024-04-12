@@ -24,16 +24,6 @@
 #include <mutex>
 #include <opencv2/opencv.hpp>
 
-// IoDevice is really just a way to make sure close() is called
-// when the robot is stopped or the program dies no matter what
-// this is the same thing that should be done for cameras
-// to ensure that a camera thread / subprocess is closed down
-// properly in all cases
-// So instead of creating something with a different name, that is essentially the
-// same exact thing, just use IoDevice here, even though this isn't actually
-// using the Io interface.
-#include <arpirobot/core/io/IoDevice.hpp>
-
 
 // TODO: Each child class of BaseCamera could have static method
 // listCameras() that enumerates cameras for that backend
@@ -42,13 +32,10 @@
 
 namespace arpirobot{
     // TOOD: Doc comments
-    // TODO: Inherit from IoDevice & implement close() function
-    class BaseCamera : public IoDevice{
+    class BaseCamera{
     public:
         BaseCamera(std::string id);
         virtual ~BaseCamera();
-
-        void close() override;
 
         /**
          * Get backend-specific device ID for this camera

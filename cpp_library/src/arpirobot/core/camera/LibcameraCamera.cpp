@@ -19,6 +19,9 @@
 
 #include <arpirobot/core/camera/LibcameraCamera.hpp>
 
+#include <string>
+#include <regex>
+
 using namespace arpirobot;
 
 LibcameraCamera::LibcameraCamera(std::string id) : BaseCamera(id){
@@ -34,7 +37,9 @@ std::string LibcameraCamera::getDeviceName(){
 }
 
 std::string LibcameraCamera::getCapturePipeline(){
-    std::string pl = "libcamerasrc camera-name=" + id + " ! ";
+    std::string idEscape = id;
+    idEscape = std::regex_replace(idEscape, std::regex("\\\\"), "\\\\");
+    std::string pl = "libcamerasrc camera-name=\"" + idEscape + "\" ! ";
     if(capFormat == "raw"){
         pl += "video/x-raw";
     }else if(capFormat == "jpeg"){

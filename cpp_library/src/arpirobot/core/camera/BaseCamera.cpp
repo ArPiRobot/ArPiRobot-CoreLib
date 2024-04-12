@@ -31,10 +31,6 @@ BaseCamera::BaseCamera(std::string id) : id(id){
 }
 
 BaseCamera::~BaseCamera(){
-    close();
-}
-
-void BaseCamera::close(){
     stopStream();
 }
 
@@ -141,7 +137,8 @@ bool BaseCamera::doStartStream(std::string pipeline){
     cap = std::make_unique<cv::VideoCapture>();
     if(!cap->open(pipeline, cv::CAP_GSTREAMER)){
         Logger::logErrorFrom(getDeviceName(), "Failed to launch pipeline for stream.");
-        cap.release();
+        cap->release();
+        cap = nullptr;
         return false;
     }
     isStreaming = true;     // used by stream control functions to know if stream is running
@@ -151,7 +148,7 @@ bool BaseCamera::doStartStream(std::string pipeline){
         while(runStream){
             cap->read(frame);
             if(frame.empty())
-                continue; // Stream is probably shutting down. If so, run flag will be false
+                continue;
 
             // Read frameCallback only once. It is not mutex protected, so it could
             // change between checking if null and calling it otherwise
@@ -168,7 +165,6 @@ void BaseCamera::doStopStream(){
     // that is still holding it
     Logger::logInfoFrom(getDeviceName(), "Stopping stream.");
     runStream = false;
-    cap->release();
     thread->join();
     isStreaming = false;
     thread = nullptr;
