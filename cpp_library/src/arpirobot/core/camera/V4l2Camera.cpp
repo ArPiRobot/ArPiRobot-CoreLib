@@ -16,3 +16,34 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
  */
+
+#include <arpirobot/core/camera/V4l2Camera.hpp>
+
+using namespace arpirobot;
+
+V4l2Camera::V4l2Camera(std::string id) : BaseCamera(id){
+
+}
+
+std::string V4l2Camera::getBackend(){
+    return "v4l2";
+}
+
+std::string V4l2Camera::getDeviceName(){
+    return "V4l2Camera(" + id + ")";
+}
+
+std::string V4l2Camera::getCapturePipeline(){
+    std::string pl = "v4l2src device=" + id + " ! ";
+    if(capFormat == "raw"){
+        pl += "video/x-raw";
+    }else if(capFormat == "jpeg"){
+        pl += "image/jpeg";
+    }else if(capFormat == "h264"){
+        pl += "video/x-h264";
+    }else{
+        return "";
+    }
+    pl += ",width=" + capWidth + ",height=" + capHeight + ",framerate=" + capFramerate;
+    return pl;
+}

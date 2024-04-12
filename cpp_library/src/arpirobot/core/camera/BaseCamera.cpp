@@ -1,3 +1,21 @@
+/*
+ * Copyright 2024 Marcus Behel
+ *
+ * This file is part of ArPiRobot-CoreLib.
+ * 
+ * ArPiRobot-CoreLib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * ArPiRobot-CoreLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
+ */
 
 #include <arpirobot/core/camera/BaseCamera.hpp>
 #include <gst/gst.h>
@@ -40,6 +58,8 @@ bool BaseCamera::setCaptureMode(std::string mode){
         capWidth = m[3];
         capHeight = m[4];
         capFramerate = m[6];
+        if(capFramerate.find('/') == std::string::npos)
+            capFramerate += "/1";
         return true;
     }else{
         // Invalid mode string
@@ -47,7 +67,7 @@ bool BaseCamera::setCaptureMode(std::string mode){
     }
 }
 
-bool BaseCamera::configHWAccel(bool hwencode, bool hwdecode, bool hwconvert){
+bool BaseCamera::setHwAccel(bool hwencode, bool hwdecode, bool hwconvert){
     /// If this config changes part way through stream start, stream will
     // be started incorrectly
     std::lock_guard<std::mutex> l(mutex);
@@ -95,6 +115,7 @@ bool BaseCamera::doStartStreamH264(unsigned int port, unsigned int bitrate,
     // Note: Even if input is already h264, we still want to
     // re-encode because encoder settings may not be correct
     auto encodePipeline = getH264EncodeElement(bitrate, profile, level);
+    encodePipeline += " ! h264parse config-interval=-1 ! video/x-h264,stream-format=byte-stream";
     auto pipeline = makeStandardPipeline(port, encodePipeline);
     return doStartStream(pipeline);
 }
@@ -110,6 +131,8 @@ bool BaseCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
 bool BaseCamera::doStartStream(std::string pipeline){
     // Note: not taking mutex here. This will be called from another function
     // that is still holding it
+
+    Logger::logDebugFrom(getDeviceName(), "Pipeline: " + pipeline);
 
     // Start the pipeline on another thread
     // Note: Not using BaseRobot scheduler's threads
@@ -178,7 +201,7 @@ std::string BaseCamera::makeStandardPipeline(unsigned int port, std::string encP
     // Note: SW videoconvert needed at input because colorimetry may cause issues for HW converters
     // depending on input source (often occurs for USB webcams with v4l2convert on rpi)
     // Thus, this is always SW convert, since it can handle fixing this.
-    return capPl + " ! videoconvert ! " + decPl + " tee name=raw " + 
+    return capPl + " ! " + decPl + " ! videoconvert ! tee name=raw " + 
             "raw. ! queue ! " + convert + " ! appsink drop=true max-buffers=1 " + 
             "raw. ! queue ! " + convert + " ! " + encPl + " ! " + outPl;
 
@@ -217,21 +240,28 @@ std::string BaseCamera::getH264EncodeElement(unsigned int bitrate, std::string p
         if(gstHasElement("v4l2h264enc")){
             // Note: Must be explicit with both level and profile or v4l2h264enc fails
             // Note: Adding zeros to bitrate b/c video_bitrate is in bits/sec but argument is kbits/sec
-            return "v4l2h264enc extra-controls=controls,repeat_sequence_header=1,video_bitrate=" + 
-                    std::to_string(bitrate) + "000;" + " ! video/x-h264,level=(string)" + 
-                    level + ",profile=" + profile;
+            auto pl = "v4l2h264enc extra-controls=controls,repeat_sequence_header=1,video_bitrate=" + 
+                    std::to_string(bitrate) + "000;" + " ! video/x-h264";
+            if(level == "") level = "4";
+            pl += ",level=(string)" + level;
+            if(profile != "") pl += ",profile=" + profile;
+            return pl;
         }
         // VA-API
         if(gstHasElement("vaapih264enc")){
-            return "vaapih264enc bitrate=" + std::to_string(bitrate) + " ! video/x-h264,level=(string)" + 
-                    level + ",profile=" + profile;
+            auto pl = "vaapih264enc bitrate=" + std::to_string(bitrate) + " ! video/x-h264";
+            if(level != "") pl += ",level=(string)" + level;
+            if(profile != "") pl += ",profile=" + profile;
+            return pl;
         }
     }
 
     // Fallback to software
-    return "x264enc key-int-max=120 tune=zerolatency speed-preset=ultrafast bitrate=" + 
-            std::to_string(bitrate) + " ! video/x-h264,level=(string)" + level + 
-            ",profile=" + profile;
+    auto pl = "x264enc key-int-max=120 tune=zerolatency speed-preset=ultrafast bitrate=" + 
+            std::to_string(bitrate) + " ! video/x-h264";
+    if(level != "") pl += ",level=(string)" + level;
+    if(profile != "") pl += ",profile=" + profile;
+    return pl;
 }
 
 std::string BaseCamera::getJpegEncodeElement(unsigned int quality){

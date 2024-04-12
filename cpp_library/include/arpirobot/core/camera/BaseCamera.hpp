@@ -1,3 +1,22 @@
+/*
+ * Copyright 2024 Marcus Behel
+ *
+ * This file is part of ArPiRobot-CoreLib.
+ * 
+ * ArPiRobot-CoreLib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * ArPiRobot-CoreLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
 #pragma once
 
 #include <string>
@@ -61,7 +80,10 @@ namespace arpirobot{
          * @param hwconvert Use hardware converters if available
          * @return true on success. Only returns false if a stream is running
          */
-        bool configHWAccel(bool hwencode, bool hwdecode, bool hwconvert);
+        bool setHwAccel(bool hwencode, bool hwdecode, bool hwconvert);
+
+        // TODO: setExtaControls
+        // Will not work for all implementations. but will work for some. advanced feature.
 
         /**
          * Function to be called when a frame is read from this camera
@@ -75,15 +97,15 @@ namespace arpirobot{
          * TODO: params
          * @return true on success, else false (could be pipeline failure, or a stream may already be running)
          */
-        bool startStreamH264(unsigned int port, unsigned int bitrate, 
-                std::string profile, std::string level);
+        bool startStreamH264(unsigned int port, unsigned int bitrate = 2048, 
+                std::string profile = "baseline", std::string level = "");
 
         /**
          * Start a JPEG stream
          * TODO: params
          * @return true on success, else false (could be pipeline failure, or a stream may already be running)
          */
-        bool startStreamJpeg(unsigned int port, unsigned int quality);
+        bool startStreamJpeg(unsigned int port, unsigned int quality = 80);
 
         /**
          * Stop the running stream

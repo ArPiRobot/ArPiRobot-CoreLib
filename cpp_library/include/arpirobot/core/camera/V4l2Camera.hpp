@@ -16,3 +16,20 @@
  * You should have received a copy of the GNU Lesser General Public License
  * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
  */
+
+#pragma once
+
+#include <arpirobot/core/camera/BaseCamera.hpp>
+
+namespace arpirobot{
+    class V4l2Camera : public BaseCamera{
+    public:
+        V4l2Camera(std::string id);
+
+        std::string getBackend() override;
+
+    protected:
+        std::string getDeviceName() override;
+        std::string getCapturePipeline() override;
+    };
+}

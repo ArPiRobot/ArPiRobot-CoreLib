@@ -25,7 +25,6 @@
 #include <arpirobot/core/conversions.hpp>
 #include <arpirobot/core/io/Io.hpp>
 #include <arpirobot/core/audio/AudioManager.hpp>
-#include <arpirobot/core/camera/CameraManager.hpp>
 
 
 #include <stdexcept>
@@ -160,9 +159,6 @@ void BaseRobot::start(){
     Logger::logInfo("Robot stopping.");
 
     robotStopped();
-
-    // Stop any camera stream threads
-    CameraManager::stopAllStreams();
     
     // Make sure this is nullptr before stopping scheduler
     {
