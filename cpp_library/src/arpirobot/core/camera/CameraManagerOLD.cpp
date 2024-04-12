@@ -326,21 +326,7 @@ void CameraManager::stopStream(unsigned int streamPort){
     streams.erase(streamPort);
 }
 
-void CameraManager::stopAllStreams(){
-    while(streams.size() > 0){
-        stopStream((*streams.begin()).first);
-    }
-}
 
-bool CameraManager::gstHasElement(std::string elementName){
-    auto factory = gst_element_factory_find(elementName.c_str());
-    if(factory == NULL){
-        return false;
-    }else{
-        gst_object_unref(factory);
-        return true;
-    }
-}
 
 std::string CameraManager::getSource(Camera cam){
     if(cam.api == "libcamera"){
@@ -426,85 +412,10 @@ std::string CameraManager::getProcCmd(std::string fifo, Camera cam,
     return "";
 }
 
-std::string CameraManager::getVideoConvertElement(bool hwaccel){
-    if(hwaccel){
-        // V4L2M2M (eg RPi)
-        if(gstHasElement("v4l2convert")){
-            return "v4l2convert";
-        }
-    }
 
-    // Fallback to software
-    return "videoconvert";
-}
 
-std::string CameraManager::getH264EncodeElement(bool hwaccel, H264Settings h264settings){
-    if(hwaccel){
-        // V4L2M2M (eg on RPi)
-        if(gstHasElement("v4l2h264enc")){
-            // Note: Must be explicit with both level and profile or v4l2h264enc fails
-            // Note: Adding zeros to bitrate b/c video_bitrate is in bits/sec but argument is kbits/sec
-            return "v4l2h264enc extra-controls=controls,repeat_sequence_header=1,video_bitrate=" + 
-                    std::to_string(h264settings.bitrate) + "000;" + " ! video/x-h264,level=(string)" + 
-                    h264settings.level + ",profile=" + h264settings.profile;
-        }
-        // VA-API
-        if(gstHasElement("vaapih264enc")){
-            return "vaapih264enc bitrate=" + std::to_string(h264settings.bitrate) + " ! video/x-h264,level=(string)" + 
-                    h264settings.level + ",profile=" + h264settings.profile;
-        }
-    }
 
-    // Fallback to software
-    return "x264enc key-int-max=120 tune=zerolatency speed-preset=ultrafast bitrate=" + 
-            std::to_string(h264settings.bitrate) + " ! video/x-h264,level=(string)" + h264settings.level + 
-            ",profile=" + h264settings.profile;
-}
 
-std::string CameraManager::getJpegEncodeElement(bool hwaccel, JpegSettings jpegSettings){
-    if(hwaccel){
-        // V4L2M2M (eg on RPi)
-        if(gstHasElement("v4l2jpegenc"))
-            return "v4l2jpegenc extra-controls=controls,compression_quality=" + std::to_string(jpegSettings.quality);
-        
-        // VA-API
-        if(gstHasElement("vaapijpegenc"))
-            return "vaapijpegenc quality=" + std::to_string(jpegSettings.quality);
-    }
-
-    // Fallback to software
-    return "jpegenc quality=" + std::to_string(jpegSettings.quality);
-}
-
-std::string CameraManager::getH264DecodeElement(bool hwaccel){
-    if(hwaccel){
-        // V4L2M2M (eg on RPi)
-        if(gstHasElement("v4l2h264dec"))
-            return "v4l2h264dec";
-        
-        // VA-API
-        if(gstHasElement("vaapih264dec"))
-            return "vaapih264dec";
-    }
-
-    // Fallback to software
-    return "openh264dec";
-}
-
-std::string CameraManager::getJpegDecodeElement(bool hwaccel){
-    if(hwaccel){
-        // V4L2M2M (eg on RPi)
-        if(gstHasElement("v4l2jpegdec"))
-            return "v4l2jpegdec";
-        
-        // VA-API
-        if(gstHasElement("vaapijpegdec"))
-            return "vaapijpegdec";
-    }
-
-    // Fallback to software
-    return "jpegdec";
-}
 
 void CameraManager::initV4l2(){
     Logger::logDebugFrom("CameraManager", "Enumerating v4l2 devices.");

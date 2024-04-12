@@ -1,18 +1,24 @@
 
 #include <arpirobot/core/camera/BaseCamera.hpp>
+#include <gst/gst.h>
+#include <opencv2/opencv.hpp>
+#include <arpirobot/core/log/Logger.hpp>
+#include <regex>
 
 using namespace arpirobot;
 
 
 BaseCamera::BaseCamera(std::string id) : id(id){
-    // TODO: ANything else needed in initializer list?
+
 }
 
 BaseCamera::~BaseCamera(){
-    //TODO: close();
+    close();
 }
 
-// TODO: close function
+void BaseCamera::close(){
+    stopStream();
+}
 
 std::string BaseCamera::getId(){
     return id;
@@ -27,9 +33,18 @@ bool BaseCamera::setCaptureMode(std::string mode){
     if(isStreaming)
         return false;
     
-    // TODO: Parse, validate, and apply capture mode
-
-    return true; // Should be false if parse / validate fails
+    std::regex e("^((raw|jpeg|h264):)?(\\d+)x(\\d+)(@(\\d+|\\d+\\/\\d+))?$");
+    std::smatch m;
+    if(std::regex_search(mode, m, e)){
+        capFormat = m[2];
+        capWidth = m[3];
+        capHeight = m[4];
+        capFramerate = m[6];
+        return true;
+    }else{
+        // Invalid mode string
+        return false;
+    }
 }
 
 bool BaseCamera::configHWAccel(bool hwencode, bool hwdecode, bool hwconvert){
@@ -43,15 +58,14 @@ bool BaseCamera::configHWAccel(bool hwencode, bool hwdecode, bool hwconvert){
     this->hwencode = hwencode;
     this->hwdecode = hwdecode;
     this->hwconvert = hwconvert;
+
+    return true;
 }
 
 void BaseCamera::setFrameCallback(std::function<void(cv::Mat)> *frameCallback){
     // No need to mutex this. This doesn't impact stream startup
     // process. It can also change during a stream since the pointer in the object
     // is accessed.
-    // TODO: When framecallback is run in stream thread
-    // the stream thread should perform a single read. Otherwise check then use
-    // could have thread safety problems
     this->frameCallback = frameCallback;
 }
 
@@ -60,22 +74,14 @@ bool BaseCamera::startStreamH264(unsigned int port, unsigned int bitrate,
     std::lock_guard<std::mutex> l(mutex);
     if(isStreaming)
         return false;
-
-    // Note: Even if input is already h264, we still want to
-    // re-encode because encoder settings may not be correct
-    std::string encodePipeline = ""; // TODO
-    return doStartStream(port, encodePipeline);
+    return doStartStreamH264(port, bitrate, profile, level);
 }
 
-bool BaseCamera::startStreamJPEG(unsigned int port, unsigned int quality){
+bool BaseCamera::startStreamJpeg(unsigned int port, unsigned int quality){
     std::lock_guard<std::mutex> l(mutex);
     if(isStreaming)
         return false;
-
-    // Note: Even if input is already jpeg, we still want to
-    // re-encode because encoder settings may not be correct
-    std::string encodePipeline = ""; // TODO
-    return doStartStream(port, encodePipeline);
+    return doStartStreamJpeg(port, quality);
 }
 
 void BaseCamera::stopStream(){
@@ -84,40 +90,191 @@ void BaseCamera::stopStream(){
         doStopStream();
 }
 
-// TODO: This is entirely re-implemented for RpicamCamera
-// rpicam-vid would provide frames in a "ready to stream"
-// state. We then use decode pipeline to get into appsrc
-bool BaseCamera::doStartStream(unsigned int port, std::string encodePipeline){
+bool BaseCamera::doStartStreamH264(unsigned int port, unsigned int bitrate, 
+                std::string profile, std::string level){
+    // Note: Even if input is already h264, we still want to
+    // re-encode because encoder settings may not be correct
+    auto encodePipeline = getH264EncodeElement(bitrate, profile, level);
+    auto pipeline = makeStandardPipeline(port, encodePipeline);
+    return doStartStream(pipeline);
+}
+
+bool BaseCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
+    // Note: Even if input is already jpeg, we still want to
+    // re-encode because encoder settings may not be correct
+    auto encodePipeline = getJpegEncodeElement(quality);
+    auto pipeline = makeStandardPipeline(port, encodePipeline);
+    return doStartStream(pipeline);
+}
+
+bool BaseCamera::doStartStream(std::string pipeline){
     // Note: not taking mutex here. This will be called from another function
     // that is still holding it
 
-    // Capture pipeline includes correct capsfilter
-    std::string capturePipeline = getCapturePipeline();
-    
-    // TODO: Construct this based on frame input mode. We always need
-    // have to decode because OpenCV needs raw frames for application to access
-    std::string decodePipeline = "";
+    // Start the pipeline on another thread
+    // Note: Not using BaseRobot scheduler's threads
+    // because those are reserved for dynamically scheduled tasks that yield by returning
+    // This thread will "yield" by blocking on I/O
+    cap = std::make_unique<cv::VideoCapture>();
+    if(!cap->open(pipeline, cv::CAP_GSTREAMER)){
+        Logger::logErrorFrom(getDeviceName(), "Failed to launch pipeline for stream.");
+        cap.release();
+        return false;
+    }
+    isStreaming = true;     // used by stream control functions to know if stream is running
+    runStream = true;       // used in stop stream to halt thread before join
+    thread = std::make_unique<std::thread>([this](){
+        cv::Mat frame;
+        while(runStream){
+            cap->read(frame);
+            if(frame.empty())
+                continue; // Stream is probably shutting down. If so, run flag will be false
 
-    // Construct full pipeline
-    // Note: after input, there is a SW videoconvert because HW converter often have
-    // limitations that cause pipelines to break with some cameras. videoconvert can usually
-    // fix such issues (normally just colorimetry)
-    std::string pipeline = 
-            capturePipeline + " ! videoconvert ! ";
-            // TODO: Finish pipeline construction
-    
-    // TODO: Actually run stream
+            // Read frameCallback only once. It is not mutex protected, so it could
+            // change between checking if null and calling it otherwise
+            auto *cb = frameCallback;
+            if(cb != nullptr)
+                (*cb)(frame);
+        }
+    });
+    return true;
 }
 
 void BaseCamera::doStopStream(){
-    // TODO
+    // Note: not taking mutex here. This will be called from another function
+    // that is still holding it
+    Logger::logInfoFrom(getDeviceName(), "Stopping stream.");
+    runStream = false;
+    cap->release();
+    thread->join();
+    isStreaming = false;
+    cap = nullptr;
+    thread = nullptr;
 }
 
-// TODO: Implement all these
-// TODO: Make sure to init gst if needed in gstHasElement
-bool gstHasElement(std::string elementName);
-std::string getVideoConvertElement(bool hwaccel);
-std::string getH264EncodeElement(bool hwaccel, unsigned int bitrate, std::string profile, std::string level);
-std::string getJpegEncodeElement(bool hwaccel, unsigned int quality);
-std::string getH264DecodeElement(bool hwaccel);
-std::string getJpegDecodeElement(bool hwaccel);
+std::string BaseCamera::getOutputPipeline(unsigned int port){
+    // buffers-soft-max=2 recover-policy=latest on tcpserversink do two things to help with network drops / latency
+    //   1. If a client looses frames, they are not re-sent. Instead the latest frame is sent
+    //   2. If packets are dropped, the number of buffers used is limited to avoid excessive memory usage
+    return "tcpserversink buffers-soft-max=2 recover-policy=latest host=0.0.0.0 port=" + std::to_string(port);
+}
+
+std::string BaseCamera::makeStandardPipeline(unsigned int port, std::string encPl){
+    // TODO: Construct the pipeline
+    std::string capPl = getCapturePipeline();       // Note: Includes capsfilter
+    std::string decPl;
+    std::string convert = getVideoConvertElement();
+    std::string outPl = getOutputPipeline(port);
+    if(capFormat == "raw"){
+        decPl = "identity";
+    }else if(capFormat == "jpeg"){
+        decPl = getJpegDecodeElement();
+    }else if(capFormat == "h264"){
+        decPl = getH264DecodeElement();
+    }else{
+        return "";
+    }
+    
+    // Note: SW videoconvert needed at input because colorimetry may cause issues for HW converters
+    // depending on input source (often occurs for USB webcams with v4l2convert on rpi)
+    // Thus, this is always SW convert, since it can handle fixing this.
+    return capPl + " ! videoconvert ! " + decPl + " tee name=raw " + 
+            "raw. ! queue ! " + convert + " ! appsink drop=true max-buffers=1 " + 
+            "raw. ! queue ! " + convert + " ! " + encPl + " ! " + outPl;
+
+}
+
+bool BaseCamera::gstHasElement(std::string elementName){
+    if(!gst_is_initialized()){
+        gst_init(NULL, NULL);
+    }
+    auto factory = gst_element_factory_find(elementName.c_str());
+    if(factory == NULL){
+        return false;
+    }else{
+        gst_object_unref(factory);
+        return true;
+    }
+}
+
+std::string BaseCamera::getVideoConvertElement(){
+    if(hwconvert){
+        // V4L2M2M (eg RPi)
+        if(gstHasElement("v4l2convert")){
+            return "v4l2convert";
+        }
+
+        // VA-API has no convert element
+    }
+
+    // Fallback to software
+    return "videoconvert";
+}
+
+std::string BaseCamera::getH264EncodeElement(unsigned int bitrate, std::string profile, std::string level){
+    if(hwencode){
+        // V4L2M2M (eg on RPi)
+        if(gstHasElement("v4l2h264enc")){
+            // Note: Must be explicit with both level and profile or v4l2h264enc fails
+            // Note: Adding zeros to bitrate b/c video_bitrate is in bits/sec but argument is kbits/sec
+            return "v4l2h264enc extra-controls=controls,repeat_sequence_header=1,video_bitrate=" + 
+                    std::to_string(bitrate) + "000;" + " ! video/x-h264,level=(string)" + 
+                    level + ",profile=" + profile;
+        }
+        // VA-API
+        if(gstHasElement("vaapih264enc")){
+            return "vaapih264enc bitrate=" + std::to_string(bitrate) + " ! video/x-h264,level=(string)" + 
+                    level + ",profile=" + profile;
+        }
+    }
+
+    // Fallback to software
+    return "x264enc key-int-max=120 tune=zerolatency speed-preset=ultrafast bitrate=" + 
+            std::to_string(bitrate) + " ! video/x-h264,level=(string)" + level + 
+            ",profile=" + profile;
+}
+
+std::string BaseCamera::getJpegEncodeElement(unsigned int quality){
+    if(hwencode){
+        // V4L2M2M (eg on RPi)
+        if(gstHasElement("v4l2jpegenc"))
+            return "v4l2jpegenc extra-controls=controls,compression_quality=" + std::to_string(quality);
+        
+        // VA-API
+        if(gstHasElement("vaapijpegenc"))
+            return "vaapijpegenc quality=" + std::to_string(quality);
+    }
+
+    // Fallback to software
+    return "jpegenc quality=" + std::to_string(quality);
+}
+
+std::string BaseCamera::getH264DecodeElement(){
+    if(hwdecode){
+        // V4L2M2M (eg on RPi)
+        if(gstHasElement("v4l2h264dec"))
+            return "v4l2h264dec";
+        
+        // VA-API
+        if(gstHasElement("vaapih264dec"))
+            return "vaapih264dec";
+    }
+
+    // Fallback to software
+    return "openh264dec";
+}
+
+std::string BaseCamera::getJpegDecodeElement(){
+    if(hwdecode){
+        // V4L2M2M (eg on RPi)
+        if(gstHasElement("v4l2jpegdec"))
+            return "v4l2jpegdec";
+        
+        // VA-API
+        if(gstHasElement("vaapijpegdec"))
+            return "vaapijpegdec";
+    }
+
+    // Fallback to software
+    return "jpegdec";
+}

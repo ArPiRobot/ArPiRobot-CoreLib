@@ -24,10 +24,12 @@
 namespace arpirobot{
     // TOOD: Doc comments
     // TODO: Inherit from IoDevice & implement close() function
-    class BaseCamera{
+    class BaseCamera : public IoDevice{
     public:
         BaseCamera(std::string id);
         virtual ~BaseCamera();
+
+        void close() override;
 
         /**
          * Get backend-specific device ID for this camera
@@ -40,8 +42,11 @@ namespace arpirobot{
          *             [format]:[width]x[height]@[framerate]
          *             format and framerate can be omitted. They will default to
          *             raw and 30 respectively if they are omitted.
-         *             Framerate can be specified as either a floating point value
-         *             (eg 30 or 7.5) or as a fraction (eg 30/1 or 15/2)
+         *             Framerate can be specified as fraction or whole integer
+         *             Format is optional, defaulting to raw if not specified
+         *             Framerate is optional, defaulting to 30/1 if not specified
+         *             Omit the colon if not specifying format
+         *             Omit the at symbol if not specifying framerate
          * @return true if the provided mode string is successfully applied.
          *         false otherwise. This may mean the mode is invalid
          *         or it may mean that a stream is currently running. The capture
@@ -65,47 +70,59 @@ namespace arpirobot{
          */
         void setFrameCallback(std::function<void(cv::Mat)> *frameCallback);
 
+        /**
+         * Start a H264 stream
+         * TODO: params
+         * @return true on success, else false (could be pipeline failure, or a stream may already be running)
+         */
         bool startStreamH264(unsigned int port, unsigned int bitrate, 
                 std::string profile, std::string level);
 
-        bool startStreamJPEG(unsigned int port, unsigned int quality);
+        /**
+         * Start a JPEG stream
+         * TODO: params
+         * @return true on success, else false (could be pipeline failure, or a stream may already be running)
+         */
+        bool startStreamJpeg(unsigned int port, unsigned int quality);
 
+        /**
+         * Stop the running stream
+         */
         void stopStream();
     
-        ////////////////////////////////////////////////////////////////////////
         // Backend specific
-        ////////////////////////////////////////////////////////////////////////
-
         /**
          * Get name of this camera's backend
          */
         virtual std::string getBackend() = 0;
 
-        /**
-         * Get gstreamer pipeline to capture from this camera in the
-         * configured mode.
-         */
+    protected:
+        // Backend specific
+        virtual std::string getDeviceName() = 0;
         virtual std::string getCapturePipeline() = 0;
 
-        ////////////////////////////////////////////////////////////////////////
-
-    protected:
-
-        // TODO: This function will actually start the stream
-        // If capture mode matches stream mode, the encode pipeline will be empty
-        // (that check is handled by startH264 and startJpeg functions)
-        // If capture mode is raw, this function won't setup a decode pipeline stage
-        // Thus, most of the pipeline construction code is shared among all image formats
-        virtual bool doStartStream(unsigned int port, std::string encodePipeline);
-
+        // Can be overriden by subclasses to change how streams actually work
+        // instead of using the standard gstreamer method implemented here
+        // These are called by the functions named similary without "do"
+        // The non-"do" functions handle the mutex
+        virtual bool doStartStreamH264(unsigned int port, unsigned int bitrate, 
+                std::string profile, std::string level);
+        virtual bool doStartStreamJpeg(unsigned int port, unsigned int quality);
+        virtual bool doStartStream(std::string pipeline);
         virtual void doStopStream();
 
-        static bool gstHasElement(std::string elementName);
-        static std::string getVideoConvertElement(bool hwaccel);
-        static std::string getH264EncodeElement(bool hwaccel, unsigned int bitrate, std::string profile, std::string level);
-        static std::string getJpegEncodeElement(bool hwaccel, unsigned int quality);
-        static std::string getH264DecodeElement(bool hwaccel);
-        static std::string getJpegDecodeElement(bool hwaccel);
+        std::string getOutputPipeline(unsigned int port);
+
+        // Used in base class doStartStream... implementations
+        // since pipeline construction only varies by encoder
+        std::string makeStandardPipeline(unsigned int port, std::string encPl);
+
+        bool gstHasElement(std::string elementName);
+        std::string getVideoConvertElement();
+        std::string getH264EncodeElement(unsigned int bitrate, std::string profile, std::string level);
+        std::string getJpegEncodeElement(unsigned int quality);
+        std::string getH264DecodeElement();
+        std::string getJpegDecodeElement();
 
         // Backend-specific Device ID
         std::string id;
@@ -114,8 +131,7 @@ namespace arpirobot{
         std::string capFormat = "raw";
         std::string capWidth = "640";
         std::string capHeight = "480";
-        std::string capFramerateFrac = "30/1";
-        std::string capFramerateDec = "30";
+        std::string capFramerate = "30/1";
 
         // Called when frame read from this camera
         std::function<void(cv::Mat)> *frameCallback = nullptr;
@@ -129,7 +145,7 @@ namespace arpirobot{
         std::mutex mutex;
         bool isStreaming = false;
         bool runStream;
-        cv::VideoCapture cap;
-        std::thread thread;
+        std::unique_ptr<cv::VideoCapture> cap;
+        std::unique_ptr<std::thread> thread;
     };
 }
