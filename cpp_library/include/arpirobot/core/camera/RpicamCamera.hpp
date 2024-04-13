@@ -26,8 +26,7 @@ namespace arpirobot{
      * Somewhat more stable than libcamerasrc (used by libcamera camera)
      * 
      * Important notes about rpicam camera
-     * - input format is not supported. When setting capture mode, format will be ignored
-     * HW acceleration config is not supported for encode. Only decode / convert does something
+     * - input format is not supported (raw will always be used).
      */
     class RpicamCamera : public BaseCamera{
     public:

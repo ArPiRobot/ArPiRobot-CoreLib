@@ -25,38 +25,43 @@ std::string RpicamCamera::getDeviceName(){
 }
 
 std::string RpicamCamera::getCapturePipeline(){
-    return ""; // Not used because doStartStream... overriden to not use makeStandardPipeline
+    return "filesrc location=" + fifoPath + " ! queue ! video/x-raw,format=I420" + 
+            ",width=" + capWidth + ",height=" + capHeight + ",framerate=" + capFramerate +
+            " ! rawvideoparse use-sink-caps=true";
 }
 
 bool RpicamCamera::doStartStreamH264(unsigned int port, unsigned int bitrate, 
         std::string profile, std::string level){
     if(!setupFifo(port))
         return false;
-    std::string cmd = std::string("rpicam-vid -t 0 --codec h264 --verbose=0") + 
+
+    // We always read frames in raw mode from rpicam-vid. Why?
+    // 1. If we read jpeg / h264 we'd just end up decoding for appsink. The pi camera doesn't 
+    //    natively support jpeg / h264. It just uses the HW encoders. So that's just a waste
+    // 2. v4l2 encoders require full caps for a video read from filesrc. This requires guessing
+    //    as to the colorimetry (color space) that rpicam-vid ended up using for jpeg (and maybe h264?)
+    //    In raw mode, all caps are known and explicitly controlled via rpicam-vid's command line
+    // Essentially, RpicamCamera just uses rpicam-vid as an input source instead of libcamerasrc
+    // because it is often more stable and allows passing custom controls to the camera via
+    // rpicam-vid's command line options (libcamerasrc currently doesn't support setting controls)
+    if(capFormat != "raw"){
+        Logger::logWarningFrom(getDeviceName(), "Only raw capture format is supported, but " + capFormat + " was specified.");
+        capFormat = "raw"; // Must set this correctly or BaseCamera::makeStandardPipeline will do the wrong thing
+    }
+    std::string cmd = std::string("rpicam-vid --timeout=0 --verbose=0 --codec=yuv420") + 
             " --camera=" + id + 
             " --width=" + capWidth + 
             " --height=" + capHeight +
             " --framerate=" + framerateToDec() + 
-            " --bitrate=" + std::to_string(bitrate) +
-            " --profile=" + profile + 
             " --output=" + fifoPath;
-    if(level != "")
-        cmd += " --level=" + level;
-    if(!setupProc(cmd))
+    
+    if(!setupProc(cmd)){
+        teardownProcAndFifo();
         return false;
+    }
 
-    std::string convert = getVideoConvertElement();
-    std::string decPl = getH264DecodeElement();
-
-    std::string pl = "filesrc location=" + fifoPath + " ! ";
-    pl += capFormat + "image/jpeg,width=" + capWidth + ",height=" + capHeight + ",framerate=" + capFramerate;
-    // TODO: Other options required for h264 capsfilter
-    pl += " ! tee name=enc ";
-    pl += "enc. ! queue ! " + decPl + " ! " + convert + " ! appsink drop=true max-buffers=1 ";
-    pl += "enc. ! queue ! " + getOutputPipeline(port);
-
-    // Actually start things
-    if(!doStartStream(pl)){
+    bool ret = BaseCamera::doStartStreamH264(port, bitrate, profile, level);
+    if(!ret){
         teardownProcAndFifo();
         return false;
     }
@@ -66,28 +71,34 @@ bool RpicamCamera::doStartStreamH264(unsigned int port, unsigned int bitrate,
 bool RpicamCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
     if(!setupFifo(port))
         return false;
-    std::string cmd = std::string("rpicam-vid -t 0 --codec mjpeg --verbose=0") + 
+
+    // We always read frames in raw mode from rpicam-vid. Why?
+    // 1. If we read jpeg / h264 we'd just end up decoding for appsink. The pi camera doesn't 
+    //    natively support jpeg / h264. It just uses the HW encoders. So that's just a waste
+    // 2. v4l2 encoders require full caps for a video read from filesrc. This requires guessing
+    //    as to the colorimetry (color space) that rpicam-vid ended up using for jpeg (and maybe h264?)
+    //    In raw mode, all caps are known and explicitly controlled via rpicam-vid's command line
+    // Essentially, RpicamCamera just uses rpicam-vid as an input source instead of libcamerasrc
+    // because it is often more stable and allows passing custom controls to the camera via
+    // rpicam-vid's command line options (libcamerasrc currently doesn't support setting controls)
+    if(capFormat != "raw"){
+        Logger::logWarningFrom(getDeviceName(), "Only raw capture format is supported, but " + capFormat + " was specified.");
+        capFormat = "raw"; // Must set this correctly or BaseCamera::makeStandardPipeline will do the wrong thing
+    }
+    std::string cmd = std::string("rpicam-vid --timeout=0 --verbose=0 --codec=yuv420") + 
             " --camera=" + id + 
             " --width=" + capWidth + 
             " --height=" + capHeight +
             " --framerate=" + framerateToDec() + 
-            " --quality=" + std::to_string(quality) + 
             " --output=" + fifoPath;
-    if(!setupProc(cmd))
-        return false;
-
-    std::string convert = getVideoConvertElement();
-    std::string decPl = getJpegDecodeElement();
     
-    std::string pl = "filesrc location=" + fifoPath + " ! ";
-    pl += capFormat + "imag/jpeg,width=" + capWidth + ",height=" + capHeight + ",framerate=" + capFramerate;
-    // TODO: Other options required for jpeg capsfilter
-    pl += " ! tee name=enc ";
-    pl += "enc. ! queue ! " + decPl + " ! " + convert + " ! appsink drop=true max-buffers=1 ";
-    pl += "enc. ! queue ! " + getOutputPipeline(port);
+    if(!setupProc(cmd)){
+        teardownProcAndFifo();
+        return false;
+    }
 
-    // Actually start things
-    if(!doStartStream(pl)){
+    bool ret = BaseCamera::doStartStreamJpeg(port, quality);
+    if(!ret){
         teardownProcAndFifo();
         return false;
     }
@@ -101,16 +112,20 @@ void RpicamCamera::doStopStream(){
 
 bool RpicamCamera::setupFifo(unsigned int port){
     fifoPath = "/tmp/stream" + std::to_string(port);
+    if(access(fifoPath.c_str(), F_OK) == 0){
+        remove(fifoPath.c_str());
+    }
     if(mkfifo(fifoPath.c_str(), 0666) != 0){
         Logger::logErrorFrom(getDeviceName(), "Failed to create fifo for stream.");
         return false;
     }
+    Logger::logDebugFrom(getDeviceName(), "FiFo path for stream: " + fifoPath);
     chmod(fifoPath.c_str(), 0666);
     return true;
 }
 
 bool RpicamCamera::setupProc(std::string cmd){
-    Logger::logInfoFrom(getDeviceName(), "Starting process " + cmd);
+    Logger::logDebugFrom(getDeviceName(), "Starting process " + cmd);
     proc = popen(cmd.c_str(), "r");
     if(proc == NULL){
         Logger::logErrorFrom("CameraManager", "Failed to start stream. Failed to spawn process.");
@@ -120,8 +135,10 @@ bool RpicamCamera::setupProc(std::string cmd){
 }
 
 void RpicamCamera::teardownProcAndFifo(){
-    pclose(proc);
-    remove(fifoPath.c_str());
+    if(proc != NULL)
+        pclose(proc);
+    if(fifoPath != "")
+        remove(fifoPath.c_str());
     proc = NULL;
 }
 

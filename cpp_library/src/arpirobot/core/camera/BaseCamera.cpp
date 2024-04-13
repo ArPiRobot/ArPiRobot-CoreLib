@@ -50,10 +50,16 @@ bool BaseCamera::setCaptureMode(std::string mode){
     std::regex e("^((raw|jpeg|h264):)?(\\d+)x(\\d+)(@(\\d+|\\d+\\/\\d+))?$");
     std::smatch m;
     if(std::regex_search(mode, m, e)){
-        capFormat = m[2];
+        if(m[2] != "")
+            capFormat = m[2];
+        else
+            capFormat = "raw";
         capWidth = m[3];
         capHeight = m[4];
-        capFramerate = m[6];
+        if(m[6] != "")
+            capFramerate = m[6];
+        else
+            capFramerate = "30/1";
         if(capFramerate.find('/') == std::string::npos)
             capFramerate += "/1";
         return true;
