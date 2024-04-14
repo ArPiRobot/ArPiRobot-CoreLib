@@ -233,6 +233,16 @@ void BaseCamera::runStream(unsigned int port, std::string pipeline){
         }
 
         // Setup and start gstreamer pipeline
+        // Note: OpenCV is not used to run gstreamer pipeline because
+        // VideoCapture::read  will block forever if gstreamer pipeline "stalls"
+        // which can happen if v4l2m2m elements have an issue (eg linking libcamerasrc with v4l2jpegdec)
+        // or if a pipe stalls (eg ffmpeg process dies first due to ctrl+c and the pipe write blocks
+        // because there is no reader). In these cases, cleanly closing a cv VideoCapture
+        // is difficult and requires calling release() from a different thead. This causes
+        // segmentation faults when using libcamerasrc in the pipeline, and also does not seem
+        // to be recommended practice for using OpenCV. As such, gstreamer is just used directly
+        // to run the pipeline, and data is manually put into a cv::Mat which users could then
+        // use with OpenCV as desired (using frame callback)
         if(streamStartSuccess){
             Logger::logDebugFrom(getDeviceName(), "gst pipeline: " + pipeline);
             gstPl = gst_parse_launch(pipeline.c_str(), NULL);
