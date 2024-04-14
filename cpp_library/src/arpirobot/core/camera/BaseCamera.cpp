@@ -97,19 +97,23 @@ void BaseCamera::setFrameCallback(std::function<void(cv::Mat)> *frameCallback){
     this->frameCallback = frameCallback;
 }
 
-bool BaseCamera::startStreamH264(unsigned int port, unsigned int bitrate, 
+bool BaseCamera::startStreamH264(std::string key, unsigned int bitrate, 
         std::string profile, std::string level){
     std::lock_guard<std::mutex> l(managementMutex);
     if(thread != nullptr)
         return false;
-    return doStartStreamH264(port, bitrate, profile, level);
+    std::replace(key.begin(), key.end(), '/', '_');
+    std::replace(key.begin(), key.end(), '\\', '_');
+    return doStartStreamH264(key, bitrate, profile, level);
 }
 
-bool BaseCamera::startStreamJpeg(unsigned int port, unsigned int quality){
+bool BaseCamera::startStreamJpeg(std::string key, unsigned int quality){
     std::lock_guard<std::mutex> l(managementMutex);
     if(thread != nullptr)
         return false;
-    return doStartStreamJpeg(port, quality);
+    std::replace(key.begin(), key.end(), '/', '_');
+    std::replace(key.begin(), key.end(), '\\', '_');
+    return doStartStreamJpeg(key, quality);
 }
 
 void BaseCamera::stopStream(){
@@ -118,19 +122,19 @@ void BaseCamera::stopStream(){
         doStopStream();
 }
 
-std::string BaseCamera::getOutputPipeline(unsigned int port){
+std::string BaseCamera::getOutputPipeline(std::string key){
     // buffers-soft-max=2 recover-policy=latest on tcpserversink do two things to help with network drops / latency
     //   1. If a client looses frames, they are not re-sent. Instead the latest frame is sent
     //   2. If packets are dropped, the number of buffers used is limited to avoid excessive memory usage
     // return "tcpserversink buffers-soft-max=2 recover-policy=latest host=0.0.0.0 port=" + std::to_string(port);
-    return "filesink buffer-mode=2 location=/tmp/to_ffmpeg_" + std::to_string(port);
+    return "filesink buffer-mode=2 location=/tmp/to_ffmpeg_" + key;
 }
 
-std::string BaseCamera::makeStandardPipeline(unsigned int port, std::string encPl){
+std::string BaseCamera::makeStandardPipeline(std::string key, std::string encPl){
     std::string capPl = getCapturePipeline();       // Note: Includes capsfilter
     std::string decPl;
     std::string convert = getVideoConvertElement();
-    std::string outPl = getOutputPipeline(port);
+    std::string outPl = getOutputPipeline(key);
     if(capFormat == "raw"){
         decPl = "identity";
     }else if(capFormat == "jpeg"){
@@ -150,31 +154,31 @@ std::string BaseCamera::makeStandardPipeline(unsigned int port, std::string encP
 
 }
 
-bool BaseCamera::doStartStreamH264(unsigned int port, unsigned int bitrate, 
+bool BaseCamera::doStartStreamH264(std::string key, unsigned int bitrate, 
                 std::string profile, std::string level){
     // Note: Even if input is already h264, we still want to
     // re-encode because encoder settings may not be correct
     auto encodePipeline = getH264EncodeElement(bitrate, profile, level);
     encodePipeline += " ! h264parse config-interval=-1 ! video/x-h264,stream-format=byte-stream";
-    auto pipeline = makeStandardPipeline(port, encodePipeline);
-    return doStartStream(port, pipeline);
+    auto pipeline = makeStandardPipeline(key, encodePipeline);
+    return doStartStream(key, pipeline);
 }
 
-bool BaseCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
+bool BaseCamera::doStartStreamJpeg(std::string key, unsigned int quality){
     // Note: Even if input is already jpeg, we still want to
     // re-encode because encoder settings may not be correct
     auto encodePipeline = getJpegEncodeElement(quality);
     encodePipeline += " ! jpegparse";
-    auto pipeline = makeStandardPipeline(port, encodePipeline);
-    return doStartStream(port, pipeline);
+    auto pipeline = makeStandardPipeline(key, encodePipeline);
+    return doStartStream(key, pipeline);
 }
 
-bool BaseCamera::doStartStream(unsigned int port, std::string pipeline){
+bool BaseCamera::doStartStream(std::string key, std::string pipeline){
     shouldStreamRun = true;
     streamStartDone = false;
     streamStartSuccess = false;
 
-    thread = std::make_unique<std::thread>(&BaseCamera::runStream, this, port, pipeline);
+    thread = std::make_unique<std::thread>(&BaseCamera::runStream, this, key, pipeline);
     std::unique_lock<std::mutex> l(streamStartMutex);
     streamStartCv.wait(l, [this](){ return streamStartDone; });
     if(!streamStartSuccess){
@@ -185,8 +189,8 @@ bool BaseCamera::doStartStream(unsigned int port, std::string pipeline){
     return true;
 }
 
-void BaseCamera::runStream(unsigned int port, std::string pipeline){
-    std::string ffmpegFifo = "/tmp/to_ffmpeg_" + std::to_string(port);
+void BaseCamera::runStream(std::string key, std::string pipeline){
+    std::string ffmpegFifo = "/tmp/to_ffmpeg_" + key;
     std::unique_ptr<boost::process::child> ffmpegProc;
     GstElement *gstPl = NULL;
     GstBus *gstBus = NULL;
@@ -198,7 +202,7 @@ void BaseCamera::runStream(unsigned int port, std::string pipeline){
 
         streamStartSuccess = true;
 
-        if(!extraSetup(port, pipeline)){
+        if(!extraSetup(key, pipeline)){
             streamStartSuccess = false;
         }
 
@@ -222,7 +226,7 @@ void BaseCamera::runStream(unsigned int port, std::string pipeline){
         // Because for some reason on rpi, v4l2m2m encoders seem to just cause pipelines to break (freeze after a second or two)
         // Everything works fine taking that same data and piping to ffmpeg though, so just do that
         if(streamStartSuccess){
-            std::string cmd = "ffmpeg -fflags nobuffer -flags low_delay -hide_banner -loglevel error -i " + ffmpegFifo + " -c:v copy -f rtsp rtsp://localhost:8554/" + std::to_string(port);
+            std::string cmd = "ffmpeg -fflags nobuffer -flags low_delay -hide_banner -loglevel error -i " + ffmpegFifo + " -c:v copy -f rtsp rtsp://localhost:8554/" + key;
             Logger::logDebugFrom(getDeviceName(), "ffmpeg cmd: " + cmd);
             try{
                 ffmpegProc = std::make_unique<boost::process::child>(cmd);
@@ -302,14 +306,14 @@ void BaseCamera::runStream(unsigned int port, std::string pipeline){
         gst_element_set_state (gstPl, GST_STATE_NULL);
         gst_object_unref(gstPl);
     }
-    extraTeardown(port, pipeline);
+    extraTeardown(key, pipeline);
 }
 
-bool BaseCamera::extraSetup(unsigned int port, std::string pipeline){
+bool BaseCamera::extraSetup(std::string key, std::string pipeline){
     return true;
 }
 
-void BaseCamera::extraTeardown(unsigned int port, std::string pipeline){
+void BaseCamera::extraTeardown(std::string key, std::string pipeline){
 
 }
 

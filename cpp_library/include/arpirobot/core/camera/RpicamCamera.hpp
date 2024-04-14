@@ -41,12 +41,12 @@ namespace arpirobot{
         std::string getDeviceName() override;
         std::string getCapturePipeline() override;
 
-        bool doStartStreamH264(unsigned int port, unsigned int bitrate, 
+        bool doStartStreamH264(std::string key, unsigned int bitrate, 
                 std::string profile, std::string level) override;
-        bool doStartStreamJpeg(unsigned int port, unsigned int quality) override;
+        bool doStartStreamJpeg(std::string key, unsigned int quality) override;
 
-        bool extraSetup(unsigned int port, std::string pipeline) override;
-        void extraTeardown(unsigned int port, std::string pipeline) override;
+        bool extraSetup(std::string key, std::string pipeline) override;
+        void extraTeardown(std::string key, std::string pipeline) override;
 
     private:
         std::string framerateToDec();

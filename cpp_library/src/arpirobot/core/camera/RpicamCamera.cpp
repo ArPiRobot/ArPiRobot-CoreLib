@@ -1,3 +1,21 @@
+/*
+ * Copyright 2024 Marcus Behel
+ *
+ * This file is part of ArPiRobot-CoreLib.
+ * 
+ * ArPiRobot-CoreLib is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * ArPiRobot-CoreLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
+ */
 
 #include <arpirobot/core/camera/RpicamCamera.hpp>
 #include <arpirobot/core/log/Logger.hpp>
@@ -30,7 +48,7 @@ std::string RpicamCamera::getCapturePipeline(){
             " ! rawvideoparse use-sink-caps=true";
 }
 
-bool RpicamCamera::doStartStreamH264(unsigned int port, unsigned int bitrate, 
+bool RpicamCamera::doStartStreamH264(std::string key, unsigned int bitrate, 
         std::string profile, std::string level){
     // We always read frames in raw mode from rpicam-vid. Why?
     // 1. If we read jpeg / h264 we'd just end up decoding for appsink. The pi camera doesn't 
@@ -45,7 +63,7 @@ bool RpicamCamera::doStartStreamH264(unsigned int port, unsigned int bitrate,
         Logger::logWarningFrom(getDeviceName(), "Only raw capture format is supported, but " + capFormat + " was specified.");
         capFormat = "raw"; // Must set this correctly or BaseCamera::makeStandardPipeline will do the wrong thing
     }
-    rpicamFifo = "/tmp/rpicamvid_" + std::to_string(port);
+    rpicamFifo = "/tmp/rpicamvid_" + key;
     rpicamCommand = std::string("rpicam-vid --timeout=0 --verbose=0 --codec=yuv420") + 
             " --camera=" + id + 
             " --width=" + capWidth + 
@@ -53,10 +71,10 @@ bool RpicamCamera::doStartStreamH264(unsigned int port, unsigned int bitrate,
             " --framerate=" + framerateToDec() + 
             " --output=" + rpicamFifo;
 
-    return BaseCamera::doStartStreamH264(port, bitrate, profile, level);
+    return BaseCamera::doStartStreamH264(key, bitrate, profile, level);
 }
 
-bool RpicamCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
+bool RpicamCamera::doStartStreamJpeg(std::string key, unsigned int quality){
     // We always read frames in raw mode from rpicam-vid. Why?
     // 1. If we read jpeg / h264 we'd just end up decoding for appsink. The pi camera doesn't 
     //    natively support jpeg / h264. It just uses the HW encoders. So that's just a waste
@@ -70,7 +88,7 @@ bool RpicamCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
         Logger::logWarningFrom(getDeviceName(), "Only raw capture format is supported, but " + capFormat + " was specified.");
         capFormat = "raw"; // Must set this correctly or BaseCamera::makeStandardPipeline will do the wrong thing
     }
-    rpicamFifo = "/tmp/rpicamvid_" + std::to_string(port);
+    rpicamFifo = "/tmp/rpicamvid_" + key;
     rpicamCommand = std::string("rpicam-vid --timeout=0 --verbose=0 --codec=yuv420") + 
             " --camera=" + id + 
             " --width=" + capWidth + 
@@ -78,10 +96,10 @@ bool RpicamCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
             " --framerate=" + framerateToDec() + 
             " --output=" + rpicamFifo;
     
-    return BaseCamera::doStartStreamJpeg(port, quality);
+    return BaseCamera::doStartStreamJpeg(key, quality);
 }
 
-bool RpicamCamera::extraSetup(unsigned int port, std::string pipeline){
+bool RpicamCamera::extraSetup(std::string key, std::string pipeline){
     if(access(rpicamFifo.c_str(), F_OK) == 0){
         remove(rpicamFifo.c_str());
     }
@@ -100,7 +118,7 @@ bool RpicamCamera::extraSetup(unsigned int port, std::string pipeline){
     return true;
 }
 
-void RpicamCamera::extraTeardown(unsigned int port, std::string pipeline){
+void RpicamCamera::extraTeardown(std::string key, std::string pipeline){
     if(rpicamFifo != "")
         remove(rpicamFifo.c_str());
     if(rpicamProc != nullptr){

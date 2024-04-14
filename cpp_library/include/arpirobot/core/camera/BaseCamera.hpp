@@ -85,7 +85,7 @@ namespace arpirobot{
          * TODO: params
          * @return true on success, else false (could be pipeline failure, or a stream may already be running)
          */
-        bool startStreamH264(unsigned int port, unsigned int bitrate = 2048, 
+        bool startStreamH264(std::string key, unsigned int bitrate = 2048, 
                 std::string profile = "baseline", std::string level = "");
 
         /**
@@ -93,7 +93,7 @@ namespace arpirobot{
          * TODO: params
          * @return true on success, else false (could be pipeline failure, or a stream may already be running)
          */
-        bool startStreamJpeg(unsigned int port, unsigned int quality = 80);
+        bool startStreamJpeg(std::string key, unsigned int quality = 80);
 
         /**
          * Stop the running stream
@@ -111,25 +111,25 @@ namespace arpirobot{
         virtual std::string getDeviceName() = 0;
         virtual std::string getCapturePipeline() = 0;
 
-        virtual std::string getOutputPipeline(unsigned int port);
-        std::string makeStandardPipeline(unsigned int port, std::string encPl);
+        virtual std::string getOutputPipeline(std::string key);
+        std::string makeStandardPipeline(std::string key, std::string encPl);
 
         // Can be overriden by subclasses to change how streams actually work
         // instead of using the standard gstreamer method implemented here
         // These are called by the functions named similary without "do"
         // The non-"do" functions handle the mutex
-        virtual bool doStartStreamH264(unsigned int port, unsigned int bitrate, 
+        virtual bool doStartStreamH264(std::string key, unsigned int bitrate, 
                 std::string profile, std::string level);
-        virtual bool doStartStreamJpeg(unsigned int port, unsigned int quality);
-        virtual bool doStartStream(unsigned int port, std::string pipeline);
+        virtual bool doStartStreamJpeg(std::string key, unsigned int quality);
+        virtual bool doStartStream(std::string key, std::string pipeline);
         virtual void doStopStream();
 
         // Runs on bg thread
-        void runStream(unsigned int port, std::string pipeline);
+        void runStream(std::string key, std::string pipeline);
 
         // Called in runStream function
-        virtual bool extraSetup(unsigned int port, std::string pipeline);
-        virtual void extraTeardown(unsigned int port, std::string pipeline);
+        virtual bool extraSetup(std::string key, std::string pipeline);
+        virtual void extraTeardown(std::string key, std::string pipeline);
 
         bool gstHasElement(std::string elementName);
         std::string getVideoConvertElement();
