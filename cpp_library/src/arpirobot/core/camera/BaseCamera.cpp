@@ -37,10 +37,6 @@ BaseCamera::BaseCamera(std::string id) : id(id){
 }
 
 BaseCamera::~BaseCamera(){
-    close();
-}
-
-void BaseCamera::close(){
     stopStream();
 }
 
@@ -281,18 +277,33 @@ void BaseCamera::runStream(unsigned int port, std::string pipeline){
     }
 
     // Cleanup
+    Logger::logDebug("AA");
     remove(ffmpegFifo.c_str());
+    Logger::logDebug("BB");
     if(ffmpegProc != nullptr){
+        Logger::logDebug("CC");
         ffmpegProc->terminate();
+        Logger::logDebug("DD");
         ffmpegProc = nullptr;
+        Logger::logDebug("EE");
     }
+    Logger::logDebug("FF");
     if(gstPl != NULL){
-        if(gstBus != NULL)
+        Logger::logDebug("GG");
+        if(gstBus != NULL){
+            Logger::logDebug("HH");
             gst_object_unref(gstBus);
+            Logger::logDebug("II");
+        }
+        Logger::logDebug("JJ");
         gst_element_set_state (gstPl, GST_STATE_NULL);
+        Logger::logDebug("KK");
         gst_object_unref(gstPl);
+        Logger::logDebug("LL");
     }
+    Logger::logDebug("MM");
     extraTeardown(port, pipeline);
+    Logger::logDebug("NN");
 }
 
 bool BaseCamera::extraSetup(unsigned int port, std::string pipeline){

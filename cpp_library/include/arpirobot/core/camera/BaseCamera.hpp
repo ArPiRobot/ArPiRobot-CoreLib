@@ -24,7 +24,6 @@
 #include <mutex>
 #include <condition_variable>
 #include <opencv2/opencv.hpp>
-#include <arpirobot/core/io/IoDevice.hpp>
 
 
 // TODO: Each child class of BaseCamera could have static method
@@ -34,12 +33,10 @@
 
 namespace arpirobot{
     // TOOD: Doc comments
-    class BaseCamera : public IoDevice{
+    class BaseCamera{
     public:
         BaseCamera(std::string id);
         virtual ~BaseCamera();
-
-        void close() override;
 
         /**
          * Get backend-specific device ID for this camera
