@@ -218,6 +218,9 @@ void BaseCamera::runStream(unsigned int port, std::string pipeline){
         }
 
         // Setup ffmpeg (reads frames from fifo and writes to rtsp server)
+        // Why using ffmpeg instead of just using gstreamer's rtspclientsink?
+        // Because for some reason on rpi, v4l2m2m encoders seem to just cause pipelines to break (freeze after a second or two)
+        // Everything works fine taking that same data and piping to ffmpeg though, so just do that
         if(streamStartSuccess){
             std::string cmd = "ffmpeg -fflags nobuffer -flags low_delay -hide_banner -loglevel error -i " + ffmpegFifo + " -c:v copy -f rtsp rtsp://localhost:8554/" + std::to_string(port);
             Logger::logDebugFrom(getDeviceName(), "ffmpeg cmd: " + cmd);
@@ -277,33 +280,19 @@ void BaseCamera::runStream(unsigned int port, std::string pipeline){
     }
 
     // Cleanup
-    Logger::logDebug("AA");
     remove(ffmpegFifo.c_str());
-    Logger::logDebug("BB");
     if(ffmpegProc != nullptr){
-        Logger::logDebug("CC");
         ffmpegProc->terminate();
-        Logger::logDebug("DD");
         ffmpegProc = nullptr;
-        Logger::logDebug("EE");
     }
-    Logger::logDebug("FF");
     if(gstPl != NULL){
-        Logger::logDebug("GG");
         if(gstBus != NULL){
-            Logger::logDebug("HH");
             gst_object_unref(gstBus);
-            Logger::logDebug("II");
         }
-        Logger::logDebug("JJ");
         gst_element_set_state (gstPl, GST_STATE_NULL);
-        Logger::logDebug("KK");
         gst_object_unref(gstPl);
-        Logger::logDebug("LL");
     }
-    Logger::logDebug("MM");
     extraTeardown(port, pipeline);
-    Logger::logDebug("NN");
 }
 
 bool BaseCamera::extraSetup(unsigned int port, std::string pipeline){
