@@ -202,17 +202,23 @@ void BaseCamera::runStream(unsigned int port, std::string pipeline){
 
         streamStartSuccess = true;
 
-        // Create ffmpeg fifo
-        if(access(ffmpegFifo.c_str(), F_OK) == 0){
-            remove(ffmpegFifo.c_str());
-        }
-        if(mkfifo(ffmpegFifo.c_str(), 0666) != 0){
-            Logger::logErrorFrom(getDeviceName(), "Failed to create ffmpeg fifo");
+        if(!extraSetup(port, pipeline)){
             streamStartSuccess = false;
-        }else{
-            // chmod behaves differently than mode given to mkfifo does.
-            // Sometimes, actual chmod is needed instead of relying on mkfifo
-            chmod(ffmpegFifo.c_str(), 0666);
+        }
+
+        // Create ffmpeg fifo
+        if(streamStartSuccess){
+            if(access(ffmpegFifo.c_str(), F_OK) == 0){
+                remove(ffmpegFifo.c_str());
+            }
+            if(mkfifo(ffmpegFifo.c_str(), 0666) != 0){
+                Logger::logErrorFrom(getDeviceName(), "Failed to create ffmpeg fifo");
+                streamStartSuccess = false;
+            }else{
+                // chmod behaves differently than mode given to mkfifo does.
+                // Sometimes, actual chmod is needed instead of relying on mkfifo
+                chmod(ffmpegFifo.c_str(), 0666);
+            }
         }
 
         // Setup ffmpeg (reads frames from fifo and writes to rtsp server)
@@ -286,6 +292,14 @@ void BaseCamera::runStream(unsigned int port, std::string pipeline){
         gst_element_set_state (gstPl, GST_STATE_NULL);
         gst_object_unref(gstPl);
     }
+    extraTeardown(port, pipeline);
+}
+
+bool BaseCamera::extraSetup(unsigned int port, std::string pipeline){
+    return true;
+}
+
+void BaseCamera::extraTeardown(unsigned int port, std::string pipeline){
 
 }
 

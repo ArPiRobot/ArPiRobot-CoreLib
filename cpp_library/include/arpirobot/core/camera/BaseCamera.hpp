@@ -128,7 +128,11 @@ namespace arpirobot{
         virtual void doStopStream();
 
         // Runs on bg thread
-        virtual void runStream(unsigned int port, std::string pipeline);
+        void runStream(unsigned int port, std::string pipeline);
+
+        // Called in runStream function
+        virtual bool extraSetup(unsigned int port, std::string pipeline);
+        virtual void extraTeardown(unsigned int port, std::string pipeline);
 
         bool gstHasElement(std::string elementName);
         std::string getVideoConvertElement();

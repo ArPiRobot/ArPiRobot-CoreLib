@@ -18,6 +18,7 @@
  */
 
 #include <arpirobot/core/camera/BaseCamera.hpp>
+#include <boost/process.hpp>
 
 namespace arpirobot{
     /**
@@ -43,15 +44,16 @@ namespace arpirobot{
         bool doStartStreamH264(unsigned int port, unsigned int bitrate, 
                 std::string profile, std::string level) override;
         bool doStartStreamJpeg(unsigned int port, unsigned int quality) override;
-        bool doStartStream(unsigned int port, std::string pipeline) override;
-        void doStopStream() override;
-    
+
+        bool extraSetup(unsigned int port, std::string pipeline) override;
+        void extraTeardown(unsigned int port, std::string pipeline) override;
+
     private:
         std::string framerateToDec();
 
         // Process and pipe name vars
         std::string rpicamFifo = "";
         std::string rpicamCommand = "";
-        FILE *rpicamProc = NULL;
+        std::unique_ptr<boost::process::child> rpicamProc;
     };
 }

@@ -81,7 +81,7 @@ bool RpicamCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
     return BaseCamera::doStartStreamJpeg(port, quality);
 }
 
-bool RpicamCamera::doStartStream(unsigned int port, std::string pipeline){
+bool RpicamCamera::extraSetup(unsigned int port, std::string pipeline){
     if(access(rpicamFifo.c_str(), F_OK) == 0){
         remove(rpicamFifo.c_str());
     }
@@ -91,25 +91,22 @@ bool RpicamCamera::doStartStream(unsigned int port, std::string pipeline){
     }
     chmod(rpicamFifo.c_str(), 0666);
     Logger::logDebugFrom(getDeviceName(), "rpicam-vid command: " + rpicamCommand);
-    rpicamProc = popen(rpicamCommand.c_str(), "r");
-    if(rpicamProc == NULL){
+    try{
+        rpicamProc = std::make_unique<boost::process::child>(rpicamCommand);
+    }catch(const boost::process::process_error &e){
         Logger::logErrorFrom("CameraManager", "Failed to start rpicam-vid process.");
-        remove(rpicamFifo.c_str());
-        return false;
-    }
-    bool ret = BaseCamera::doStartStream(port, pipeline);
-    if(!ret){
-        pclose(rpicamProc);
-        remove(rpicamFifo.c_str());
         return false;
     }
     return true;
 }
 
-void RpicamCamera::doStopStream(){
-    BaseCamera::doStopStream();
-    pclose(rpicamProc);
-    remove(rpicamFifo.c_str());
+void RpicamCamera::extraTeardown(unsigned int port, std::string pipeline){
+    if(rpicamFifo != "")
+        remove(rpicamFifo.c_str());
+    if(rpicamProc != nullptr){
+        rpicamProc->terminate();
+        rpicamProc = nullptr;
+    }
 }
 
 std::string RpicamCamera::framerateToDec(){
