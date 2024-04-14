@@ -31,7 +31,9 @@ using namespace arpirobot;
 
 
 BaseCamera::BaseCamera(std::string id) : id(id){
-
+    if(!gst_is_initialized()){
+        gst_init(NULL, NULL);
+    }
 }
 
 BaseCamera::~BaseCamera(){
@@ -50,10 +52,10 @@ bool BaseCamera::setCaptureMode(std::string mode){
     // Configuration and stream management must be mutually exclusive
     // If this config changes part way through stream start, stream will
     // be started incorrectly
-    std::lock_guard<std::mutex> l(mutex);
+    std::lock_guard<std::mutex> l(managementMutex);
 
-    if(isStreaming)
-        return false;
+    if(thread != nullptr)
+        return false;       // Can't change while stream running
     
     std::regex e("^((raw|jpeg|h264):)?(\\d+)x(\\d+)(@(\\d+|\\d+\\/\\d+))?$");
     std::smatch m;
@@ -80,10 +82,10 @@ bool BaseCamera::setCaptureMode(std::string mode){
 bool BaseCamera::setHwAccel(bool hwencode, bool hwdecode, bool hwconvert){
     /// If this config changes part way through stream start, stream will
     // be started incorrectly
-    std::lock_guard<std::mutex> l(mutex);
+    std::lock_guard<std::mutex> l(managementMutex);
 
-    if(isStreaming)
-        return false;
+    if(thread != nullptr)
+        return false; // Can't change while streaming
     
     this->hwencode = hwencode;
     this->hwdecode = hwdecode;
@@ -101,117 +103,23 @@ void BaseCamera::setFrameCallback(std::function<void(cv::Mat)> *frameCallback){
 
 bool BaseCamera::startStreamH264(unsigned int port, unsigned int bitrate, 
         std::string profile, std::string level){
-    std::lock_guard<std::mutex> l(mutex);
-    if(isStreaming)
+    std::lock_guard<std::mutex> l(managementMutex);
+    if(thread != nullptr)
         return false;
     return doStartStreamH264(port, bitrate, profile, level);
 }
 
 bool BaseCamera::startStreamJpeg(unsigned int port, unsigned int quality){
-    std::lock_guard<std::mutex> l(mutex);
-    if(isStreaming)
+    std::lock_guard<std::mutex> l(managementMutex);
+    if(thread != nullptr)
         return false;
     return doStartStreamJpeg(port, quality);
 }
 
 void BaseCamera::stopStream(){
-    std::lock_guard<std::mutex> l(mutex);
-    if(isStreaming)
+    std::lock_guard<std::mutex> l(managementMutex);
+    if(thread != nullptr)
         doStopStream();
-}
-
-bool BaseCamera::doStartStreamH264(unsigned int port, unsigned int bitrate, 
-                std::string profile, std::string level){
-    // Note: Even if input is already h264, we still want to
-    // re-encode because encoder settings may not be correct
-    auto encodePipeline = getH264EncodeElement(bitrate, profile, level);
-    encodePipeline += " ! h264parse config-interval=-1 ! video/x-h264,stream-format=byte-stream";
-    auto pipeline = makeStandardPipeline(port, encodePipeline);
-    return doStartStream(port, pipeline);
-}
-
-bool BaseCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
-    // Note: Even if input is already jpeg, we still want to
-    // re-encode because encoder settings may not be correct
-    auto encodePipeline = getJpegEncodeElement(quality);
-    encodePipeline += " ! jpegparse";
-    auto pipeline = makeStandardPipeline(port, encodePipeline);
-    return doStartStream(port, pipeline);
-}
-
-bool BaseCamera::doStartStream(unsigned int port, std::string pipeline){
-    // Note: not taking mutex here. This will be called from another function
-    // that is still holding it
-
-    // First, start the ffmpeg process that will be used to actually publish
-    // See comments in header for why ffmpeg is used instead of rtspclientsink
-    // ffmpeg is communicated with via a named pipe
-    if(access(ffmpegFifo.c_str(), F_OK) == 0){
-        remove(ffmpegFifo.c_str());
-    }
-    if(mkfifo(ffmpegFifo.c_str(), 0666) != 0){
-        Logger::logErrorFrom(getDeviceName(), "Failed to create ffmpeg fifo");
-        return false;
-    }
-    chmod(ffmpegFifo.c_str(), 0666);
-    std::string cmd = "ffmpeg -fflags nobuffer -flags low_delay -hide_banner -loglevel error -i " + ffmpegFifo + " -c:v copy -f rtsp rtsp://localhost:8554/" + std::to_string(port);
-    Logger::logDebugFrom(getDeviceName(), "ffmpeg cmd: " + cmd);
-    ffmpegProc = std::make_unique<boost::process::child>(cmd);
-    if(!ffmpegProc->running()){
-        Logger::logErrorFrom(getDeviceName(), "Failed to start ffmpeg process");
-        remove(ffmpegFifo.c_str());
-        return false;
-    }
-
-    // Start the pipeline on another thread
-    // Note: Not using BaseRobot scheduler's threads
-    // because those are reserved for dynamically scheduled tasks that yield by returning
-    // This thread will "yield" by blocking on I/O
-    Logger::logDebugFrom(getDeviceName(), "Pipeline: " + pipeline);
-    cap = std::make_unique<cv::VideoCapture>();
-    if(!cap->open(pipeline, cv::CAP_GSTREAMER)){
-        Logger::logErrorFrom(getDeviceName(), "Failed to launch pipeline for stream.");
-        cap->release();
-        cap = nullptr;
-        ffmpegProc->terminate();
-        ffmpegProc->wait(); // wait after terminate to avoid zombie process
-        ffmpegProc = nullptr;
-        remove(ffmpegFifo.c_str());
-        return false;
-    }
-    isStreaming = true;     // used by stream control functions to know if stream is running
-    runStream = true;       // used in stop stream to halt thread before join
-    thread = std::make_unique<std::thread>([this](){
-        cv::Mat frame;
-        while(runStream){
-            cap->read(frame);
-            if(frame.empty())
-                continue;
-
-            // Read frameCallback only once. It is not mutex protected, so it could
-            // change between checking if null and calling it otherwise
-            auto *cb = frameCallback;
-            if(cb != nullptr)
-                (*cb)(frame);
-        }
-    });
-    return true;
-}
-
-void BaseCamera::doStopStream(){
-    // Note: not taking mutex here. This will be called from another function
-    // that is still holding it
-    Logger::logInfoFrom(getDeviceName(), "Stopping stream.");
-    runStream = false;
-    cap->release();
-    thread->join();
-    isStreaming = false;
-    thread = nullptr;
-    cap = nullptr;
-    ffmpegProc->terminate();
-    ffmpegProc->wait(); // wait after terminate to avoid zombie process
-    ffmpegProc = nullptr;
-    remove(ffmpegFifo.c_str());
 }
 
 std::string BaseCamera::getOutputPipeline(unsigned int port){
@@ -219,13 +127,10 @@ std::string BaseCamera::getOutputPipeline(unsigned int port){
     //   1. If a client looses frames, they are not re-sent. Instead the latest frame is sent
     //   2. If packets are dropped, the number of buffers used is limited to avoid excessive memory usage
     // return "tcpserversink buffers-soft-max=2 recover-policy=latest host=0.0.0.0 port=" + std::to_string(port);
-    return "filesink buffer-mode=2 location=" + ffmpegFifo;
+    return "filesink buffer-mode=2 location=/tmp/to_ffmpeg_" + std::to_string(port);
 }
 
 std::string BaseCamera::makeStandardPipeline(unsigned int port, std::string encPl){
-    // Must be set before getOutputPipeline can work
-    ffmpegFifo = "/tmp/to_ffmpeg_" + std::to_string(port);
-
     std::string capPl = getCapturePipeline();       // Note: Includes capsfilter
     std::string decPl;
     std::string convert = getVideoConvertElement();
@@ -249,10 +154,148 @@ std::string BaseCamera::makeStandardPipeline(unsigned int port, std::string encP
 
 }
 
-bool BaseCamera::gstHasElement(std::string elementName){
-    if(!gst_is_initialized()){
-        gst_init(NULL, NULL);
+bool BaseCamera::doStartStreamH264(unsigned int port, unsigned int bitrate, 
+                std::string profile, std::string level){
+    // Note: Even if input is already h264, we still want to
+    // re-encode because encoder settings may not be correct
+    auto encodePipeline = getH264EncodeElement(bitrate, profile, level);
+    encodePipeline += " ! h264parse config-interval=-1 ! video/x-h264,stream-format=byte-stream";
+    auto pipeline = makeStandardPipeline(port, encodePipeline);
+    return doStartStream(port, pipeline);
+}
+
+bool BaseCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
+    // Note: Even if input is already jpeg, we still want to
+    // re-encode because encoder settings may not be correct
+    auto encodePipeline = getJpegEncodeElement(quality);
+    encodePipeline += " ! jpegparse";
+    auto pipeline = makeStandardPipeline(port, encodePipeline);
+    return doStartStream(port, pipeline);
+}
+
+bool BaseCamera::doStartStream(unsigned int port, std::string pipeline){
+    shouldStreamRun = true;
+    streamStartDone = false;
+    streamStartSuccess = false;
+
+    thread = std::make_unique<std::thread>(&BaseCamera::runStream, this, port, pipeline);
+    std::unique_lock<std::mutex> l(streamStartMutex);
+    streamStartCv.wait(l, [this](){ return streamStartDone; });
+    if(!streamStartSuccess){
+        Logger::logErrorFrom(getDeviceName(), "Failed to start stream");
+        return false;
     }
+    Logger::logInfoFrom(getDeviceName(), "Stream running");
+    return true;
+}
+
+void BaseCamera::runStream(unsigned int port, std::string pipeline){
+    std::string ffmpegFifo = "/tmp/to_ffmpeg_" + std::to_string(port);
+    std::unique_ptr<boost::process::child> ffmpegProc;
+    GstElement *gstPl = NULL;
+    GstBus *gstBus = NULL;
+    // TODO: Things to capture frame from pipeline using appsink
+
+    // Setup everything for the stream
+    {
+        std::lock_guard<std::mutex> l(streamStartMutex); // for cond var to work properly
+
+        streamStartSuccess = true;
+
+        // Create ffmpeg fifo
+        if(access(ffmpegFifo.c_str(), F_OK) == 0){
+            remove(ffmpegFifo.c_str());
+        }
+        if(mkfifo(ffmpegFifo.c_str(), 0666) != 0){
+            Logger::logErrorFrom(getDeviceName(), "Failed to create ffmpeg fifo");
+            streamStartSuccess = false;
+        }else{
+            // chmod behaves differently than mode given to mkfifo does.
+            // Sometimes, actual chmod is needed instead of relying on mkfifo
+            chmod(ffmpegFifo.c_str(), 0666);
+        }
+
+        // Setup ffmpeg (reads frames from fifo and writes to rtsp server)
+        if(streamStartSuccess){
+            std::string cmd = "ffmpeg -fflags nobuffer -flags low_delay -hide_banner -loglevel error -i " + ffmpegFifo + " -c:v copy -f rtsp rtsp://localhost:8554/" + std::to_string(port);
+            Logger::logDebugFrom(getDeviceName(), "ffmpeg cmd: " + cmd);
+            try{
+                ffmpegProc = std::make_unique<boost::process::child>(cmd);
+            }catch(const boost::process::process_error &e){
+                Logger::logErrorFrom(getDeviceName(), "Failed to start ffmpeg process");
+                streamStartSuccess = false;
+            }
+        }
+
+        // Setup and start gstreamer pipeline
+        if(streamStartSuccess){
+            Logger::logDebugFrom(getDeviceName(), "gst pipeline: " + pipeline);
+            gstPl = gst_parse_launch(pipeline.c_str(), NULL);
+            auto ret = gst_element_set_state(gstPl, GST_STATE_PLAYING);
+            if(ret == GST_STATE_CHANGE_FAILURE){
+                Logger::logErrorFrom(getDeviceName(), "Failed to start gstreamer pipeline");
+                streamStartSuccess = false;
+            }else{
+                gstBus = gst_element_get_bus (gstPl);
+            }
+        }
+
+        streamStartDone = true; // Done var is needed in case notify_one called before other thread wait()
+    }
+
+    // Inform the stream start status
+    streamStartCv.notify_one();
+
+    // Main loop (runs the pipeline)
+    while(streamStartSuccess && shouldStreamRun){
+        GstMessage *msg = gst_bus_timed_pop_filtered(gstBus, 1 * GST_SECOND, 
+                static_cast<GstMessageType>(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
+        GError *err;
+        gchar *debug_info;
+        if(msg != NULL){
+            switch(GST_MESSAGE_TYPE(msg)){
+            case GST_MESSAGE_ERROR:
+                gst_message_parse_error (msg, &err, &debug_info);
+                Logger::logErrorFrom(getDeviceName(), "Gstreamer pipeline had error");
+                Logger::logErrorFrom(getDeviceName(), "Error from element " + 
+                        std::string(GST_OBJECT_NAME(msg->src)) + " " + std::string(err->message));
+                Logger::logDebugFrom(getDeviceName(), std::string(debug_info));
+                g_clear_error (&err);
+                g_free (debug_info);
+                break;
+            case GST_MESSAGE_EOS:
+                Logger::logErrorFrom(getDeviceName(), "Gstreamer pipeline EoS");
+                break;
+            default:
+                // This shouldn't happen because pop is filtered
+                break;
+            }
+            gst_message_unref(msg);
+        }
+    }
+
+    // Cleanup
+    remove(ffmpegFifo.c_str());
+    if(ffmpegProc != nullptr){
+        ffmpegProc->terminate();
+        ffmpegProc = nullptr;
+    }
+    if(gstPl != NULL){
+        if(gstBus != NULL)
+            gst_object_unref(gstBus);
+        gst_element_set_state (gstPl, GST_STATE_NULL);
+        gst_object_unref(gstPl);
+    }
+
+}
+
+void BaseCamera::doStopStream(){
+    shouldStreamRun = false;
+    thread->join();
+    thread = nullptr;
+}
+
+bool BaseCamera::gstHasElement(std::string elementName){
     auto factory = gst_element_factory_find(elementName.c_str());
     if(factory == NULL){
         return false;
