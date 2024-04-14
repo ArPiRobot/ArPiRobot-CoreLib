@@ -43,18 +43,15 @@ namespace arpirobot{
         bool doStartStreamH264(unsigned int port, unsigned int bitrate, 
                 std::string profile, std::string level) override;
         bool doStartStreamJpeg(unsigned int port, unsigned int quality) override;
+        bool doStartStream(unsigned int port, std::string pipeline) override;
         void doStopStream() override;
     
     private:
-
-        bool setupFifo(unsigned int port);
-        bool setupProc(std::string cmd);
-        void teardownProcAndFifo();
-
         std::string framerateToDec();
 
         // Process and pipe name vars
-        std::string fifoPath = "";
-        FILE *proc = NULL;
+        std::string rpicamFifo = "";
+        std::string rpicamCommand = "";
+        FILE *rpicamProc = NULL;
     };
 }

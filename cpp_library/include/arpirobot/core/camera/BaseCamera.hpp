@@ -23,6 +23,8 @@
 #include <thread>
 #include <mutex>
 #include <opencv2/opencv.hpp>
+#include <arpirobot/core/io/IoDevice.hpp>
+#include <boost/process.hpp>
 
 
 // TODO: Each child class of BaseCamera could have static method
@@ -32,10 +34,12 @@
 
 namespace arpirobot{
     // TOOD: Doc comments
-    class BaseCamera{
+    class BaseCamera : public IoDevice{
     public:
         BaseCamera(std::string id);
         virtual ~BaseCamera();
+
+        void close() override;
 
         /**
          * Get backend-specific device ID for this camera
@@ -110,6 +114,8 @@ namespace arpirobot{
         virtual std::string getDeviceName() = 0;
         virtual std::string getCapturePipeline() = 0;
 
+        virtual std::string getOutputPipeline(unsigned int port);
+
         // Can be overriden by subclasses to change how streams actually work
         // instead of using the standard gstreamer method implemented here
         // These are called by the functions named similary without "do"
@@ -117,10 +123,8 @@ namespace arpirobot{
         virtual bool doStartStreamH264(unsigned int port, unsigned int bitrate, 
                 std::string profile, std::string level);
         virtual bool doStartStreamJpeg(unsigned int port, unsigned int quality);
-        virtual bool doStartStream(std::string pipeline);
+        virtual bool doStartStream(unsigned int port, std::string pipeline);
         virtual void doStopStream();
-
-        std::string getOutputPipeline(unsigned int port);
 
         // Used in base class doStartStream... implementations
         // since pipeline construction only varies by encoder
@@ -156,5 +160,23 @@ namespace arpirobot{
         bool runStream;
         std::unique_ptr<cv::VideoCapture> cap;
         std::unique_ptr<std::thread> thread;
+
+        // This exists because v4l2m2m encoders seem to just not work with gstreamer's rtspclientsink
+        // No idea why, but it seems to just result in a second or two of running pipeline before
+        // something hangs. ffmpeg can publish just fine though, so using ffmpeg to publish as a
+        // messy workaround. I don't like this, but it works...
+        // See: https://forums.raspberrypi.com/viewtopic.php?p=2201264
+        // In my testing I have replicated this with various pipelines. Sometimes it is "fixed" by
+        // inserting v4l2convert, rawvideoparse, etc in the right spot, but it doesn't seem to be 
+        // consistent or reliable across different cameras or input backend.
+        //
+        // Alternative would be to use tcpserversink instead. This was experimented with, but
+        // allowing multiple clients to play the same stream is somewhat important. Also using
+        // stream names instead of port numbers is a little more friendly for users
+        //
+        // Since gstreamer pipeline is run through opencv, we can't just use stdout/stdin to pipe
+        // from gstreamer to ffmpeg. Thus a named pipe is used
+        std::unique_ptr<boost::process::child> ffmpegProc;
+        std::string ffmpegFifo;
     };
 }

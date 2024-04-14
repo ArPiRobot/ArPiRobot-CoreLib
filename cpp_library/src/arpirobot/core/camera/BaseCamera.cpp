@@ -22,6 +22,10 @@
 #include <opencv2/opencv.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 #include <regex>
+#include <stdexcept>
+
+#include <boost/process.hpp>
+
 
 using namespace arpirobot;
 
@@ -31,6 +35,10 @@ BaseCamera::BaseCamera(std::string id) : id(id){
 }
 
 BaseCamera::~BaseCamera(){
+    close();
+}
+
+void BaseCamera::close(){
     stopStream();
 }
 
@@ -119,32 +127,56 @@ bool BaseCamera::doStartStreamH264(unsigned int port, unsigned int bitrate,
     auto encodePipeline = getH264EncodeElement(bitrate, profile, level);
     encodePipeline += " ! h264parse config-interval=-1 ! video/x-h264,stream-format=byte-stream";
     auto pipeline = makeStandardPipeline(port, encodePipeline);
-    return doStartStream(pipeline);
+    return doStartStream(port, pipeline);
 }
 
 bool BaseCamera::doStartStreamJpeg(unsigned int port, unsigned int quality){
     // Note: Even if input is already jpeg, we still want to
     // re-encode because encoder settings may not be correct
     auto encodePipeline = getJpegEncodeElement(quality);
+    encodePipeline += " ! jpegparse";
     auto pipeline = makeStandardPipeline(port, encodePipeline);
-    return doStartStream(pipeline);
+    return doStartStream(port, pipeline);
 }
 
-bool BaseCamera::doStartStream(std::string pipeline){
+bool BaseCamera::doStartStream(unsigned int port, std::string pipeline){
     // Note: not taking mutex here. This will be called from another function
     // that is still holding it
 
-    Logger::logDebugFrom(getDeviceName(), "Pipeline: " + pipeline);
+    // First, start the ffmpeg process that will be used to actually publish
+    // See comments in header for why ffmpeg is used instead of rtspclientsink
+    // ffmpeg is communicated with via a named pipe
+    if(access(ffmpegFifo.c_str(), F_OK) == 0){
+        remove(ffmpegFifo.c_str());
+    }
+    if(mkfifo(ffmpegFifo.c_str(), 0666) != 0){
+        Logger::logErrorFrom(getDeviceName(), "Failed to create ffmpeg fifo");
+        return false;
+    }
+    chmod(ffmpegFifo.c_str(), 0666);
+    std::string cmd = "ffmpeg -fflags nobuffer -flags low_delay -hide_banner -loglevel error -i " + ffmpegFifo + " -c:v copy -f rtsp rtsp://localhost:8554/" + std::to_string(port);
+    Logger::logDebugFrom(getDeviceName(), "ffmpeg cmd: " + cmd);
+    ffmpegProc = std::make_unique<boost::process::child>(cmd);
+    if(!ffmpegProc->running()){
+        Logger::logErrorFrom(getDeviceName(), "Failed to start ffmpeg process");
+        remove(ffmpegFifo.c_str());
+        return false;
+    }
 
     // Start the pipeline on another thread
     // Note: Not using BaseRobot scheduler's threads
     // because those are reserved for dynamically scheduled tasks that yield by returning
     // This thread will "yield" by blocking on I/O
+    Logger::logDebugFrom(getDeviceName(), "Pipeline: " + pipeline);
     cap = std::make_unique<cv::VideoCapture>();
     if(!cap->open(pipeline, cv::CAP_GSTREAMER)){
         Logger::logErrorFrom(getDeviceName(), "Failed to launch pipeline for stream.");
         cap->release();
         cap = nullptr;
+        ffmpegProc->terminate();
+        ffmpegProc->wait(); // wait after terminate to avoid zombie process
+        ffmpegProc = nullptr;
+        remove(ffmpegFifo.c_str());
         return false;
     }
     isStreaming = true;     // used by stream control functions to know if stream is running
@@ -171,21 +203,29 @@ void BaseCamera::doStopStream(){
     // that is still holding it
     Logger::logInfoFrom(getDeviceName(), "Stopping stream.");
     runStream = false;
+    cap->release();
     thread->join();
     isStreaming = false;
     thread = nullptr;
     cap = nullptr;
+    ffmpegProc->terminate();
+    ffmpegProc->wait(); // wait after terminate to avoid zombie process
+    ffmpegProc = nullptr;
+    remove(ffmpegFifo.c_str());
 }
 
 std::string BaseCamera::getOutputPipeline(unsigned int port){
     // buffers-soft-max=2 recover-policy=latest on tcpserversink do two things to help with network drops / latency
     //   1. If a client looses frames, they are not re-sent. Instead the latest frame is sent
     //   2. If packets are dropped, the number of buffers used is limited to avoid excessive memory usage
-    return "tcpserversink buffers-soft-max=2 recover-policy=latest host=0.0.0.0 port=" + std::to_string(port);
+    // return "tcpserversink buffers-soft-max=2 recover-policy=latest host=0.0.0.0 port=" + std::to_string(port);
+    return "filesink buffer-mode=2 location=" + ffmpegFifo;
 }
 
 std::string BaseCamera::makeStandardPipeline(unsigned int port, std::string encPl){
-    // TODO: Construct the pipeline
+    // Must be set before getOutputPipeline can work
+    ffmpegFifo = "/tmp/to_ffmpeg_" + std::to_string(port);
+
     std::string capPl = getCapturePipeline();       // Note: Includes capsfilter
     std::string decPl;
     std::string convert = getVideoConvertElement();
