@@ -22,17 +22,26 @@
 
 namespace arpirobot{
     /**
-     * Uses rpicam-vid instead of gstreamer to capture video
-     * Allows control over rpicam-vid options using extra parameters (TODO: When implemented)
-     * Somewhat more stable than libcamerasrc (used by libcamera camera)
+     * \class RpicamCamera RpicamCamera.hpp arpirobot/core/camera/RpicamCamera.hpp
+     * 
+     * Camera object using the rpicam-vid program. Can be used for Raspberry Pi camera modules.
+     * It may or may not work with other camera modules. It will not work with USB cameras.
+     * 
+     * This is a more reliable and customizable way to use RPi camera modules than LibcameraCamera.
+     * RpicamCamera allows setting extra controls.
+     * 
+     * When using this camera backend, extra options will be command line arguments to rpicam-vid
      * 
      * Important notes about rpicam camera
-     * - input format is not supported (raw will always be used).
+     * - input format is not supported (raw will always be used)
      */
     class RpicamCamera : public BaseCamera{
     public:
-
-        // ID is camera number as shown by rpicam-vid --list-cameras
+        /**
+         * Create a new camera object using libcamera backend
+         * @param id ID number of the camera module (as shown by rpicam-vid --list-cameras command).
+         *           This is the NUMBER not the path.
+         */
         RpicamCamera(std::string id);
 
         std::string getBackend() override;

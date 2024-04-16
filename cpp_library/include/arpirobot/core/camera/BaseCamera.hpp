@@ -28,13 +28,14 @@
 #include <boost/process.hpp>
 
 
-// TODO: Each child class of BaseCamera could have static method
-// listCameras() that enumerates cameras for that backend
-// Should just return list of ids
-// Note: make sure implementations check if gst is initialized before gst init call
-
 namespace arpirobot{
-    // TOOD: Doc comments
+    /**
+     * \class BaseCamera BaseCamera.hpp arpirobot/core/camera/BaseCamera.hpp
+     * 
+     * Common base class for various camera types
+     * Provides functionality to run camera streams and receive frames from
+     * cameras in OpenCV compatible formats
+     */
     class BaseCamera{
     public:
         BaseCamera(std::string id);
@@ -83,16 +84,22 @@ namespace arpirobot{
         void setFrameCallback(std::function<void(cv::Mat&)> frameCallback);
 
         /**
-         * Start a H264 stream
-         * TODO: params
+         * Start a H264 stream. Note that only one stream may be running on a
+         * camera at a time.
+         * @param key Name of the stream (must be unique)
+         * @param bitrate Target bitrate in kbps (default 2048)
+         * @param profile H.264 profile to use (default baseline)
+         * @param level H.264 level to use (default empty string = auto)
          * @return true on success, else false (could be pipeline failure, or a stream may already be running)
          */
         bool startStreamH264(std::string key, unsigned int bitrate = 2048, 
                 std::string profile = "baseline", std::string level = "");
 
         /**
-         * Start a JPEG stream
-         * TODO: params
+         * Start a (M)JPEG stream. Note that only one stream may be running on a
+         * camera at a time.
+         * @param key Name of the stream (must be unique)
+         * @param quality Quality of JPEG images (0-100, default 80). Lower quality requires less bandwidth
          * @return true on success, else false (could be pipeline failure, or a stream may already be running)
          */
         bool startStreamJpeg(std::string key, unsigned int quality = 80);
@@ -102,7 +109,6 @@ namespace arpirobot{
          */
         void stopStream();
     
-        // Backend specific
         /**
          * Get name of this camera's backend
          */
@@ -126,9 +132,11 @@ namespace arpirobot{
         virtual bool doStartStream(std::string key, std::string pipeline);
         virtual void doStopStream();
 
+        // Callbacks shared for all gstreamer pipline instances
         static GstFlowReturn frameFromAppsink(GstElement *sink, BaseCamera *instance);
         static GstBusSyncReply messageFromPipeline(GstBus *bus, GstMessage *msg, gpointer userData);
 
+        // Internally used to choose which element to use for a task based on hw... vars
         bool gstHasElement(std::string elementName);
         std::string getVideoConvertElement();
         std::string getH264EncodeElement(unsigned int bitrate, std::string profile, std::string level);

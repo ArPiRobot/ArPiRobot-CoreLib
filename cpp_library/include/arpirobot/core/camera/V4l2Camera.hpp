@@ -22,9 +22,22 @@
 #include <arpirobot/core/camera/BaseCamera.hpp>
 
 namespace arpirobot{
+    /**
+     * \class V4l2Camera V4l2Camera.hpp arpirobot/core/camera/V4l2Camera.hpp
+     * 
+     * Camera object using the v4l2 backend. Can be used for USB webcams. Generally will not work
+     * with camera modules (eg RPi Camera modules)
+     * 
+     * When using this camera backend, extra options will be v4l2 controls
+     */
     class V4l2Camera : public BaseCamera{
     public:
         // ID is /dev path (v4l2-ctl --list-devices)
+        /**
+         * Create a new camera object using libcamera backend
+         * @param id Path to a camera (as shown by v4l2-ctl --list-devices command).
+         *           This must be a /dev/video[num] path not just a number
+         */
         V4l2Camera(std::string id);
 
         std::string getBackend() override;
