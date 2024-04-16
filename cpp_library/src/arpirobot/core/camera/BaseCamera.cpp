@@ -90,7 +90,7 @@ bool BaseCamera::setHwAccel(bool hwencode, bool hwdecode, bool hwconvert){
     return true;
 }
 
-void BaseCamera::setFrameCallback(std::function<void(cv::Mat)> *frameCallback){
+void BaseCamera::setFrameCallback(std::function<void(cv::Mat&)> frameCallback){
     // No need to mutex this. This doesn't impact stream startup
     // process. It can also change during a stream since the pointer in the object
     // is accessed.
@@ -149,7 +149,7 @@ std::string BaseCamera::makeStandardPipeline(std::string key, std::string encPl)
     // depending on input source (often occurs for USB webcams with v4l2convert on rpi)
     // Thus, this is always SW convert, since it can handle fixing this.
     return capPl + " ! " + decPl + " ! videoconvert ! tee name=raw " + 
-            "raw. ! queue ! " + convert + " ! appsink name=my_sink drop=true max-buffers=1 " + 
+            "raw. ! queue ! " + convert + " ! video/x-raw,format=BGRA ! appsink name=my_sink drop=true max-buffers=1 " + 
             "raw. ! queue ! " + convert + " ! " + encPl + " ! " + outPl;
 
 }
@@ -253,7 +253,22 @@ GstFlowReturn BaseCamera::frameFromAppsink(GstElement *sink, BaseCamera *instanc
     g_signal_emit_by_name (sink, "pull-sample", &sample);
     if(sample != NULL){
         // TODO: Convert to cv::Mat and pass to framecallback if framecallback is not nullptr
-
+        auto cb = instance->frameCallback; // Note: need to read only once. Could change on different thread
+        if(cb != nullptr){
+            GstBuffer *buffer = gst_sample_get_buffer(sample);
+            if(buffer != NULL){
+                GstMapInfo map;
+                if(gst_buffer_map(buffer, &map, GST_MAP_READ)){
+                    cv::Mat frame(std::stoi(instance->capHeight), std::stoi(instance->capWidth), CV_8UC4, map.data);
+                    // This constructor doesn't copy the input data, it just references it
+                    // This data becomes invalid when we call gst_buffer_unmap
+                    // But a user callback could hold onto a copy of the frame object
+                    // So, we have to clone it to be safe
+                    cb(frame);
+                    gst_buffer_unmap(buffer, &map);
+                }
+            }
+        }
         gst_sample_unref (sample);
         return GST_FLOW_OK;
     }

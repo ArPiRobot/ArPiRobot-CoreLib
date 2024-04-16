@@ -80,7 +80,7 @@ namespace arpirobot{
          * Note: frames are only read from this camera while it is streaming
          * @param frameCallback function to call when a frame is read
          */
-        void setFrameCallback(std::function<void(cv::Mat)> *frameCallback);
+        void setFrameCallback(std::function<void(cv::Mat&)> frameCallback);
 
         /**
          * Start a H264 stream
@@ -146,7 +146,7 @@ namespace arpirobot{
         std::string capFramerate = "30/1";
 
         // Called when frame read from this camera
-        std::function<void(cv::Mat)> *frameCallback = nullptr;
+        std::function<void(cv::Mat&)> frameCallback = nullptr;
 
         // HW accel settings
         bool hwencode = true;
