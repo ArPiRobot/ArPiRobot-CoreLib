@@ -24,6 +24,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <opencv2/opencv.hpp>
+#include <gst/gst.h>
+#include <boost/process.hpp>
 
 
 // TODO: Each child class of BaseCamera could have static method
@@ -124,12 +126,8 @@ namespace arpirobot{
         virtual bool doStartStream(std::string key, std::string pipeline);
         virtual void doStopStream();
 
-        // Runs on bg thread
-        void runStream(std::string key, std::string pipeline);
-
-        // Called in runStream function
-        virtual bool extraSetup(std::string key, std::string pipeline);
-        virtual void extraTeardown(std::string key, std::string pipeline);
+        static GstFlowReturn frameFromAppsink(GstElement *sink, BaseCamera *instance);
+        static GstBusSyncReply messageFromPipeline(GstBus *bus, GstMessage *msg, gpointer userData);
 
         bool gstHasElement(std::string elementName);
         std::string getVideoConvertElement();
@@ -155,15 +153,15 @@ namespace arpirobot{
         bool hwdecode = true;
         bool hwconvert = true;
 
-        // Stream management
+        // Stream management must be thread safe
         std::mutex managementMutex;
-        bool shouldStreamRun;
-        std::unique_ptr<std::thread> thread;
+        bool isStreaming = false;
 
-        // Used to indicate if stream is successfully started
-        bool streamStartSuccess;
-        bool streamStartDone;
-        std::mutex streamStartMutex;
-        std::condition_variable streamStartCv;
+        // Used for running stream
+        std::string ffmpegFifo;
+        std::unique_ptr<boost::process::child> ffmpegProc = nullptr;
+        GstElement *gstPl = NULL;
+        GstElement *gstAppsink = NULL;
+        GstBus *gstBus = NULL;
     };
 }

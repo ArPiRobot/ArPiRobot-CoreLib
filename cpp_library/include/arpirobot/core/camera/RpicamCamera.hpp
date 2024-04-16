@@ -44,9 +44,8 @@ namespace arpirobot{
         bool doStartStreamH264(std::string key, unsigned int bitrate, 
                 std::string profile, std::string level) override;
         bool doStartStreamJpeg(std::string key, unsigned int quality) override;
-
-        bool extraSetup(std::string key, std::string pipeline) override;
-        void extraTeardown(std::string key, std::string pipeline) override;
+        bool doStartStream(std::string key, std::string pipeline) override;
+        void doStopStream() override;
 
     private:
         std::string framerateToDec();

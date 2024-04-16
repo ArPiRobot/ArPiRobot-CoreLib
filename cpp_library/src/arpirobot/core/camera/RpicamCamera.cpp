@@ -99,12 +99,13 @@ bool RpicamCamera::doStartStreamJpeg(std::string key, unsigned int quality){
     return BaseCamera::doStartStreamJpeg(key, quality);
 }
 
-bool RpicamCamera::extraSetup(std::string key, std::string pipeline){
+bool RpicamCamera::doStartStream(std::string key, std::string pipeline){
     if(access(rpicamFifo.c_str(), F_OK) == 0){
         remove(rpicamFifo.c_str());
     }
     if(mkfifo(rpicamFifo.c_str(), 0666) != 0){
         Logger::logErrorFrom(getDeviceName(), "Failed to create fifo for rpicam-vid.");
+        doStopStream();
         return false;
     }
     chmod(rpicamFifo.c_str(), 0666);
@@ -113,12 +114,14 @@ bool RpicamCamera::extraSetup(std::string key, std::string pipeline){
         rpicamProc = std::make_unique<boost::process::child>(rpicamCommand);
     }catch(const boost::process::process_error &e){
         Logger::logErrorFrom("CameraManager", "Failed to start rpicam-vid process.");
+        doStopStream();
         return false;
     }
-    return true;
+    return BaseCamera::doStartStream(key, pipeline);
 }
 
-void RpicamCamera::extraTeardown(std::string key, std::string pipeline){
+void RpicamCamera::doStopStream(){
+    BaseCamera::doStopStream();
     if(rpicamFifo != "")
         remove(rpicamFifo.c_str());
     if(rpicamProc != nullptr){
