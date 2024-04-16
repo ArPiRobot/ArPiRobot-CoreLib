@@ -22,7 +22,7 @@
 #include <string>
 #include <thread>
 #include <mutex>
-#include <condition_variable>
+#include <unordered_map>
 #include <opencv2/opencv.hpp>
 #include <gst/gst.h>
 #include <boost/process.hpp>
@@ -75,6 +75,20 @@ namespace arpirobot{
 
         // TODO: setExtaControls
         // Will not work for all implementations. but will work for some. advanced feature.
+
+        /**
+         * Set an extra option (option names and values are backend and camera specific)
+         * @param name Name of the option to set
+         * @param value Value to set for the option
+         * @return true on success, false on error (which occurs if stream is currently running)
+         */
+        bool setExtraOption(std::string name, std::string value);
+
+        /**
+         * Unset all extra options that were previous set
+         * @return true on success, false on error (which occurs if stream is currently running)
+         */
+        bool clearExtraOptions();
 
         /**
          * Function to be called when a frame is read from this camera
@@ -160,6 +174,9 @@ namespace arpirobot{
         bool hwencode = true;
         bool hwdecode = true;
         bool hwconvert = true;
+
+        // Extra options
+        std::unordered_map<std::string, std::string> extraOpts;
 
         // Stream management must be thread safe
         std::mutex managementMutex;

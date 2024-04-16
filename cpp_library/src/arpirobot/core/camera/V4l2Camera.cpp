@@ -34,7 +34,16 @@ std::string V4l2Camera::getDeviceName(){
 }
 
 std::string V4l2Camera::getCapturePipeline(){
-    std::string pl = "v4l2src io-mode=dmabuf device=" + id + " ! ";
+    std::string pl = "v4l2src io-mode=dmabuf device=" + id;
+
+    std::string optsStr = " extra-controls=controls";
+    if(extraOpts.size() != 0){
+        for(auto opt : extraOpts){
+            optsStr += "," + opt.first + "=" + opt.second;
+        }
+        pl += optsStr;
+    }
+    pl += " ! ";
     if(capFormat == "raw"){
         pl += "video/x-raw";
     }else if(capFormat == "jpeg"){

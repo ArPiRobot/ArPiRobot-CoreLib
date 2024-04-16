@@ -76,7 +76,7 @@ bool BaseCamera::setCaptureMode(std::string mode){
 }
 
 bool BaseCamera::setHwAccel(bool hwencode, bool hwdecode, bool hwconvert){
-    /// If this config changes part way through stream start, stream will
+    // If this config changes part way through stream start, stream will
     // be started incorrectly
     std::lock_guard<std::mutex> l(managementMutex);
 
@@ -87,6 +87,22 @@ bool BaseCamera::setHwAccel(bool hwencode, bool hwdecode, bool hwconvert){
     this->hwdecode = hwdecode;
     this->hwconvert = hwconvert;
 
+    return true;
+}
+
+bool BaseCamera::setExtraOption(std::string name, std::string value){
+    std::lock_guard<std::mutex> l(managementMutex);
+    if(isStreaming)
+        return false;
+    extraOpts[name] = value;
+    return true;
+}
+
+bool BaseCamera::clearExtraOptions(){
+    std::lock_guard<std::mutex> l(managementMutex);
+    if(isStreaming)
+        return false;
+    extraOpts.clear();
     return true;
 }
 

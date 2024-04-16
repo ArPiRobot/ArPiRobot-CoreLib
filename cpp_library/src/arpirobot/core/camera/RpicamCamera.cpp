@@ -70,7 +70,11 @@ bool RpicamCamera::doStartStreamH264(std::string key, unsigned int bitrate,
             " --height=" + capHeight +
             " --framerate=" + framerateToDec() + 
             " --output=" + rpicamFifo;
-
+    if(extraOpts.size() != 0){
+        for(auto opt : extraOpts){
+            rpicamCommand += " --" + opt.first + "=" + opt.second;
+        }
+    }
     return BaseCamera::doStartStreamH264(key, bitrate, profile, level);
 }
 
@@ -95,7 +99,11 @@ bool RpicamCamera::doStartStreamJpeg(std::string key, unsigned int quality){
             " --height=" + capHeight +
             " --framerate=" + framerateToDec() + 
             " --output=" + rpicamFifo;
-    
+    if(extraOpts.size() != 0){
+        for(auto opt : extraOpts){
+            rpicamCommand += " --" + opt.first + "=" + opt.second;
+        }
+    }
     return BaseCamera::doStartStreamJpeg(key, quality);
 }
 
