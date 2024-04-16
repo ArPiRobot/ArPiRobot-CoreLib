@@ -73,9 +73,6 @@ namespace arpirobot{
          */
         bool setHwAccel(bool hwencode, bool hwdecode, bool hwconvert);
 
-        // TODO: setExtaControls
-        // Will not work for all implementations. but will work for some. advanced feature.
-
         /**
          * Set an extra option (option names and values are backend and camera specific)
          * @param name Name of the option to set

@@ -77,6 +77,11 @@
 
 #include <arpirobot/core/control/PID.hpp>
 
+#include <arpirobot/core/camera/BaseCamera.hpp>
+#include <arpirobot/core/camera/V4l2Camera.hpp>
+#include <arpirobot/core/camera/LibcameraCamera.hpp>
+#include <arpirobot/core/camera/RpicamCamera.hpp>
+
 #include <string>
 #include <memory>
 #include <vector>
@@ -724,3 +729,52 @@ BRIDGE_FUNC void PID_setSetpoint(PID *pid, double setpoint);
 BRIDGE_FUNC void PID_reset(PID *pid);
 
 BRIDGE_FUNC double PID_getOutput(PID *pid, double currentPv);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// BaseCamera Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC char *BaseCamera_getId(BaseCamera *cam);
+
+BRIDGE_FUNC bool BaseCamera_setCaptureMode(BaseCamera *cam, const char *mode);
+
+BRIDGE_FUNC bool BaseCamera_setHwAccel(BaseCamera *cam, bool hwencode, bool hwdecode, bool hwconvert);
+
+BRIDGE_FUNC bool BaseCamera_setExtraOption(BaseCamera *cam, const char *name, const char *value);
+
+BRIDGE_FUNC bool BaseCamera_clearExtraOptions(BaseCamera *cam);
+
+// TODO: BRIDGE_FUNC void BaseCamera_setFrameCallback(BaseCamera *cam, void (*callback)(int, int, uint8_t*))
+
+BRIDGE_FUNC bool BaseCamera_startStreamH264(BaseCamera *cam, const char *key, unsigned int bitrate, const char *profile, const char *level);
+
+BRIDGE_FUNC bool BaseCamera_startStreamJpeg(BaseCamera *cam, const char *key, unsigned int quality);
+
+BRIDGE_FUNC void BaseCamera_stopStream(BaseCamera *cam);
+
+BRIDGE_FUNC char *BaseCamera_getBackend(BaseCamera *cam);
+
+////////////////////////////////////////////////////////////////////////////////
+/// V4l2Camera Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC V4l2Camera *V4l2Camera_create(const char *id);
+
+BRIDGE_FUNC void V4l2Camera_destroy(V4l2Camera *cam);
+
+////////////////////////////////////////////////////////////////////////////////
+/// LibcameraCamera Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC LibcameraCamera *LibcameraCamera_create(const char *id);
+
+BRIDGE_FUNC void LibcameraCamera_destroy(LibcameraCamera *cam);
+
+////////////////////////////////////////////////////////////////////////////////
+/// RpicamCamera Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC RpicamCamera *RpicamCamera_create(const char *id);
+
+BRIDGE_FUNC void RpicamCamera_destroy(RpicamCamera *cam);

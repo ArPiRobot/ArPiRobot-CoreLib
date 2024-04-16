@@ -1245,3 +1245,87 @@ BRIDGE_FUNC void PID_reset(PID *pid){
 BRIDGE_FUNC double PID_getOutput(PID *pid, double currentPv){
     return pid->getOutput(currentPv);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+/// BaseCamera Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC char *BaseCamera_getId(BaseCamera *cam){
+    return returnableString(cam->getId());
+}
+
+BRIDGE_FUNC bool BaseCamera_setCaptureMode(BaseCamera *cam, const char *mode){
+    return cam->setCaptureMode(std::string(mode));
+}
+
+BRIDGE_FUNC bool BaseCamera_setHwAccel(BaseCamera *cam, bool hwencode, bool hwdecode, bool hwconvert){
+    return cam->setHwAccel(hwencode, hwdecode, hwconvert);
+}
+
+BRIDGE_FUNC bool BaseCamera_setExtraOption(BaseCamera *cam, const char *name, const char *value){
+    return cam->setExtraOption(std::string(name), std::string(value));
+}
+
+BRIDGE_FUNC bool BaseCamera_clearExtraOptions(BaseCamera *cam){
+    return cam->clearExtraOptions();
+}
+
+// TODO: BRIDGE_FUNC void BaseCamera_setFrameCallback(BaseCamera *cam, void (*callback)(int, int, uint8_t*))
+
+BRIDGE_FUNC bool BaseCamera_startStreamH264(BaseCamera *cam, const char *key, unsigned int bitrate, const char *profile, const char *level){
+    return cam->startStreamH264(std::string(key), bitrate, std::string(profile), std::string(level));
+}
+
+BRIDGE_FUNC bool BaseCamera_startStreamJpeg(BaseCamera *cam, const char *key, unsigned int quality){
+    return cam->startStreamJpeg(std::string(key), quality);
+}
+
+BRIDGE_FUNC void BaseCamera_stopStream(BaseCamera *cam){
+    cam->stopStream();
+}
+
+BRIDGE_FUNC char *BaseCamera_getBackend(BaseCamera *cam){
+    return returnableString(cam->getBackend());
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// V4l2Camera Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC V4l2Camera *V4l2Camera_create(const char *id){
+    auto cam = std::make_shared<V4l2Camera>(std::string(id));
+    bridge_objs[cam.get()] = cam;
+    return cam.get();
+}
+
+BRIDGE_FUNC void V4l2Camera_destroy(V4l2Camera *cam){
+    bridge_objs.erase(cam);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// LibcameraCamera Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC LibcameraCamera *LibcameraCamera_create(const char *id){
+    auto cam = std::make_shared<LibcameraCamera>(std::string(id));
+    bridge_objs[cam.get()] = cam;
+    return cam.get();
+}
+
+BRIDGE_FUNC void LibcameraCamera_destroy(LibcameraCamera *cam){
+    bridge_objs.erase(cam);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// RpicamCamera Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC RpicamCamera *RpicamCamera_create(const char *id){
+    auto cam = std::make_shared<RpicamCamera>(std::string(id));
+    bridge_objs[cam.get()] = cam;
+    return cam.get();
+}
+
+BRIDGE_FUNC void RpicamCamera_destroy(RpicamCamera *cam){
+    bridge_objs.erase(cam);
+}
