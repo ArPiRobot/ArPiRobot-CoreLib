@@ -32,7 +32,6 @@ namespace arpirobot{
      */
     class V4l2Camera : public BaseCamera{
     public:
-        // ID is /dev path (v4l2-ctl --list-devices)
         /**
          * Create a new camera object using libcamera backend
          * @param id Path to a camera (as shown by v4l2-ctl --list-devices command).

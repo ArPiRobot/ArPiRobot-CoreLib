@@ -785,3 +785,68 @@ arpirobot.PID_reset.restype = None
 arpirobot.PID_getOutput.argtypes = [ctypes.c_void_p, ctypes.c_double]
 arpirobot.PID_getOutput.restype = ctypes.c_double
 
+
+################################################################################
+# BaseCamera Bridge
+################################################################################
+
+arpirobot.BaseCamera_getId.argtypes = [ctypes.c_void_p]
+arpirobot.BaseCamera_getId.restype = ctypes.c_void_p
+
+arpirobot.BaseCamera_setCaptureMode.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+arpirobot.BaseCamera_setCaptureMode.restype = ctypes.c_bool
+
+arpirobot.BaseCamera_setHwAccel.argtypes = [ctypes.c_void_p, ctypes.c_bool, ctypes.c_bool, ctypes.c_bool]
+arpirobot.BaseCamera_setHwAccel.restype = ctypes.c_bool
+
+arpirobot.BaseCamera_setExtraOption.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_char_p]
+arpirobot.BaseCamera_setExtraOption.restype = ctypes.c_bool
+
+arpirobot.BaseCamera_clearExtraOptions.argtypes = [ctypes.c_void_p]
+arpirobot.BaseCamera_clearExtraOptions.restype = ctypes.c_bool
+
+# arpirobot.BaseCamera_setFrameCallback.argtypes = [ctypes.c_void_p]
+# arpirobot.BaseCamera_setFrameCallback.restype = None
+
+arpirobot.BaseCamera_startStreamH264.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint, ctypes.c_char_p, ctypes.c_char_p]
+arpirobot.BaseCamera_startStreamH264.restype = ctypes.c_bool
+
+arpirobot.BaseCamera_startStreamJpeg.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint]
+arpirobot.BaseCamera_startStreamJpeg.restype = ctypes.c_bool
+
+arpirobot.BaseCamera_stopStream.argtypes = [ctypes.c_void_p]
+arpirobot.BaseCamera_stopStream.restype = None
+
+arpirobot.BaseCamera_getBackend.argtypes = [ctypes.c_void_p]
+arpirobot.BaseCamera_getBackend.restype = ctypes.c_void_p
+
+
+################################################################################
+# V4l2Camera Bridge
+################################################################################
+
+arpirobot.V4l2Camera_create.argtypes = [ctypes.c_char_p]
+arpirobot.V4l2Camera_create.restype = ctypes.c_void_p
+
+arpirobot.V4l2Camera_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.V4l2Camera_destroy.restype = None
+
+################################################################################
+# LibcameraCamera Bridge
+################################################################################
+
+arpirobot.LibcameraCamera_create.argtypes = [ctypes.c_char_p]
+arpirobot.LibcameraCamera_create.restype = ctypes.c_void_p
+
+arpirobot.LibcameraCamera_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.LibcameraCamera_destroy.restype = None
+
+################################################################################
+# RpicamCamera Bridge
+################################################################################
+
+arpirobot.RpicamCamera_create.argtypes = [ctypes.c_char_p]
+arpirobot.RpicamCamera_create.restype = ctypes.c_void_p
+
+arpirobot.RpicamCamera_destroy.argtypes = [ctypes.c_void_p]
+arpirobot.RpicamCamera_destroy.restype = None
