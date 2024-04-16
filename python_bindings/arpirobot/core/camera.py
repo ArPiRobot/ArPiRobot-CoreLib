@@ -81,7 +81,7 @@ class BaseCamera:
     #  @param profile H.264 profile to use (default baseline)
     #  @param level H.264 level to use (default empty string = auto)
     #  @return true on success, else false (could be pipeline failure, or a stream may already be running)
-    def start_stream_h264(self, key: str, bitrate: int, profile: str, level: str) -> bool:
+    def start_stream_h264(self, key: str, bitrate: int = 2048, profile: str = "baseline", level: str = "") -> bool:
         return bridge.arpirobot.BaseCamera_startStreamH264(self._ptr, key.encode(), bitrate, profile.encode(), level.encode())
 
     ## Start a (M)JPEG stream. Note that only one stream may be running on a
@@ -89,7 +89,7 @@ class BaseCamera:
     #  @param key Name of the stream (must be unique)
     #  @param quality Quality of JPEG images (0-100, default 80). Lower quality requires less bandwidth
     #  @return true on success, else false (could be pipeline failure, or a stream may already be running)
-    def start_stream_jpeg(self, key: str, quality: int) -> bool:
+    def start_stream_jpeg(self, key: str, quality: int = 80) -> bool:
         return bridge.arpirobot.BaseCamera_startStreamJpeg(self._ptr, key.encode(), quality)
     
     ## Stop the running stream
@@ -136,10 +136,10 @@ class LibcameraCamera(BaseCamera):
     #  @param id Path to a camera (as shown by cam -l command). IDs (numbers) will not work.
     def __init__(self, id: str):
         super().__init__()
-        self._ptr = bridge.arpirobot.V4l2Camera_create(id.encode())
+        self._ptr = bridge.arpirobot.LibcameraCamera_create(id.encode())
     
     def __del__(self):
-        bridge.arpirobot.V4l2Camera_destroy(self._ptr)
+        bridge.arpirobot.LibcameraCamera_destroy(self._ptr)
 
 ## Camera object using the rpicam-vid program. Can be used for Raspberry Pi camera modules.
 #  It may or may not work with other camera modules. It will not work with USB cameras.
@@ -157,7 +157,7 @@ class RpicamCamera(BaseCamera):
     #            This is the NUMBER not the path.
     def __init__(self, id: str):
         super().__init__()
-        self._ptr = bridge.arpirobot.V4l2Camera_create(id.encode())
+        self._ptr = bridge.arpirobot.RpicamCamera_create(id.encode())
     
     def __del__(self):
-        bridge.arpirobot.V4l2Camera_destroy(self._ptr)
+        bridge.arpirobot.RpicamCamera_destroy(self._ptr)
