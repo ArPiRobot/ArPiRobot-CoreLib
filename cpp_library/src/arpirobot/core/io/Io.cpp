@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Marcus Behel
+ * Copyright 2021-2024 Marcus Behel
  *
  * This file is part of ArPiRobot-CoreLib.
  * 
@@ -78,7 +78,7 @@ void Io::init(std::string provider){
         throw std::runtime_error("The IO provider '" + provider + "' is not available.");
 #endif
     }else if(provider == PROVIDER_SERIAL){
-#ifdef HAS_SERIAL
+#ifdef HAS_SERIALPORT
         instance = new SerialIoProvider();
 #else
         throw std::runtime_error("The IO provider '" + provider + "' is not available.");

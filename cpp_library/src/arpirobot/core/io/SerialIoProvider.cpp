@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Marcus Behel
+ * Copyright 2021-2024 Marcus Behel
  *
  * This file is part of ArPiRobot-CoreLib.
  * 
@@ -24,7 +24,7 @@
 
 using namespace arpirobot;
 
-#ifdef HAS_SERIAL
+#ifdef HAS_SERIALPORT
 
 SerialIoProvider::SerialIoProvider(bool disableWarn) : IoProvider(){
     if(!disableWarn){
@@ -36,10 +36,9 @@ SerialIoProvider::SerialIoProvider(bool disableWarn) : IoProvider(){
         
 SerialIoProvider::~SerialIoProvider(){
     for(auto &it : handleMap){
-        it.second->close();
-        delete it.second;
+        sp_close(it.second);
+        sp_free_port(it.second);
     }
-
     Logger::logInfoFrom("SerialIoProvider", "IO Provider terminated.");
 }
 
@@ -141,9 +140,14 @@ unsigned int SerialIoProvider::spiRead(unsigned int handle, char *buf, unsigned 
 ////////////////////////////////////////////////////////////////////////
 
 unsigned int SerialIoProvider::uartOpen(char *port, unsigned int baud){
-    serial::Serial *serial = new serial::Serial(port, baud);
-    if(!serial->isOpen()){
-        delete serial;
+    sp_port *serial;
+    if(sp_get_port_by_name(port, &serial) != SP_OK){
+        throw OpenFailedException();
+    }
+    if(sp_open(serial, SP_MODE_READ_WRITE) != SP_OK){
+        throw OpenFailedException();
+    }
+    if(sp_set_baudrate(serial, baud) != SP_OK){
         throw OpenFailedException();
     }
     int handle = currentHandle++;
@@ -153,8 +157,9 @@ unsigned int SerialIoProvider::uartOpen(char *port, unsigned int baud){
 
 void SerialIoProvider::uartClose(unsigned int handle){
     if(handleMap.find(handle) != handleMap.end()){
-        handleMap[handle]->close();
-        delete handleMap[handle];
+        sp_port *serial = handleMap[handle];
+        sp_close(serial);
+        sp_free_port(serial);
         handleMap.erase(handle);
     }else{
         throw BadHandleException();
@@ -163,44 +168,43 @@ void SerialIoProvider::uartClose(unsigned int handle){
 
 unsigned int SerialIoProvider::uartAvailable(unsigned int handle){
     if(handleMap.find(handle) != handleMap.end()){
-        return handleMap[handle]->available();
+        sp_return res = sp_input_waiting(handleMap[handle]);
+        if(res < 0)
+            return 0; // Error occurred in libserialport
+        return res;
     }else{
         throw BadHandleException();
     }
 }
 
 void SerialIoProvider::uartWrite(unsigned int handle, char* buf, unsigned int count){
-    uint8_t *byteBuf = new uint8_t[count];
     if(handleMap.find(handle) != handleMap.end()){
-        for(size_t i = 0; i < count; ++i){
-            byteBuf[i] = buf[i];
+        sp_return res = sp_blocking_write(handleMap[handle], buf, count, 0);
+        if(res < 0){
+            throw WriteFailedException();
         }
-        handleMap[handle]->write(byteBuf, count);
-        delete[] byteBuf;
     }else{
-        delete[] byteBuf;
         throw BadHandleException();
     }
 }
 
 unsigned int SerialIoProvider::uartRead(unsigned int handle, char *buf, unsigned int count){
-    uint8_t *byteBuf = new uint8_t[count];
     if(handleMap.find(handle) != handleMap.end()){
-        unsigned int ret = handleMap[handle]->read(byteBuf, count);
-        for(size_t i = 0; i < count; ++i){
-            buf[i] = byteBuf[i];
+        sp_return ret = sp_nonblocking_read(handleMap[handle], buf, count);
+        if(ret < 0){
+            throw ReadFailedException();
         }
-        delete[] byteBuf;
         return ret;
     }else{
-        delete[] byteBuf;
         throw BadHandleException();
     }
 }
 
 void SerialIoProvider::uartWriteByte(unsigned int handle, uint8_t b){
     if(handleMap.find(handle) != handleMap.end()){
-        handleMap[handle]->write(&b, 1);
+        char c;
+        uartWrite(handle, &c, 1);
+        b = c;
     }else{
         throw BadHandleException();
     }
@@ -208,13 +212,17 @@ void SerialIoProvider::uartWriteByte(unsigned int handle, uint8_t b){
 
 uint8_t SerialIoProvider::uartReadByte(unsigned int handle){
     if(handleMap.find(handle) != handleMap.end()){
-        uint8_t b;
-        handleMap[handle]->read(&b, 1);
-        return b;
+        char c;
+        try{
+            uartRead(handle, &c, 1);
+        }catch(const ReadFailedException &e){
+            c = 0;
+        }
+        return c;
     }else{
         throw BadHandleException();
     }
 }
 
 
-#endif // HAS_SERIAL
+#endif // HAS_SERIALPORT

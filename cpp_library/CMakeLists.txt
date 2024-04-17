@@ -50,11 +50,11 @@ if(USE_PIGPIO)
 endif()
 if(USE_LGPIO)
      target_compile_definitions(arpirobot-core PUBLIC HAS_LGPIO)
-     target_link_libraries(arpirobot-core PkgConfig::SERIALPORT)
+     # TODO: Link
 endif()
 if(USE_SERIALPORT)
-     target_compile_definitions(arpirobot-core PUBLIC HAS_SERIAL)
-     target_link_libraries(arpirobot-core serial)
+     target_compile_definitions(arpirobot-core PUBLIC HAS_SERIALPORT)
+     target_link_libraries(arpirobot-core PkgConfig::SERIALPORT)
 endif()
 
 

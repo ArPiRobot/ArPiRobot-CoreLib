@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Marcus Behel
+ * Copyright 2021-2024 Marcus Behel
  *
  * This file is part of ArPiRobot-CoreLib.
  * 
@@ -22,10 +22,11 @@
 #include <arpirobot/core/io/IoProvider.hpp>
 
 #include <unordered_map>
+#include <memory>
 
-#ifdef HAS_SERIAL
+#ifdef HAS_SERIALPORT
 
-#include <serial/serial.h>
+#include <libserialport.h>
 
 namespace arpirobot{
 
@@ -33,8 +34,6 @@ namespace arpirobot{
      * \class SerialIoProvider SerialIoProvider.hpp arpirobot/core/io/SerialIoProvider.hpp
      * 
      * Io provider that is capable only of uart (serial) operations. 
-     * Available on any Windows, Linux, or macOS platform.
-     * 
      * Most IO operations will not be performed. Only UART is supported.
      * 
      */
@@ -121,12 +120,11 @@ namespace arpirobot{
 
     private:
         // Map handles to serial instances
-        std::unordered_map<int, serial::Serial*> handleMap;
+        std::unordered_map<int, sp_port*> handleMap;
         int currentHandle = 0;
 
         friend class Io;
-        friend class LibsocIoProvider;
     };
 }
 
-#endif // HAS_SERIAL
+#endif // HAS_SERIALPORT
