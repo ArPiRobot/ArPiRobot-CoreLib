@@ -1,6 +1,0 @@
-Note: Code from commit 545b354968a9d03008e1e86e14c58e3f8423a20c
-
-- Automake / makefile build system removed
-- Simple cmake build system added (only with features required to build library how it will be used with ArPiRobot Framework)
-- Remove everything but source for library (as that is all that is actually used in the custom build)
-- Code split into src and include directories (move .c from lib/ to src/ and move include/ out of lib/ then delete lib/)

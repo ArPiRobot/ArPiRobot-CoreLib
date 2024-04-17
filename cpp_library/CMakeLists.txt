@@ -19,9 +19,6 @@ target_compile_options(pigpio PRIVATE -fPIC)
 add_subdirectory(${PROJECT_SOURCE_DIR}/deps/serial/ EXCLUDE_FROM_ALL)
 target_compile_options(serial PRIVATE -fPIC)
 
-add_subdirectory(${PROJECT_SOURCE_DIR}/deps/libsoc EXCLUDE_FROM_ALL)
-target_compile_options(soc PRIVATE -fPIC)
-
 
 # ArPiRobot core library
 
@@ -59,17 +56,6 @@ target_link_libraries(arpirobot-core serial)
 # Copy serial library to build directory so it is included in update packages
 add_custom_command(TARGET arpirobot-core POST_BUILD
      COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:serial> $<OUTPUT_CONFIG:$<CONFIG>>
-)
-
-add_dependencies(arpirobot-core soc)
-target_compile_definitions(arpirobot-core PUBLIC HAS_LIBSOC)
-target_include_directories(arpirobot-core PUBLIC ${PROJECT_SOURCE_DIR}/deps/libsoc/include)
-
-target_link_libraries(arpirobot-core soc)
-
-# Copy libsoc library to build directory so it is included in update packages
-add_custom_command(TARGET arpirobot-core POST_BUILD
-     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:soc> $<OUTPUT_CONFIG:$<CONFIG>>
 )
 
 # miniaudio requires dl (dlfcn) library on Linux
