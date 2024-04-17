@@ -19,7 +19,8 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 
 import arpirobot.bridge as bridge
 import ctypes
-
+from typing import Callable
+import numpy as np
 
 ## Common base class for various camera types
 #  Provides functionality to run camera streams and receive frames from
@@ -27,6 +28,8 @@ import ctypes
 class BaseCamera:
     def __init__(self):
         self._ptr = None
+        self._callback = None
+        self._callback_c = None
     
     ## Get backend-specific device ID for this camera
     def get_id(self) -> str:
@@ -72,7 +75,24 @@ class BaseCamera:
     def clear_extra_options(self) -> bool:
         return bridge.arpirobot.BaseCamera_clearExtraOptions(self._ptr)
 
-    # TODO: set_frame_callback
+    ## Function to be called when a frame is read from this camera
+    #  Note: frames are only read from this camera while it is streaming
+    #  @param frame_callback function to call when a frame is read
+    def set_frame_callback(self, frame_callback: Callable[[np.ndarray], None]):
+        self._callback = frame_callback
+        bridge.arpirobot.BaseCamera_setFrameCallback(self._ptr, None)
+        if self._callback is not None:
+            @ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_uint8))
+            def cb_c(rows: int, cols: int, type: int, data_p: ctypes.POINTER(ctypes.c_uint8)):
+                # Note: Channels 4 is constant because C++ corelib always uses BGRA format
+                # If this is not true in the future, will need to parse type int to determine
+                data_p = ctypes.cast(data_p, ctypes.POINTER(ctypes.c_uint8))
+                frame = np.ctypeslib.as_array(data_p, shape=(rows, cols, 4))
+                self._callback(frame)
+            self._callback_c = cb_c
+        else:
+            self._callback_c = None
+        bridge.arpirobot.BaseCamera_setFrameCallback(self._ptr, self._callback_c)
 
     ## Start a H264 stream. Note that only one stream may be running on a
     #  camera at a time.
@@ -116,6 +136,7 @@ class V4l2Camera(BaseCamera):
         self._ptr = bridge.arpirobot.V4l2Camera_create(id.encode())
     
     def __del__(self):
+        self.set_frame_callback(None)
         bridge.arpirobot.V4l2Camera_destroy(self._ptr)
 
 ## Camera object using the libcamera backend. Libcamera can be used for USB webcams or 
@@ -139,6 +160,7 @@ class LibcameraCamera(BaseCamera):
         self._ptr = bridge.arpirobot.LibcameraCamera_create(id.encode())
     
     def __del__(self):
+        self.set_frame_callback(None)
         bridge.arpirobot.LibcameraCamera_destroy(self._ptr)
 
 ## Camera object using the rpicam-vid program. Can be used for Raspberry Pi camera modules.
@@ -160,4 +182,5 @@ class RpicamCamera(BaseCamera):
         self._ptr = bridge.arpirobot.RpicamCamera_create(id.encode())
     
     def __del__(self):
+        self.set_frame_callback(None)
         bridge.arpirobot.RpicamCamera_destroy(self._ptr)

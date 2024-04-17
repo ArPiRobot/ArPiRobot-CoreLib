@@ -1270,7 +1270,15 @@ BRIDGE_FUNC bool BaseCamera_clearExtraOptions(BaseCamera *cam){
     return cam->clearExtraOptions();
 }
 
-// TODO: BRIDGE_FUNC void BaseCamera_setFrameCallback(BaseCamera *cam, void (*callback)(int, int, uint8_t*))
+BRIDGE_FUNC void BaseCamera_setFrameCallback(BaseCamera *cam, void (*callback)(int, int, int, uint8_t*)){
+    if(callback == NULL){
+        cam->setFrameCallback(nullptr);
+    }else{
+        cam->setFrameCallback([callback](cv::Mat &frame){
+            callback(frame.rows, frame.cols, frame.type(), frame.data);
+        });
+    }
+}
 
 BRIDGE_FUNC bool BaseCamera_startStreamH264(BaseCamera *cam, const char *key, unsigned int bitrate, const char *profile, const char *level){
     return cam->startStreamH264(std::string(key), bitrate, std::string(profile), std::string(level));

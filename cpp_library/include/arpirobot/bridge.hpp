@@ -745,7 +745,7 @@ BRIDGE_FUNC bool BaseCamera_setExtraOption(BaseCamera *cam, const char *name, co
 
 BRIDGE_FUNC bool BaseCamera_clearExtraOptions(BaseCamera *cam);
 
-// TODO: BRIDGE_FUNC void BaseCamera_setFrameCallback(BaseCamera *cam, void (*callback)(int, int, uint8_t*))
+BRIDGE_FUNC void BaseCamera_setFrameCallback(BaseCamera *cam, void (*callback)(int, int, int, uint8_t*));
 
 BRIDGE_FUNC bool BaseCamera_startStreamH264(BaseCamera *cam, const char *key, unsigned int bitrate, const char *profile, const char *level);
 

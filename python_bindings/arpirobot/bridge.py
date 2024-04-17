@@ -805,8 +805,8 @@ arpirobot.BaseCamera_setExtraOption.restype = ctypes.c_bool
 arpirobot.BaseCamera_clearExtraOptions.argtypes = [ctypes.c_void_p]
 arpirobot.BaseCamera_clearExtraOptions.restype = ctypes.c_bool
 
-# arpirobot.BaseCamera_setFrameCallback.argtypes = [ctypes.c_void_p]
-# arpirobot.BaseCamera_setFrameCallback.restype = None
+arpirobot.BaseCamera_setFrameCallback.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
+arpirobot.BaseCamera_setFrameCallback.restype = None
 
 arpirobot.BaseCamera_startStreamH264.argtypes = [ctypes.c_void_p, ctypes.c_char_p, ctypes.c_uint, ctypes.c_char_p, ctypes.c_char_p]
 arpirobot.BaseCamera_startStreamH264.restype = ctypes.c_bool
