@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include <asio.hpp>
+#include <boost/asio.hpp>
 #include <functional>
 #include <array>
 #include <thread>
@@ -31,8 +31,8 @@
 #include <arpirobot/core/network/ControllerData.hpp>
 #include <arpirobot/core/network/NetworkTable.hpp>
 
-using namespace asio::ip;
-using namespace asio;
+using namespace boost::asio::ip;
+using namespace boost::asio;
 
 namespace arpirobot{
 
@@ -171,10 +171,10 @@ namespace arpirobot{
 
         // Boost async handler functions
 
-        static void handleAccept(const tcp::socket &client, const std::error_code &ec);
+        static void handleAccept(const tcp::socket &client, const boost::system::error_code &ec);
         static void handleDisconnect(const tcp::socket &client);
-        static void handleTcpReceive(const tcp::socket &client, const std::error_code &ec, std::size_t count);
-        static void handleUdpReceive(const std::error_code &ec, std::size_t count);
+        static void handleTcpReceive(const tcp::socket &client, const boost::system::error_code &ec, std::size_t count);
+        static void handleUdpReceive(const boost::system::error_code &ec, std::size_t count);
 
         static void handleCommand();
 

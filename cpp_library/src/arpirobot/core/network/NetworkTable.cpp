@@ -74,7 +74,7 @@ void NetworkTable::startSync(){
     inSync = true;
     Logger::logDebug("Starting sync from robot to DS.");
 
-    if(!NetworkManager::sendNtRaw(asio::buffer(NET_TABLE_START_SYNC_DATA, 3))){
+    if(!NetworkManager::sendNtRaw(boost::asio::buffer(NET_TABLE_START_SYNC_DATA, 3))){
         // abortSync will be called by handleDisconnect and lock will be released
         return;
     }
@@ -85,7 +85,7 @@ void NetworkTable::startSync(){
     }
 
     Logger::logDebug("Ending sync from robot to DS. Waiting for DS to sync data to robot.");
-    NetworkManager::sendNtRaw(asio::buffer(NET_TABLE_END_SYNC_DATA, 4));
+    NetworkManager::sendNtRaw(boost::asio::buffer(NET_TABLE_END_SYNC_DATA, 4));
 }
 
 void NetworkTable::sendAllValues(){
