@@ -12,7 +12,16 @@
             "description": "Target native system",
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build/native",
-            "cacheVariables": {},
+            "cacheVariables": {
+                "USE_PIGPIO": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                },
+                "USE_LGPIO": {
+                    "type": "BOOL",
+                    "value": "OFF"
+                }
+            },
             "environment": {
                 "CC": "clang",
                 "CXX": "clang++"
