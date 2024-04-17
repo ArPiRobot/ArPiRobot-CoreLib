@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Marcus Behel
+ * Copyright 2021-2024 Marcus Behel
  *
  * This file is part of ArPiRobot-CoreLib.
  * 
@@ -293,7 +293,6 @@ bool BaseArduinoInterface::readData(){
 }
 
 bool BaseArduinoInterface::checkData(){
-
     if(readDataset.size() == 0)
         return false;
     // CRC is sent big endian (high_byte, low_byte)
@@ -301,7 +300,8 @@ bool BaseArduinoInterface::checkData(){
     uint16_t calcCrc = calcCCittFalse(readDataset, readDataset.size() - 2);
 
     if(readCrc != calcCrc){
-        Logger::logDebugFrom(getDeviceName(), "CRC check failed for a message.");
+        Logger::logDebugFrom(getDeviceName(), "CRC check failed for a message. " + 
+                std::to_string(readCrc) + " != " + std::to_string(calcCrc));
     }
     return readCrc == calcCrc;
 }

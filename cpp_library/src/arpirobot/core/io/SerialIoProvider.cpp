@@ -150,6 +150,18 @@ unsigned int SerialIoProvider::uartOpen(char *port, unsigned int baud){
     if(sp_set_baudrate(serial, baud) != SP_OK){
         throw OpenFailedException();
     }
+    if(sp_set_bits(serial, 8) != SP_OK){
+        throw OpenFailedException();
+    }
+    if(sp_set_parity(serial, SP_PARITY_NONE) != SP_OK){
+        throw OpenFailedException();
+    }
+    if(sp_set_stopbits(serial, 1) != SP_OK){
+        throw OpenFailedException();
+    }
+    if(sp_set_flowcontrol(serial, SP_FLOWCONTROL_NONE) != SP_OK){
+        throw OpenFailedException();
+    }
     int handle = currentHandle++;
     handleMap[handle] = serial;
     return handle;
@@ -183,6 +195,9 @@ void SerialIoProvider::uartWrite(unsigned int handle, char* buf, unsigned int co
         if(res < 0){
             throw WriteFailedException();
         }
+        if(sp_drain(handleMap[handle]) != SP_OK){
+            throw WriteFailedException();
+        }
     }else{
         throw BadHandleException();
     }
@@ -190,7 +205,13 @@ void SerialIoProvider::uartWrite(unsigned int handle, char* buf, unsigned int co
 
 unsigned int SerialIoProvider::uartRead(unsigned int handle, char *buf, unsigned int count){
     if(handleMap.find(handle) != handleMap.end()){
-        sp_return ret = sp_nonblocking_read(handleMap[handle], buf, count);
+        unsigned int avail = uartAvailable(handle);
+        if(avail == 0){
+            return 0;
+        }
+        if(avail < count)
+            count = avail;
+        sp_return ret = sp_blocking_read(handleMap[handle], buf, count, 0);
         if(ret < 0){
             throw ReadFailedException();
         }
@@ -202,9 +223,8 @@ unsigned int SerialIoProvider::uartRead(unsigned int handle, char *buf, unsigned
 
 void SerialIoProvider::uartWriteByte(unsigned int handle, uint8_t b){
     if(handleMap.find(handle) != handleMap.end()){
-        char c;
+        char c = b;
         uartWrite(handle, &c, 1);
-        b = c;
     }else{
         throw BadHandleException();
     }
@@ -212,7 +232,7 @@ void SerialIoProvider::uartWriteByte(unsigned int handle, uint8_t b){
 
 uint8_t SerialIoProvider::uartReadByte(unsigned int handle){
     if(handleMap.find(handle) != handleMap.end()){
-        char c;
+        char c = (uint8_t)211;
         try{
             uartRead(handle, &c, 1);
         }catch(const ReadFailedException &e){
@@ -225,4 +245,4 @@ uint8_t SerialIoProvider::uartReadByte(unsigned int handle){
 }
 
 
-#endif // HAS_SERIALPORT
+#endif // HAS_SERIALPORTPORT

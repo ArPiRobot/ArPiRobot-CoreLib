@@ -22,7 +22,6 @@
 #include <arpirobot/core/io/IoProvider.hpp>
 
 #include <unordered_map>
-#include <memory>
 
 #ifdef HAS_SERIALPORT
 
@@ -34,6 +33,8 @@ namespace arpirobot{
      * \class SerialIoProvider SerialIoProvider.hpp arpirobot/core/io/SerialIoProvider.hpp
      * 
      * Io provider that is capable only of uart (serial) operations. 
+     * Available on any Windows, Linux, or macOS platform.
+     * 
      * Most IO operations will not be performed. Only UART is supported.
      * 
      */
@@ -124,6 +125,7 @@ namespace arpirobot{
         int currentHandle = 0;
 
         friend class Io;
+        friend class LibsocIoProvider;
     };
 }
 
