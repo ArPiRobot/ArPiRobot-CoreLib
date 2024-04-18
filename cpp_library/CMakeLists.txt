@@ -35,11 +35,11 @@ file (GLOB_RECURSE SOURCES
      ${PROJECT_SOURCE_DIR}/include/*.h
      ${PROJECT_SOURCE_DIR}/include/*.hpp
 )
-add_library(arpirobot-core SHARED ${SOURCES} ${PROJECT_SOURCE_DIR}/deps/miniaudio/miniaudio.h)
+add_library(arpirobot-core SHARED ${SOURCES} ${PROJECT_SOURCE_DIR}/thirdparty/miniaudio/miniaudio.h)
 target_include_directories(arpirobot-core PUBLIC 
      ${PROJECT_SOURCE_DIR}/include 
-     ${PROJECT_SOURCE_DIR}/deps 
-     ${PROJECT_SOURCE_DIR}/deps/miniaudio/)
+     ${PROJECT_SOURCE_DIR}/thirdparty 
+     ${PROJECT_SOURCE_DIR}/thirdparty/miniaudio/)
 target_link_libraries(arpirobot-core Threads::Threads PkgConfig::GSTREAMER PkgConfig::OPENCV 
           Boost::headers Boost::system dl)
 include(GenerateExportHeader)
