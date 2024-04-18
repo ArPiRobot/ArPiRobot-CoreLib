@@ -35,6 +35,7 @@ ArduinoUartInterface::ArduinoUartInterface(std::string port, int baud) :
 }
 
 ArduinoUartInterface::~ArduinoUartInterface(){
+    stopFromChildDestructor();
     delete portCStr;
 }
 
@@ -67,9 +68,6 @@ uint8_t ArduinoUartInterface::readOne() {
         auto msg = "Invalid UART handle in ArduinoUART interface.";
         Logger::logErrorFrom(getDeviceName(), msg);
         throw std::runtime_error(msg);
-    }
-    while(!available()){
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
     return Io::uartReadByte(handle);
 }

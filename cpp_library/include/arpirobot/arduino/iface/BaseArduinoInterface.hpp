@@ -127,6 +127,12 @@ namespace arpirobot{
         virtual std::vector<uint8_t> readAll() = 0;
         virtual void write(const uint8_t &b) = 0;
         virtual std::string getDeviceName() = 0;
+    
+    protected:
+        // Child class destructor must stop thread because thread calls
+        // pure virtual methods. Thus, it must stop before child (implementing these functions)
+        // is destructed.
+        void stopFromChildDestructor();
 
     private:
 
@@ -141,6 +147,7 @@ namespace arpirobot{
         std::vector<std::shared_ptr<ArduinoDevice>> devices;
         bool initialized = false;
         bool arduinoReady = false;
+        bool stopRun = false;
 
         const static uint8_t START_BYTE;
         const static uint8_t END_BYTE;

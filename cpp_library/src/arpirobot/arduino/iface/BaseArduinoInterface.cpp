@@ -40,11 +40,7 @@ const std::vector<uint8_t> BaseArduinoInterface::CMD_RESET = {'R', 'E', 'S', 'E'
 const std::vector<uint8_t> BaseArduinoInterface::CMD_END = {'E', 'N', 'D'};
 
 BaseArduinoInterface::~BaseArduinoInterface(){
-    if(processThread != nullptr){
-        processThread->join();
-        delete processThread;
-    }
-
+    // Note: All child class destructors MUST call stopFromChildDestructor!!!
     for(auto &dev : devices){
         dev->setArduino(nullptr);
     }
@@ -191,7 +187,7 @@ void BaseArduinoInterface::sendFromDevice(uint8_t deviceId, std::vector<uint8_t>
 }
 
 void BaseArduinoInterface::run(){
-    while(arduinoReady){
+    while(arduinoReady && !stopRun){
         try{
             if(readData() && checkData()){
                 // Special case check
@@ -214,6 +210,8 @@ void BaseArduinoInterface::run(){
             arduinoReady = false;
         }
     }
+    if(stopRun)
+        return;
 
     // The above loop exits when communication is lost
     // Have begin run asynchronously
@@ -262,6 +260,10 @@ void BaseArduinoInterface::writeData(const std::vector<uint8_t> &data){
 }
 
 bool BaseArduinoInterface::readData(){
+    if(available() < 1){
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        return false;
+    }
     uint8_t b = readOne();
     if(parseEscaped){
         // Only allow valid escape sequences
@@ -322,6 +324,14 @@ std::vector<uint8_t> BaseArduinoInterface::waitForMessage(const std::vector<uint
                 return readDataset;
             }
         }
+    }
+}
+
+void BaseArduinoInterface::stopFromChildDestructor(){
+    if(processThread != nullptr){
+        stopRun = true;
+        processThread->join();
+        delete processThread;
     }
 }
 

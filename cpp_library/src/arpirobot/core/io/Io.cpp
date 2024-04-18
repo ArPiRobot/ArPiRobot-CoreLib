@@ -23,6 +23,7 @@
 #include <arpirobot/core/io/PigpioIoProvider.hpp>
 #include <arpirobot/core/io/SerialIoProvider.hpp>
 #include <arpirobot/core/io/LgpioIoProvider.hpp>
+#include <arpirobot/core/log/Logger.hpp>
 
 #include <algorithm>
 #include <fstream>
