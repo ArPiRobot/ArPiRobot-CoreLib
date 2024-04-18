@@ -22,6 +22,7 @@
 #include <arpirobot/core/io/DummyIoProvider.hpp>
 #include <arpirobot/core/io/PigpioIoProvider.hpp>
 #include <arpirobot/core/io/SerialIoProvider.hpp>
+#include <arpirobot/core/io/LgpioIoProvider.hpp>
 
 #include <algorithm>
 #include <fstream>
@@ -35,6 +36,7 @@ std::vector<IoDevice*> Io::ioDevices;
 std::mutex Io::ioDevicesLock;
 
 const char *Io::PROVIDER_PIGPIO = "pigpio";
+const char *Io::PROVIDER_LGPIO = "lgpio";
 const char *Io::PROVIDER_DUMMY = "dummy";
 const char *Io::PROVIDER_SERIAL = "serial";
 
@@ -62,8 +64,7 @@ void Io::init(std::string provider){
             provider = PROVIDER_PIGPIO;
         }else{
             // Not a raspberry pi
-            // TODO: Fallback to lgpio once implemented
-            provider = PROVIDER_SERIAL;
+            provider = PROVIDER_LGPIO;
         }
     }
 
@@ -74,6 +75,12 @@ void Io::init(std::string provider){
     if(provider == PROVIDER_PIGPIO){
 #ifdef HAS_PIGPIO
         instance = new PigpioIoProvider();
+#else
+        throw std::runtime_error("The IO provider '" + provider + "' is not available.");
+#endif
+    }else if(provider == PROVIDER_LGPIO){
+#ifdef HAS_LGPIO
+        instance = new LgpioIoProvider();
 #else
         throw std::runtime_error("The IO provider '" + provider + "' is not available.");
 #endif

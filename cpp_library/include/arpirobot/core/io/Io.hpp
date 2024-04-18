@@ -41,6 +41,7 @@ namespace arpirobot{
         const static unsigned int GPIO_HIGH = IoProvider::GPIO_HIGH;
 
         const static char *PROVIDER_PIGPIO;      // PIGPIO library
+        const static char *PROVIDER_LGPIO;       // LGPIO library
         const static char *PROVIDER_DUMMY;       // Fake provider. Prints log messages.
         const static char *PROVIDER_SERIAL;      // UART only
 

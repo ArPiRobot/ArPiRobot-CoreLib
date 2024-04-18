@@ -5,12 +5,12 @@
 # Find the path to the lgpio includes.
 find_path(lgpio_INCLUDE_DIR 
 	NAMES lgpio.h 
-	HINTS /usr/include)
+	HINTS /usr/include /usr/local/include)
 	
 # Find the lgpio libraries.
 find_library(lgpio_LIBRARY 
 	NAMES liblgpio.so
-	HINTS /usr/lib)
+	HINTS /usr/lib /usr/local/lib)
 
     
 # Set the lgpio variables to plural form to make them accessible for 
