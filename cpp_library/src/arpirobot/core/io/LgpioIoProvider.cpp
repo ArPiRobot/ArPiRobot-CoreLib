@@ -33,7 +33,7 @@ LgpioIoProvider::LgpioIoProvider(){
     lgChipInfo_p info;
     while(chip < 99){   // 99 chips is just a failsafe exit condition
         handle = lgGpiochipOpen(chip);
-        if(handle == LG_NOT_A_GPIOCHIP)
+        if(handle == LG_CANNOT_OPEN_CHIP)
             break;
         handleLgpioError(handle, false);
         chipHandles[chip] = handle;
@@ -311,7 +311,7 @@ void LgpioIoProvider::handleLgpioError(int ec, bool opIsWrite){
     case LG_I2C_OPEN_FAILED:
     case LG_SERIAL_OPEN_FAILED:
     case LG_SPI_OPEN_FAILED:
-    case LG_CANNOT_OPEN_CHIP:
+    case LG_NOT_A_GPIOCHIP:
     case LG_GPIO_BUSY:
         throw OpenFailedException();
     case LG_BAD_MICROS:
