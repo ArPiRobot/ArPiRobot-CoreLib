@@ -174,7 +174,8 @@ namespace arpirobot{
 
         void feed();
 
-        std::shared_ptr<internal::AdafruitINA260> sensor;
+        std::unique_ptr<internal::AdafruitINA260> sensor;
+        std::unique_ptr<std::thread> thr;
 
         double current = 0, voltage = 0, power = 0;
 

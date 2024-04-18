@@ -251,7 +251,7 @@ void INA260PowerSensor::begin(){
     try{
         if(bus == -1)
             bus = Io::getDefaultI2cBus();
-        sensor = std::make_shared<AdafruitINA260>(0x40, bus);
+        sensor = std::make_unique<AdafruitINA260>(0x40, bus);
     }catch(const std::exception &e){
         Logger::logErrorFrom(getDeviceName(), "Failed to initialize sensor.");
         Logger::logDebugFrom(getDeviceName(), e.what());
@@ -261,7 +261,11 @@ void INA260PowerSensor::begin(){
         Logger::logDebugFrom(getDeviceName(), "Incorrect device at given adddress.");
         return;
     }
-    BaseRobot::scheduleOneshotFunction(std::bind(&INA260PowerSensor::feed, this));
+
+    // Run on dedicated thread not using BaseRobot's thread pool
+    // This function will run forever. Thread pool is designed for short running
+    // tasks that yield by returning.
+    thr = std::make_unique<std::thread>(&INA260PowerSensor::feed, this);
 }
 
 bool INA260PowerSensor::isEnabled(){
