@@ -30,16 +30,16 @@ LgpioIoProvider::LgpioIoProvider(){
     // Open all GPIO chips
     unsigned int chip = 0;
     int handle, res;
-    lgChipInfo_p info;
+    lgChipInfo_t info;
     while(chip < 99){   // 99 chips is just a failsafe exit condition
         handle = lgGpiochipOpen(chip);
         if(handle == LG_CANNOT_OPEN_CHIP)
             break;
         handleLgpioError(handle, false);
         chipHandles[chip] = handle;
-        res = lgGpioGetChipInfo(handle, info);
+        res = lgGpioGetChipInfo(handle, &info);
         handleLgpioError(res, false);
-        chipLineCounts[chip] = info->lines;
+        chipLineCounts[chip] = info.lines;
         chip++;
     }
     Logger::logInfoFrom("LgpioIoProvider", "IO Provider initialized.");
