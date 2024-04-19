@@ -92,6 +92,26 @@ class BaseRobot(ABC):
         
         @ctypes.CFUNCTYPE(None)
         def robot_stopped():
+            # Due to camera objects holding references
+            # To arbitrary functions in python, it is necessary to
+            # Ensure that these are cleared before python cleans
+            # up memory of the objects those functions might be in
+            # Consider robot with a member camera object that has a callback
+            # to a function in that class when ctrl+c pressed
+            # - Robot class destructor in python runs
+            # - Running pipeline gets a frame and runs callback, which the interpreter will now not run
+            # - The gstreamer thread now hangs
+            # - Python destructs member camera
+            # - This calls destructor for c++ object
+            # - gst pipeline state is set to Null as part of shutdown
+            # - but thread is blocked, so this doesn't return
+            # You can ctrl+c this a second time, but it doesn't allow a clean
+            # shutdown.
+            # Since most frame callbacks will either be in scope when robot_stopped
+            # is called this avoids the issue in most (maybe all since this will be
+            # called before interpreter shuts things down) cases
+            from arpirobot.core.camera import BaseCamera
+            BaseCamera._null_all_callbacks()
             self.robot_stopped()
         
         @ctypes.CFUNCTYPE(None)

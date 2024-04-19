@@ -185,5 +185,7 @@ namespace arpirobot{
         GstElement *gstPl = NULL;
         GstElement *gstAppsink = NULL;
         GstBus *gstBus = NULL;
+
+        std::mutex callbackMutex;
     };
 }

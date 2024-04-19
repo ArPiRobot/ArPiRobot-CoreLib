@@ -44,6 +44,8 @@ namespace arpirobot{
          */
         RpicamCamera(std::string id);
 
+        ~RpicamCamera();
+
         std::string getBackend() override;
 
     protected:

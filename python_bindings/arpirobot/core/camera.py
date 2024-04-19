@@ -26,10 +26,22 @@ import numpy as np
 #  Provides functionality to run camera streams and receive frames from
 #  cameras in OpenCV compatible formats
 class BaseCamera:
+    # See comments in BaseRobot's robot_stopped c function object for details
+    # on why this is needed in python
+    _all_cameras = []
+    @staticmethod
+    def _null_all_callbacks():
+        for cam in BaseCamera._all_cameras:
+            cam.set_frame_callback(None)
+
     def __init__(self):
         self._ptr = None
         self._callback = None
         self._callback_c = None
+        self._all_cameras.append(self)
+    
+    def __del__(self):
+        self._all_cameras.remove(self)
     
     ## Get backend-specific device ID for this camera
     def get_id(self) -> str:

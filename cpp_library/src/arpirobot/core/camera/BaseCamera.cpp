@@ -37,7 +37,7 @@ BaseCamera::BaseCamera(std::string id) : id(id){
 }
 
 BaseCamera::~BaseCamera(){
-    stopStream();
+    // CHILD CLASSES MUST CALL STOPSTREAM!!!
 }
 
 std::string BaseCamera::getId(){
@@ -107,9 +107,7 @@ bool BaseCamera::clearExtraOptions(){
 }
 
 void BaseCamera::setFrameCallback(std::function<void(cv::Mat&)> frameCallback){
-    // No need to mutex this. This doesn't impact stream startup
-    // process. It can also change during a stream since the pointer in the object
-    // is accessed.
+    std::lock_guard<std::mutex> lg(callbackMutex);
     this->frameCallback = frameCallback;
 }
 
@@ -255,10 +253,10 @@ void BaseCamera::doStopStream(){
         ffmpegProc = nullptr;
     }
     if(gstPl != NULL){
+        gst_element_set_state (gstPl, GST_STATE_NULL);
         if(gstBus != NULL){
             gst_object_unref(gstBus);
         }
-        gst_element_set_state (gstPl, GST_STATE_NULL);
         gst_object_unref(gstPl);
     }
     isStreaming = false;
@@ -268,9 +266,8 @@ GstFlowReturn BaseCamera::frameFromAppsink(GstElement *sink, BaseCamera *instanc
     GstSample *sample = NULL;
     g_signal_emit_by_name (sink, "pull-sample", &sample);
     if(sample != NULL){
-        // TODO: Convert to cv::Mat and pass to framecallback if framecallback is not nullptr
-        auto cb = instance->frameCallback; // Note: need to read only once. Could change on different thread
-        if(cb != nullptr){
+        std::lock_guard<std::mutex> lg(instance->callbackMutex);
+        if(instance->frameCallback != nullptr){
             GstBuffer *buffer = gst_sample_get_buffer(sample);
             if(buffer != NULL){
                 GstMapInfo map;
@@ -280,7 +277,7 @@ GstFlowReturn BaseCamera::frameFromAppsink(GstElement *sink, BaseCamera *instanc
                     // This data becomes invalid when we call gst_buffer_unmap
                     // But a user callback could hold onto a copy of the frame object
                     // So, we have to clone it to be safe
-                    cb(frame);
+                    instance->frameCallback(frame);
                     gst_buffer_unmap(buffer, &map);
                 }
             }

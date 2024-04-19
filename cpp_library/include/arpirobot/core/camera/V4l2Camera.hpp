@@ -39,6 +39,8 @@ namespace arpirobot{
          */
         V4l2Camera(std::string id);
 
+        ~V4l2Camera();
+
         std::string getBackend() override;
 
     protected:

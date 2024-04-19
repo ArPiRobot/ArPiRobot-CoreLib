@@ -34,6 +34,11 @@ RpicamCamera::RpicamCamera(std::string id) : BaseCamera(id){
 
 }
 
+RpicamCamera::~RpicamCamera(){
+    setFrameCallback(nullptr);
+    stopStream();
+}
+
 std::string RpicamCamera::getBackend(){
     return "rpicam";
 }

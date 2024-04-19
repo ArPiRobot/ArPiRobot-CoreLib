@@ -28,6 +28,11 @@ LibcameraCamera::LibcameraCamera(std::string id) : BaseCamera(id){
 
 }
 
+LibcameraCamera::~LibcameraCamera(){
+    setFrameCallback(nullptr);
+    stopStream();
+}
+
 std::string LibcameraCamera::getBackend(){
     return "libcamera";
 }

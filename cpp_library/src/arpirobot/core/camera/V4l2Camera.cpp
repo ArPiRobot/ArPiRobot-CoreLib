@@ -18,11 +18,19 @@
  */
 
 #include <arpirobot/core/camera/V4l2Camera.hpp>
+#include <arpirobot/core/log/Logger.hpp>
+#include <thread>
+#include <chrono>
 
 using namespace arpirobot;
 
 V4l2Camera::V4l2Camera(std::string id) : BaseCamera(id){
 
+}
+
+V4l2Camera::~V4l2Camera(){
+    setFrameCallback(nullptr);
+    stopStream();
 }
 
 std::string V4l2Camera::getBackend(){
