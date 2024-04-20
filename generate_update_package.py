@@ -80,25 +80,11 @@ os.chdir(os.path.join(script_path, "cpp_library"))
 # arpirobot includes
 shutil.copytree(os.path.join("include"), os.path.join("..", "package", "include"))
 
-# asio includes
-for file in glob.glob(os.path.join("deps", "asio-*")):
-    copytree(os.path.join(file, "include"), os.path.join("..", "package", "include"))
-
-# libsoc includes
-copytree(os.path.join("deps", "libsoc", "include"), os.path.join("..", "package", "include"))
-
 # miniaudio includes
-copytree(os.path.join("deps", "miniaudio"), os.path.join("..", "package", "include"))
-
-# pigpio includes
-for file in glob.glob(os.path.join("deps", "pigpio-*", "*.h")):
-    shutil.copy(file, os.path.join("..", "package", "include"))
-
-# serial includes
-copytree(os.path.join("deps", "serial", "include"), os.path.join("..", "package", "include"))
+copytree(os.path.join("thirdparty", "miniaudio"), os.path.join("..", "package", "include"))
 
 # Loose files
-shutil.copy(os.path.join("deps", "ctpl_stl.h"), os.path.join("..", "package", "include"))
+shutil.copy(os.path.join("thirdparty", "ctpl_stl.h"), os.path.join("..", "package", "include"))
 os.chdir(original_dir)
 
 print("")
