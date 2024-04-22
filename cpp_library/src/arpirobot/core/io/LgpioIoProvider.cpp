@@ -135,8 +135,6 @@ void LgpioIoProvider::gpioPwm(unsigned int pin, unsigned int value) {
     auto chipAndLine = pinToChipAndLine(pin);
     unsigned int chip = chipAndLine.first;
     unsigned int line = chipAndLine.second;
-    Logger::logDebug("CHIP = " + std::to_string(chip));
-    Logger::logDebug("LINE = " + std::to_string(line));
     unsigned int freq = 125;
     if(pwmFreqs.find(pin) != pwmFreqs.end())
         freq = pwmFreqs[pin];
