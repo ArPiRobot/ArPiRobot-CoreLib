@@ -135,6 +135,8 @@ void LgpioIoProvider::gpioPwm(unsigned int pin, unsigned int value) {
     auto chipAndLine = pinToChipAndLine(pin);
     unsigned int chip = chipAndLine.first;
     unsigned int line = chipAndLine.second;
+    Logger::logDebug("CHIP = " + std::to_string(chip));
+    Logger::logDebug("LINE = " + std::to_string(line));
     unsigned int freq = 125;
     if(pwmFreqs.find(pin) != pwmFreqs.end())
         freq = pwmFreqs[pin];
@@ -280,7 +282,7 @@ uint8_t LgpioIoProvider::uartReadByte(unsigned int handle) {
 std::pair<unsigned int, unsigned int> LgpioIoProvider::pinToChipAndLine(unsigned int pin){
     unsigned int chip = 0;
     unsigned int line = 0;
-    while(pin > chipLineCounts[chip]){
+    while(pin >= chipLineCounts[chip]){
         pin -= chipLineCounts[chip];
         chip++;
         if(chip >= chipLineCounts.size())
