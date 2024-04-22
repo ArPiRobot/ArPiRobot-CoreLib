@@ -23,6 +23,8 @@
 #include <arpirobot/core/io/exceptions.hpp>
 #include <arpirobot/core/log/Logger.hpp>
 
+#include <iostream>
+
 using namespace arpirobot;
 
 
@@ -137,8 +139,8 @@ void LgpioIoProvider::gpioPwm(unsigned int pin, unsigned int value) {
     if(pwmFreqs.find(pin) != pwmFreqs.end())
         freq = pwmFreqs[pin];
     // Duty cycle is expected as percent (0-100) but provided as range 0-255
-    float dc = (float)value / 255.0f;
-    int res = lgTxPwm(chipHandles[chip], line, freq, 50, dc, 0);
+    float dc = ((float)value / 255.0f) * 100.0f;
+    int res = lgTxPwm(chipHandles[chip], line, freq, dc, 0, 0);
     handleLgpioError(res, true);
 }
 
@@ -358,6 +360,12 @@ void LgpioIoProvider::handleLgpioError(int ec, bool opIsWrite){
         else throw ReadFailedException();
     case LG_TX_QUEUE_FULL:
         throw std::runtime_error("Out of slots in PWM queue (too many PWMs, lgpio can't handle more)");
+    default:
+        if(ec < 0){
+            Logger::logWarningFrom("LgpioIoProvider", "Got unhandled error code ");
+            std::cout << "STUPID THINGS: " << ec << std::endl;
+        }
+        return;
     }
 }
 
