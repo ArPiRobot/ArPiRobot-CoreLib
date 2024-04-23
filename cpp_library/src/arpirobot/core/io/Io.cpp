@@ -29,6 +29,10 @@
 #include <fstream>
 #include <cstdio>
 
+#if HAS_PIGPIO
+#include <pigpio.h>
+#endif
+
 using namespace arpirobot;
 
 
@@ -44,30 +48,27 @@ const char *Io::PROVIDER_SERIAL = "serial";
 
 void Io::init(std::string provider){
     // Choose a default provider based on the current platform if none is specified
-
+#if HAS_PIGPIO
+    // try pigpio first
     if(provider == ""){
-        // Determine if this is a raspberry pi board
-        bool isrpi = false;
-        FILE *pipe = popen("cat /proc/cpuinfo | grep Model", "r");
-        if(pipe){
-            char buf[64];
-            std::string cmdOutput;
-            while(!feof(pipe)){
-                if(fgets(buf, 64, pipe) != NULL)
-                    cmdOutput += buf;
-            }
-            pclose(pipe);
-            isrpi = (cmdOutput.find("Raspberry Pi") != std::string::npos);
-        }
-
-        if(isrpi){
-            // Raspberry pi
+        if(gpioHardwareRevision() != 0){
             provider = PROVIDER_PIGPIO;
-        }else{
-            // Not a raspberry pi
-            provider = PROVIDER_LGPIO;
         }
     }
+#endif
+#if HAS_LGPIO
+    // If pigpio didn't work (or not built), fallback to lgpio
+    if(provider == "")
+        provider = PROVIDER_LGPIO;
+#endif
+#if HAS_SERIALPORT
+    // If we can't user either pigpio or lgpio, use libserialport
+    if(provider == "")
+        provider = PROVIDER_SERIAL;
+#endif
+    // If no other provider has worked, fallback on dummy
+    if(provider == "")
+        provider = PROVIDER_DUMMY;
 
     // Terminate old provider first (if one)
     terminate();
