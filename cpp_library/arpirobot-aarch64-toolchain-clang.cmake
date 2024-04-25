@@ -31,14 +31,14 @@ endif()
 
 set(CMAKE_CROSSCOMPILING TRUE)
 SET(CMAKE_SYSTEM_NAME Linux)
-set(CMAKE_SYSTEM_PROCESSOR arm)
+set(CMAKE_SYSTEM_PROCESSOR aarch64)
 
-SET(TARGET arm-linux-gnueabihf)
-set(CMAKE_SYSROOT "${HOMEDIR}/.arpirobot/sysroot/armv6")
+SET(TARGET aarch64-linux-gnu)
+set(CMAKE_SYSROOT "${HOMEDIR}/.arpirobot/sysroot/aarch64")
 
 # Make pkg-config work properly with sysroot
 set(ENV{PKG_CONFIG_DIR} "")
-set(ENV{PKG_CONFIG_LIBDIR} "${CMAKE_SYSROOT}/usr/lib/arm-linux-gnueabihf/pkgconfig")
+set(ENV{PKG_CONFIG_LIBDIR} "${CMAKE_SYSROOT}/usr/lib/aarch64-linux-gnu/pkgconfig")
 set(ENV{PKG_CONFIG_SYSROOT_DIR} ${CMAKE_SYSROOT})
 
 if(NOT EXISTS "${CMAKE_SYSROOT}")
@@ -46,17 +46,22 @@ if(NOT EXISTS "${CMAKE_SYSROOT}")
 endif()
 
 SET(CMAKE_C_COMPILER ${CLANG})
-SET(CMAKE_C_COMPILER_TARGET arm-linux-gnueabihf)
+SET(CMAKE_C_COMPILER_TARGET aarch64-linux-gnu)
 
 SET(CMAKE_CXX_COMPILER ${CLANGPP})
-SET(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabihf)
+SET(CMAKE_CXX_COMPILER_TARGET aarch64-linux-gnu)
 
 SET(CMAKE_ASM_COMPILER ${CLANG})
-SET(CMAKE_ASM_COMPILER_TARGET arm-linux-gnueabihf)
+SET(CMAKE_ASM_COMPILER_TARGET aarch64-linux-gnu)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 # Find C++ include path for whatever version of libstdc++ is used by the sysroot
 file(GLOB CPP_INCLUDES "${CMAKE_SYSROOT}/usr/include/c++/*/")
-file(GLOB CPP_INCLUDES_2 "${CMAKE_SYSROOT}/usr/include/arm-linux-gnueabihf/c++/*/")
+file(GLOB CPP_INCLUDES_2 "${CMAKE_SYSROOT}/usr/include/aarch64-linux-gnu/c++/*/")
 list(JOIN CPP_INCLUDES "-isystem" CPP_INCLUDES_STR)
 list(JOIN CPP_INCLUDES_2 "-isystem" CPP_INCLUDES_STR_2)
 
@@ -65,9 +70,7 @@ list(JOIN CPP_INCLUDES_2 "-isystem" CPP_INCLUDES_STR_2)
 # Note: Linking with lld since it is cross linker natively
 #       Avoids needing gcc for target system just to link
 #       Thus, using clang and lld, no cross GNU toolchain is needed. Only sysroot.
-SET(SHARED_FLAGS "-fuse-ld=lld -Qunused-arguments -march=armv6z -mtune=arm1176jzf-s -mfpu=vfp -mfloat-abi=hard")
+SET(SHARED_FLAGS "-fuse-ld=lld -Qunused-arguments")
 SET(CMAKE_C_FLAGS "${SHARED_FLAGS}" CACHE STRING "C compiler flags")
 SET(CMAKE_CXX_FLAGS "${SHARED_FLAGS} -isystem ${CPP_INCLUDES_STR} -isystem ${CPP_INCLUDES_STR_2}" CACHE STRING "C++ compiler flags")
 set(LINK_FLAGS "${SHARED_FLAGS} -fuse-ld=lld" CACHE STRING "Linker flags")
-
-

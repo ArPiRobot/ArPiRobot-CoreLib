@@ -7,11 +7,11 @@
     },
     "configurePresets": [
         {
-            "name": "native",
-            "displayName": "native",
-            "description": "Target native system",
+            "name": "native-clang",
+            "displayName": "native-clang",
+            "description": "Target native system using LLVM toolchain",
             "generator": "Ninja Multi-Config",
-            "binaryDir": "${sourceDir}/build/native",
+            "binaryDir": "${sourceDir}/build/native-clang",
             "cacheVariables": {
                 "USE_PIGPIO": {
                     "type": "BOOL",
@@ -29,27 +29,38 @@
             "vendor": {}
         },
         {
-            "name": "armv6",
-            "displayName": "armv6",
-            "description": "Targeting armv6 systems",
+            "name": "armv6-clang",
+            "displayName": "armv6-clang",
+            "description": "Targeting armv6 systems using LLVM toolchain",
             "generator": "Ninja Multi-Config",
-            "binaryDir": "${sourceDir}/build/armv6",
+            "binaryDir": "${sourceDir}/build/armv6-clang",
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/arpirobot-armv6-toolchain.cmake",
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/arpirobot-armv6-toolchain-clang.cmake"
+            },
+            "environment": {},
+            "vendor": {}
+        },
+        {
+            "name": "armv6-gcc",
+            "displayName": "armv6-gcc",
+            "description": "Targeting armv6 systems using GNU toolchain",
+            "generator": "Ninja Multi-Config",
+            "binaryDir": "${sourceDir}/build/armv6-gcc",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/arpirobot-armv6-toolchain-gcc.cmake",
                 "CMAKE_BUILD_WITH_INSTALL_RPATH": "ON"
             },
             "environment": {},
             "vendor": {}
         },
         {
-            "name": "aarch64",
-            "displayName": "aarch64",
-            "description": "Targeting aarch64 systems",
+            "name": "aarch64-clang",
+            "displayName": "aarch64-clang",
+            "description": "Targeting aarch64 systems using LLVM toolchain",
             "generator": "Ninja Multi-Config",
-            "binaryDir": "${sourceDir}/build/aarch64",
+            "binaryDir": "${sourceDir}/build/aarch64-clang",
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/arpirobot-aarch64-toolchain.cmake",
-                "CMAKE_BUILD_WITH_INSTALL_RPATH": "ON"
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/arpirobot-aarch64-toolchain-clang.cmake"
             },
             "environment": {},
             "vendor": {}
@@ -57,77 +68,102 @@
     ],
     "buildPresets": [
         {
-            "name": "native-debug",
+            "name": "native-clang-debug",
             "displayName": "Debug",
-            "configurePreset": "native",
+            "configurePreset": "native-clang",
             "configuration": "Debug"
         },
         {
-            "name": "native-release",
+            "name": "native-clang-release",
             "displayName": "Release",
-            "configurePreset": "native",
+            "configurePreset": "native-clang",
             "configuration": "Release"
         },
         {
-            "name": "native-minsizerel",
+            "name": "native-clang-minsizerel",
             "displayName": "MinSizeRel",
-            "configurePreset": "native",
+            "configurePreset": "native-clang",
             "configuration": "MinSizeRel"
         },
         {
-            "name": "native-relwithdebinfo",
+            "name": "native-clang-relwithdebinfo",
             "displayName": "RelWithDebInfo",
-            "configurePreset": "native",
+            "configurePreset": "native-clang",
             "configuration": "RelWithDebInfo"
         },
 
         {
-            "name": "armv6-debug",
+            "name": "armv6-clang-debug",
             "displayName": "Debug",
-            "configurePreset": "armv6",
+            "configurePreset": "armv6-clang",
             "configuration": "Debug"
         },
         {
-            "name": "armv6-release",
+            "name": "armv6-clang-release",
             "displayName": "Release",
-            "configurePreset": "armv6",
+            "configurePreset": "armv6-clang",
             "configuration": "Release"
         },
         {
-            "name": "armv6-minsizerel",
+            "name": "armv6-clang-minsizerel",
             "displayName": "MinSizeRel",
-            "configurePreset": "armv6",
+            "configurePreset": "armv6-clang",
             "configuration": "MinSizeRel"
         },
         {
-            "name": "armv6-relwithdebinfo",
+            "name": "armv6-clang-relwithdebinfo",
             "displayName": "RelWithDebInfo",
-            "configurePreset": "armv6",
+            "configurePreset": "armv6-clang",
             "configuration": "RelWithDebInfo"
         },
 
         {
-            "name": "aarch64-debug",
+            "name": "armv6-gcc-debug",
             "displayName": "Debug",
-            "configurePreset": "aarch64",
+            "configurePreset": "armv6-gcc",
             "configuration": "Debug"
         },
         {
-            "name": "aarch64-release",
+            "name": "armv6-gcc-release",
             "displayName": "Release",
-            "configurePreset": "aarch64",
+            "configurePreset": "armv6-gcc",
             "configuration": "Release"
         },
         {
-            "name": "aarch64-minsizerel",
+            "name": "armv6-gcc-minsizerel",
             "displayName": "MinSizeRel",
-            "configurePreset": "aarch64",
+            "configurePreset": "armv6-gcc",
             "configuration": "MinSizeRel"
         },
         {
-            "name": "aarch64-relwithdebinfo",
+            "name": "armv6-gcc-relwithdebinfo",
             "displayName": "RelWithDebInfo",
-            "configurePreset": "aarch64",
+            "configurePreset": "armv6-gcc",
+            "configuration": "RelWithDebInfo"
+        },
+
+        {
+            "name": "aarch64-clang-debug",
+            "displayName": "Debug",
+            "configurePreset": "aarch64-clang",
+            "configuration": "Debug"
+        },
+        {
+            "name": "aarch64-clang-release",
+            "displayName": "Release",
+            "configurePreset": "aarch64-clang",
+            "configuration": "Release"
+        },
+        {
+            "name": "aarch64-clang-minsizerel",
+            "displayName": "MinSizeRel",
+            "configurePreset": "aarch64-clang",
+            "configuration": "MinSizeRel"
+        },
+        {
+            "name": "aarch64-clang-relwithdebinfo",
+            "displayName": "RelWithDebInfo",
+            "configurePreset": "aarch64-clang",
             "configuration": "RelWithDebInfo"
         }
     ]
