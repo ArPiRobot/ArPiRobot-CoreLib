@@ -47,8 +47,7 @@
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build/armv6-gcc",
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/arpirobot-armv6-toolchain-gcc.cmake",
-                "CMAKE_BUILD_WITH_INSTALL_RPATH": "ON"
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/arpirobot-armv6-toolchain-gcc.cmake"
             },
             "environment": {},
             "vendor": {}
