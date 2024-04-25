@@ -14,9 +14,9 @@ option(USE_SERIALPORT "Use libserialport" ON)
 # Find dependencies
 find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
+find_package(OpenCV REQUIRED core)
 find_package(Boost REQUIRED COMPONENTS headers system)
 pkg_check_modules(GSTREAMER REQUIRED IMPORTED_TARGET gstreamer-1.0)
-pkg_check_modules(OPENCV REQUIRED IMPORTED_TARGET opencv4)
 if(USE_PIGPIO)
      find_package(pigpio REQUIRED)
 endif()
@@ -40,8 +40,12 @@ target_include_directories(arpirobot-core PUBLIC
      ${PROJECT_SOURCE_DIR}/include 
      ${PROJECT_SOURCE_DIR}/thirdparty 
      ${PROJECT_SOURCE_DIR}/thirdparty/miniaudio/)
-target_link_libraries(arpirobot-core Threads::Threads PkgConfig::GSTREAMER PkgConfig::OPENCV 
-          Boost::headers Boost::system dl)
+target_link_libraries(arpirobot-core 
+          Threads::Threads
+          PkgConfig::GSTREAMER
+          opencv_core
+          Boost::headers Boost::system
+          dl)
 include(GenerateExportHeader)
 generate_export_header(arpirobot-core)
 if(USE_PIGPIO)
