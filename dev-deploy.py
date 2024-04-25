@@ -36,6 +36,7 @@ robot_pass = "arpirobot"
 robot_port = 22
 deploy_dir = "/home/arpirobot/CoreLib-Test"
 arch = ""
+toolchain = ""
 config = ""
 
 # Globals used for connection
@@ -44,9 +45,10 @@ session = None
 
 
 def parse_arguments():
-    global robot_address, robot_user, robot_pass, robot_port, deploy_dir, arch, config
+    global robot_address, robot_user, robot_pass, robot_port, deploy_dir, arch, config, toolchain
     parser = argparse.ArgumentParser(description="Development Deploy of ArPiRobot-CoreLib and test programs")
     parser.add_argument("arch", metavar="arch", help="Architecture", type=str, choices=["armv6", "aarch64"])
+    parser.add_argument("toolchain", metavar="toolchain", type=str, choices=["clang", "gcc"])
     parser.add_argument("config", metavar="config", help="Build configuration", type=str, choices=["Debug", "Release", "RelWithDebInfo", "MinSizeRel"])
     parser.add_argument("-a", metavar="address", help="Specify robot address. Default: '{0}'".format(robot_address))
     parser.add_argument("-u", metavar="username", help="Specify SSH username. Default: '{0}'".format(robot_user))
@@ -69,6 +71,7 @@ def parse_arguments():
         robot_port = args.t
     arch = args.arch
     config = args.config
+    toolchain = args.toolchain
 
 
 def connect_to_host():
@@ -245,8 +248,8 @@ def main():
     # Copy files
     logging.info("Copying files to robot.")
     sftp_send([
-        "cpp_library/build/{}/{}/*.so".format(arch, config),
-        "cpp_library/build/{}/{}/testrobot".format(arch, config),
+        "cpp_library/build/{}-{}/{}/*.so".format(arch, toolchain, config),
+        "cpp_library/build/{}-{}/{}/testrobot".format(arch, toolchain, config),
         "python_bindings/arpirobot/",
         "python_bindings/testrobot-py/",
         "start-cpp.sh",
