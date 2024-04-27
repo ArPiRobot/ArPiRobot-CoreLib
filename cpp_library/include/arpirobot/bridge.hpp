@@ -86,6 +86,8 @@
 #include <memory>
 #include <vector>
 
+#include <arpirobot/core/io/Io.hpp>
+
 using namespace arpirobot;
 
 #define BRIDGE_FUNC extern "C"
@@ -778,3 +780,12 @@ BRIDGE_FUNC void LibcameraCamera_destroy(LibcameraCamera *cam);
 BRIDGE_FUNC RpicamCamera *RpicamCamera_create(const char *id);
 
 BRIDGE_FUNC void RpicamCamera_destroy(RpicamCamera *cam);
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// IO Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC int IO_getDefaultI2cBus();
+
+BRIDGE_FUNC int IO_getDefaultSpiBus();

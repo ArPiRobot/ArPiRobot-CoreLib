@@ -64,6 +64,7 @@ namespace arpirobot{
 
         static int getDefaultI2cBus();
 
+        static int getDefaultSpiBus();
 
         ////////////////////////////////////////////////////////////////////////
         /// Matches pure virtual functions of IoProvider

@@ -850,3 +850,13 @@ arpirobot.RpicamCamera_create.restype = ctypes.c_void_p
 
 arpirobot.RpicamCamera_destroy.argtypes = [ctypes.c_void_p]
 arpirobot.RpicamCamera_destroy.restype = None
+
+################################################################################
+# IO Bridge
+################################################################################
+
+arpirobot.IO_getDefaultI2cBus.argtypes = []
+arpirobot.IO_getDefaultI2cBus.restype = ctypes.c_int
+
+arpirobot.IO_getDefaultSpiBus.argtypes = []
+arpirobot.IO_getDefaultSpiBus.restype = ctypes.c_int

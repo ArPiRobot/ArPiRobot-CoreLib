@@ -1337,3 +1337,15 @@ BRIDGE_FUNC RpicamCamera *RpicamCamera_create(const char *id){
 BRIDGE_FUNC void RpicamCamera_destroy(RpicamCamera *cam){
     bridge_objs.erase(cam);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+/// IO Bridge
+////////////////////////////////////////////////////////////////////////////////
+
+BRIDGE_FUNC int IO_getDefaultI2cBus(){
+    return Io::getDefaultI2cBus();
+}
+
+BRIDGE_FUNC int IO_getDefaultSpiBus(){
+    return Io::getDefaultSpiBus();
+}

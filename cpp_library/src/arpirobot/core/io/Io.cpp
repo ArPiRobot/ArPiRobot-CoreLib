@@ -133,6 +133,21 @@ int Io::getDefaultI2cBus(){
     return 0;
 }
 
+int Io::getDefaultSpiBus(){
+    // Read config file placed by image scripts to determine
+    // default i2c bus for this board
+    std::ifstream i2cConfigFile;
+    i2cConfigFile.open("/usr/local/arpirobot_default_spi.txt");
+    int bus;
+    if(i2cConfigFile.is_open()){
+        i2cConfigFile >> bus;
+        return bus;
+    }
+
+    // Default to bus 0 if not specified in config file
+    return 0;
+}
+
 void Io::addDevice(IoDevice *device){
     std::lock_guard<std::mutex> l(ioDevicesLock);
     if(std::find(ioDevices.begin(), ioDevices.end(), device) == ioDevices.end()){
