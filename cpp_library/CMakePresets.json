@@ -24,7 +24,8 @@
             },
             "environment": {
                 "CC": "clang",
-                "CXX": "clang++"
+                "CXX": "clang++",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
             },
             "vendor": {}
         },
@@ -38,7 +39,9 @@
                 "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/arpirobot-armv6-toolchain.cmake",
                 "CMAKE_BUILD_WITH_INSTALL_RPATH": "ON"
             },
-            "environment": {},
+            "environment": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
+            },
             "vendor": {}
         },
         {
@@ -51,7 +54,9 @@
                 "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/arpirobot-aarch64-toolchain.cmake",
                 "CMAKE_BUILD_WITH_INSTALL_RPATH": "ON"
             },
-            "environment": {},
+            "environment": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "1"
+            },
             "vendor": {}
         }
     ],
