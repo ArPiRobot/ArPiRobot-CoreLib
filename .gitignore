@@ -3,4 +3,4 @@ package/
 doxygen-docs/
 *~
 cpp_library/.vscode/settings.json
-config.vim
+.lvimrc
