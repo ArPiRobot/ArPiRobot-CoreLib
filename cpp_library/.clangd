@@ -1,0 +1,4 @@
+CompileFlags:
+  CompilationDatabase: build/armv6
+  # CompilationDatabase: build/aarch64
+  # CompilationDatabase: build/native
