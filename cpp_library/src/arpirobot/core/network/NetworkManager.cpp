@@ -33,6 +33,7 @@ using namespace std::placeholders;
 const std::string arpirobot::COMMAND_ENABLE = "ENABLE";
 const std::string arpirobot::COMMAND_DISABLE = "DISABLE";
 const std::string arpirobot::COMMAND_NET_TABLE_SYNC = "NT_SYNC";
+const std::string arpirobot::COMMAND_TEST = "TEST";
 
 // Pre-defined (special) data packets
 const uint8_t arpirobot::NET_TABLE_START_SYNC_DATA[] = {255, 255, '\n'};
@@ -305,6 +306,12 @@ void NetworkManager::handleCommand(){
             Logger::logDebug("Starting net table sync.");
             ntSyncData.clear();
             NetworkTable::startSync();
+        }else if(subset == COMMAND_TEST){
+            // Ignore. Just used by DS to check if TCP is still alive
+            // on some OSes the drive station can only detect this when it
+            // tries to write over TCP
+        }else{
+            Logger::logWarning("Got unrecognized command from DS: '" + subset + "'");
         }
     }
 }
