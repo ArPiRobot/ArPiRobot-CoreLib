@@ -90,6 +90,7 @@ os.chdir(original_dir)
 print("")
 print("Adding python bindings")
 shutil.copytree(os.path.join(script_path, "python_bindings", "arpirobot"), os.path.join(script_path, "package", "python_bindings", "arpirobot"))
+shutil.copy(os.path.join(script_path, "python_bindings", "setup.py"), os.path.join(script_path, "package", "python_bindings", "setup.py"))
 
 print("")
 print("Generating Package")
