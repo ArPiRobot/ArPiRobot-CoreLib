@@ -64,7 +64,6 @@ namespace arpirobot{
     *     "ENABLE" = Enable the robot
     *     "DISABLE" = Disable the robot
     *     "NT_SYNC" = Start network table sync (always triggered by drive station)
-    *     "TEST" = Sent from drive station to robot to check if TCP still alive
     * Net Table port (TCP 8092):
     *     Data is sent and received on the net table port.
     *     New keys are sent to the drive station in the format shown below
@@ -88,7 +87,6 @@ namespace arpirobot{
     const extern std::string COMMAND_ENABLE;
     const extern std::string COMMAND_DISABLE;
     const extern std::string COMMAND_NET_TABLE_SYNC;
-    const extern std::string COMMAND_TEST;
 
     // Pre-defined (special) data packets
     const extern uint8_t NET_TABLE_START_SYNC_DATA[];
