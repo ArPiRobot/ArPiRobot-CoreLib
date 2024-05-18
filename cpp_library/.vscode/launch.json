@@ -18,9 +18,9 @@
         {
             "type": "lldb",
             "request": "custom",
-            "name": "Attach armv6 Remote",
+            "name": "Attach Remote",
             "targetCreateCommands": [
-                "target create ${workspaceFolder}/build/armv6/Debug/testrobot"
+                "target create ${workspaceFolder}/build/${command:cmake.activeConfigurePresetName}/Debug/testrobot"
             ],
             "processCreateCommands": [
                 "gdb-remote 192.168.10.1:2000",
