@@ -79,4 +79,16 @@ The corelib can be built for a native linux PC. You'll need to install the depen
 
 This can still be useful to test Arduino Firmware or during development of Arduino Firmware. Additionally, can be useful when testing features that don't require use of any IO interfaces.
 
-To run, after building use `python3 run.py [cpp/python] [CONFIG]`
+To run, you must build the cpp library for Linux (even if running the python testrobot program). You also need to set `LD_LIBRARY_PATH` to include the cpp library build folder. It will be assumed that if you are running on the dev PC, you are using a debug build.
+
+```sh
+# Run cpp testrobot
+cd cpp_library/build/native/Debug
+LD_LIBRARY_PATH=".:$LD_LIBRARY_PATH" ./testrobot
+
+# Run python testrobot
+cd python_bindings/
+LD_LIBRARY_PATH="../cpp_library/build/native/Debug:$LD_LIBRARY_PATH" python3 testrobot-py/main.py
+```
+
+You could also run these using lldb or debugpy for debugging (vscode `launch.json` files are included to do this).

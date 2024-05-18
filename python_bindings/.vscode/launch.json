@@ -5,13 +5,14 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "lldb",
-            "request": "launch",
             "name": "Launch Native testrobot",
-            "program": "${workspaceFolder}/build/native/Debug/testrobot",
-            "args": [],
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/testrobot-py/main.py",
+            "console": "integratedTerminal",
             "env": {
-                "LD_LIBRARY_PATH": "${workspaceFolder}/build/native/Debug:${env:LD_LIBRARY_PATH}"
+                "LD_LIBRARY_PATH": "${workspaceFolder}/../cpp_library/build/native/Debug:${env:LD_LIBRARY_PATH}",
+                "PYTHONPATH": "${workspaceFolder}:${env:PYTHONPATH}"
             },
             "cwd": "${workspaceFolder}"
         }

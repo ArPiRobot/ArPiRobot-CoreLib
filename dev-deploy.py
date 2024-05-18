@@ -249,8 +249,8 @@ def main():
         "cpp_library/build/{}/{}/testrobot".format(arch, config),
         "python_bindings/arpirobot/",
         "python_bindings/testrobot-py/",
-        "start-cpp.sh",
-        "start-py.sh"
+        "testrobot_templates/start-cpp.sh",
+        "testrobot_templates/start-py.sh"
     ])
     
     logging.info("Fixing permissions.")
