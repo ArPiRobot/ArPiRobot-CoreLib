@@ -12,7 +12,7 @@ fi
 DIR=$(realpath $(dirname $0))
 cd $DIR
 if [ "$DEBUG" = "true" ]; then
-    sudo -E LD_LIBRARY_PATH=. PYTHONPATH=. python3 -m debugpy --listen 0.0.0.0:2000 --wait-for-client testrobot-py/main.py
+    sudo -E LD_LIBRARY_PATH=. PYTHONPATH=. python3 -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:2000 --wait-for-client testrobot-py/main.py
 else
     sudo -E LD_LIBRARY_PATH=. PYTHONPATH=. python3 testrobot-py/main.py
 fi

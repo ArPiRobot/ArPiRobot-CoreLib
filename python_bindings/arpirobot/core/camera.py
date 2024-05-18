@@ -21,6 +21,7 @@ import arpirobot.bridge as bridge
 import ctypes
 from typing import Callable
 import numpy as np
+from arpirobot import util
 
 ## Common base class for various camera types
 #  Provides functionality to run camera streams and receive frames from
@@ -96,6 +97,7 @@ class BaseCamera:
         if self._callback is not None:
             @ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_uint8))
             def cb_c(rows: int, cols: int, type: int, data_p: ctypes.POINTER(ctypes.c_uint8)):
+                util._enable_debugpy_this_thread()
                 # Note: Channels 4 is constant because C++ corelib always uses BGRA format
                 # If this is not true in the future, will need to parse type int to determine
                 data_p = ctypes.cast(data_p, ctypes.POINTER(ctypes.c_uint8))

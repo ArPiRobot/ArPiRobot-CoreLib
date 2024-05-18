@@ -22,6 +22,7 @@ import ctypes
 from abc import ABC, abstractmethod
 from arpirobot.core.device import BaseDevice
 from typing import List
+from arpirobot import util
 
 
 # For consistent naming with c++ API
@@ -62,18 +63,22 @@ class Action(ABC):
 
         @ctypes.CFUNCTYPE(None)
         def begin():
+            util._enable_debugpy_this_thread()
             self.begin()
         
         @ctypes.CFUNCTYPE(None)
         def process():
+            util._enable_debugpy_this_thread()
             self.process()
         
         @ctypes.CFUNCTYPE(None, ctypes.c_bool)
         def finish(was_interrupted: bool):
+            util._enable_debugpy_this_thread()
             self.finish(was_interrupted)
         
         @ctypes.CFUNCTYPE(ctypes.c_bool)
         def should_continue() -> bool:
+            util._enable_debugpy_this_thread()
             return self.should_continue()
         
         # Have to keep reference to these or will be garbage collected then seg fault

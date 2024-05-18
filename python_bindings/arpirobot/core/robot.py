@@ -20,6 +20,7 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 import arpirobot.bridge as bridge
 from abc import ABC, abstractmethod
 import ctypes
+from arpirobot import util
 
 
 ## Settings to configure general robot behavior
@@ -88,10 +89,12 @@ class BaseRobot(ABC):
 
         @ctypes.CFUNCTYPE(None)
         def robot_started():
+            util._enable_debugpy_this_thread()
             self.robot_started()
         
         @ctypes.CFUNCTYPE(None)
         def robot_stopped():
+            util._enable_debugpy_this_thread()
             # Due to camera objects holding references
             # To arbitrary functions in python, it is necessary to
             # Ensure that these are cleared before python cleans
@@ -116,22 +119,27 @@ class BaseRobot(ABC):
         
         @ctypes.CFUNCTYPE(None)
         def robot_enabled():
+            util._enable_debugpy_this_thread()
             self.robot_enabled()
         
         @ctypes.CFUNCTYPE(None)
         def robot_disabled():
+            util._enable_debugpy_this_thread()
             self.robot_disabled()
         
         @ctypes.CFUNCTYPE(None)
         def enabled_periodic():
+            util._enable_debugpy_this_thread()
             self.enabled_periodic()
         
         @ctypes.CFUNCTYPE(None)
         def disabled_periodic():
+            util._enable_debugpy_this_thread()
             self.disabled_periodic()
         
         @ctypes.CFUNCTYPE(None)
         def periodic():
+            util._enable_debugpy_this_thread()
             self.periodic()
         
         # Have to keep reference to these or will be garbage collected then seg fault
