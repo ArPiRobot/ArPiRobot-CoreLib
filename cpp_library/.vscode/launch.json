@@ -25,14 +25,12 @@
             "processCreateCommands": [
                 "gdb-remote 192.168.10.1:2000",
                 "shell sleep 1",
-                "breakpoint set --name main",
                 "c"
             ],
             "windows": {
                 "processCreateCommands": [
                     "gdb-remote 192.168.10.1:2000",
                     "shell waitfor /t 1 pause",
-                    "breakpoint set --name main",
                     "c"
                 ]
             }
