@@ -15,6 +15,21 @@
                 "PYTHONPATH": "${workspaceFolder}:${env:PYTHONPATH}"
             },
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "name": "Attach Remote testrobot",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "192.168.10.1",
+                "port": 2000
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "/home/arpirobot/CoreLib-Test"
+                }
+            ]
         }
     ]
 }

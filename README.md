@@ -73,6 +73,8 @@ cmake --build [PRESET]-[CONFIG]
 
 5. On the robot, in the `/home/arpirobot/CoreLib-Test` folder run either `start-cpp.sh` or `start-py.sh` to run the cpp or python test robot programs
 
+6. Optionally, pass `--debug` to the start script to run the program through a debug server (`lldb-server` for cpp and `debugpy` for python) that can be attached to on your dev machine (vscode launch json has configs for these)
+
 ## Running on Dev PC
 
 The corelib can be built for a native linux PC. You'll need to install the dependencies for the corelib on your development pc. When running on a native PC, only the libserialport IO provider will be available meaning only UART devices will work. Most devices (GPIO, I2C, PWM, SPI, etc) will not work.

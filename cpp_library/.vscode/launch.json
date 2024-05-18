@@ -14,6 +14,22 @@
                 "LD_LIBRARY_PATH": "${workspaceFolder}/build/native/Debug:${env:LD_LIBRARY_PATH}"
             },
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Attach Remote testrobot",
+            "program": "${workspaceFolder}/build/native/Debug/testrobot",
+            "args": [],
+            "env": {
+                "LD_LIBRARY_PATH": "${workspaceFolder}/build/native/Debug:${env:LD_LIBRARY_PATH}"
+            },
+            "cwd": "${workspaceFolder}",
+            "initCommands": [
+                "platform select remote-linux",
+                "platform connect connect://192.168.10.1:2000",
+                "settings set target.inherit-env false"
+            ]
         }
     ]
 }
