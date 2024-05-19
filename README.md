@@ -69,7 +69,7 @@ cmake --build [PRESET]-[CONFIG]
 
 3. Login to the robot via ssh
 
-4. Stop the arpirobot-program service on the robot `sudo systemctl stop arpirobot-program.service`
+4. Stop the arpirobot-program service on the robot `sudo systemctl stop arpirobot-program.service`. If you previously were running a deployed program under a debug server, also stop the arpirobot-program-debug service `sudo systemctl stop arpirobot-program-debug.service`
 
 5. On the robot, in the `/home/arpirobot/CoreLib-Test` folder run either `start-cpp.sh` or `start-py.sh` to run the cpp or python test robot programs
 
