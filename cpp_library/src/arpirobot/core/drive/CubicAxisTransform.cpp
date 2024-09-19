@@ -22,6 +22,7 @@
 #include <arpirobot/core/log/Logger.hpp>
 
 #include <cmath>
+#include <stdexcept>
 
 using namespace arpirobot;
 

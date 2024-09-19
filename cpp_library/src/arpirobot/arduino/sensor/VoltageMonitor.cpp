@@ -21,6 +21,8 @@
 #include <arpirobot/core/log/Logger.hpp>
 #include <arpirobot/core/conversions.hpp>
 
+#include <stdexcept>
+
 using namespace arpirobot;
 
 

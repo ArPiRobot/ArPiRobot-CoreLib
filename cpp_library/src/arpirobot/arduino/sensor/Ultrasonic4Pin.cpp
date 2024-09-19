@@ -21,6 +21,8 @@
 #include <arpirobot/core/log/Logger.hpp>
 #include <arpirobot/core/conversions.hpp>
 
+#include <stdexcept>
+
 using namespace arpirobot;
 
 Ultrasonic4Pin::Ultrasonic4Pin(int triggerPin, int echoPin, bool createDevice, int deviceId) : 
