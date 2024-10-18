@@ -51,8 +51,8 @@ cd cpp_library
 
 # Configure for one of the supported architectures
 # armv6, aarch64, or native
-# native builds for a native Linux system. You can only use this if you are building on Linux
-# It is used if running the robot program for testing on your development PC (again, Linux only)
+# native builds for the system building on (development system)
+# Only tested under Liunx, but Windows with MSYS2 and macOS with brew may work
 cmake --preset [PRESET]
 
 # Build

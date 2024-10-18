@@ -9,7 +9,7 @@
         {
             "name": "native",
             "displayName": "native",
-            "description": "Target native system",
+            "description": "Target development system",
             "generator": "Ninja Multi-Config",
             "binaryDir": "${sourceDir}/build/native",
             "cacheVariables": {
