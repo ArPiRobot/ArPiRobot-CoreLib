@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "lldb",
+            "type": "lldb-dap",
             "request": "launch",
             "name": "Launch Native",
             "program": "${workspaceFolder}/build/native/Debug/testrobot",
@@ -13,27 +13,20 @@
             "env": {
                 "LD_LIBRARY_PATH": "${workspaceFolder}/build/native/Debug:${env:LD_LIBRARY_PATH}"
             },
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}",
+            "preRunCommands": [
+                "b main"
+            ]
         },
         {
-            "type": "lldb",
-            "request": "custom",
+            "type": "lldb-dap",
+            "request": "attach",
             "name": "Attach Remote",
-            "targetCreateCommands": [
-                "target create ${workspaceFolder}/build/${command:cmake.activeConfigurePresetName}/Debug/testrobot"
-            ],
-            "processCreateCommands": [
+            "program": "${workspaceFolder}/build/${command:cmake.activeConfigurePresetName}/Debug/testrobot",
+            "attachCommands": [
                 "gdb-remote 192.168.10.1:2000",
-                "shell sleep 1",
-                "c"
-            ],
-            "windows": {
-                "processCreateCommands": [
-                    "gdb-remote 192.168.10.1:2000",
-                    "shell waitfor /t 1 pause",
-                    "c"
-                ]
-            }
+                "b main"
+            ]
         }
     ]
 }
