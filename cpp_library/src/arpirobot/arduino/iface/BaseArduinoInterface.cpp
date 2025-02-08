@@ -19,8 +19,8 @@
 
 #include <arpirobot/arduino/iface/BaseArduinoInterface.hpp>
 #include <arpirobot/arduino/device/ArduinoDevice.hpp>
-#include <arpirobot/core/log/Logger.hpp>
-#include <arpirobot/core/robot/BaseRobot.hpp>
+#include <arpirobot/log/Logger.hpp>
+#include <arpirobot/robot/BaseRobot.hpp>
 #include <functional>
 #include <algorithm>
 #include <cstring>

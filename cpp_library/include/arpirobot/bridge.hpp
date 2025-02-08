@@ -19,42 +19,42 @@
 
 #pragma once
 
-#include <arpirobot/core/robot/BaseRobot.hpp>
-#include <arpirobot/core/robot/RobotProfile.hpp>
+#include <arpirobot/robot/BaseRobot.hpp>
+#include <arpirobot/robot/RobotProfile.hpp>
 
-#include <arpirobot/core/log/Logger.hpp>
+#include <arpirobot/log/Logger.hpp>
 
-#include <arpirobot/devices/gamepad/Gamepad.hpp>
-#include <arpirobot/devices/gamepad/ButtonPressedTrigger.hpp>
-#include <arpirobot/devices/gamepad/ButtonReleasedTrigger.hpp>
+#include <arpirobot/device/gamepad/Gamepad.hpp>
+#include <arpirobot/device/gamepad/ButtonPressedTrigger.hpp>
+#include <arpirobot/device/gamepad/ButtonReleasedTrigger.hpp>
 
-#include <arpirobot/core/network/NetworkTable.hpp>
+#include <arpirobot/network/NetworkTable.hpp>
 
-#include <arpirobot/devices/adafruitmotorhat/AdafruitMotorHatMotor.hpp>
+#include <arpirobot/device/adafruitmotorhat/AdafruitMotorHatMotor.hpp>
 
-#include <arpirobot/devices/l298n/L298NModule.hpp>
-#include <arpirobot/devices/l298n/L298NMotor.hpp>
+#include <arpirobot/device/l298n/L298NModule.hpp>
+#include <arpirobot/device/l298n/L298NMotor.hpp>
 
-#include <arpirobot/devices/tb6612/TB6612Module.hpp>
-#include <arpirobot/devices/tb6612/TB6612Motor.hpp>
+#include <arpirobot/device/tb6612/TB6612Module.hpp>
+#include <arpirobot/device/tb6612/TB6612Motor.hpp>
 
-#include <arpirobot/devices/drv8833/DRV8833Module.hpp>
-#include <arpirobot/devices/drv8833/DRV8833Motor.hpp>
+#include <arpirobot/device/drv8833/DRV8833Module.hpp>
+#include <arpirobot/device/drv8833/DRV8833Motor.hpp>
 
-#include <arpirobot/core/drive/ArcadeDriveHelper.hpp>
-#include <arpirobot/core/drive/BaseAxisTransform.hpp>
-#include <arpirobot/core/drive/CubicAxisTransform.hpp>
-#include <arpirobot/core/drive/SquareRootAxisTransform.hpp>
-#include <arpirobot/core/drive/TankDriveHelper.hpp>
+#include <arpirobot/drive/ArcadeDriveHelper.hpp>
+#include <arpirobot/drive/BaseAxisTransform.hpp>
+#include <arpirobot/drive/CubicAxisTransform.hpp>
+#include <arpirobot/drive/SquareRootAxisTransform.hpp>
+#include <arpirobot/drive/TankDriveHelper.hpp>
 
 
-#include <arpirobot/core/device/BaseDevice.hpp>
-#include <arpirobot/core/device/MotorController.hpp>
+#include <arpirobot/device/BaseDevice.hpp>
+#include <arpirobot/device/MotorController.hpp>
 
-#include <arpirobot/core/action/Action.hpp>
-#include <arpirobot/core/action/ActionManager.hpp>
-#include <arpirobot/core/action/ActionSeries.hpp>
-#include <arpirobot/core/action/BaseActionTrigger.hpp>
+#include <arpirobot/action/Action.hpp>
+#include <arpirobot/action/ActionManager.hpp>
+#include <arpirobot/action/ActionSeries.hpp>
+#include <arpirobot/action/BaseActionTrigger.hpp>
 
 #include <arpirobot/arduino/iface/BaseArduinoInterface.hpp>
 #include <arpirobot/arduino/iface/ArduinoUartInterface.hpp>
@@ -70,23 +70,23 @@
 #include <arpirobot/arduino/sensor/VoltageMonitor.hpp>
 #include <arpirobot/arduino/sensor/QuadEncoder.hpp>
 
-#include <arpirobot/devices/ina260/INA260PowerSensor.hpp>
+#include <arpirobot/device/ina260/INA260PowerSensor.hpp>
 
-#include <arpirobot/devices/gpio/StatusLED.hpp>
-#include <arpirobot/devices/gpio/GPIOPin.hpp>
+#include <arpirobot/device/gpio/StatusLED.hpp>
+#include <arpirobot/device/gpio/GPIOPin.hpp>
 
-#include <arpirobot/core/control/PID.hpp>
+#include <arpirobot/control/PID.hpp>
 
-#include <arpirobot/core/camera/BaseCamera.hpp>
-#include <arpirobot/core/camera/V4l2Camera.hpp>
-#include <arpirobot/core/camera/LibcameraCamera.hpp>
-#include <arpirobot/core/camera/RpicamCamera.hpp>
+#include <arpirobot/camera/BaseCamera.hpp>
+#include <arpirobot/camera/V4l2Camera.hpp>
+#include <arpirobot/camera/LibcameraCamera.hpp>
+#include <arpirobot/camera/RpicamCamera.hpp>
 
 #include <string>
 #include <memory>
 #include <vector>
 
-#include <arpirobot/core/io/Io.hpp>
+#include <arpirobot/io/Io.hpp>
 
 using namespace arpirobot;
 

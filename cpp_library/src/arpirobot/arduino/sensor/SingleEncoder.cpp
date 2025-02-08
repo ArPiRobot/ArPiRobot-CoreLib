@@ -18,8 +18,8 @@
  */
 
 #include <arpirobot/arduino/sensor/SingleEncoder.hpp>
-#include <arpirobot/core/log/Logger.hpp>
-#include <arpirobot/core/conversions.hpp>
+#include <arpirobot/log/Logger.hpp>
+#include <arpirobot/conversions.hpp>
 
 #include <stdexcept>
 

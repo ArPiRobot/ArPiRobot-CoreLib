@@ -21,7 +21,7 @@
 
 #include <arpirobot/arduino/device/ArduinoDevice.hpp>
 #include <arpirobot/arduino/iface/BaseArduinoInterface.hpp>
-#include <arpirobot/core/network/MainVmon.hpp>
+#include <arpirobot/network/MainVmon.hpp>
 
 namespace arpirobot{
     /**

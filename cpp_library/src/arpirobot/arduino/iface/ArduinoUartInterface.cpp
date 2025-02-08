@@ -18,9 +18,9 @@
  */
 
 #include <arpirobot/arduino/iface/ArduinoUartInterface.hpp>
-#include <arpirobot/core/log/Logger.hpp>
-#include <arpirobot/core/robot/BaseRobot.hpp>
-#include <arpirobot/core/io/Io.hpp>
+#include <arpirobot/log/Logger.hpp>
+#include <arpirobot/robot/BaseRobot.hpp>
+#include <arpirobot/io/Io.hpp>
 #include <functional>
 #include <algorithm>
 #include <cstring>

@@ -24,7 +24,7 @@
 #include <string>
 
 #include <arpirobot/arduino/iface/BaseArduinoInterface.hpp>
-#include <arpirobot/core/io/IoDevice.hpp>
+#include <arpirobot/io/IoDevice.hpp>
 
 namespace arpirobot{
 

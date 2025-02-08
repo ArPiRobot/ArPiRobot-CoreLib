@@ -31,11 +31,11 @@
  */
 
 #include <arpirobot/bridge.hpp>
-#include <arpirobot/core/network/NetworkTable.hpp>
-#include <arpirobot/core/log/Logger.hpp>
-#include <arpirobot/core/audio/AudioManager.hpp>
-#include <arpirobot/core/audio/AudioDeviceInfo.hpp>
-//#include <arpirobot/core/drive.hpp>
+#include <arpirobot/network/NetworkTable.hpp>
+#include <arpirobot/log/Logger.hpp>
+#include <arpirobot/audio/AudioManager.hpp>
+#include <arpirobot/audio/AudioDeviceInfo.hpp>
+//#include <arpirobot/drive.hpp>
 
 #include <iostream>
 #include <cstring>

@@ -18,7 +18,7 @@
  */
 
 #include <arpirobot/arduino/device/ArduinoDevice.hpp>
-#include <arpirobot/core/log/Logger.hpp>
+#include <arpirobot/log/Logger.hpp>
 
 using namespace arpirobot;
 

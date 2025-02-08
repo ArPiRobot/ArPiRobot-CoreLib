@@ -18,8 +18,8 @@
  */
 
 #include <arpirobot/arduino/sensor/Mpu6050Imu.hpp>
-#include <arpirobot/core/log/Logger.hpp>
-#include <arpirobot/core/conversions.hpp>
+#include <arpirobot/log/Logger.hpp>
+#include <arpirobot/conversions.hpp>
 
 using namespace arpirobot;
 
