@@ -18,7 +18,7 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from typing import List
+from typing import List, Optional
 import arpirobot.bridge as bridge
 import ctypes
 
@@ -47,7 +47,7 @@ class AudioManager:
             bridge.arpirobot.AudioManager_getPlaybackDevice(i, ctypes.byref(id), ctypes.byref(name), ctypes.byref(is_default), ctypes.byref(type))
             info = AudioDeviceInfo()
             info.id = id.value
-            info.name = name.value.decode()
+            info.name = name.value.decode() if name.value else ""
             info.is_default = is_default.value
             info.type = type.value
             lst.append(info)
@@ -55,7 +55,7 @@ class AudioManager:
         return lst
 
     @staticmethod
-    def play_sound(filename: str, info: AudioDeviceInfo = None) -> int:
+    def play_sound(filename: str, info: Optional[AudioDeviceInfo] = None) -> int:
         if info is None:
             return bridge.arpirobot.AudioManager_playSound(filename.encode())
         else:

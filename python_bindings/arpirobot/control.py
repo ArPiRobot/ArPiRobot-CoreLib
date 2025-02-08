@@ -69,7 +69,7 @@ class PID:
     
     ## Set the feedforward gain
     #  @param kf New value of kf
-    def set_kf(self, kf: float) -> float:
+    def set_kf(self, kf: float):
         bridge.arpirobot.PID_setKf(self._ptr, kf)
     
     ## Get minimum allowed PID output

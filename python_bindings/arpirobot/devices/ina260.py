@@ -17,10 +17,10 @@ You should have received a copy of the GNU Lesser General Public License
 along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>. 
 """
 
-from arpirobot.core.network import MainVmon
+from arpirobot.network import MainVmon
 import arpirobot.bridge as bridge
 import ctypes
-from arpirobot.core.device import BaseDevice
+from arpirobot.devices import BaseDevice
 
 
 ## INA260 Power sensor

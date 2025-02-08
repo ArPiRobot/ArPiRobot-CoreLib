@@ -18,12 +18,12 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 
-from arpirobot.core.network import MainVmon
+from arpirobot.network import MainVmon
 import arpirobot.bridge as bridge
 import ctypes
 from typing import Union
 from arpirobot.arduino.device import ArduinoDevice
-from arpirobot.core.network import MainVmon
+from arpirobot.network import MainVmon
 
 
 ## Simple analog input voltage monitor (using voltage divider) connected to arduino analog input.

@@ -23,8 +23,8 @@ import ctypes
 class Io:
     @staticmethod
     def get_default_i2c_bus() -> int:
-        return bridge.IO_getDefaultI2cBus()
+        return bridge.arpirobot.IO_getDefaultI2cBus()
 
     @staticmethod
     def get_default_spi_bus() -> int:
-        return bridge.IO_getDefaultSpiBus()
+        return bridge.arpirobot.IO_getDefaultSpiBus()

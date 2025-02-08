@@ -29,7 +29,6 @@ else:
 # NOTE: If returning dynamically allocated string restype should be ptr (ctypes.c_void_p)
 #       Using c_char_p will convert to python bytes then can't call free
 
-
 ################################################################################
 # General / Helper
 ################################################################################

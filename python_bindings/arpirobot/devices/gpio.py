@@ -18,7 +18,7 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 """
 
 import arpirobot.bridge as bridge
-from arpirobot.core.device import BaseDevice
+from arpirobot.devices import BaseDevice
 from enum import IntEnum
 
 

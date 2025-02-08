@@ -1,6 +1,10 @@
 {
     "include": [
-        "src"
+        "arpirobot",
+        "testrobot-py"
+    ],
+    "exclude": [
+        "arpirobot/bridge.py"
     ],
     "typeCheckingMode": "basic",
     "reportGeneralTypeIssues": false,

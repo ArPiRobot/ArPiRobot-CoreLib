@@ -19,7 +19,7 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 
 import arpirobot.bridge as bridge
 import ctypes
-from typing import Callable
+from typing import Callable, Optional
 import numpy as np
 from arpirobot import util
 
@@ -47,7 +47,7 @@ class BaseCamera:
     ## Get backend-specific device ID for this camera
     def get_id(self) -> str:
         res = ctypes.c_char_p(bridge.arpirobot.BaseCamera_getId(self._ptr))
-        retval = res.value.decode()
+        retval = res.value.decode() if res.value else ""
         bridge.arpirobot.freeString(res)
         return retval
     
@@ -91,18 +91,19 @@ class BaseCamera:
     ## Function to be called when a frame is read from this camera
     #  Note: frames are only read from this camera while it is streaming
     #  @param frame_callback function to call when a frame is read
-    def set_frame_callback(self, frame_callback: Callable[[np.ndarray], None]):
+    def set_frame_callback(self, frame_callback: Optional[Callable[[np.ndarray], None]]):
         self._callback = frame_callback
         bridge.arpirobot.BaseCamera_setFrameCallback(self._ptr, None)
         if self._callback is not None:
             @ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_uint8))
-            def cb_c(rows: int, cols: int, type: int, data_p: ctypes.POINTER(ctypes.c_uint8)):
+            def cb_c(rows: int, cols: int, type: int, data_p: ctypes._Pointer[ctypes.c_uint8]):
                 util._enable_debugpy_this_thread()
                 # Note: Channels 4 is constant because C++ corelib always uses BGRA format
                 # If this is not true in the future, will need to parse type int to determine
                 data_p = ctypes.cast(data_p, ctypes.POINTER(ctypes.c_uint8))
                 frame = np.ctypeslib.as_array(data_p, shape=(rows, cols, 4))
-                self._callback(frame)
+                if self._callback is not None:
+                    self._callback(frame)
             self._callback_c = cb_c
         else:
             self._callback_c = None
@@ -133,7 +134,7 @@ class BaseCamera:
     ## Get name of this camera's backend
     def get_backend(self) -> str:
         res = ctypes.c_char_p(bridge.arpirobot.BaseCamera_getBackend(self._ptr))
-        retval = res.value.decode()
+        retval = res.value.decode() if res.value else ""
         bridge.arpirobot.freeString(res)
         return retval
 

@@ -48,7 +48,7 @@ class NetworkTable:
     @staticmethod
     def get(key: str) -> str:
         res = ctypes.c_char_p(bridge.arpirobot.NetworkTable_get(key.encode()))
-        retval = res.value.decode()
+        retval = res.value.decode() if res.value else ""
         bridge.arpirobot.freeString(res)
         return retval
     

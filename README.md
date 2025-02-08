@@ -90,7 +90,7 @@ LD_LIBRARY_PATH=".:$LD_LIBRARY_PATH" ./testrobot
 
 # Run python testrobot
 cd python_bindings/
-LD_LIBRARY_PATH="../cpp_library/build/native/Debug:$LD_LIBRARY_PATH" python3 testrobot-py/main.py
+LD_LIBRARY_PATH="../cpp_library/build/native/Debug:$LD_LIBRARY_PATH" PYTHONPATH=".:$PYTHONPATH" python3 testrobot-py/main.py
 ```
 
 You could also run these using lldb or debugpy for debugging (vscode `launch.json` files are included to do this).

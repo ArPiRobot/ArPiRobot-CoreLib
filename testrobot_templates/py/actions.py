@@ -1,6 +1,6 @@
 
-from arpirobot.core.log import Logger
-from arpirobot.core.action import Action
-from arpirobot.core.control import PID
+from arpirobot.log import Logger
+from arpirobot.action import Action
+from arpirobot.control import PID
 
 import main 

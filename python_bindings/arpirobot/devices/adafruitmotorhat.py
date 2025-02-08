@@ -19,7 +19,7 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 
 import arpirobot.bridge as bridge
 import ctypes
-from arpirobot.core.device import MotorController
+from arpirobot.devices import MotorController
 
 
 ## Motor for Adafruit Motor Hat

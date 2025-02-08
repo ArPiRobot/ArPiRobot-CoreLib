@@ -69,7 +69,7 @@ class RobotProfileSingleton:
     @property
     def io_provider(self) -> str:
         res = ctypes.c_char_p(bridge.arpirobot.RobotProfile_getIoProvider())
-        retval = res.value.decode()
+        retval = res.value.decode() if res.value else ""
         bridge.arpirobot.freeString(res)
         return retval
     
@@ -113,7 +113,7 @@ class BaseRobot(ABC):
             # Since most frame callbacks will either be in scope when robot_stopped
             # is called this avoids the issue in most (maybe all since this will be
             # called before interpreter shuts things down) cases
-            from arpirobot.core.camera import BaseCamera
+            from arpirobot.camera import BaseCamera
             BaseCamera._null_all_callbacks()
             self.robot_stopped()
         

@@ -31,6 +31,6 @@ class ArduinoDevice:
     #  @returns The human-readable name
     def get_device_name(self) -> str:
         res = ctypes.c_char_p(bridge.arpirobot.ArduinoDevice_getDeviceName(self._ptr))
-        retval = res.value.decode()
+        retval = res.value.decode() if res.value else ""
         bridge.arpirobot.freeString(res)
         return retval

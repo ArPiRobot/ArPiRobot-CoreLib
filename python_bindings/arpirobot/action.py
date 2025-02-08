@@ -20,7 +20,7 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 import arpirobot.bridge as bridge
 import ctypes
 from abc import ABC, abstractmethod
-from arpirobot.core.device import BaseDevice
+from arpirobot.devices import BaseDevice
 from typing import List
 from arpirobot import util
 
@@ -36,7 +36,7 @@ class Action(ABC):
     def __init__(self, process_period_ms = -1):
 
         @ctypes.CFUNCTYPE(ctypes.c_size_t, ctypes.POINTER(ctypes.c_void_p))
-        def locked_devices(dest: ctypes.POINTER(ctypes.c_void_p)) -> int:
+        def locked_devices(dest: ctypes._Pointer[ctypes.c_void_p]) -> int:
             # Get python list of python objects for locked devices
             py_list = self.locked_devices()
 

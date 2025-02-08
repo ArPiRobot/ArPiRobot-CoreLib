@@ -1,8 +1,8 @@
 
-from arpirobot.core.action import ActionManager
-from arpirobot.core.log import Logger
-from arpirobot.core.network import NetworkTable
-from arpirobot.core.robot import BaseRobot
+from arpirobot.action import ActionManager
+from arpirobot.log import Logger
+from arpirobot.network import NetworkTable
+from arpirobot.robot import BaseRobot
 
 class Robot(BaseRobot):
     def __init__(self):

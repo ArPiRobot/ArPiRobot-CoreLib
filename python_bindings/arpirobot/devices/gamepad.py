@@ -19,9 +19,9 @@ along with ArPiRobot-CoreLib.  If not, see <https://www.gnu.org/licenses/>.
 
 import arpirobot.bridge as bridge
 import ctypes
-from arpirobot.core.device import BaseDevice
-from arpirobot.core.drive import BaseAxisTransform
-from arpirobot.core.action import BaseActionTrigger, Action
+from arpirobot.devices import BaseDevice
+from arpirobot.drive import BaseAxisTransform
+from arpirobot.action import BaseActionTrigger, Action
 
 
 ## Gamepad receiving data from drive station
