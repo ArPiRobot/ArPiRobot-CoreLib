@@ -36,7 +36,7 @@ class Action(ABC):
     def __init__(self, process_period_ms = -1):
 
         @ctypes.CFUNCTYPE(ctypes.c_size_t, ctypes.POINTER(ctypes.c_void_p))
-        def locked_devices(dest: ctypes._Pointer[ctypes.c_void_p]) -> int:
+        def locked_devices(dest: ctypes.POINTER) -> int:
             # Get python list of python objects for locked devices
             py_list = self.locked_devices()
 

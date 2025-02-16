@@ -96,7 +96,7 @@ class BaseCamera:
         bridge.arpirobot.BaseCamera_setFrameCallback(self._ptr, None)
         if self._callback is not None:
             @ctypes.CFUNCTYPE(None, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.POINTER(ctypes.c_uint8))
-            def cb_c(rows: int, cols: int, type: int, data_p: ctypes._Pointer[ctypes.c_uint8]):
+            def cb_c(rows: int, cols: int, type: int, data_p: ctypes.POINTER):
                 util._enable_debugpy_this_thread()
                 # Note: Channels 4 is constant because C++ corelib always uses BGRA format
                 # If this is not true in the future, will need to parse type int to determine
