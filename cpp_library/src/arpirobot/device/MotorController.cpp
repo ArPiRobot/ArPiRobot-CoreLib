@@ -50,18 +50,15 @@ void MotorController::setBrakeMode(bool brakeMode){
 }
 
 double MotorController::getSpeed(){
-    if(!enabled)
-        return 0;
     {
+        if(!enabled)
+           return 0;
         std::lock_guard<std::mutex> l(lock);
         return speed / speedFactor; // divide by speed factor so this matches what user sets
     }
 }
 
 void MotorController::setSpeed(double speed){
-    if(!enabled)
-        return;
-    
     // Limit range of speeds
     if(speed > 1)
         speed = 1;
@@ -69,6 +66,8 @@ void MotorController::setSpeed(double speed){
         speed = -1;
 
     {
+        if(!enabled)
+            return;
         std::lock_guard<std::mutex> l(lock);
         this->speed = speed * speedFactor;
         run();
