@@ -41,14 +41,25 @@ shutil.copy(os.path.join(script_path, "COPYING.LESSER"), os.path.join(script_pat
 
 
 print("")
+print("Cleaning C++ Library Build")
+build_dir = os.path.join(script_path, "cpp_library", "build")
+if os.path.isdir(build_dir):
+    shutil.rmtree(build_dir)
+
+
+print("")
 print("Building C++ Library (armv6)")
 
 original_dir = os.getcwd()
 
 # Perform build
 os.chdir(os.path.join(script_path, "cpp_library"))
-os.system("cmake --preset armv6")
-os.system("cmake --build --preset armv6-release")
+rc = os.system("cmake --preset armv6")
+if rc > 0:
+    exit(rc)
+rc = os.system("cmake --build --preset armv6-release")
+if rc > 0:
+    exit(rc)
 
 # Copy library files
 for file in glob.glob("build/armv6/Release/*.so"):
@@ -63,8 +74,12 @@ original_dir = os.getcwd()
 
 # Perform build
 os.chdir(os.path.join(script_path, "cpp_library"))
-os.system("cmake --preset aarch64")
-os.system("cmake --build --preset aarch64-release")
+rc = os.system("cmake --preset aarch64")
+if rc > 0:
+    exit(rc)
+rc = os.system("cmake --build --preset aarch64-release")
+if rc > 0:
+    exit(rc)
 
 # Copy library files
 for file in glob.glob("build/aarch64/Release/*.so"):
