@@ -1,5 +1,5 @@
 //! This module defines data structures used for ArPiRobot network messages
-//! The ArPiRobot network protocol uses three different ports
+//! The ArPiRobot network protocol uses four different ports
 //! 
 //! - Command Port (TCP): Used to send commands from the drive station to the robot. This port is
 //!   also used for initial handshaking between the drive station and robot.
@@ -12,7 +12,10 @@
 //!   Implemented using UDP since minimizing latency is more important than dropped packets.
 //!   Additionally, when many packets are being dropped, it is much more important that the latest
 //!   controller data (which is re-sent at a fast pace anyway) gets received over enforcing ordering
+//!
+//! - Log Port (TCP): Used by the robot (server) to send log messages to the drive station (client)
 
+use log;
 
 
 /// General Constants
@@ -61,15 +64,28 @@ pub struct CommandMessage {
 pub enum NetTableValue {
     Integer(Box<[i64]>),
     Float(Box<[f64]>),
-    String(Box<[str]>),
+    String(Box<[String]>),
 }
 
 /// Network table raw key/value pair message
 /// Either client or server can send such a message to synchronize the pairs
 pub struct NetTableMessage {
     /// Net table entry key
-    pub key: str,
+    pub key: String,
 
     /// Net table entry value
     pub value: NetTableValue,
+}
+
+
+
+/// Log Messages
+
+/// Log message being sent from server to client
+pub struct LogMessage {
+    /// Message level
+    pub level: log::Level,
+
+    /// Message contents
+    pub message: str,
 }
