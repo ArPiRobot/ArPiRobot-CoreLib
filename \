@@ -1,0 +1,128 @@
+//! This module implements the server side communication
+
+use mio::event::Event;
+use mio::net::{TcpListener, TcpStream};
+use mio::{Events, Interest, Poll, Token};
+use std::net::SocketAddr;
+use std::io::Result;
+use std::time::Duration;
+
+/// Tokens to identify what a polled event originates from
+struct TokenId;
+impl TokenId {
+    // Server tokens
+    pub const LISTENER_CTRL: Token = Token(0);
+    pub const LISTENER_CMD: Token = Token(1);
+    pub const LISTENER_NT: Token = Token(2);
+    pub const LISTENER_LOG: Token = Token(3);
+
+    // Client tokens
+    pub const STREAM_CMD: Token = Token(4);
+    pub const STREAM_NT: Token = Token(5);
+    pub const STREAM_LOG: Token = Token(6);
+}
+
+
+/// Server implementation
+pub struct Server {
+    // State
+    client_connected: bool,
+    client_addr: Option<SocketAddr>,
+
+    // TCP server instances
+    // TODO: UDP listener
+    cmd_listener: TcpListener,
+    nt_listener: TcpListener,
+    log_listener: TcpListener,
+
+    // Connected client instances
+    cmd_client: Option<TcpStream>,
+    nt_client: Option<TcpStream>,
+    log_client: Option<TcpStream>,
+
+    // Polling
+    poll: Poll,
+    events: Events,
+}
+
+impl Server {
+    /// Create a new server instance
+    /// Arguments:
+    /// - ctrl_addr: Address to listen on for controller UDP datagrams
+    /// - cmd_addr:  Address to listen on for command TCP connections
+    /// - nt_addr:   Address to listen on for net table TCP connections
+    /// - log_addr:  Address to listen on for log TCP connections
+    pub fn bind(ctrl_addr: SocketAddr, cmd_addr: SocketAddr, nt_addr: SocketAddr, log_addr: SocketAddr) -> Result<Self> {
+        // Create network listeners (servers)
+        let mut cmd_listener = TcpListener::bind(cmd_addr)?;
+        let mut nt_listener = TcpListener::bind(nt_addr)?;
+        let mut log_listener = TcpListener::bind(log_addr)?;
+
+        // Listeners should always be polled for readable events. On TCP listeners, this indicates
+        // an incomming connection. For UDP listeners TODO
+        let poll = Poll::new()?;
+        poll.registry().register(&mut cmd_listener, TokenId::LISTENER_CMD, Interest::READABLE)?;
+        poll.registry().register(&mut nt_listener, TokenId::LISTENER_NT, Interest::READABLE)?;
+        poll.registry().register(&mut log_listener, TokenId::LISTENER_LOG, Interest::READABLE)?;
+
+        return Ok(Self {
+            // State
+            client_connected: false,
+            client_addr: None,
+
+            // Servers
+            // TODO: ctrl listener
+            cmd_listener: cmd_listener,
+            nt_listener: nt_listener,
+            log_listener: log_listener,
+
+            // Client connections (none initially)
+            cmd_client: None,
+            nt_client: None,
+            log_client: None,
+
+            // Polling
+            poll: poll,
+            events: Events::with_capacity(128),
+        });
+    }
+    
+    // TODO: Address getter
+
+    /// Process one set of events on the servers (non-blocking multiplexed IO)
+    /// This function **WILL** return. Looping and threading is left up to the caller!
+    pub fn process(&mut self, duration: Option<Duration>) -> Result<()>{
+        self.poll.poll(&mut self.events, duration)?;
+        
+        // Take the events buffer ownership from self replacing it with a temporary zero size
+        // buffer. Overhead of this swap is negligible and allows a mutable borrow of self
+        // while iterating over the events
+        let mut events = std::mem::replace(&mut self.events, Events::with_capacity(0));
+    
+        for event in &events {
+            match event.token() {
+                TokenId::LISTENER_CMD | TokenId::LISTENER_NT | TokenId::LISTENER_LOG => {
+                    self.handle_client_connect(event);
+                }
+                TokenId::LISTENER_CTRL => {
+                    // TODO: Ctrl port
+                }
+                TokenId::STREAM_CMD | TokenId::STREAM_NT | TokenId::STREAM_LOG => {
+                    
+                }
+                _ => {
+                    // Ignore unknown events
+                }
+            }
+        }
+
+        // Clear and return the original (actually allocated) events object to the struct
+        events.clear();
+        self.events = events;
+
+        return Ok(());
+    }
+
+    fn handle_incomming_connection(&mut self, event: &Event) {
+    }
+}
