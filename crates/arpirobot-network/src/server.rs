@@ -1,4 +1,5 @@
 //! This module implements the server side communication
+//! TODO: State machine diagram
 
 use mio::net::{TcpListener, TcpStream};
 use mio::{Events, Interest, Poll, Token};
@@ -7,6 +8,8 @@ use std::io;
 use std::io::Read;
 use std::time::Duration;
 use log::{warn, error, info, debug};
+
+use crate::protocol::{HandshakeParser, create_handshake_for_remote_versions};
 
 /// Server states
 #[derive(Clone, Copy)] 
@@ -49,10 +52,8 @@ struct Clients {
     pub ip: Option<IpAddr>,
 }
 
-struct Buffers {
-    cmd: Vec<u8>,
-    nt: Vec<u8>,
-    log: Vec<u8>
+struct Parsers {
+    handshake: HandshakeParser,
 }
 
 struct Listeners {
@@ -77,8 +78,8 @@ pub struct Server {
     poll: Poll,
     events: Events,
 
-    // Data buffers
-    buffer: Buffers,
+    // Message parsers
+    parsers: Parsers,
 }
 
 impl Server {
@@ -104,10 +105,8 @@ impl Server {
             },
             poll: Poll::new()?,
             events: Events::with_capacity(16),
-            buffer: Buffers {
-                cmd: Vec::with_capacity(1024),
-                nt:  Vec::with_capacity(1024),
-                log: Vec::with_capacity(1024)
+            parsers: Parsers {
+                handshake: HandshakeParser::new(), 
             }
         };
         s.poll.registry().register(&mut s.listener.cmd, Tokens::LISTENER_CMD, Interest::READABLE)?;
@@ -166,13 +165,13 @@ impl Server {
                     // TODO: Handle UDP data
                 }
                 Tokens::STREAM_CMD => {
-                    self.handle_cmd_read();
+                    self.handle_cmd_readable();
                 }
                 Tokens::STREAM_NT => {
-                    self.handle_nt_read();
+                    self.handle_nt_readable();
                 }
                 Tokens::STREAM_LOG => {
-                    self.handle_log_read();
+                    self.handle_log_readable();
                 }
                 _ => error!("Invalid token encountered"),
             }
@@ -246,9 +245,40 @@ impl Server {
             }
         }
     }
-   
-    /// Handle bytes from the command port
-    fn handle_cmd_read_read(&mut self){
+    
+    /// Handle bytes read from the command port
+    fn handle_cmd_bytes(&mut self, data: &[u8]) {
+        for b in data {
+            match self.state {
+                State::Connected|State::Connecting => {
+                    // The first thing send on the command port is handshake data. Until handshaking
+                    // completes, each byte is assumed to be part of the handshake.
+                    match self.parsers.handshake.parse(b) {
+                        Some(remote_versions) => {
+                            let mut response: [u8; 8] = [0u8; 8];
+                            let Ok(size) = create_handshake_for_remote_versions(&mut response, remote_versions) else {
+                                error!("Failed to reply to client's handshake. Disconnecting");
+                                self.do_disconnect();
+                                return;
+                            };
+                            // TODO: Queue message for write to command client
+                            self.do_handshook();
+                        },
+                        None => { /* Not done parsing handshake yet */ } 
+                    }
+                },
+                State::Handshook => {
+
+                },
+                _ => {
+                    // Should not be possible to get here, just ignore data
+                }
+            }
+        }
+    }
+
+    /// Handle readable events on the command port's tcp stream (client)
+    fn handle_cmd_readable(&mut self){
         let mut chunk = [0u8; 128];
         loop {
             // Borrow inside the loop so borrow checker can understand where the borrow ends each
@@ -258,62 +288,26 @@ impl Server {
                 return;
             };
             match client.read(&mut chunk) {
-                Ok(0) => {
-                    // Remote side closed connection cleanly
-                    self.do_disconnect();
-                },
-                Ok(n) => {
-                    // Got actual data
+                Ok(0) => self.do_disconnect(),                  // Remote side closed cleanly (EOF)
+                Ok(n) => self.handle_cmd_bytes(&chunk[0..n]),   // Got actual data
+                Err(e) => {
+                    match e.kind() {
+                        io::ErrorKind::WouldBlock => break,     // Have handled all data
+                        io::ErrorKind::Interrupted => {},       // syscall interrupted. Retry
+                        _ => self.do_disconnect(),              // Remote side dropped
+                    }
                 }
             }
         }
     }
 
-    /// Handle readable events on the command port's tcp stream (client)
-    fn handle_cmd_read(&mut self) {
-        match self.state {
-            State::Connected => {
-                // Data received before handshaking is complete is part of a handshake
-                // Handshaking is initiated by the client. Handshake messages MUST NOT use
-                // serialized structs like most messages. This is because handshaking must be
-                // possible between any version combo of client and server. Updates to serialization
-                // libraries could change serialization. Thus, handshakes are different.
-                // A client initiates the handshake by sending a sequence of u32's encoded little
-                // endian. The handshake message ends when the client sends PROTOCOL_INVALID (u32 0)
-                // The sequence of u32 values are a list of the cleint's supported protocol versions
-                // The server will then choose one from this list and reply to the client in a
-                // similar form with a u32 (little endian) of the chosen version followed by
-                // PROTOCOL_INVALID
-                // While not expected, a client could send no versions before PROTOCOL_INVALID. In
-                // this case the server shall treat the client as supporting no protocol versions
-                // and will fail to pick a matching supported version. It will repond the same way
-                // as if the server does not support any version the client sent.
-                // When the server does not support any protocol version the client sent, the server
-                // responds with only PROTOCOL_INVALID. The client will treat this to mean that
-                // there is no valid version. The server will not disconnect the client as this
-                // point. The client is expected to disconnect.
-                // NOTE: It may be preferred in the future for the server to disconnect the client
-                //       after a failed handshake to ensure a different client could connect
-                // TODO: Implement server side of handshake
-            },
-            State::Handshook => {
-                // TODO: Handle real command messages
-            }
-            State::Connecting|State::Disconnected => {
-                // Any data send by the client before all three ports are connected
-                // is ignored. Clients must not send data before all connections have been
-                // accepted
-            },
-        }
-    }
-
     /// Handle readable events on the net table port's tcp stream (client)
-    fn handle_nt_read(&mut self) {
+    fn handle_nt_readable(&mut self) {
         // TODO: Handle messages on the net table port
     }
 
     /// Handle readable events on the log port's tcp stream (client)
-    fn handle_log_read(&mut self) {
+    fn handle_log_readable(&mut self) {
         // TODO: Handles messages on the log port
     }
 
@@ -357,6 +351,13 @@ impl Server {
             error!("Client IP was unset during transition to connecting state");
             self.do_disconnect();
         }
+
+        // Since the first port to connect could be the command port, make sure the handshake
+        // parser is clean and ready for reuse before entering this state
+        self.parsers.handshake.reset();
+
+        // TODO: Clear write buffers
+
         self.state = State::Connecting;  
     }
 

@@ -36,9 +36,9 @@
 //! of this, handshaking does not use general messages (or message framing, etc) described below.
 //! Handshaking is a special case process implemented independently.
 //!
-//! A handshake message is a sequence of 32-bit integers, terminated with `PROTOCOL_INVALID`. The
-//! sequence before `PROTOCOL_INVALID` is received are the list of versions supported (if sent by
-//! the client) or selected (if sent by the server).
+//! A handshake message is a sequence of 32-bit integers (little endian), terminated with 
+//! `PROTOCOL_INVALID`. The sequence before `PROTOCOL_INVALID` is received are the list of versions
+//! supported (if sent by the client) or selected (if sent by the server).
 //!
 //! ```txt
 //! | VERSION_A | VERSION_B | ... | PROTOCOL_INVALID |
@@ -46,7 +46,8 @@
 //!
 //! It **is** valid to have a handshake message that contains no versions before `PROTOCOL_INVALID`.
 //! Such a message indicates that no versions are supported (client) or selected (server).
-//!
+//! 
+//! Handshaking occurs only on the command port.
 //!
 //!
 //! # Message Framing
@@ -129,8 +130,112 @@ const PROTOCOL_INVALID: u32 = 0;
 ///     - Bugs are fixed that correct frame structure or crc calculation in specific cases
 const PROTOCOL_VERSION: u32 = 1;
 
-// TODO: Implement handshaking in here with a parser / generator
-//       The parser should hold its own buffer of 4 bytes and a vector of supported versions
+
+/// Parser to parse handshake message data into a set of versions
+pub struct HandshakeParser {
+    /// Holds bytes of each 32-bit integer during decoding
+    buf: [u8; 4],
+
+    /// Tracks how many bytes are in `buf`
+    count: usize,
+
+    /// Holds versions sent so far
+    versions: Vec<u32>
+}
+
+impl HandshakeParser {
+    pub fn new() -> Self {
+         return Self {
+            buf: [0u8; 4],
+            count: 0,
+
+            // It is not expected that client / server will ever support multiple protocol versions
+            // So only allocate space for one version in this vector. But if that were to change in
+            // the future this could grow on demand
+            versions: Vec::with_capacity(1),
+         };
+    }
+
+    /// Parses a byte as part of a handshake
+    /// Parameters:
+    ///     b: The received byte
+    /// Returns: 
+    ///     A vector of supported versions when the handshake message is fully received
+    ///     None until a full handshake message has been parsed
+    ///     NOTE: Once this returns a vector, the caller must call reset() before reuse
+    pub fn parse(&mut self, b: &u8) -> Option<&Vec<u32>> {
+        self.buf[self.count] = *b;
+        self.count += 1;
+        if self.count == 4 {
+            let v = u32::from_le_bytes(self.buf);
+            if v == 0 {
+                return Some(&self.versions); 
+            } else {
+            
+            }
+            self.count = 0;
+        }
+        return None;
+    }
+    
+    /// Reset the parser to parse a fresh handshake
+    pub fn reset(&mut self) {
+        self.count = 0;
+        self.versions.clear();
+    }
+}
+
+/// Size of the handshake message for a given number of versions
+fn handshake_size(num_versions: usize) -> usize {
+    return 4 * (num_versions + 1);
+}
+
+/// Possible errors while creating a handshake message
+pub enum HandshakeCreateError {
+    DestBufTooSmallError,
+}
+
+/// Create a handshake message in response to the remote side's versions
+pub fn create_handshake_for_remote_versions(outbuf: &mut [u8; 8], remote_versions: &Vec<u32>) -> Result<usize, HandshakeCreateError> {
+    if remote_versions.contains(&PROTOCOL_VERSION) {
+        // Remote side is compatible. Respond with this side's version
+        return create_handshake_for_versions(outbuf, &vec![PROTOCOL_VERSION]);
+    } else {
+        // No compatible version, respond invalid
+        return create_handshake_for_versions(outbuf, &vec![PROTOCOL_INVALID]);
+    }
+}
+
+/// Create a handshake message for the local side's current protocol version
+pub fn create_handshake_for_local_versions(outbuf: &mut [u8; 8]) -> Result<usize, HandshakeCreateError> {
+    return create_handshake_for_versions(outbuf, &vec![PROTOCOL_VERSION]);
+}
+
+/// Create a handshake message.
+/// THE STRUCTURE OF THESE MESSAGES MUST NEVER CHANGE
+/// Parameters:
+///     outbuf: Buffer to populate message into
+///     versions: Supported protocol versions
+/// Returns:
+///     Ok on success or a `HandshakeCreateError` on failure
+fn create_handshake_for_versions(outbuf: &mut [u8], versions: &Vec<u32>) -> Result<usize, HandshakeCreateError> {
+    if outbuf.len() < handshake_size(versions.len()) {
+        return Err(HandshakeCreateError::DestBufTooSmallError);
+    }
+    let mut len: usize = 0;
+    for i in 0..versions.len()+1 {
+        let version = if i < versions.len() { versions[i] } else { PROTOCOL_INVALID };
+        let dest = &mut outbuf[(i*4)..(i*4)+4];
+        dest.copy_from_slice(&version.to_le_bytes());
+        len += 4;
+
+        // If the version list includes PROTOCOL_INVALID (eg it is the only thing) return early
+        if version == PROTOCOL_INVALID {
+            break;
+        }
+    }
+    return Ok(len);
+}
 
 
 
@@ -295,6 +400,7 @@ impl CommandParser {
             // The decoder contains a decoded message (w/ valid crc)
             let msg = &self.dec.dest()[1..];
             // TODO: Deserialize the message into a Command
+            self.dec.reset();
             // TODO: Return the command
             return None;
         } else {
