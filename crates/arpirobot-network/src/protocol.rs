@@ -22,65 +22,115 @@
 //!
 //!
 //!
+//!
+//! # Handshaking
+//!
+//! Upon first connecting, the client initiates a handshake with the server. The client's handshake
+//! is used to indicate which protocol versions the client supports. The server must choose a
+//! protocol it also supports from the client's list. If there are no protocol versions in common,
+//! the server chooses `PROTOCOL_INVALID`. The server then responds with the chosen version.
+//!
+//! Handshaking **must** be possible between any version pairing of client / server as it is the
+//! handshake that is used to determine if the client and server are compatible. To achieve this,
+//! the handshaking sequence and values used during handshaking **must never** be changed. Because
+//! of this, handshaking does not use general messages (or message framing, etc) described below.
+//! Handshaking is a special case process implemented independently.
+//!
+//! A handshake message is a sequence of 32-bit integers, terminated with `PROTOCOL_INVALID`. The
+//! sequence before `PROTOCOL_INVALID` is received are the list of versions supported (if sent by
+//! the client) or selected (if sent by the server).
+//!
+//! ```txt
+//! | VERSION_A | VERSION_B | ... | PROTOCOL_INVALID |
+//! ```
+//!
+//! It **is** valid to have a handshake message that contains no versions before `PROTOCOL_INVALID`.
+//! Such a message indicates that no versions are supported (client) or selected (server).
+//!
+//!
+//!
 //! # Message Framing
 //!
-//! Raw message data is split into different "frames" for each message using a delimiter byte. The
-//! delimiter byte should be sent at BOTH the start and end of each message. At the end of the
+//! Message data is split into different "frames" for each message using a delimiter byte. Frames
+//! and messages map 1 to 1. That is to say that each frame contains exactly one message and it
+//! contains that message in full.
+//!
+//! Frames include a delimiter byte at **both** the start and end of each message. At the end of the
 //! message, a delimiter byte informs the receiver that it has the entire message. At the start of
 //! the message, a delimiter serves only to "force" the receiver to clear previously received data
 //! (eg if garbage were sent or a previous message was corrupted) to ensure the next message is not
 //! missed (unless the next message is itself corrupted too)
 //!
 //! ```txt
-//! | DELIM (1) | CONTENT (~)          | DELIM (1) |
+//! | MESSAGE_FRAME (~)                         |
+//! | DELIM (1) | FRAME_CONTENT (~) | DELIM (1) |
 //! ```
 //! 
-//! Between the delimiters is the content of the message. The content of the message is encoded
-//! using COBS to ensure that the delimiter byte never appears within the message content.
+//! Between the delimiters is the content of the message frame. The frame content is encoded using
+//! COBS to ensure that the delimiter byte never appears within the frame content.
 //!
-//! The message content includes two parts. First is the raw message payload (the data actually
-//! being sent in the message). The second is a 16-bit CRC (CCITT-FALSE). The CRC is of the message
-//! payload data and used by the receiver to verify the message integrity. Verification of message
-//! integrity is **not** optional. Receivers are required to verify integrity before considering a
-//! frame a valid message. The CRC value is sent little endian.
+//! The frame content includes two parts (both encoded). First is the message being sent. 
+//! The second is a CCITT-FALSE CRC (16-bits, little endian) of the message (pre-encode) appended.
 //!
 //! ```txt
-//! | DELIM (1) | PAYLOAD (~) | CRC(2) | DELIM (1) |
+//! | MESSAGE_FRAME (~)                                          |
+//! | DELIM (1) | FRAME_CONTENT (~)                   | DELIM(1) |
+//! | DELIM (1) | ENCODED_MESSAGE(~) | ENCODED_CRC(~) | DELIM(1) |
+//!                      ^                    ^
+//!                      | cobs               | cobs
+//!                      v                    v
+//!                   MESSAGE(~) ----------> CRC(2)
+//!                              ccitt-false
 //! ```
 //!
-//! While the framing structure imposes no strict limit on payload length, the payload is limited to
-//! 4096 bytes. There are a few reasons for this decision
+//! While the framing structure imposes no strict limit on frame length, the frame content is
+//! limited in practice due to messages being limited to 4096 bytes (note that the frame content
+//! could be longer as there are two additional CRC bytes -> 4098 bytes before COBS encoding, which
+//! could be at most 4115 bytes after encoding). Plus two additional delimiter bytes
+//! 
+//! This length limitation exists for the following reasons:
 //!
-//! - It is not expected to currently have any messages (including log messages) that exceed this
-//!   length
+//! - It is not expected to currently have any messages (including log messages) that exceed 4KiB
 //! - Limiting message sizes allows a more effecient frame encoder/decoder implementation
-//! - The 16-bit CRC becomes less useful eventually anyway (closer to 16KiB than 4KiB)
+//! - The 16-bit CRC becomes less useful eventually (closer to 16KiB) anyway
 //!
 //!
 //!
-//! # TODO: Other sections
+//! # Message Data
+//!
+//! Each message will be sent in-full in a single frame. The structure of the message data itself
+//! depends on the port. Each port has a set of message data structures which will be serialized 
+//! into raw bytes to be sent as a single message.
+//! TODO: Finish this section
 
 
-use cobs::{CobsDecoderOwned};
-use log;
+use cobs::{CobsDecoderOwned, CobsEncoder};
+
 
 
 // =================================================================================================
-// # General Constants
+// # Handshaking
 // =================================================================================================
 
 /// Used to indicate there is no valid protocol version during handshaking
+/// THIS MUST NEVER CHANGE OR IT WILL BREAK HANDSHAKING!
 const PROTOCOL_INVALID: u32 = 0;
 
 /// The current protocol version implemented by this side
 /// This must be changed when any of the following change:
-///     - Message IDs, constants, enum values
-///     - Message data structures being serialized / deserialized
-///     - Serializer / deserializer library version or format settings
-///     - A different type of CRC is used in message framing
+///     - Constants, enums, structs, and format used to frame messages
+///     - Constants, enums, structs serialized as messages
+///     - Serializer / deserializer library version or settings if the format is not backwards
+///       compatible in how it serializes / encodes data
+///     - Bugs are fixed that change frame structure or crc calculation generally
 /// The protocol version does not need to change when:
 ///     - The COBS library version changes (COBS is standardized)
+///     - CRC implementation changes (but algorithm does not)
+///     - Bugs are fixed that correct frame structure or crc calculation in specific cases
 const PROTOCOL_VERSION: u32 = 1;
+
+// TODO: Implement handshaking in here with a parser / generator
+//       The parser should hold its own buffer of 4 bytes and a vector of supported versions
 
 
 
@@ -89,100 +139,182 @@ const PROTOCOL_VERSION: u32 = 1;
 // =================================================================================================
 
 /// Message frame delimiter byte
+/// If this is changed, `PROTOCOL_VERSION` must be incremented
 const FRAME_DELIM: u8 = 0x00;
 
-/// Maximum message **frame** size (payload plus CRC)
-const FRAME_MAX_LEN: usize = 4096 + 2;
+/// Maximum message (**not** frame or frame content) length
+/// If this is changed, `PROTOCOL_VERSION` should be incremented
+const MAX_MSG_LEN: usize = 4096;
 
-/// Parses message frames
-pub trait FrameParser {
-    /// Calculate the CCITT-FALSE CRC of the given data
-    /// Parameters:
-    ///     data: Data slice
-    /// Return:
-    ///     Calculated CRC of the given data
-    fn ccitt_false(data: &[u8]) -> u16 {
-        let mut crc = 0xFFFF;
-        for b in data {
-            for i in 0..8 {
-                let bit: u8 = ((b >> (7 - i) & 1) == 1) as u8;
-                let c15 = ((crc >> 15 & 1) == 1) as u8;
-                if c15 ^ bit != 0 {
-                    crc ^= 0x1021;
-                }
+/// Number of CRC bytes
+const CRC_LEN: usize = 2;
+
+/// Number of delimiter bytes in a frame
+const FRAME_DELIM_COUNT: usize = 2;
+
+/// Calculate the CCITT-FALSE CRC of the given data
+/// Parameters:
+///     data: Data slice
+/// Return:
+///     Calculated CRC of the given data
+fn ccitt_false(data: &[u8]) -> u16 {
+    let mut crc = 0xFFFF;
+    for b in data {
+        for i in 0..8 {
+            let bit: u8 = ((b >> (7 - i) & 1) == 1) as u8;
+            let c15 = ((crc >> 15 & 1) == 1) as u8;
+            if c15 ^ bit != 0 {
+                crc ^= 0x1021;
             }
         }
-        return crc;
     }
+    return crc;
+}
 
-    /// Feed a byte into the frame parser
-    /// Parmeters:
-    ///     dec: The COBS decoder instance being used by this parser
-    ///     b:   The byte
-    /// Returns:
-    ///     true if a complete and valid (passing CRC check) message is available in the decoder's
-    ///     buffer.
-    ///     false otherwise
-    fn feed(&self, dec: &mut CobsDecoderOwned, b: u8) -> bool {
-        // xor would be required if FRAME_DELIM were not 0x00. Implement to support that.
-        // The compiler will optimize this away if FRAME_DELIM is a constat 0x00
-        match dec.feed(b ^ FRAME_DELIM) {
-            Ok(None) => return false, // Not a complete message
-            Err(_) => return false, // Ignore decode errors, assume corrupted message
-            Ok(Some(n)) => {
-                // Got a frame of size n bytes
-                if n < 2 {
-                    return false; // Not enough bytes for a CRC
-                }
-                let data = dec.dest();
-                let crc_recv: u16 = u16::from_le_bytes([data[n-2], data[n-1]]);
-                let crc_calc = Self::ccitt_false(&data[0..n-2]);
-                return crc_calc == crc_recv;
-            },
-        }
+/// Parse data received as a possible message frame and decode the messages
+/// Parameters:
+///     dec: The COBS decoder instance being used by this parser
+///     b:   The byte
+/// Returns:
+///     true if a complete and valid (passing CRC check) message is available in the decoder's
+///     buffer.
+///     false otherwise
+fn parse_frame_byte(dec: &mut CobsDecoderOwned, b: u8) -> bool {
+    // xor would be required if FRAME_DELIM were not 0x00. Implement to support that.
+    // The compiler will optimize this away if FRAME_DELIM is a constant 0x00
+    match dec.feed(b ^ FRAME_DELIM) {
+        Ok(None) => return false, // Not a complete message
+        Err(_) => return false, // Ignore decode errors, assume corrupted or too long message
+        Ok(Some(n)) => {
+            // Got a frame of size n bytes
+            if n < CRC_LEN {
+                return false; // Not enough bytes for a CRC
+            }
+            let data = dec.dest();
+            let crc_recv: u16 = u16::from_le_bytes([data[n-2], data[n-1]]);
+            let crc_calc = ccitt_false(&data[0..n-2]);
+            return crc_calc == crc_recv;
+        },
     }
 }
 
-/// TODO: cobs encoder
+/// Possible errors during frame creation
+enum FrameCreateError {
+    MessageTooLongError,
+    DestBufTooSmallError,
+}
 
-impl MessageParser{
-    pub fn new() -> Self{
+/// Get the largest possible **frame** size for a given **message** size
+/// The size can vary due to COBS encoding
+/// Parameters:
+///     msg_len: The length of the message
+/// Returns:
+///     The max possible frame lenth after CRC, delimiters, and COBS encoding
+///     In other words, the size `outframe` needs to be when passed to `create_frame`
+fn calc_max_frame_len(msg_len: usize) -> usize {
+    return FRAME_DELIM_COUNT + cobs::max_encoding_length(msg_len + CRC_LEN);
+}
+
+/// Create a frame for a given message
+/// Parameters:
+///     inmsg: The raw message payload data
+///     outframe: Buffer to store the frame in
+/// Returns:
+///     Ok on success
+///     Err on error (eg if frame output buffer is too small)
+pub fn create_frame(outframe: &mut[u8], inmsg: &[u8]) -> Result<usize, FrameCreateError> {
+    // Enforce message length limit
+    if inmsg.len() > MAX_MSG_LEN {
+        return Err(FrameCreateError::MessageTooLongError)
+    }
+    
+    // Calculate the CRC **before** encoding the message data
+    let crc = ccitt_false(inmsg);
+
+    // Constructing an entire frame, so start with a delimiter
+    outframe[0] = FRAME_DELIM;
+
+    // Encode message plus CRC into outframe buffer starting after the delimiter
+    let outcontent = &mut outframe[1..];
+    let mut enc = CobsEncoder::new(outcontent);
+    let Ok(_) = enc.push(inmsg) else {
+        return Err(FrameCreateError::DestBufTooSmallError) 
+    };
+    let Ok(_) = enc.push(&crc.to_le_bytes()) else {
+        return Err(FrameCreateError::DestBufTooSmallError);
+    };
+    let frame_content_len = enc.finalize();
+
+    // If a delimiter other than 0x00 is used, need to xor each byte of the encoded data
+    // with the delimiter to shift the encoding. This is not currently used, but implemented to
+    // support if desired in the future. The compiler will optimize this away when not needed.
+    if FRAME_DELIM != 0x00 {
+        for i in 0..frame_content_len {
+            outcontent[1 + i] ^= FRAME_DELIM;
+        }
+    }
+
+    // Full frame length with the two delimiters
+    let frame_len = frame_content_len + FRAME_DELIM_COUNT;
+
+    // Insert delimiter onto end of frame
+    if frame_len <= outframe.len(){
+        outframe[frame_len - 1] = FRAME_DELIM;
+        return Ok(frame_len);
+    } else {
+        return Err(FrameCreateError::DestBufTooSmallError);
+    }
+}
+
+
+
+// =================================================================================================
+// Command Port Messages
+// =================================================================================================
+
+// TODO: Make sure this can be serialized efficiently
+/// Commands that can be sent from the drive station to the robot
+pub enum Command {
+    Disable,
+    Enable,
+    NetTableSync
+}
+
+pub struct CommandParser {
+    dec: CobsDecoderOwned
+}
+
+impl CommandParser {
+    pub fn new() -> Self {
         return Self {
-            started: false,
-            escaped: false,
-            buffer: [0u8; MSG_MAX_LEN],
+            dec: CobsDecoderOwned::new(MAX_MSG_LEN + 2), // 2 byte CRC
         };
     }
-
-    /// Handle a byte b. Returns true if a complete and valid message is available
-    pub fn parse(&mut self, b: u8) -> bool{
-        if self.escaped {
-            if b == 
+    pub fn parse(&mut self, b: u8) -> Option<Command> {
+        if parse_frame_byte(&mut self.dec, b) {
+            // The decoder contains a decoded message (w/ valid crc)
+            let msg = &self.dec.dest()[1..];
+            // TODO: Deserialize the message into a Command
+            // TODO: Return the command
+            return None;
+        } else {
+            // Not a complete message yet
+            return None;
         }
-        return false;
     }
 }
 
 
-/// Maximum message payload length (including CRC)
 
 
-/// Message payloads (serialized / deserialized to bytes) 
 
-/// Command ids used with the CommandMessage command field
-pub struct Command { }
-impl Command {
-    pub const DISABLE:  u8   = 1;
-    pub const ENABLE:   u8   = 2;
-    pub const NT_SYNC:  u8   = 3;
-}
 
-/// Command message
-/// Used by the client (drive station) to send a message to the robot (server)
-pub struct CommandMessage {
-    /// Command ID
-    pub command: Command,
-}
+
+
+
+
+
+/*
 
 
 
@@ -217,3 +349,5 @@ pub struct LogMessage {
     /// Message contents
     pub message: str,
 }
+
+*/
