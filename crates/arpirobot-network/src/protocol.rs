@@ -28,7 +28,7 @@
 //! Upon first connecting, the client initiates a handshake with the server. The client's handshake
 //! is used to indicate which protocol versions the client supports. The server must choose a
 //! protocol it also supports from the client's list. If there are no protocol versions in common,
-//! the server chooses `PROTOCOL_INVALID`. The server then responds with the chosen version.
+//! the server chooses [`PROTOCOL_INVALID`]. The server then responds with the chosen version.
 //!
 //! Handshaking **must** be possible between any version pairing of client / server as it is the
 //! handshake that is used to determine if the client and server are compatible. To achieve this,
@@ -36,15 +36,15 @@
 //! of this, handshaking does not use general messages (or message framing, etc) described below.
 //! Handshaking is a special case process implemented independently.
 //!
-//! A handshake message is a sequence of 32-bit integers (little endian), terminated with 
-//! `PROTOCOL_INVALID`. The sequence before `PROTOCOL_INVALID` is received are the list of versions
+//! A handshake message is a sequence of unsigned 32-bit integers (little endian), terminated with 
+//! [`PROTOCOL_INVALID`]. The sequence before [`PROTOCOL_INVALID`] is received are the list of versions
 //! supported (if sent by the client) or selected (if sent by the server).
 //!
 //! ```txt
 //! | VERSION_A | VERSION_B | ... | PROTOCOL_INVALID |
 //! ```
 //!
-//! It **is** valid to have a handshake message that contains no versions before `PROTOCOL_INVALID`.
+//! It **is** valid to have a handshake message that contains no versions before [`PROTOCOL_INVALID`].
 //! Such a message indicates that no versions are supported (client) or selected (server).
 //! 
 //! Handshaking occurs only on the command port.
@@ -93,7 +93,7 @@
 //!
 //! - It is not expected to currently have any messages (including log messages) that exceed 4KiB
 //! - Limiting message sizes allows a more effecient frame encoder/decoder implementation
-//! - The 16-bit CRC becomes less useful eventually (closer to 16KiB) anyway
+//! - The 16-bit CRC becomes less useful eventually (though closer to 16KiB) anyway
 //!
 //!
 //!
@@ -102,6 +102,7 @@
 //! Each message will be sent in-full in a single frame. The structure of the message data itself
 //! depends on the port. Each port has a set of message data structures which will be serialized 
 //! into raw bytes to be sent as a single message.
+//!
 //! TODO: Finish this section
 
 
@@ -114,20 +115,26 @@ use cobs::{CobsDecoderOwned, CobsEncoder};
 // =================================================================================================
 
 /// Used to indicate there is no valid protocol version during handshaking
+///
 /// THIS MUST NEVER CHANGE OR IT WILL BREAK HANDSHAKING!
 const PROTOCOL_INVALID: u32 = 0;
 
 /// The current protocol version implemented by this side
+///
 /// This must be changed when any of the following change:
-///     - Constants, enums, structs, and format used to frame messages
-///     - Constants, enums, structs serialized as messages
-///     - Serializer / deserializer library version or settings if the format is not backwards
-///       compatible in how it serializes / encodes data
-///     - Bugs are fixed that change frame structure or crc calculation generally
+///
+/// - Constants, enums, structs, and format used to frame messages
+/// - Constants, enums, structs serialized as messages
+/// - Serializer / deserializer library version or settings if the format is not backwards
+///   compatible in how it serializes / encodes data
+/// - Bugs are fixed that change frame structure or crc calculation generally
+///
+///
 /// The protocol version does not need to change when:
-///     - The COBS library version changes (COBS is standardized)
-///     - CRC implementation changes (but algorithm does not)
-///     - Bugs are fixed that correct frame structure or crc calculation in specific cases
+///
+/// - The COBS library version changes (COBS is standardized)
+/// - CRC implementation changes (but algorithm does not)
+/// - Bugs are fixed that correct frame structure or crc calculation in specific cases
 const PROTOCOL_VERSION: u32 = 1;
 
 
@@ -185,59 +192,80 @@ impl HandshakeParser {
     }
 }
 
-/// Size of the handshake message for a given number of versions
-fn handshake_size(num_versions: usize) -> usize {
-    return 4 * (num_versions + 1);
-}
 
 /// Possible errors while creating a handshake message
 pub enum HandshakeCreateError {
+    /// The buffer provided to write the message into was too small
     DestBufTooSmallError,
 }
 
-/// Create a handshake message in response to the remote side's versions
-/// If the returned size is 4 bytes, no valid version was received
-/// If the returned size is 8 bytes, a valid version was received and selected
-pub fn create_handshake_for_remote_versions(outbuf: &mut [u8; 8], remote_versions: &Vec<u32>) -> Result<usize, HandshakeCreateError> {
-    if remote_versions.contains(&PROTOCOL_VERSION) {
-        // Remote side is compatible. Respond with this side's version
-        return create_handshake_for_versions(outbuf, &vec![PROTOCOL_VERSION]);
-    } else {
-        // No compatible version, respond invalid
-        return create_handshake_for_versions(outbuf, &vec![PROTOCOL_INVALID]);
+/// Handshake message / response generator
+pub struct HandshakeGenerator { }
+
+impl HandshakeGenerator {
+    /// Gets the size of a handshake message (in bytes) that lists `n` versions
+    pub const fn size_for_num_versions(n: usize) -> usize {
+        return size_of::<u32>() * (n + 1);
     }
-}
 
-/// Create a handshake message for the local side's current protocol version
-pub fn create_handshake_for_local_versions(outbuf: &mut [u8; 8]) -> Result<usize, HandshakeCreateError> {
-    return create_handshake_for_versions(outbuf, &vec![PROTOCOL_VERSION]);
-}
-
-/// Create a handshake message.
-/// THE STRUCTURE OF THESE MESSAGES MUST NEVER CHANGE
-/// Parameters:
-///     outbuf: Buffer to populate message into
-///     versions: Supported protocol versions
-/// Returns:
-///     Ok on success or a `HandshakeCreateError` on failure
-fn create_handshake_for_versions(outbuf: &mut [u8], versions: &Vec<u32>) -> Result<usize, HandshakeCreateError> {
-    if outbuf.len() < handshake_size(versions.len()) {
-        return Err(HandshakeCreateError::DestBufTooSmallError);
-    }
-    let mut len: usize = 0;
-    for i in 0..versions.len()+1 {
-        let version = if i < versions.len() { versions[i] } else { PROTOCOL_INVALID };
-        let dest = &mut outbuf[(i*4)..(i*4)+4];
-        dest.copy_from_slice(&version.to_le_bytes());
-        len += 4;
-
-        // If the version list includes PROTOCOL_INVALID (eg it is the only thing) return early
-        if version == PROTOCOL_INVALID {
-            break;
+    /// Selects a protocol version that this local side supports from the set in `remote_versions`.
+    /// A handshake message will be generated into `outbuf` indicating the selected version.
+    /// `outbuf` must be large enough to indicate one version (see 
+    /// [`size_for_num_versions`](HandshakeGenerator::size_for_num_versions)).
+    ///
+    /// If no supported version was indicated in `remote_versions`, this will instead generate a
+    /// response message indicating that no version was selected. The size returned from this 
+    /// function can be checked against values from 
+    /// [`size_for_num_versions`](HandshakeGenerator::size_for_num_versions) to determine if a 
+    /// version was selected or not.
+    ///
+    /// If `outbuf` is too small, this function will return
+    /// [`DestBufTooSmallError`](HandshakeCreateError::DestBufTooSmallError) instead of the 
+    /// generated message size
+    pub fn for_remote_versions(outbuf: &mut [u8], remote_versions: &Vec<u32>) -> Result<usize, HandshakeCreateError> {
+        if remote_versions.contains(&PROTOCOL_VERSION) {
+            // Remote side is compatible. Respond with this side's version
+            return HandshakeGenerator::create(outbuf, &vec![PROTOCOL_VERSION]);
+        } else {
+            // No compatible version, respond invalid
+            return HandshakeGenerator::create(outbuf, &vec![]);
         }
     }
-    return Ok(len);
+    
+    /// Creates a handshake message indicating this side's protocol version. The message will be
+    /// generated into `outbuf` (must be large enough to hold one version, see
+    /// [`size_for_num_versions`](HandshakeGenerator::size_for_num_versions)
+    ///
+    /// This function will return the size of the generated message unless `outbuf` is too small, in
+    /// which case it will return
+    /// [`DestBufTooSmallError`](HandshakeCreateError::DestBufTooSmallError)
+    pub fn for_local_version(outbuf: &mut [u8]) -> Result<usize, HandshakeCreateError> {
+       return HandshakeGenerator::create(outbuf, &vec![PROTOCOL_VERSION]);
+    }
+
+    /// Creates a handshake message indicating the supported `versions` provided. The message will
+    /// be generated into `outbuf`.
+    ///
+    /// This function returns the size of the generated message, unless `outbuf` is too small for
+    /// the number of `versions` provided. See
+    /// [`size_for_num_versions`](HandshakeGenerator::size_for_num_versions)
+    ///
+    /// THE STRUCTURE OF THESE MESSAGES MUST NEVER CHANGE
+    fn create(outbuf: &mut [u8], versions: &Vec<u32>) -> Result<usize, HandshakeCreateError> {
+        if outbuf.len() < HandshakeGenerator::size_for_num_versions(versions.len()) {
+            return Err(HandshakeCreateError::DestBufTooSmallError);
+        }
+        let mut len: usize = 0;
+        for i in 0..versions.len()+1 {
+            let version = if i < versions.len() { versions[i] } else { PROTOCOL_INVALID };
+            let dest = &mut outbuf[(i*4)..(i*4)+4];
+            dest.copy_from_slice(&version.to_le_bytes());
+            len += 4;
+        }
+        return Ok(len);
+    }
 }
+
 
 
 
@@ -410,6 +438,10 @@ impl CommandParser {
             return None;
         }
     }
+}
+
+pub struct ComandGenerator {
+    // TODO: pub fn create_message(cmd: Command)
 }
 
 

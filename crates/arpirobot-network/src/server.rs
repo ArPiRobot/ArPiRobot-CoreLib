@@ -82,7 +82,7 @@ use std::time::Duration;
 use std::sync::{Mutex};
 use log::{warn, error, info, debug};
 
-use crate::protocol::{HandshakeParser, create_handshake_for_remote_versions};
+use crate::protocol::{HandshakeParser, HandshakeGenerator};
 
 /// Server states
 #[derive(Clone, Copy)] 
@@ -390,7 +390,7 @@ impl Server {
                     match self.parsers.handshake.parse(b) {
                         Some(remote_versions) => {
                             let mut response: [u8; 8] = [0u8; 8];
-                            let Ok(size) = create_handshake_for_remote_versions(&mut response, remote_versions) else {
+                            let Ok(size) = HandshakeGenerator::for_remote_versions(&mut response, remote_versions) else {
                                 error!("Failed to reply to client's handshake. Disconnecting");
                                 self.do_disconnect();
                                 return;
@@ -406,9 +406,7 @@ impl Server {
                             self.queue_raw_cmd_write(&response[0..size]);
 
                             // If the server selected a protocol version, valid handshake complete
-                            // If the handshake failed, the response will include ONLY
-                            // PROTOCOL_INVALID (single u32)
-                            if size >= 8{
+                            if size != HandshakeGenerator::size_for_num_versions(0){
                                 self.do_handshook();
                             }
                         },
