@@ -4,6 +4,7 @@ use mio::net::{TcpListener, TcpStream};
 use mio::{Events, Interest, Poll, Token};
 use std::net::{IpAddr, SocketAddr};
 use std::io;
+use std::io::Read;
 use std::time::Duration;
 use log::{warn, error, info, debug};
 
@@ -48,6 +49,12 @@ struct Clients {
     pub ip: Option<IpAddr>,
 }
 
+struct Buffers {
+    cmd: Vec<u8>,
+    nt: Vec<u8>,
+    log: Vec<u8>
+}
+
 struct Listeners {
     // TODO: UDP listener
     cmd: TcpListener,
@@ -68,7 +75,10 @@ pub struct Server {
 
     // Polling infrastructure
     poll: Poll,
-    events: Events
+    events: Events,
+
+    // Data buffers
+    buffer: Buffers,
 }
 
 impl Server {
@@ -94,6 +104,11 @@ impl Server {
             },
             poll: Poll::new()?,
             events: Events::with_capacity(16),
+            buffer: Buffers {
+                cmd: Vec::with_capacity(1024),
+                nt:  Vec::with_capacity(1024),
+                log: Vec::with_capacity(1024)
+            }
         };
         s.poll.registry().register(&mut s.listener.cmd, Tokens::LISTENER_CMD, Interest::READABLE)?;
         s.poll.registry().register(&mut s.listener.nt,  Tokens::LISTENER_NT,  Interest::READABLE)?;
@@ -231,10 +246,65 @@ impl Server {
             }
         }
     }
-    
+   
+    /// Handle bytes from the command port
+    fn handle_cmd_read_read(&mut self){
+        let mut chunk = [0u8; 128];
+        loop {
+            // Borrow inside the loop so borrow checker can understand where the borrow ends each
+            // iteration so the do_ functions can be called
+            let Some(client) = &mut self.client.cmd else {
+                warn!("Tried to read a client that is not connected");
+                return;
+            };
+            match client.read(&mut chunk) {
+                Ok(0) => {
+                    // Remote side closed connection cleanly
+                    self.do_disconnect();
+                },
+                Ok(n) => {
+                    // Got actual data
+                }
+            }
+        }
+    }
+
     /// Handle readable events on the command port's tcp stream (client)
     fn handle_cmd_read(&mut self) {
-        // TODO: Handle messages on the command port
+        match self.state {
+            State::Connected => {
+                // Data received before handshaking is complete is part of a handshake
+                // Handshaking is initiated by the client. Handshake messages MUST NOT use
+                // serialized structs like most messages. This is because handshaking must be
+                // possible between any version combo of client and server. Updates to serialization
+                // libraries could change serialization. Thus, handshakes are different.
+                // A client initiates the handshake by sending a sequence of u32's encoded little
+                // endian. The handshake message ends when the client sends PROTOCOL_INVALID (u32 0)
+                // The sequence of u32 values are a list of the cleint's supported protocol versions
+                // The server will then choose one from this list and reply to the client in a
+                // similar form with a u32 (little endian) of the chosen version followed by
+                // PROTOCOL_INVALID
+                // While not expected, a client could send no versions before PROTOCOL_INVALID. In
+                // this case the server shall treat the client as supporting no protocol versions
+                // and will fail to pick a matching supported version. It will repond the same way
+                // as if the server does not support any version the client sent.
+                // When the server does not support any protocol version the client sent, the server
+                // responds with only PROTOCOL_INVALID. The client will treat this to mean that
+                // there is no valid version. The server will not disconnect the client as this
+                // point. The client is expected to disconnect.
+                // NOTE: It may be preferred in the future for the server to disconnect the client
+                //       after a failed handshake to ensure a different client could connect
+                // TODO: Implement server side of handshake
+            },
+            State::Handshook => {
+                // TODO: Handle real command messages
+            }
+            State::Connecting|State::Disconnected => {
+                // Any data send by the client before all three ports are connected
+                // is ignored. Clients must not send data before all connections have been
+                // accepted
+            },
+        }
     }
 
     /// Handle readable events on the net table port's tcp stream (client)

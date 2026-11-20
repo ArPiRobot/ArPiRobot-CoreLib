@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 mio = { version = "1.0", features = ["os-poll", "net"] }
 log = "0.4.34"
+cobs = "0.5.1"
