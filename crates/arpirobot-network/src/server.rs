@@ -3,10 +3,12 @@
 
 use mio::net::{TcpListener, TcpStream};
 use mio::{Events, Interest, Poll, Token};
+use std::collections::VecDeque;
 use std::net::{IpAddr, SocketAddr};
 use std::io;
 use std::io::Read;
 use std::time::Duration;
+use std::sync::{Mutex};
 use log::{warn, error, info, debug};
 
 use crate::protocol::{HandshakeParser, create_handshake_for_remote_versions};
@@ -63,6 +65,12 @@ struct Listeners {
     log: TcpListener,
 }
 
+struct WBuffers {
+    cmd: Mutex<VecDeque<u8>>,
+    nt:  Mutex<VecDeque<u8>>,
+    log: Mutex<VecDeque<u8>>,
+}
+
 // Server implementation
 pub struct Server {
     // Server state
@@ -78,8 +86,11 @@ pub struct Server {
     poll: Poll,
     events: Events,
 
-    // Message parsers
+    // Message parsers (include buffers) for reading from clients
     parsers: Parsers,
+
+    // Write buffers (ring buffers) for writing to clients
+    wbuffers: WBuffers,
 }
 
 impl Server {
@@ -107,6 +118,11 @@ impl Server {
             events: Events::with_capacity(16),
             parsers: Parsers {
                 handshake: HandshakeParser::new(), 
+            },
+            wbuffers: WBuffers {
+                cmd: Mutex::new(VecDeque::with_capacity(1024)),
+                nt:  Mutex::new(VecDeque::with_capacity(1024)),
+                log: Mutex::new(VecDeque::with_capacity(1024)),
             }
         };
         s.poll.registry().register(&mut s.listener.cmd, Tokens::LISTENER_CMD, Interest::READABLE)?;
@@ -123,7 +139,7 @@ impl Server {
             _ => return None
         }
     }
- 
+
     /// Run server event loop. This function **WILL** return. You must call it repeatedly.
     /// If an error is returned, the server may not function properly anymore
     /// The provided duration is the maximum amount of time to wait for events. The function may
@@ -152,6 +168,13 @@ impl Server {
         self.events = events;
         return res;
     }
+
+
+
+
+    // =============================================================================================
+    // Event handling
+    // =============================================================================================
 
     /// Process a set of polled events
     fn handle_events(&mut self, events: &Events) -> io::Result<()> {
@@ -245,37 +268,6 @@ impl Server {
             }
         }
     }
-    
-    /// Handle bytes read from the command port
-    fn handle_cmd_bytes(&mut self, data: &[u8]) {
-        for b in data {
-            match self.state {
-                State::Connected|State::Connecting => {
-                    // The first thing send on the command port is handshake data. Until handshaking
-                    // completes, each byte is assumed to be part of the handshake.
-                    match self.parsers.handshake.parse(b) {
-                        Some(remote_versions) => {
-                            let mut response: [u8; 8] = [0u8; 8];
-                            let Ok(size) = create_handshake_for_remote_versions(&mut response, remote_versions) else {
-                                error!("Failed to reply to client's handshake. Disconnecting");
-                                self.do_disconnect();
-                                return;
-                            };
-                            // TODO: Queue message for write to command client
-                            self.do_handshook();
-                        },
-                        None => { /* Not done parsing handshake yet */ } 
-                    }
-                },
-                State::Handshook => {
-
-                },
-                _ => {
-                    // Should not be possible to get here, just ignore data
-                }
-            }
-        }
-    }
 
     /// Handle readable events on the command port's tcp stream (client)
     fn handle_cmd_readable(&mut self){
@@ -310,6 +302,65 @@ impl Server {
     fn handle_log_readable(&mut self) {
         // TODO: Handles messages on the log port
     }
+
+    
+
+    // =============================================================================================
+    // Reading from clients
+    // =============================================================================================
+
+    /// Handle bytes read from the command port
+    fn handle_cmd_bytes(&mut self, data: &[u8]) {
+        for b in data {
+            match self.state {
+                State::Connected|State::Connecting => {
+                    // The first thing send on the command port is handshake data. Until handshaking
+                    // completes, each byte is assumed to be part of the handshake.
+                    match self.parsers.handshake.parse(b) {
+                        Some(remote_versions) => {
+                            let mut response: [u8; 8] = [0u8; 8];
+                            let Ok(size) = create_handshake_for_remote_versions(&mut response, remote_versions) else {
+                                error!("Failed to reply to client's handshake. Disconnecting");
+                                self.do_disconnect();
+                                return;
+                            };
+                            self.queue_raw_cmd_write(&response[0..size]);
+                            self.do_handshook();
+                        },
+                        None => { /* Not done parsing handshake yet */ } 
+                    }
+                },
+                State::Handshook => {
+
+                },
+                _ => {
+                    // Should not be possible to get here, just ignore data
+                }
+            }
+        }
+    }
+
+
+
+    // =============================================================================================
+    // Writing to clients
+    // =============================================================================================
+
+    /// Queue a complete message for write
+    /// Parameters:
+    ///     data: Complete message. Must be complete or thread safety issues can occur mixing up
+    ///           messages
+    fn queue_raw_cmd_write(&mut self, data: &[u8]) {
+        let mut buf = self.wbuffers.cmd.lock().unwrap();
+        for b in data {
+            buf.push_back(*b); 
+        }
+    }
+
+
+    // =============================================================================================
+    // State transitions
+    // =============================================================================================
 
     /// Transition to State::Disconnected
     fn do_disconnect(&mut self) {
@@ -370,6 +421,8 @@ impl Server {
             self.do_disconnect();
             return;
         };
+        // TODO: Start polling for writable clients to process buffer? Or maybe only when queue is
+        // not empty due to how mio won't repeat events?
         if let Err(_) = self.poll.registry().register(client_cmd, Tokens::STREAM_CMD, Interest::READABLE) {
             error!("Failed to setup to poll client. Disconnecting.");
             self.do_disconnect();
