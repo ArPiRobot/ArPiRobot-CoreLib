@@ -48,6 +48,7 @@
 //!     - Reset write buffers
 //! - Transition to Connected State:
 //!     - Start reading from the command client (only the one port)
+//!     - Start writing to the command client (only the one port, for handshake responses)
 //! - Transition to Handshook State:
 //!     - Start reading from all clients
 //!     - Start writing to all clients
@@ -345,6 +346,9 @@ impl Server {
             }
         }
     }
+    
+    // TODO: Rewrite these handle_..._readable functions so that they don't have to be duplicated
+    // code for each of the three ports.
 
     /// Handle readable events on the command port's tcp stream (client)
     fn handle_cmd_readable(&mut self){
@@ -403,12 +407,17 @@ impl Server {
                     // completes, each byte is assumed to be part of the handshake.
                     match self.parsers.handshake.parse(b) {
                         Some(remote_versions) => {
+                            // Generate handshake response
                             let mut response: [u8; 8] = [0u8; 8];
-                            let Ok(size) = HandshakeGenerator::for_remote_versions(&mut response, remote_versions) else {
+                            debug!("Client versions: {:?}", remote_versions);
+                            let version = HandshakeGenerator::select_from_remote_versions(remote_versions);
+                            debug!("Server selected version: {}", version);
+                            let Ok(size) = HandshakeGenerator::for_single_version(&mut response, version) else {
                                 error!("Failed to reply to client's handshake. Disconnecting");
                                 self.do_disconnect();
                                 return;
                             };
+
                             // Reset the handshake parser now. It would be legal for a client
                             // to receive an invalid handshake (PROTOCOL_INVALID response)
                             // And for that client to then attempt to handshake again. The server

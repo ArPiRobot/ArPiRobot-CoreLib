@@ -175,10 +175,10 @@ impl HandshakeParser {
         self.count += 1;
         if self.count == 4 {
             let v = u32::from_le_bytes(self.buf);
-            if v == 0 {
+            if v == PROTOCOL_INVALID {
                 return Some(&self.versions); 
             } else {
-            
+                self.versions.push(v); 
             }
             self.count = 0;
         }
@@ -209,26 +209,31 @@ impl HandshakeGenerator {
     }
 
     /// Selects a protocol version that this local side supports from the set in `remote_versions`.
+    /// If no version supported by this local side is present in `remote_versions`, this function
+    /// will return [`PROTOCOL_INVALID`].
+    pub fn select_from_remote_versions(remote_versions: &Vec<u32>) -> u32 {
+        if remote_versions.contains(&PROTOCOL_VERSION) {
+            return PROTOCOL_VERSION;
+        }
+        return PROTOCOL_INVALID;
+    }
+    
+    /// Creates a handshake message indicating a single supported `version`. 
     /// A handshake message will be generated into `outbuf` indicating the selected version.
     /// `outbuf` must be large enough to indicate one version (see 
     /// [`size_for_num_versions`](HandshakeGenerator::size_for_num_versions)).
     ///
-    /// If no supported version was indicated in `remote_versions`, this will instead generate a
-    /// response message indicating that no version was selected. The size returned from this 
-    /// function can be checked against values from 
-    /// [`size_for_num_versions`](HandshakeGenerator::size_for_num_versions) to determine if a 
-    /// version was selected or not.
+    /// If `version` is PROTOCOL_INVALID, this will instead generate a response message indicating
+    /// that no version was selected. The size returned from this 
     ///
     /// If `outbuf` is too small, this function will return
     /// [`DestBufTooSmallError`](HandshakeCreateError::DestBufTooSmallError) instead of the 
     /// generated message size
-    pub fn for_remote_versions(outbuf: &mut [u8], remote_versions: &Vec<u32>) -> Result<usize, HandshakeCreateError> {
-        if remote_versions.contains(&PROTOCOL_VERSION) {
-            // Remote side is compatible. Respond with this side's version
-            return HandshakeGenerator::create(outbuf, &vec![PROTOCOL_VERSION]);
-        } else {
-            // No compatible version, respond invalid
+    pub fn for_single_version(outbuf: &mut [u8], version: u32) -> Result<usize, HandshakeCreateError> {
+        if version == PROTOCOL_INVALID {
             return HandshakeGenerator::create(outbuf, &vec![]);
+        } else {
+            return HandshakeGenerator::create(outbuf, &vec![version]);
         }
     }
     
