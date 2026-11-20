@@ -45,7 +45,7 @@
 //! - Transition to Connecting State:
 //!     - Reset handshake buffer
 //!     - Reset read buffers
-//!     - Reset write buffers (TBD, may leave logs)
+//!     - Reset write buffers
 //! - Transition to Connected State:
 //!     - Start reading from the command client (only the one port)
 //! - Transition to Handshook State:
@@ -292,6 +292,12 @@ impl Server {
             };
             match listener.accept() {
                 Ok((s, a)) => {
+                    match token {
+                        Tokens::LISTENER_CMD => debug!("Accepted connection on command port"),
+                        Tokens::LISTENER_NT  => debug!("Accepted connection on net table port"),
+                        Tokens::LISTENER_LOG => debug!("Accepted connection on log port"),
+                        _ => {}
+                    }
                     match self.state {
                         State::Disconnected => {
                             // Accept first TCP connection to any port unconditionally
@@ -347,17 +353,25 @@ impl Server {
             // Borrow inside the loop so borrow checker can understand where the borrow ends each
             // iteration so the do_ functions can be called
             let Some(client) = &mut self.client.cmd else {
-                warn!("Tried to read a client that is not connected");
+                warn!("Tried to read command client, but it is not connected");
                 return;
             };
             match client.read(&mut chunk) {
-                Ok(0) => self.do_disconnect(),                  // Remote side closed cleanly (EOF)
+                Ok(0) => {
+                    // Remote side closed cleanly (EOF)
+                    info!("Client closed command port connection. Disocnnecting.");
+                    self.do_disconnect()
+                },
                 Ok(n) => self.handle_cmd_bytes(&chunk[0..n]),   // Got actual data
                 Err(e) => {
                     match e.kind() {
                         io::ErrorKind::WouldBlock => break,     // Have handled all data
                         io::ErrorKind::Interrupted => {},       // syscall interrupted. Retry
-                        _ => self.do_disconnect(),              // Remote side dropped
+                        _ => { 
+                            // Remote side dropped
+                            info!("Command client connection lost. Disconnecting.");
+                            self.do_disconnect()
+                        }
                     }
                 }
             }
@@ -403,11 +417,13 @@ impl Server {
                             self.parsers.handshake.reset();
                             
                             // Send handsake to the client
-                            self.queue_raw_cmd_write(&response[0..size]);
+                            self.queue_raw_cmd_write(&response[0..size]).ok();
 
                             // If the server selected a protocol version, valid handshake complete
                             if size != HandshakeGenerator::size_for_num_versions(0){
                                 self.do_handshook();
+                            } else {
+                                warn!("Client sent invalid versions during handshaking.");
                             }
                         },
                         None => { /* Not done parsing handshake yet */ } 
@@ -433,12 +449,33 @@ impl Server {
     /// Parameters:
     ///     data: Complete message. Must be complete or thread safety issues can occur mixing up
     ///           messages
-    fn queue_raw_cmd_write(&mut self, data: &[u8]) {
-        let mut buf = self.wbuffers.cmd.lock().unwrap();
-        for b in data {
-            buf.push_back(*b); 
+    fn queue_raw_cmd_write(&mut self, data: &[u8]) -> io::Result<()> {
+        match self.state {
+            State::Connected|State::Handshook => {
+                // Queue the data
+                let mut buf = self.wbuffers.cmd.lock().unwrap();
+                for b in data {
+                    buf.push_back(*b); 
+                }
+                drop(buf);
+
+                // Wake the event loop to actually send the data
+                // TODO: Use an mio::Waker?
+                // TODO: The event loop should try to write immediately. Only register if WouldBlock
+                //       The event loop should also deregister writable interest when buffer is empty
+                return Ok(());
+            }
+            _ => {
+                // We should never get here. The only thing written over the command port is the
+                // handshake response written by the server
+                warn!("Attempted write to command port in an invalid server state!");
+                return Err(io::Error::new(io::ErrorKind::NotConnected, 
+                            "Command port is not ready to write"));
+            }
         }
     }
+
+    // TODO public functions to queue data on net table and log ports
 
 
     // =============================================================================================
@@ -447,11 +484,20 @@ impl Server {
 
     /// Transition to State::Disconnected
     fn do_disconnect(&mut self) {
+        debug!("Starting transition to Disconnected state.");
+
         // Stop polling clients before dropping the stream objects
-        // TODO: Need to deregister differently. Need to start reading at different times
-        //       Probably need to track each individually
         match self.state{
-            State::Connected | State::Handshook => {
+            State::Connected => {
+                // When transitioning into connected state, the server will poll only on the command
+                // port so it can process handshakes
+                if let Some(client_cmd) = &mut self.client.cmd {
+                    self.poll.registry().deregister(client_cmd).ok();
+                }
+            },
+            State::Handshook => {
+                // When transitioning into handshook state, the server will start polling all
+                // clients and the UDP controller port
                 if let Some(client_cmd) = &mut self.client.cmd {
                     self.poll.registry().deregister(client_cmd).ok();
                 }
@@ -461,11 +507,10 @@ impl Server {
                 if let Some(client_log) = &mut self.client.log {
                     self.poll.registry().deregister(client_log).ok();
                 }
+                // TODO: Controller port?
             },
             _ => {
-                // Calling deregister on something that was never registered results in undefined
-                // behavior per mio docs. Client streams are only registered just before transition
-                // to the Connected state.
+                // deregister on something that was never registered results in undefined behavior
             }
         }
 
@@ -476,13 +521,14 @@ impl Server {
         self.client.ip = None;
 
         // State change
-        info!("Client disconnected");
+        debug!("Server in Disconnected state.");
         self.state = State::Disconnected;
     }
 
     /// Transition to State::Connecting
     fn do_connecting(&mut self){
-        debug!("Client starting to connect");
+        debug!("Starting transition to Connecting state.");
+
         if self.client.ip.is_none(){
             error!("Client IP was unset during transition to connecting state");
             self.do_disconnect();
@@ -492,49 +538,85 @@ impl Server {
         // parser is clean and ready for reuse before entering this state
         self.parsers.handshake.reset();
 
-        // TODO: Clear write buffers
+        // Clear write buffers when a new client starts connecting to ensure previously in-flight
+        // data will not be sent.
+        let mut wbuffer_cmd = self.wbuffers.cmd.lock().unwrap();
+        wbuffer_cmd.clear();
+        drop(wbuffer_cmd);
+        let mut wbuffer_nt = self.wbuffers.nt.lock().unwrap();
+        wbuffer_nt.clear();
+        drop(wbuffer_nt);
+        let mut wbuffer_log = self.wbuffers.log.lock().unwrap();
+        wbuffer_log.clear();
+        drop(wbuffer_log);
 
+        // TODO: Clear read buffers (parsers)
+        
+        // Do state change
+        debug!("Server in Connecting state");
         self.state = State::Connecting;  
     }
 
     /// Transition to State::Connected
     fn do_connected(&mut self) {
-        // Start polling clients too
-        let (Some(client_cmd), Some(client_nt), Some(client_log)) = 
-                (&mut self.client.cmd, &mut self.client.nt, &mut self.client.log) else {
+        debug!("Starting transition to Connected state.");
+        
+        // Start polling **only** the command client. We do not want to read from other ports
+        // until after handshake is complete. Since we cannot ignore polled events safely with mio,
+        // do not start polling until we are ready to handle such events on other ports.
+        let Some(client_cmd) = &mut self.client.cmd else {
             error!("Client was missing during transition to connected state");
             self.do_disconnect();
             return;
         };
-        // TODO: Start polling for writable clients to process buffer? Or maybe only when queue is
-        // not empty due to how mio won't repeat events?
         if let Err(_) = self.poll.registry().register(client_cmd, Tokens::STREAM_CMD, Interest::READABLE) {
-            error!("Failed to setup to poll client. Disconnecting.");
-            self.do_disconnect();
-            return;
-        }
-        if let Err(_) = self.poll.registry().register(client_nt,  Tokens::STREAM_NT,  Interest::READABLE) {
-            error!("Failed to setup to poll client. Disconnecting.");
-            self.poll.registry().deregister(client_cmd).ok();
-            self.do_disconnect();
-            return;
-        }
-        if let Err(_) = self.poll.registry().register(client_log, Tokens::STREAM_LOG, Interest::READABLE) {
-            error!("Failed to setup to poll client. Disconnecting.");
-            self.poll.registry().deregister(client_log).ok();
-            self.poll.registry().deregister(client_nt).ok();
+            error!("Failed to setup to poll command client. Disconnecting.");
             self.do_disconnect();
             return;
         }
 
         // State change (ONLY SET AFTER EVERYTHING IS REGISTERED or calls to do_disconnect will
         // attempt to unregister incorrectly)
+        debug!("Server in Connected state");
+        info!("Client connected. Waiting for handshake");
         self.state = State::Connected;
     }
 
     /// Transition to State::Handshook
     fn do_handshook(&mut self) {
-        // State change
+        debug!("Starting transition to Handshook state.");
+        info!("Handshake with client completed.");
+        
+        let (Some(client_cmd), Some(client_nt), Some(client_log)) = 
+                (&mut self.client.cmd, &mut self.client.nt, &mut self.client.log) else {
+            error!("Client was missing during transition to connected state");
+            self.do_disconnect();
+            return;
+        };
+        if let Err(_) = self.poll.registry().register(client_cmd, Tokens::STREAM_CMD, Interest::READABLE) {
+            error!("Failed to setup to poll command client. Disconnecting.");
+            self.do_disconnect();
+            return;
+        }
+        if let Err(_) = self.poll.registry().register(client_nt,  Tokens::STREAM_NT,  Interest::READABLE) {
+            error!("Failed to setup to poll NT client. Disconnecting.");
+            self.poll.registry().deregister(client_cmd).ok();
+            self.do_disconnect();
+            return;
+        }
+        if let Err(_) = self.poll.registry().register(client_log, Tokens::STREAM_LOG, Interest::READABLE) {
+            error!("Failed to setup to poll log client. Disconnecting.");
+            self.poll.registry().deregister(client_log).ok();
+            self.poll.registry().deregister(client_nt).ok();
+            self.do_disconnect();
+            return;
+        }
+        
+        // TODO: Start polling UDP port
+
+        // State change (ONLY SET AFTER EVERYTHING IS REGISTERED or calls to do_disconnect will
+        // attempt to unregister incorrectly)
+        debug!("Server in Handshook state");
         self.state = State::Handshook;
     }
 }
