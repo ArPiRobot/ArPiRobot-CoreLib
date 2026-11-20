@@ -1,5 +1,76 @@
-//! This module implements the server side communication
-//! TODO: State machine diagram
+//! This module implements the server side communication via a single-threaded state machine.
+//! The state machine uses non-blocking socket I/O (polling).
+//! The caller is expected to manage the thread and ensure that no two threads call run() at the
+//! same time.
+//! The methods to queue data to be written **are** thread-safe to allow multiple callers on
+//! different threads to queue data for write.
+//!
+//! Server State machine:
+//!
+//! ```txt
+//!                          │
+//!                          │START
+//!                          │
+//!                    ┌─────▼──────┐
+//!                    │Disconnected│
+//!                    │(No Clients)│◄───┐
+//!                    └─────┬──────┘    │
+//!                          │Client     │Client connects
+//!                          │connect    │from different IP
+//!                    ┌─────▼───────┐   │
+//!                ┌──►│ Connecting  ├───┘
+//! Client connects│   │(1-2 clients)│   ▲
+//! from same IP   └───┴─────┬───────┘   │
+//!                          │3 clients  │
+//!                          │same IP    │
+//!                    ┌─────▼─────┐     │Client disconnects
+//!                ┌──►│ Connected ├─────┤(read error, read EOF, write error)
+//!       Invalid  │   │(3 clients)│     │
+//!       Handshake└───┴─────┬─────┘     │
+//!                          │Valid      │
+//!                          │Handshake  │
+//!                    ┌─────▼─────┐     │
+//!                    │ Handshook ├─────┘
+//!                    │(3 clients)│
+//!                    └───────────┘
+//! ```
+//!
+//! Actions when transitioning into states:
+//!
+//! - Transition to Disconnected State:
+//!     - Stop reading from clients
+//!     - Stop listening on controller UDP port
+//!     - Stop writing to clients
+//!     - Disconnects any connected clients
+//! - Transition to Connecting State:
+//!     - Reset handshake buffer
+//!     - Reset read buffers
+//!     - Reset write buffers (TBD, may leave logs)
+//! - Transition to Connected State:
+//!     - Start reading from the command client (only the one port)
+//! - Transition to Handshook State:
+//!     - Start reading from all clients
+//!     - Start writing to all clients
+//!     - Start listening on the controller UDP port
+//!
+//! Actions while in each state:
+//! - While in Disconnected State:
+//!     - Server accepts any incoming TCP connection
+//! - While in Connecting State:
+//!     - Server accepts incoming TCP connections from the same IP
+//!     - Server rejects incoming TCP connections from different IPs
+//! - While in Connected State:
+//!     - Server parses any data received on the command port as part of a handshake until  
+//!       a complete handshake has been received
+//!     - Server responds to complete handshake data with a selected protocol version
+//! - While in Handshook State:
+//!     - Data received on each port (TCP or UDP) is parsed as a message of the type expected on  
+//!       that port
+//!     - Data queued to be written to each client will be written
+
+
+
+
 
 use mio::net::{TcpListener, TcpStream};
 use mio::{Events, Interest, Poll, Token};
@@ -313,7 +384,7 @@ impl Server {
     fn handle_cmd_bytes(&mut self, data: &[u8]) {
         for b in data {
             match self.state {
-                State::Connected|State::Connecting => {
+                State::Connected => {
                     // The first thing send on the command port is handshake data. Until handshaking
                     // completes, each byte is assumed to be part of the handshake.
                     match self.parsers.handshake.parse(b) {
@@ -324,14 +395,28 @@ impl Server {
                                 self.do_disconnect();
                                 return;
                             };
+                            // Reset the handshake parser now. It would be legal for a client
+                            // to receive an invalid handshake (PROTOCOL_INVALID response)
+                            // And for that client to then attempt to handshake again. The server
+                            // will not disconnect clients upon a failed handshake. It waits for the
+                            // client to disconnect or to retry the handshake
+                            self.parsers.handshake.reset();
+                            
+                            // Send handsake to the client
                             self.queue_raw_cmd_write(&response[0..size]);
-                            self.do_handshook();
+
+                            // If the server selected a protocol version, valid handshake complete
+                            // If the handshake failed, the response will include ONLY
+                            // PROTOCOL_INVALID (single u32)
+                            if size >= 8{
+                                self.do_handshook();
+                            }
                         },
                         None => { /* Not done parsing handshake yet */ } 
                     }
                 },
                 State::Handshook => {
-
+                    // TODO: Handle real data
                 },
                 _ => {
                     // Should not be possible to get here, just ignore data
@@ -365,6 +450,8 @@ impl Server {
     /// Transition to State::Disconnected
     fn do_disconnect(&mut self) {
         // Stop polling clients before dropping the stream objects
+        // TODO: Need to deregister differently. Need to start reading at different times
+        //       Probably need to track each individually
         match self.state{
             State::Connected | State::Handshook => {
                 if let Some(client_cmd) = &mut self.client.cmd {

@@ -196,6 +196,8 @@ pub enum HandshakeCreateError {
 }
 
 /// Create a handshake message in response to the remote side's versions
+/// If the returned size is 4 bytes, no valid version was received
+/// If the returned size is 8 bytes, a valid version was received and selected
 pub fn create_handshake_for_remote_versions(outbuf: &mut [u8; 8], remote_versions: &Vec<u32>) -> Result<usize, HandshakeCreateError> {
     if remote_versions.contains(&PROTOCOL_VERSION) {
         // Remote side is compatible. Respond with this side's version
