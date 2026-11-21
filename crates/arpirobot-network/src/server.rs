@@ -259,14 +259,8 @@ impl Server {
                 Tokens::LISTENER_CTRL => {
                     // TODO: Handle UDP data
                 }
-                Tokens::STREAM_CMD => {
-                    self.handle_cmd_readable();
-                }
-                Tokens::STREAM_NT => {
-                    self.handle_nt_readable();
-                }
-                Tokens::STREAM_LOG => {
-                    self.handle_log_readable();
+                Tokens::STREAM_CMD|Tokens::STREAM_NT|Tokens::STREAM_LOG => {
+                    self.handle_stream_readable(token);
                 }
                 _ => error!("Invalid token encountered"),
             }
@@ -347,33 +341,47 @@ impl Server {
         }
     }
     
-    // TODO: Rewrite these handle_..._readable functions so that they don't have to be duplicated
-    // code for each of the three ports.
-
-    /// Handle readable events on the command port's tcp stream (client)
-    fn handle_cmd_readable(&mut self){
-        let mut chunk = [0u8; 128];
+    /// Handle a TCP stream which has bytes to read
+    fn handle_stream_readable(&mut self, token: Token) {
+        let mut chunk = [0u8; 1024];
         loop {
             // Borrow inside the loop so borrow checker can understand where the borrow ends each
             // iteration so the do_ functions can be called
-            let Some(client) = &mut self.client.cmd else {
+            let (opt_stream, handler) : (&mut Option<TcpStream>, fn(&mut Self, &[u8])) = match token {
+                Tokens::LISTENER_CMD => (&mut self.client.cmd, Self::handle_cmd_bytes),
+                Tokens::LISTENER_NT  => (&mut self.client.nt,  Self::handle_nt_bytes),
+                Tokens::LISTENER_LOG => (&mut self.client.log, Self::handle_log_bytes),
+                _ => {
+                    error!("Invalid token encountered");
+                    continue;
+                }
+            };
+            let Some(client) = opt_stream else {
                 warn!("Tried to read command client, but it is not connected");
                 return;
             };
             match client.read(&mut chunk) {
                 Ok(0) => {
                     // Remote side closed cleanly (EOF)
-                    info!("Client closed command port connection. Disocnnecting.");
+                    info!("Client closed port. Disocnnecting.");
                     self.do_disconnect()
                 },
-                Ok(n) => self.handle_cmd_bytes(&chunk[0..n]),   // Got actual data
+                Ok(n) => {
+                    match token {
+                        Tokens::LISTENER_CMD => debug!("Read {} bytes on command port", n),
+                        Tokens::LISTENER_NT  => debug!("Read {} bytes on NT port", n),
+                        Tokens::LISTENER_LOG => debug!("Read {} bytes on log port", n),
+                        _ => {}
+                    }
+                    handler(self, &chunk[0..n])
+                },
                 Err(e) => {
                     match e.kind() {
                         io::ErrorKind::WouldBlock => break,     // Have handled all data
                         io::ErrorKind::Interrupted => {},       // syscall interrupted. Retry
                         _ => { 
                             // Remote side dropped
-                            info!("Command client connection lost. Disconnecting.");
+                            info!("Client connection lost. Disconnecting.");
                             self.do_disconnect()
                         }
                     }
@@ -382,72 +390,75 @@ impl Server {
         }
     }
 
-    /// Handle readable events on the net table port's tcp stream (client)
-    fn handle_nt_readable(&mut self) {
-        // TODO: Handle messages on the net table port
-    }
-
-    /// Handle readable events on the log port's tcp stream (client)
-    fn handle_log_readable(&mut self) {
-        // TODO: Handles messages on the log port
-    }
-
-    
-
     // =============================================================================================
     // Reading from clients
     // =============================================================================================
+
+    /// Handle a byte read from the command port during handshaking
+    fn handle_cmd_byte_handshake(&mut self, b: &u8) {
+        // The first thing send on the command port is handshake data. Until handshaking
+        // completes, each byte is assumed to be part of the handshake.
+        match self.parsers.handshake.parse(b) {
+            Some(remote_versions) => {
+                // Generate handshake response
+                let mut response: [u8; 8] = [0u8; 8];
+                debug!("Client versions: {:?}", remote_versions);
+                let version = HandshakeGenerator::select_from_remote_versions(remote_versions);
+                debug!("Server selected version: {}", version);
+                let Ok(size) = HandshakeGenerator::for_single_version(&mut response, version) else {
+                    error!("Failed to reply to client's handshake. Disconnecting");
+                    self.do_disconnect();
+                    return;
+                };
+
+                // Reset the handshake parser now. It would be legal for a client
+                // to receive an invalid handshake (PROTOCOL_INVALID response)
+                // And for that client to then attempt to handshake again. The server
+                // will not disconnect clients upon a failed handshake. It waits for the
+                // client to disconnect or to retry the handshake
+                self.parsers.handshake.reset();
+                
+                // Send handsake to the client
+                self.queue_raw_cmd_write(&response[0..size]).ok();
+
+                // If the server selected a protocol version, valid handshake complete
+                if size != HandshakeGenerator::size_for_num_versions(0){
+                    self.do_handshook();
+                } else {
+                    warn!("Client sent invalid versions during handshaking.");
+                }
+            },
+            None => { /* Not done parsing handshake yet */ } 
+        }
+    }
+
+    /// Handle a byte read from the command port after handshaking
+    fn handle_cmd_byte_normal(&mut self, b: &u8) {
+        // TODO: Parse
+    }
 
     /// Handle bytes read from the command port
     fn handle_cmd_bytes(&mut self, data: &[u8]) {
         for b in data {
             match self.state {
-                State::Connected => {
-                    // The first thing send on the command port is handshake data. Until handshaking
-                    // completes, each byte is assumed to be part of the handshake.
-                    match self.parsers.handshake.parse(b) {
-                        Some(remote_versions) => {
-                            // Generate handshake response
-                            let mut response: [u8; 8] = [0u8; 8];
-                            debug!("Client versions: {:?}", remote_versions);
-                            let version = HandshakeGenerator::select_from_remote_versions(remote_versions);
-                            debug!("Server selected version: {}", version);
-                            let Ok(size) = HandshakeGenerator::for_single_version(&mut response, version) else {
-                                error!("Failed to reply to client's handshake. Disconnecting");
-                                self.do_disconnect();
-                                return;
-                            };
-
-                            // Reset the handshake parser now. It would be legal for a client
-                            // to receive an invalid handshake (PROTOCOL_INVALID response)
-                            // And for that client to then attempt to handshake again. The server
-                            // will not disconnect clients upon a failed handshake. It waits for the
-                            // client to disconnect or to retry the handshake
-                            self.parsers.handshake.reset();
-                            
-                            // Send handsake to the client
-                            self.queue_raw_cmd_write(&response[0..size]).ok();
-
-                            // If the server selected a protocol version, valid handshake complete
-                            if size != HandshakeGenerator::size_for_num_versions(0){
-                                self.do_handshook();
-                            } else {
-                                warn!("Client sent invalid versions during handshaking.");
-                            }
-                        },
-                        None => { /* Not done parsing handshake yet */ } 
-                    }
-                },
-                State::Handshook => {
-                    // TODO: Handle real data
-                },
-                _ => {
-                    // Should not be possible to get here, just ignore data
-                }
+                State::Connected => self.handle_cmd_byte_handshake(b),
+                State::Handshook => self.handle_cmd_byte_normal(b),
+                _ => { /* Shouldn't ever get here */ }
             }
         }
     }
 
+    /// Handle bytes read from the net table port
+    fn handle_nt_bytes(&mut self, data: &[u8]) {
+        // TODO: Parse 
+    }
+
+    /// Handle bytes read from the log port
+    fn handle_log_bytes(&mut self, data: &[u8]) {
+        // The client (DS) should never send data to the server (robot) on the log port
+        // Log message are only sent from robot (server) to client (DS)
+        warn!("Data received on log port, client is misbehaving!");
+    }
 
 
     // =============================================================================================
