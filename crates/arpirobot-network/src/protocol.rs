@@ -311,6 +311,12 @@ fn ccitt_false(data: &[u8]) -> u16 {
     return crc;
 }
 
+/// Errors that can occur while parsing message frames
+pub enum FrameParseError {
+    MessageTooLongError,
+    MessageIntegrityError
+}
+
 /// Parse data received as a possible message frame and decode the messages
 /// Parameters:
 ///     dec: The COBS decoder instance being used by this parser
@@ -319,21 +325,29 @@ fn ccitt_false(data: &[u8]) -> u16 {
 ///     true if a complete and valid (passing CRC check) message is available in the decoder's
 ///     buffer.
 ///     false otherwise
-fn parse_frame_byte(dec: &mut CobsDecoderOwned, b: u8) -> bool {
+fn parse_frame_byte(dec: &mut CobsDecoderOwned, b: u8) -> Result<bool, FrameParseError> {
+    // TODO: Handle message frame too long
     // xor would be required if FRAME_DELIM were not 0x00. Implement to support that.
     // The compiler will optimize this away if FRAME_DELIM is a constant 0x00
     match dec.feed(b ^ FRAME_DELIM) {
-        Ok(None) => return false, // Not a complete message
-        Err(_) => return false, // Ignore decode errors, assume corrupted or too long message
+        Ok(None) => return Ok(false), // Not a complete message
+        Err(cobs::DecodeError::EmptyFrame) => return Ok(false), // Ignore empty messages
+        Err(cobs::DecodeError::InvalidFrame{..}) => return Err(FrameParseError::MessageIntegrityError),
+        Err(cobs::DecodeError::TargetBufTooSmall) => return Err(FrameParseError::MessageTooLongError),
         Ok(Some(n)) => {
             // Got a frame of size n bytes
             if n < CRC_LEN {
-                return false; // Not enough bytes for a CRC
+                // Not enough bytes for a CRC
+                return Err(FrameParseError::MessageIntegrityError);
             }
             let data = dec.dest();
             let crc_recv: u16 = u16::from_le_bytes([data[n-2], data[n-1]]);
             let crc_calc = ccitt_false(&data[0..n-2]);
-            return crc_calc == crc_recv;
+            if crc_calc != crc_recv {
+                // CRC check failed
+                return Err(FrameParseError::MessageIntegrityError);
+            }
+            return Ok(true);
         },
     }
 }
@@ -430,17 +444,21 @@ impl CommandParser {
             dec: CobsDecoderOwned::new(MAX_MSG_LEN + 2), // 2 byte CRC
         };
     }
-    pub fn parse(&mut self, b: u8) -> Option<Command> {
-        if parse_frame_byte(&mut self.dec, b) {
-            // The decoder contains a decoded message (w/ valid crc)
-            let msg = &self.dec.dest()[1..];
-            // TODO: Deserialize the message into a Command
-            self.dec.reset();
-            // TODO: Return the command
-            return None;
-        } else {
-            // Not a complete message yet
-            return None;
+    pub fn parse(&mut self, b: u8) -> Result<Option<Command>, FrameParseError> {
+        match parse_frame_byte(&mut self.dec, b) {
+            Ok(true) => {
+                // The decoder contains a decoded message (w/ valid crc)
+                let msg = &self.dec.dest()[1..];
+                // TODO: Deserialize the message into a Command
+                self.dec.reset();
+                // TODO: Return the command
+                return Ok(None);
+            },
+            Ok(false) => {
+                // No error yet, but no message is fully received either
+                return Ok(None);
+            },
+            Err(e) => return Err(e),
         }
     }
 }
