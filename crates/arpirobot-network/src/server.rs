@@ -74,7 +74,7 @@
 
 
 use mio::net::{TcpListener, TcpStream};
-use mio::{Events, Interest, Poll, Token};
+use mio::{Events, Interest, Poll, Token, Waker};
 use std::collections::VecDeque;
 use std::net::{IpAddr, SocketAddr};
 use std::io;
@@ -114,6 +114,9 @@ impl Tokens {
     pub const STREAM_CMD: Token = Token(4);
     pub const STREAM_NT: Token = Token(5);
     pub const STREAM_LOG: Token = Token(6);
+    
+    // Wake of event loop when one of the write buffers is populated
+    pub const WAKER_WRITE: Token = Token(7);
 }
 
 struct Clients {
@@ -141,6 +144,7 @@ struct WBuffers {
     cmd: Mutex<VecDeque<u8>>,
     nt:  Mutex<VecDeque<u8>>,
     log: Mutex<VecDeque<u8>>,
+    waker: Waker,
 }
 
 // Server implementation
@@ -173,6 +177,8 @@ impl Server {
     /// - nt_addr:   Address to listen on for net table TCP connections
     /// - log_addr:  Address to listen on for log TCP connections
     pub fn bind(ctrl_addr: SocketAddr, cmd_addr: SocketAddr, nt_addr: SocketAddr, log_addr: SocketAddr) -> io::Result<Self> {
+        let poll = Poll::new()?;
+        let waker = Waker::new(poll.registry(), Tokens::WAKER_WRITE)?;
         let mut s = Self {
             state: State::Disconnected,
             client: Clients {
@@ -186,7 +192,7 @@ impl Server {
                 nt:  TcpListener::bind(nt_addr)?,
                 log: TcpListener::bind(log_addr)?,
             },
-            poll: Poll::new()?,
+            poll: poll,
             events: Events::with_capacity(16),
             parsers: Parsers {
                 handshake: HandshakeParser::new(), 
@@ -195,6 +201,7 @@ impl Server {
                 cmd: Mutex::new(VecDeque::with_capacity(1024)),
                 nt:  Mutex::new(VecDeque::with_capacity(1024)),
                 log: Mutex::new(VecDeque::with_capacity(1024)),
+                waker: waker,
             }
         };
         s.poll.registry().register(&mut s.listener.cmd, Tokens::LISTENER_CMD, Interest::READABLE)?;
@@ -255,12 +262,17 @@ impl Server {
             match token {
                 Tokens::LISTENER_CMD | Tokens::LISTENER_NT | Tokens::LISTENER_LOG => {
                     self.handle_incoming_connection(token);
-                }
+                },
                 Tokens::LISTENER_CTRL => {
                     // TODO: Handle UDP data
-                }
+                },
                 Tokens::STREAM_CMD|Tokens::STREAM_NT|Tokens::STREAM_LOG => {
+                    // TODO: Check readable vs writable. If writable, handle like WAKER_WRITE
                     self.handle_stream_readable(token);
+                },
+                Tokens::WAKER_WRITE => {
+                    // TODO: Handle this by checking all the buffers and attempting writes
+                    // TODO: Maybe split into three wakers so we don't have to do three locks?
                 }
                 _ => error!("Invalid token encountered"),
             }
@@ -465,24 +477,37 @@ impl Server {
     // Writing to clients
     // =============================================================================================
 
-    /// Queue a complete message for write
+    // TODO: Make the queue function generic/reuse across the different buffers
+        
+    /// Queue a complete message for write. This function **is** thread safe.
     /// Parameters:
     ///     data: Complete message. Must be complete or thread safety issues can occur mixing up
     ///           messages
-    fn queue_raw_cmd_write(&mut self, data: &[u8]) -> io::Result<()> {
+    fn queue_raw_cmd_write(&self, data: &[u8]) -> io::Result<()> {
         match self.state {
             State::Connected|State::Handshook => {
-                // Queue the data
+                // Lock buffer
                 let mut buf = self.wbuffers.cmd.lock().unwrap();
+
+                // Use waker to indicate data is in a write buffer
+                // Do this BEFORE putting data in the buffer since it may error
+                // If this errors, queue is considered to have failed. In which case
+                // we do not want data in the buffer either
+                // Because this occurs while holding the buffer's mutex, this is safe
+                // since the polling thread must take the mutex before checking the buffer
+                // Thus, even if the event loop thread is woken before data is inserted into the
+                // buffer, the data will be in the buffer before the event loop thread can check the
+                // buffer
+                self.wbuffers.waker.wake()?;
+
+                // Queue data to be written
                 for b in data {
                     buf.push_back(*b); 
                 }
+
+                // Unlock buffer
                 drop(buf);
 
-                // Wake the event loop to actually send the data
-                // TODO: Use an mio::Waker?
-                // TODO: The event loop should try to write immediately. Only register if WouldBlock
-                //       The event loop should also deregister writable interest when buffer is empty
                 return Ok(());
             }
             _ => {
