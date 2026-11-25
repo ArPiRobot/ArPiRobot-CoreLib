@@ -74,10 +74,10 @@
 
 
 use mio::net::{TcpListener, TcpStream};
-use mio::{Events, Interest, Poll, Token, Waker};
+use mio::{Events, Interest, Poll, Registry, Token, Waker};
 use std::collections::VecDeque;
 use std::net::{IpAddr, SocketAddr};
-use std::io;
+use std::io::{self, IoSlice, Write};
 use std::io::Read;
 use std::time::Duration;
 use std::sync::{Mutex};
@@ -107,16 +107,18 @@ impl Tokens {
     // Server tokens
     pub const LISTENER_CTRL: Token = Token(0);
     pub const LISTENER_CMD: Token = Token(1);
-    pub const LISTENER_NT: Token = Token(2);
+    pub const LISTENER_NT:  Token = Token(2);
     pub const LISTENER_LOG: Token = Token(3);
 
     // Client tokens
     pub const STREAM_CMD: Token = Token(4);
-    pub const STREAM_NT: Token = Token(5);
+    pub const STREAM_NT:  Token = Token(5);
     pub const STREAM_LOG: Token = Token(6);
     
-    // Wake of event loop when one of the write buffers is populated
-    pub const WAKER_WRITE: Token = Token(7);
+    // Write buffer tokens
+    pub const WBUF_CMD: Token = Token(7);
+    pub const WBUF_NT:  Token = Token(8);
+    pub const WBUF_LOG: Token = Token(9);
 }
 
 struct Clients {
@@ -140,11 +142,98 @@ struct Listeners {
     log: TcpListener,
 }
 
-struct WBuffers {
-    cmd: Mutex<VecDeque<u8>>,
-    nt:  Mutex<VecDeque<u8>>,
-    log: Mutex<VecDeque<u8>>,
+/// Asynchronous write buffer (thread safe) for server. Buffer is FIFO
+/// Used by multiple (server or non-server) threads to queue data to be written later by the server
+/// thread (event loop) using an mio Waker
+struct WBuffer {
+    /// Data waiting to be written
+    data: Mutex<VecDeque<u8>>,
+
+    /// Used to wake server event loop to process the buffer
     waker: Waker,
+}
+
+impl WBuffer {
+    /// Create a new async write buffer with the given `capacity`. The buffer's waker will be
+    /// registered to the given mio `registry` using the provided `token` to signal when the buffer
+    /// is not empty (meaning it can be read)
+    pub fn new(capacity: usize, registry: &Registry, token: Token) -> io::Result<WBuffer> {
+        let waker = Waker::new(registry, token)?;
+        return Ok(Self {
+            data: Mutex::new(VecDeque::with_capacity(capacity)),
+            waker: waker
+        });
+    }
+    
+    /// Queue `data` into the buffer to be written later
+    pub fn queue(&self, data: &[u8]) -> io::Result<()> {
+        // Lock buffer
+        let mut buf = self.data.lock().unwrap();
+
+        // Use waker to indicate data is in a write buffer
+        // Do this BEFORE putting data in the buffer since it may error
+        // If this errors, queue is considered to have failed. In which case
+        // we do not want data in the buffer either
+        // Because this occurs while holding the buffer's mutex, this is safe
+        // since a reader would need to take the mutex. So any reader woken by the Waker will
+        // be able to read the expected data upon mutex release
+        self.waker.wake()?;
+
+        // Queue data to be written
+        for b in data {
+            buf.push_back(*b); 
+        }
+
+        return Ok(());
+    }
+
+    /// Flush data in the buffer to the given tcp `stream`. This will return any error from the tcp
+    /// stream's write function. If Ok is returned, the write complted successfully.
+    pub fn flush(&self, stream: &mut TcpStream) -> io::Result<usize> {
+        // Lock buffer. Since socket I/O is non-blocking, will keep it locked during writes.
+        let mut buf = self.data.lock().unwrap();
+        
+        // Write until done, would block, or an error occurs
+        // Loop is needed because write syscall could be interrupted
+        loop {    
+            // Get internal buffer data as up to 2 contiguous slices
+            let (slice1, slice2) = buf.as_slices();
+            
+            // write_vectored expects an array of IoSlices
+            let io_slices = [IoSlice::new(slice1), IoSlice::new(slice2)];
+            
+            // Attempt to write
+            match stream.write_vectored(&io_slices) {
+                Ok(n) => {
+                    // Wrote n bytes. Remove the first n elements from the buffer
+                    buf.drain(..n);
+
+                    // If the buffer is not empty, return would block for the caller to handle
+                    // Expected that the caller will poll the stream to determine when it becomes
+                    // writable again, then call this function again
+                    if buf.is_empty() {
+                        return Ok(n);
+                    } else {
+                        return Err(io::Error::new(io::ErrorKind::WouldBlock, "Write incomplete, would block."))
+                    }
+                },
+                Err(e) => {
+                    if e.kind() == io::ErrorKind::Interrupted {
+                        // Syscall interrupted. Just retry the write
+                    } else {
+                        // Got an actual error
+                        return Err(e);
+                    }
+                }
+            }
+        }
+    }
+
+    /// Clear the buffer
+    pub fn reset(&self) {
+        let mut buf = self.data.lock().unwrap();
+        buf.clear();
+    }
 }
 
 // Server implementation
@@ -166,7 +255,9 @@ pub struct Server {
     parsers: Parsers,
 
     // Write buffers (ring buffers) for writing to clients
-    wbuffers: WBuffers,
+    wbuffer_cmd: WBuffer,
+    wbuffer_nt:  WBuffer,
+    wbuffer_log: WBuffer,
 }
 
 impl Server {
@@ -177,8 +268,10 @@ impl Server {
     /// - nt_addr:   Address to listen on for net table TCP connections
     /// - log_addr:  Address to listen on for log TCP connections
     pub fn bind(ctrl_addr: SocketAddr, cmd_addr: SocketAddr, nt_addr: SocketAddr, log_addr: SocketAddr) -> io::Result<Self> {
-        let poll = Poll::new()?;
-        let waker = Waker::new(poll.registry(), Tokens::WAKER_WRITE)?;
+        let poll        = Poll::new()?;
+        let wbuffer_cmd = WBuffer::new(64,   poll.registry(), Tokens::WBUF_CMD)?;
+        let wbuffer_nt  = WBuffer::new(1042, poll.registry(), Tokens::WBUF_NT)?;
+        let wbuffer_log = WBuffer::new(8192, poll.registry(), Tokens::WBUF_LOG)?;
         let mut s = Self {
             state: State::Disconnected,
             client: Clients {
@@ -197,12 +290,9 @@ impl Server {
             parsers: Parsers {
                 handshake: HandshakeParser::new(), 
             },
-            wbuffers: WBuffers {
-                cmd: Mutex::new(VecDeque::with_capacity(1024)),
-                nt:  Mutex::new(VecDeque::with_capacity(1024)),
-                log: Mutex::new(VecDeque::with_capacity(1024)),
-                waker: waker,
-            }
+            wbuffer_cmd: wbuffer_cmd,
+            wbuffer_nt:  wbuffer_nt,
+            wbuffer_log: wbuffer_log,
         };
         s.poll.registry().register(&mut s.listener.cmd, Tokens::LISTENER_CMD, Interest::READABLE)?;
         s.poll.registry().register(&mut s.listener.nt,  Tokens::LISTENER_NT,  Interest::READABLE)?;
@@ -270,7 +360,7 @@ impl Server {
                     // TODO: Check readable vs writable. If writable, handle like WAKER_WRITE
                     self.handle_stream_readable(token);
                 },
-                Tokens::WAKER_WRITE => {
+                Tokens::WBUF_CMD | Tokens::WBUF_NT | Tokens::WBUF_LOG => {
                     // TODO: Handle this by checking all the buffers and attempting writes
                     // TODO: Maybe split into three wakers so we don't have to do three locks?
                 }
@@ -477,8 +567,6 @@ impl Server {
     // Writing to clients
     // =============================================================================================
 
-    // TODO: Make the queue function generic/reuse across the different buffers
-        
     /// Queue a complete message for write. This function **is** thread safe.
     /// Parameters:
     ///     data: Complete message. Must be complete or thread safety issues can occur mixing up
@@ -486,29 +574,11 @@ impl Server {
     fn queue_raw_cmd_write(&self, data: &[u8]) -> io::Result<()> {
         match self.state {
             State::Connected|State::Handshook => {
-                // Lock buffer
-                let mut buf = self.wbuffers.cmd.lock().unwrap();
-
-                // Use waker to indicate data is in a write buffer
-                // Do this BEFORE putting data in the buffer since it may error
-                // If this errors, queue is considered to have failed. In which case
-                // we do not want data in the buffer either
-                // Because this occurs while holding the buffer's mutex, this is safe
-                // since the polling thread must take the mutex before checking the buffer
-                // Thus, even if the event loop thread is woken before data is inserted into the
-                // buffer, the data will be in the buffer before the event loop thread can check the
-                // buffer
-                self.wbuffers.waker.wake()?;
-
                 // Queue data to be written
-                for b in data {
-                    buf.push_back(*b); 
-                }
-
-                // Unlock buffer
-                drop(buf);
-
-                return Ok(());
+                // NOTE: Implemented in Connected state even though it is not expected to be written
+                // here since writes to command port are not actually disabled by server in
+                // connected state. Just not used
+                return self.wbuffer_cmd.queue(data);
             }
             _ => {
                 // We should never get here. The only thing written over the command port is the
@@ -585,15 +655,9 @@ impl Server {
 
         // Clear write buffers when a new client starts connecting to ensure previously in-flight
         // data will not be sent.
-        let mut wbuffer_cmd = self.wbuffers.cmd.lock().unwrap();
-        wbuffer_cmd.clear();
-        drop(wbuffer_cmd);
-        let mut wbuffer_nt = self.wbuffers.nt.lock().unwrap();
-        wbuffer_nt.clear();
-        drop(wbuffer_nt);
-        let mut wbuffer_log = self.wbuffers.log.lock().unwrap();
-        wbuffer_log.clear();
-        drop(wbuffer_log);
+        self.wbuffer_cmd.reset();
+        self.wbuffer_nt.reset();
+        self.wbuffer_log.reset();
 
         // TODO: Clear read buffers (parsers)
         
