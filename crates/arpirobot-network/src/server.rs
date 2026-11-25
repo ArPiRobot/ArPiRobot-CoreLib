@@ -236,6 +236,13 @@ impl WBuffer {
     }
 }
 
+// Group the write buffers for the server
+struct ServerWBuffers {
+    cmd: WBuffer,
+    nt:  WBuffer,
+    log: WBuffer,
+}
+
 // Server implementation
 pub struct Server {
     // Server state
@@ -255,9 +262,7 @@ pub struct Server {
     parsers: Parsers,
 
     // Write buffers (ring buffers) for writing to clients
-    wbuffer_cmd: WBuffer,
-    wbuffer_nt:  WBuffer,
-    wbuffer_log: WBuffer,
+    wbuffer: ServerWBuffers,
 }
 
 impl Server {
@@ -290,9 +295,11 @@ impl Server {
             parsers: Parsers {
                 handshake: HandshakeParser::new(), 
             },
-            wbuffer_cmd: wbuffer_cmd,
-            wbuffer_nt:  wbuffer_nt,
-            wbuffer_log: wbuffer_log,
+            wbuffer: ServerWBuffers {
+                cmd: wbuffer_cmd,
+                nt:  wbuffer_nt,
+                log: wbuffer_log,
+            },
         };
         s.poll.registry().register(&mut s.listener.cmd, Tokens::LISTENER_CMD, Interest::READABLE)?;
         s.poll.registry().register(&mut s.listener.nt,  Tokens::LISTENER_NT,  Interest::READABLE)?;
@@ -578,7 +585,7 @@ impl Server {
                 // NOTE: Implemented in Connected state even though it is not expected to be written
                 // here since writes to command port are not actually disabled by server in
                 // connected state. Just not used
-                return self.wbuffer_cmd.queue(data);
+                return self.wbuffer.cmd.queue(data);
             }
             _ => {
                 // We should never get here. The only thing written over the command port is the
@@ -655,9 +662,9 @@ impl Server {
 
         // Clear write buffers when a new client starts connecting to ensure previously in-flight
         // data will not be sent.
-        self.wbuffer_cmd.reset();
-        self.wbuffer_nt.reset();
-        self.wbuffer_log.reset();
+        self.wbuffer.cmd.reset();
+        self.wbuffer.nt.reset();
+        self.wbuffer.log.reset();
 
         // TODO: Clear read buffers (parsers)
         
